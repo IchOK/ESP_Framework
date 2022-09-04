@@ -1,0 +1,25 @@
+Standard: Cpp11
+BasedOnStyle: GNU
+IndentWidth: 2
+IndentPPDirectives: BeforeHash
+ColumnLimit: 0
+AccessModifierOffset: -2
+NamespaceIndentation: All
+PenaltyReturnTypeOnItsOwnLine: 1000000
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: false
+  AfterStruct: false
+  AfterClass: false
+  AfterFunction: false
+  SplitEmptyFunction: false
+  AfterControlStatement: false
+  AfterNamespace: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
