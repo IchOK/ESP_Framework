@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MB Data</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/styleMobile.css">
+    <link rel="stylesheet" type="text/css" href="/styleAddon.css">
+    <style>:root{--ColorHome:var(--contrast);--ColorConfig:var(--secondary);--ColorWiFi:var(--secondary);--ColorSystem:var(--secondary)}</style>
+    <script src="/view.js"></script>
+    <script type="text/javascript">
+      var ConfigDone = false;
+      function handleWsMsg(msg) {
+        if (ConfigDone) {
+          let _slaves = JSON.parse(msg.data);
+          console.log(_slaves);
+          let slaves = document.getElementById("slaves");
+          console.log(slaves);
+          for (const [_slaveName, _tags] of Object.entries(_slaves)) {
+            let slave = getViewSlave(slaves, _slaveName);
+            for (const [_tagName, _tagData] of Object.entries(_tags)) {
+              let tag = getViewTag(slave, _tagName);
+              updateViewTag(tag,_tagData);
+            }
+          }
+        }
+      }
+      var ws = new WebSocket("ws://" + location.host + "/ws");
+      ws.onmessage = function (_msg) {
+        handleWsMsg(_msg);
+      };
+      
+      function showConfig(){
+        fetch("/config.json")
+        .then(response => {
+           return response.json();
+        }).then(config => {
+        //Get Slaves from Config-File
+          console.log(config);
+          let _slaves = config.slaves;
+  
+          let slaves = document.getElementById("slaves");
+          
+          //Creat a DIV for each Slave that contains the tags
+          console.log(_slaves);
+          _slaves.forEach((_slaveConfig) => {
+            createViewSlave(slaves, _slaveConfig);
+          });
+          ConfigDone = true;
+        });
+      }
+      document.addEventListener("DOMContentLoaded", showConfig);
+      
+    </script>
+  </head>
+  <body>
+    <nav class="container-fluid">
+      <ul>
+        <li>%SVG_LOGO%</li>
+        <li>Online Daten</li>
+      </ul>
+      <ul>
+        <li><a href="/home.htm">%SVG_HOME%</a></li>
+        <li><a href="/config.htm">%SVG_CONFIG%</a></li>
+        <li><a href="/connect">%SVG_WIFI%</a></li>
+        <li><a href="/sys">%SVG_SYSTEM%</a></li>
+      </ul>
+    </nav>
+    <main class="container">
+      <section id="slaves">
+      </section>
+    </main>
+  </body>
+</html>

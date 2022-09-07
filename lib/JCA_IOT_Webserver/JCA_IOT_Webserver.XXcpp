@@ -75,7 +75,11 @@ namespace JCA {
      * @return true Controller is connected to WiFI
      * @return false Controller runs as AP
      */
-    bool Webserver::init () {
+    bool Webserver::init (AwsTemplateProcessor _replaceHomeWildcardsCB, AwsTemplateProcessor _replaceConfigWildcardsCB) {
+      // Save Callback Functions
+      replaceHomeWildcardsCB = _replaceHomeWildcardsCB;
+      replaceConfigWildcardsCB = _replaceConfigWildcardsCB;
+
       // WiFi Connection - Init First
       Connector.init ();
 
@@ -94,12 +98,12 @@ namespace JCA {
       // Webserver - System Config
       Server.on (JCA_IOT_WEBSERVER_PATH_SYS, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSystemGet (_Request); });
       Server.on (
-          JCA_IOT_WEBSERVER_PATH_SYS_UPLOAD, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { _Request->redirect (JCA_IOT_WEBSERVER_PATH_SYS); },
+          JCA_IOT_WEBSERVER_PATH_SYS_UPLOAD, HTTP_POST, [this] (AsyncWebServerRequest *_Request) {  _Request->redirect (JCA_IOT_WEBSERVER_PATH_SYS); },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) { this->onSystemUploadData (_Request, _Filename, _Index, _Data, _Len, _Final); });
       Server.on (
-          JCA_IOT_WEBSERVER_PATH_SYS_UPDATE, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSystemUpdate (_Request); },
+          JCA_IOT_WEBSERVER_PATH_SYS_UPDATE, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onSystemUpdate (_Request); },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) { this->onSystemUpdateData (_Request, _Filename, _Index, _Data, _Len, _Final); });
-      Server.on (JCA_IOT_WEBSERVER_PATH_SYS_RESET, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSystemReset (_Request); });
+      Server.on (JCA_IOT_WEBSERVER_PATH_SYS_RESET, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onSystemReset (_Request); });
 
       // Webserver - Custom Pages
       Server.on (JCA_IOT_WEBSERVER_PATH_HOME, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onHomeGet (_Request); });
@@ -112,7 +116,7 @@ namespace JCA {
 
       return Connector.isConnected ();
     }
-    
+
     /**
      * @brief Read the Config-JSON and store the Data
      * 
@@ -123,8 +127,10 @@ namespace JCA {
       const char *FunctionName = "readConfig";
       // Get Wifi-Config from File5
       File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
+      ConfigFile.sendAll(Serial);
       if (ConfigFile) {
         Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config File Found");
+        Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, ConfigFile.readString());
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
         if (!Error) {
           Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Deserialize Done");
@@ -215,24 +221,24 @@ namespace JCA {
             WiFiConfig = Config[JCA_IOT_WEBSERVER_CONFKEY_WIFI].as<JsonObject> ();
           } else {
             Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config Node Created");
-            WiFiConfig = Config.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
+            WiFiConfig = JsonDoc.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
           }
         } else {
           Debug.print (FLAG_ERROR, true, ObjectName, FunctionName, "deserializeJson() failed: ");
           Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, Error.c_str ());
           Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "Create new Konfig");
           JsonDoc.clear ();
-          Config = JsonDoc.as<JsonObject> ();
           WiFiConfig = Config.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
         }
+        ConfigFile.close();
       } else {
         Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "Config File NOT found");
         Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "Create new Konfig");
         JsonDoc.clear ();
-        Config = JsonDoc.as<JsonObject> ();
-        WiFiConfig = Config.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
+        WiFiConfig = JsonDoc.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
       }
 
+      // Write Data to Config-Object
       int params = _Request->params ();
       for (int i = 0; i < params; i++) {
         AsyncWebParameter *p = _Request->getParam (i);
@@ -249,7 +255,17 @@ namespace JCA {
         }
       }
 
-      // Answer to the Client
+      // Save Config Object
+      ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "w");
+      size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
+      Debug.print (FLAG_CONFIG, true, ObjectName, FunctionName, "Write Config File [");
+      Debug.print (FLAG_CONFIG, true, ObjectName, FunctionName, WrittenBytes);
+      Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "]");
+
+      // Read back Config-File
+      readConfig();
+      
+      // Connect and Answer to the Client
       if (Connector.doConnect ()) {
         _Request->send (200, "text/plain", "Connect to Network");
       } else {
@@ -387,6 +403,11 @@ namespace JCA {
       _Request->send (Response);
     }
 
+    /**
+     * @brief 
+     * 
+     * @param _Request 
+     */
     void Webserver::onHomeGet (AsyncWebServerRequest *_Request) {
       _Request->send (LittleFS, JCA_IOT_WEBSERVER_PATH_HOME, String (), false, [this] (const String &_Var) -> String { return this->replaceHomeWildcards (_Var); });
     }
@@ -420,7 +441,7 @@ namespace JCA {
       if (var == "SVG_SYSTEM") {
         return String (SvgSystem);
       }
-      return String ();
+      return String();
     }
 
     /**
@@ -431,12 +452,14 @@ namespace JCA {
      */
     String Webserver::replaceHomeWildcards (const String &var) {
       String RetVal;
-      RetVal = (replaceConfigWildcardsCB)(var);
-      if (RetVal) {
-        return RetVal;
+      if (replaceConfigWildcardsCB) {
+        RetVal = (replaceConfigWildcardsCB)(var);
+        if (!RetVal.isEmpty ()) {
+          return RetVal;
+        }
       }
       RetVal = replaceDefaultWildcards (var);
-      if (RetVal) {
+      if (!RetVal.isEmpty ()) {
         return RetVal;
       }
       return String ();
@@ -450,12 +473,14 @@ namespace JCA {
      */
     String Webserver::replaceConfigWildcards (const String &var) {
       String RetVal;
-      RetVal = (replaceConfigWildcardsCB)(var);
-      if (RetVal) {
-        return RetVal;
+      if (replaceConfigWildcardsCB) {
+        RetVal = (replaceConfigWildcardsCB)(var);
+        if (!RetVal.isEmpty ()) {
+          return RetVal;
+        }
       }
       RetVal = replaceDefaultWildcards (var);
-      if (RetVal) {
+      if (!RetVal.isEmpty ()) {
         return RetVal;
       }
       return String ();
@@ -468,9 +493,11 @@ namespace JCA {
      * @return String Replace String
      */
     String Webserver::replaceSystemWildcards (const String &var) {
+      const char *FunctionName = "replaceSystemWildcards";
       String RetVal;
       RetVal = replaceDefaultWildcards (var);
-      if (RetVal) {
+      if (!RetVal.isEmpty()) {
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, "Replace from Default Function");
         return RetVal;
       }
       if (var == "NAME") {
@@ -510,16 +537,20 @@ namespace JCA {
      * @return String Replace String
      */
     String Webserver::replaceConnectWildcards (const String &var) {
+      const char *FunctionName = "replaceConnectWildcards";
       String RetVal;
       RetVal = Connector.replaceWildcards (var);
-      if (RetVal) {
+      if (!RetVal.isEmpty ()) {
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, "Replace from Connector Function") ;
         return RetVal;
       }
       RetVal = replaceDefaultWildcards (var);
-      if (RetVal) {
+      if (!RetVal.isEmpty ()) {
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, "Replace from Default Function");
         return RetVal;
       }
       if (var == "SECTION") {
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, var);
         return String (SectionConnect);
       }
       return String ();

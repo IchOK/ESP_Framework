@@ -38,27 +38,27 @@ namespace JCA {
         switch (_Flag)
         {
         case FLAG_ERROR:
-          RetVal += "[ERROR]";
+          RetVal += "[ERROR] ";
           break;
 
         case FLAG_SETUP:
-          RetVal += "[SETUP]";
+          RetVal += "[SETUP] ";
           break;
 
         case FLAG_CONFIG:
-          RetVal += "[CONFIG]";
+          RetVal += "[CONFIG] ";
           break;
 
         case FLAG_TRAFFIC:
-          RetVal += "[TRAFFIC]";
+          RetVal += "[TRAFFIC] ";
           break;
 
         case FLAG_LOOP:
-          RetVal += "[LOOP]";
+          RetVal += "[LOOP] ";
           break;
 
         default:
-          RetVal += "[---]";
+          RetVal += "[---]" ;
           break;
         }
         if (_Framework) {
@@ -109,6 +109,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const Printable &_Message) {
       if (_Flag & Flags) {
         DebugSerial.print(getPrefix(_Flag, _Framework, _Object, _Function));
+        DebugSerial.print(_Message);
         return true;
       } else {
         return false;
@@ -151,6 +152,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const String &_Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -193,6 +195,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const char *_Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -235,6 +238,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, double _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -277,6 +281,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long long _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -319,6 +324,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long long _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -361,6 +367,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -403,6 +410,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -445,6 +453,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned int _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -487,6 +496,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, int _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -529,6 +539,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned char _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;
@@ -571,6 +582,7 @@ namespace JCA {
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, char _Message) {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;

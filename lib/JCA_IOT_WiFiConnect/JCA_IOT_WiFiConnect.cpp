@@ -29,7 +29,8 @@ namespace JCA {
       sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
       strncpy (ApPassword, _Password, sizeof (ApPassword));
       ApIP.fromString (_ApIP);
-      ApGateway.fromString (_ApGateway);
+//      ApGateway.fromString (_ApGateway);
+//      ApGateway.fromString ("0.0.0.0");
       ApSubnet.fromString (_APSubnet);
       State = Init;
       DHCP = true;
@@ -256,10 +257,10 @@ namespace JCA {
           }
 
           if (WiFi.status () == WL_CONNECTED) {
-            Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, " DONE");
+            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, " DONE");
             State = STA;
           } else {
-            Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, " FAILED");
+            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, " FAILED");
             BusyTimer = millis ();
             State = Failed;
           }
@@ -425,7 +426,7 @@ namespace JCA {
       if (var == "STYLE") {
         return F (":root{--ColorWiFi:var(--contrast)}");
       }
-      return String ();
+      return String();
     }
 
   } // namespace IOT

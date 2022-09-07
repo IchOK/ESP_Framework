@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MB Config</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/styleMobile.css">
+    <link rel="stylesheet" type="text/css" href="/styleAddon.css">
+    <style>:root{--ColorHome:var(--secondary);--ColorConfig:var(--contrast);--ColorWiFi:var(--secondary);--ColorSystem:var(--secondary)}</style>
+    <script src="/configCreate.js"></script>
+    <script src="/configSave.js"></script>
+    <script type="text/javascript">
+      var ws = new WebSocket("ws://" + location.host + "/ws");
+      function saveConfig(){
+        //Create empty Slave List
+        let _slaves = [];
+
+        let slaves = document.getElementById("slaves").getElementsByTagName("article");
+        
+        //Creat a Slave for each Card that contains the tags
+        for (let i = 0; i < slaves.length; i++) {
+          saveConfigSlave(_slaves, slaves[i]);
+        }
+        
+        //Create Config-Telegram
+        let config = {
+          "type":"config",
+          "slaves":_slaves
+        };
+        ws.send(JSON.stringify(config));
+        console.log(config);
+      }
+      
+      function showConfig(){
+        //Get Slaves from Config-File
+        fetch("/config.json")
+        .then(response => {
+           return response.json();
+        }).then(config => {
+          let _slaves = config.slaves;
+  
+          let slaves = document.getElementById("slaves");
+          
+          //Creat a Card for each Slave that contains the tags
+          _slaves.forEach((_slaveConfig) => {
+            createConfigSlave(slaves, _slaveConfig);
+          });
+          createNewButton(slaves, "createNewConfigSlave(this)", "New Slave", "secondary");
+        });
+      }
+      document.addEventListener("DOMContentLoaded", showConfig);
+      
+    </script>
+  </head>
+  <body>
+    <nav class="container-fluid">
+      <ul>
+        <li>%SVG_LOGO%</li>
+        <li>Konfiguration</li>
+      </ul>
+      <ul>
+        <li><a href="/home.htm">%SVG_HOME%</a></li>
+        <li><a href="/config.htm">%SVG_CONFIG%</a></li>
+        <li><a href="/connect">%SVG_WIFI%</a></li>
+        <li><a href="/sys">%SVG_SYSTEM%</a></li>
+      </ul>
+    </nav>
+    <main class="container">
+      <section id="slaves">
+      </section>
+      <button onclick="saveConfig()">Save</button>
+    </main>
+  </body>
+</ht???

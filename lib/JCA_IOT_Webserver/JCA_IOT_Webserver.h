@@ -14,6 +14,7 @@
  *     - Reset the controller
  * - Style Sheet
  * - Navigation and Logo Icons
+ * - ResrAPI
  * @version 0.1
  * @date 2022-09-04
  *
@@ -25,6 +26,7 @@
 #define _JCA_IO_WEBSERVER_
 #include "FS.h"
 #include <Arduino.h>
+#include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 #define SPIFFS LittleFS
@@ -76,8 +78,12 @@
 
 namespace JCA {
   namespace IOT {
+    typedef std::function<JsonVariant (JsonVariant &)> JsonVariantCallback;
+    typedef std::function<void (void)> SimpleCallback;
+
     class Webserver {
     private:
+      // ...Webserver_System.cpp
       char Hostname[80];
       char ConfUser[80];
       char ConfPassword[80];
@@ -90,31 +96,57 @@ namespace JCA {
       AsyncWebSocket Websocket;
       uint16_t Port;
       StaticJsonDocument<1000> JsonDoc;
-      bool readConfig();
-      void onConnectPost (AsyncWebServerRequest *_Request);
-      void onConnectGet (AsyncWebServerRequest *_Request);
-      void onSystemGet (AsyncWebServerRequest *_Request);
-      void onSystemUploadData (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final);
-      void onSystemUpdate (AsyncWebServerRequest *_Request);
-      void onSystemUpdateData (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final);
-      void onSystemReset (AsyncWebServerRequest *_Request);
-      void onHomeGet (AsyncWebServerRequest *_Request);
-      void onConfigGet (AsyncWebServerRequest *_Request);
+      SimpleCallback onSystemResetCB;
+      bool readConfig ();
 
+      // ...Webserver_Web.cpp
+      AwsTemplateProcessor replaceHomeWildcardsCB;
+      AwsTemplateProcessor replaceConfigWildcardsCB;
+      void onWebConnectPost (AsyncWebServerRequest *_Request);
+      void onWebConnectGet (AsyncWebServerRequest *_Request);
+      void onWebSystemGet (AsyncWebServerRequest *_Request);
+      void onWebSystemUploadData (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final);
+      void onWebSystemUpdate (AsyncWebServerRequest *_Request);
+      void onWebSystemUpdateData (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final);
+      void onWebSystemReset (AsyncWebServerRequest *_Request);
+      void onWebHomeGet (AsyncWebServerRequest *_Request);
+      void onWebConfigGet (AsyncWebServerRequest *_Request);
       String replaceDefaultWildcards (const String &var);
       String replaceHomeWildcards (const String &var);
-      AwsTemplateProcessor replaceHomeWildcardsCB;
       String replaceConfigWildcards (const String &var);
-      AwsTemplateProcessor replaceConfigWildcardsCB;
       String replaceSystemWildcards (const String &var);
       String replaceConnectWildcards (const String &var);
 
+      // ...Webserver_RestApi.cpp
+      AsyncCallbackJsonWebHandler *RestApiHandler;
+      JsonVariantCallback restApiGetCB;
+      JsonVariantCallback restApiPostCB;
+      JsonVariantCallback restApiPutCB;
+      JsonVariantCallback restApiPatchCB;
+      JsonVariantCallback restApiDeleteCB;
+      void onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json);
+
     public:
+      // ...Webserver_System.cpp
       Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword);
       Webserver (const char *_HostnamePrefix, uint16_t _Port);
       Webserver ();
       bool init ();
       bool handle ();
+      void onSystemReset(SimpleCallback _CB);
+
+      // ...Webserver_Web.cpp
+      void onWebHomeReplace (AwsTemplateProcessor _CB);
+      void onWebConfigReplace (AwsTemplateProcessor _CB);
+
+      // ...Webserver_RestApi.cpp
+      void onRestApiGet (JsonVariantCallback _CB);
+      void onRestApiPost (JsonVariantCallback _CB);
+      void onRestApiPut (JsonVariantCallback _CB);
+      void onRestApiPatch (JsonVariantCallback _CB);
+      void onRestApiDelete (JsonVariantCallback _CB);
+
+      //
     };
   }
 }

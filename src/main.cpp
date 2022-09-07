@@ -14,9 +14,9 @@
 
 using namespace JCA::IOT;
 
-//-------------------------------------------------------
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Stepper
-//-------------------------------------------------------
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define EN_PIN D1   // Enable
 #define STEP_PIN D2 // Step
 #define DIR_PIN D3  // Direction
@@ -31,10 +31,38 @@ constexpr uint32_t steps_per_mm = 80;
 // TMC2660Stepper driver = TMC2660Stepper(CS_PIN, R_SENSE); // Hardware SPI
 AccelStepper stepper = AccelStepper (stepper.DRIVER, STEP_PIN, DIR_PIN);
 
-//-------------------------------------------------------
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
-//-------------------------------------------------------
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Webserver Server;
+//-------------------------------------------------------
+// System Functions
+//-------------------------------------------------------
+void cbSystemReset() {
+  ESP.restart();
+}
+
+//-------------------------------------------------------
+// Website Functions
+//-------------------------------------------------------
+String cbWebHomeReplace (const String &var) {
+  return String ();
+}
+String cbWebConfigReplace (const String &var) {
+  return String();
+}
+//-------------------------------------------------------
+// RestAPI Functions
+//-------------------------------------------------------
+JsonVariant cbRestApiGet (JsonVariant &var) {
+  StaticJsonDocument<100> Data;
+  String Response;
+  serializeJson (Data, Response);
+  Debug.println(FLAG_CONFIG, false, "root", "cbRestApiGet", Response);
+  Data["message"] = "Hallo Welt";
+  
+  return Data;
+}
 
 //#######################################################
 // Setup
@@ -45,26 +73,31 @@ void setup () {
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
-  Debug.init (FLAG_ERROR | FLAG_SETUP);
+  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG);
 
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   if (!LittleFS.begin ()) {
-#if defined(DEBUG_SETUP)
-    Serial.println ("LITTLEFS Mount Failed");
+    Debug.println (FLAG_ERROR, false, "root", "setup", "LITTLEFS Mount Failed");
     return;
-#endif
   }
 
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // JCA IOT Functions - WiFiConnect
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  //System
   Server.init ();
+  Server.onSystemReset(cbSystemReset);
+  //Web
+  Server.onWebHomeReplace(cbWebHomeReplace);
+  Server.onWebConfigReplace(cbWebConfigReplace);
+  //RestAPI
+  Server.onRestApiGet(cbRestApiGet);
 
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Stepper
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   //  driver.begin();             // Initiate pins and registeries
   //  driver.rms_current(600);    // Set stepper current to 600mA. The command is the same as command TMC2130.setCurrent(600, 0.11, 0.5);
   ////  driver.en_pwm_mode(1);      // Enable extremely quiet stepping
@@ -77,16 +110,16 @@ void setup () {
   stepper.setPinsInverted (false, false, true);
   stepper.enableOutputs ();
 
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Webserver
-  //-------------------------------------------------------
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }
 
 //#######################################################
 // Loop
 //#######################################################
 void loop () {
-  Server.handle();
+  Server.handle ();
   /*
     if (stepper.distanceToGo() == 0) {
       digitalWrite(STAT_PIN, LOW);

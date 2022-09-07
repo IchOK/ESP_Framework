@@ -1,0 +1,22 @@
+{
+  "device": {
+    "hostname": "TempSensorBar",
+    "ServerAddress": "192.168.23.54",
+    "ServerPort": 41000,
+    "ServerWait": 30,
+    "ServerPool": 5,
+    "SleepTime": 30
+  },
+  "slaves": [
+    {
+      "name": "Aussen",
+      "id": "1c332600008007",
+      "tags": [
+        {
+          "name": "Temperatur",
+          "unit":"°C"
+        }
+      ]
+    }
+  ]
+}
