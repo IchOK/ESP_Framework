@@ -56,11 +56,28 @@ String cbWebConfigReplace (const String &var) {
 //-------------------------------------------------------
 JsonVariant cbRestApiGet (JsonVariant &var) {
   StaticJsonDocument<100> Data;
-  String Response;
-  serializeJson (Data, Response);
-  Debug.println(FLAG_CONFIG, false, "root", "cbRestApiGet", Response);
-  Data["message"] = "Hallo Welt";
-  
+  //Data["message"] = "Hallo Get";
+  var["message"] = "Hallo Get";
+  return var;
+}
+JsonVariant cbRestApiPost (JsonVariant &var) {
+  StaticJsonDocument<100> Data;
+  Data["message"] = "Hallo Post";
+  return Data;
+}
+JsonVariant cbRestApiPut (JsonVariant &var) {
+  StaticJsonDocument<100> Data;
+  Data["message"] = "Hallo Put";
+  return Data;
+}
+JsonVariant cbRestApiPath (JsonVariant &var) {
+  StaticJsonDocument<100> Data;
+  Data["message"] = "Hallo Post";
+  return Data;
+}
+JsonVariant cbRestApiDelete (JsonVariant &var) {
+  StaticJsonDocument<100> Data;
+  Data["message"] = "Hallo Delete";
   return Data;
 }
 
@@ -73,7 +90,7 @@ void setup () {
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
-  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG);
+  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
@@ -94,6 +111,7 @@ void setup () {
   Server.onWebConfigReplace(cbWebConfigReplace);
   //RestAPI
   Server.onRestApiGet(cbRestApiGet);
+  Server.onRestApiPost(cbRestApiPost);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Stepper

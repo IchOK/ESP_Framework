@@ -118,7 +118,6 @@ namespace JCA {
       String replaceConnectWildcards (const String &var);
 
       // ...Webserver_RestApi.cpp
-      AsyncCallbackJsonWebHandler *RestApiHandler;
       JsonVariantCallback restApiGetCB;
       JsonVariantCallback restApiPostCB;
       JsonVariantCallback restApiPutCB;

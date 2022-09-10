@@ -21,7 +21,8 @@ namespace JCA {
      * @param _ConfUser Username for the System Sites
      * @param _ConfPassword Password for the System Sites
      */
-    Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword) : Server (_Port), Websocket ("/ws") {
+    Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword)
+        : Server (_Port), Websocket ("/ws") {
       sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
       Port = _Port;
       Reboot = false;
@@ -135,6 +136,7 @@ namespace JCA {
      * @return false Controller runs as AP
      */
     bool Webserver::init () {
+      const char *FunctionName = "init";
       // WiFi Connection - Init First
       Connector.init ();
 
@@ -165,35 +167,37 @@ namespace JCA {
       Server.on (JCA_IOT_WEBSERVER_PATH_CONFIG, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConfigGet (_Request); });
 
       // RestAPI
-      //      RestApiHandler = new AsyncCallbackJsonWebHandler ("/api", [this] (AsyncWebServerRequest *_Request, JsonVariant &_Json) { this->onRestApiRequest (_Request, _Json); });
-      //      Server.addHandler (RestApiHandler);
-
       Server.on (
-          "/api", HTTP_GET, [this] (AsyncWebServerRequest *_Request) { 
-            Debug.println(FLAG_SETUP, true, this->ObjectName, "RestAPI", "Request");
-            Debug.print (FLAG_SETUP, true, this->ObjectName, "RestAPI", " + _tempObject ");
-            Debug.println (FLAG_SETUP, true, this->ObjectName, "RestAPI", (char *)(_Request->_tempObject));
-
+          "/api", HTTP_ANY,
+          [this] (AsyncWebServerRequest *_Request) {
+            if (Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Request")) {
+              Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Body:");
+              Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", (char *)(_Request->_tempObject));
+            }
             DynamicJsonDocument jsonBuffer (1000);
-            DeserializationError error = deserializeJson (jsonBuffer, (uint8_t *)(_Request->_tempObject));
-            if (!error) {
-              String Response;
-              JsonVariant InData = jsonBuffer.as<JsonVariant> ();
-              JsonVariant OutData = this->restApiGetCB (InData);
-              serializeJson (OutData, Response);
-              _Request->send (200, "application/json", Response);
-            } },
+            JsonVariant InData;
+            DeserializationError Error = deserializeJson (jsonBuffer, (char *)(_Request->_tempObject));
+            if (Error) {
+              if (Debug.print (FLAG_ERROR, true, ObjectName, "RestAPI", "+ deserializeJson() failed: ")) {
+                Debug.println (FLAG_ERROR, true, ObjectName, "RestAPI", Error.c_str ());
+                Debug.print (FLAG_ERROR, true, ObjectName, "RestAPI", "+ Body:");
+                Debug.println (FLAG_ERROR, true, ObjectName, "RestAPI", (char *)(_Request->_tempObject));
+              }
+              jsonBuffer.clear ();
+            }
+            InData = jsonBuffer.to<JsonVariant> ();
+            if (Debug.print (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "InDataJson:")) {
+              String JsonBody;
+              serializeJson (jsonBuffer, JsonBody);
+              Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", JsonBody);
+            }
+            this->onRestApiRequest (_Request, InData);
+          },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) {
-            Debug.println(FLAG_SETUP, true, this->ObjectName, "RestAPI", "File");
-             ; },
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "File");
+          },
           [this] (AsyncWebServerRequest *_Request, uint8_t *_Data, size_t _Len, size_t _Index, size_t _Total) {
-            Debug.println (FLAG_SETUP, true, this->ObjectName, "RestAPI", "Data");
-            Debug.print (FLAG_SETUP, true, this->ObjectName, "RestAPI", " + _Len ");
-            Debug.println (FLAG_SETUP, true, this->ObjectName, "RestAPI", _Len);
-            Debug.print (FLAG_SETUP, true, this->ObjectName, "RestAPI", " + _Index ");
-            Debug.println (FLAG_SETUP, true, this->ObjectName, "RestAPI", _Index);
-            Debug.print (FLAG_SETUP, true, this->ObjectName, "RestAPI", " + _Total ");
-            Debug.println (FLAG_SETUP, true, this->ObjectName, "RestAPI", _Total);
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Data");
 
             if (_Total > 0 && _Request->_tempObject == NULL) {
               _Request->_tempObject = malloc (_Total);
@@ -203,25 +207,13 @@ namespace JCA {
             }
           });
 
-      /*          "/api", HTTP_POST, [this] (AsyncWebServerRequest *_Request, uint8_t *_Data, size_t _Len, size_t _Index, size_t _Total) {
-                  if (!_Index) {
-                    Serial.printf ("BodyStart: %u B\n", _Total);
-                  }
-                  for (size_t i = 0; i < _Len; i++) {
-                    Serial.write (_Data[i]);
-                  }
-                  if (_Index + _Len == _Total) {
-                    Serial.printf ("BodyEnd: %u B\n", _Total);
-                  }
-                  // this->onRestApiRequest (_Request, _Json);
-                });
-      */
       // Webserver - If not defined
       Server.serveStatic ("/", LittleFS, "/")
           .setDefaultFile (JCA_IOT_WEBSERVER_PATH_HOME);
       Server.onNotFound ([] (AsyncWebServerRequest *_Request) { _Request->send (404); });
       Server.begin ();
 
+      Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Done");
       return Connector.isConnected ();
     }
 

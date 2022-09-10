@@ -13,14 +13,19 @@
 
 namespace JCA {
   namespace IOT {
-
-    void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json){
+    void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
+      const char *FunctionName = "onRestApiRequest";
       JsonVariant OutData;
-      switch (_Request->method())
-      {
+      if (Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, _Request->methodToString ())) {
+        Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Body:");
+        String JsonBody;
+        serializeJson (_Json, JsonBody);
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, JsonBody);
+      }
+      switch (_Request->method ()) {
       case HTTP_GET:
-        if (restApiGetCB){
-          OutData = restApiGetCB(_Json);
+        if (restApiGetCB) {
+          OutData = restApiGetCB (_Json);
           if (OutData.is<JsonArray> ()) {
             JsonDoc = OutData.as<JsonArray> ();
           } else if (OutData.is<JsonObject> ()) {
@@ -28,6 +33,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -43,6 +50,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -58,6 +67,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -73,6 +84,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -88,6 +101,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -96,10 +111,11 @@ namespace JCA {
       default:
         break;
       }
-      _Request->send (405, "text/plain", _Request->methodToString());
+      Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, "No Answer defined");
+      _Request->send (405, "text/plain", _Request->methodToString ());
     }
 
-    void Webserver::onRestApiGet (JsonVariantCallback _CB){
+    void Webserver::onRestApiGet (JsonVariantCallback _CB) {
       restApiGetCB = _CB;
     }
 
