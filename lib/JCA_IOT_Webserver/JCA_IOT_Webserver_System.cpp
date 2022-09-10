@@ -170,12 +170,10 @@ namespace JCA {
       Server.on (
           "/api", HTTP_ANY,
           [this] (AsyncWebServerRequest *_Request) {
-            if (Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Request")) {
-              Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Body:");
-              Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", (char *)(_Request->_tempObject));
-            }
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Request");
             DynamicJsonDocument jsonBuffer (1000);
             JsonVariant InData;
+
             DeserializationError Error = deserializeJson (jsonBuffer, (char *)(_Request->_tempObject));
             if (Error) {
               if (Debug.print (FLAG_ERROR, true, ObjectName, "RestAPI", "+ deserializeJson() failed: ")) {
@@ -185,12 +183,7 @@ namespace JCA {
               }
               jsonBuffer.clear ();
             }
-            InData = jsonBuffer.to<JsonVariant> ();
-            if (Debug.print (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "InDataJson:")) {
-              String JsonBody;
-              serializeJson (jsonBuffer, JsonBody);
-              Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", JsonBody);
-            }
+            InData = jsonBuffer.as<JsonVariant> ();
             this->onRestApiRequest (_Request, InData);
           },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) {
