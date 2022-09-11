@@ -88,10 +88,8 @@ namespace JCA {
       const char *FunctionName = "readConfig";
       // Get Wifi-Config from File5
       File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
-      ConfigFile.sendAll (Serial);
       if (ConfigFile) {
         Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config File Found");
-        Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, ConfigFile.readString ());
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
         if (!Error) {
           Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Deserialize Done");
@@ -112,6 +110,12 @@ namespace JCA {
                 Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] Password invalid");
               }
             }
+            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP)) {
+              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found DHCP");
+              if (!Connector.setDHCP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP].as<bool> ())) {
+                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] DHCP invalid");
+              }
+            }
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP)) {
               Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found IP");
               if (!Connector.setIP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP].as<const char *> ())) {
@@ -128,12 +132,6 @@ namespace JCA {
               Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found Subnet");
               if (!Connector.setSubnet (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET].as<const char *> ())) {
                 Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] Subnet invalid");
-              }
-            }
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found DHCP");
-              if (!Connector.setDHCP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP].as<bool> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] DHCP invalid");
               }
             }
           }
@@ -168,7 +166,10 @@ namespace JCA {
      */
     bool Webserver::init () {
       const char *FunctionName = "init";
-      // WiFi Connection - Init First
+      // Read Config
+      readConfig();
+
+      // WiFi Connection
       Connector.init ();
 
       // WebSocket - Init
@@ -274,11 +275,11 @@ namespace JCA {
     String Webserver::getTime () {
       return Rtc.getTime ();
     }
-    String Webserver::getDate (){
+    String Webserver::getDate () {
       return Rtc.getTime (JCA_IOT_WEBSERVER_TIME_DATEFORMAT);
     }
     String Webserver::getTimeString (String _Format) {
-      if (_Format.length() == 0){
+      if (_Format.length () == 0) {
         return Rtc.getTime (JCA_IOT_WEBSERVER_TIME_TIMEFORMAT);
       } else {
         return Rtc.getTime (_Format);

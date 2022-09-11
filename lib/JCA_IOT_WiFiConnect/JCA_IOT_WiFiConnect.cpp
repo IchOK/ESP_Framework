@@ -257,7 +257,8 @@ namespace JCA {
           }
 
           if (WiFi.status () == WL_CONNECTED) {
-            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, " DONE");
+            Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, " DONE : ");
+            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, WiFi.localIP().toString());
             State = STA;
           } else {
             Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, " FAILED");
@@ -300,7 +301,8 @@ namespace JCA {
         // Wait for Connection
         //-----------------------------
         if (WiFi.status () == WL_CONNECTED && WiFi.getMode () == WIFI_STA) {
-          Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "[Connect] Connect DONE");
+          Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, "[Connect] Connect DONE : ");
+          Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, WiFi.localIP ().toString ());
           State = STA;
         } else {
           digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN));
@@ -354,8 +356,9 @@ namespace JCA {
      * @return false connect to Station in progress
      */
     bool WiFiConnect::doConnect() {
-      if (isConnected()) {
+      if (isConfigured ()) {
         State = Connect;
+        handle ();
         return true;
       }
       return false;

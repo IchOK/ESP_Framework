@@ -81,6 +81,7 @@ namespace JCA {
       // Save Config Object
       ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "w");
       size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
+      ConfigFile.close();
       Debug.print (FLAG_CONFIG, true, ObjectName, FunctionName, "Write Config File [");
       Debug.print (FLAG_CONFIG, true, ObjectName, FunctionName, WrittenBytes);
       Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "]");
