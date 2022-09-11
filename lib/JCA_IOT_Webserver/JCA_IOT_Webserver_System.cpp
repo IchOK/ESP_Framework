@@ -20,9 +20,10 @@ namespace JCA {
      * @param _Port Port of the Webserver if not defined in Config
      * @param _ConfUser Username for the System Sites
      * @param _ConfPassword Password for the System Sites
+     * @param _Offset RTC Timeoffset in seconds
      */
-    Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword)
-        : Server (_Port), Websocket ("/ws") {
+    Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
+        : Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
       Port = _Port;
       Reboot = false;
@@ -35,8 +36,38 @@ namespace JCA {
      * Username and Password for System Sites is set to Default
      * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
      * @param _Port Port of the Webserver if not defined in Config
+     * @param _ConfUser Username for the System Sites
+     * @param _ConfPassword Password for the System Sites
+     */
+    Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword) : Webserver (_HostnamePrefix, _Port, _ConfUser, _ConfPassword, JCA_IOT_WEBSERVER_TIME_OFFSET) {
+    }
+
+    /**
+     * @brief Construct a new Webserver::Webserver object
+     * Username and Password for System Sites is set to Default
+     * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
+     * @param _Port Port of the Webserver if not defined in Config
+     * @param _Offset RTC Timeoffset in seconds
+     */
+    Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset) : Webserver (_HostnamePrefix, _Port, JCA_IOT_WEBSERVER_DEFAULT_CONF_USER, JCA_IOT_WEBSERVER_DEFAULT_CONF_PASS, _Offset) {
+    }
+
+    /**
+     * @brief Construct a new Webserver::Webserver object
+     * Username and Password for System Sites is set to Default
+     * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
+     * @param _Port Port of the Webserver if not defined in Config
      */
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port) : Webserver (_HostnamePrefix, _Port, JCA_IOT_WEBSERVER_DEFAULT_CONF_USER, JCA_IOT_WEBSERVER_DEFAULT_CONF_PASS) {
+    }
+
+    /**
+     * @brief Construct a new Webserver::Webserver object
+     * Username and Password for System Sites is set to Default
+     * Hostname-Prefix and Webserver-Port ist set to Default
+     * @param _Offset RTC Timeoffset in seconds
+     */
+    Webserver::Webserver (unsigned long _Offset) : Webserver (JCA_IOT_WEBSERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_WEBSERVER_DEFAULT_PORT, _Offset) {
     }
 
     /**
@@ -223,6 +254,35 @@ namespace JCA {
 
     void Webserver::onSystemReset (SimpleCallback _CB) {
       onSystemResetCB = _CB;
+    }
+
+    void Webserver::setTime (unsigned long _Epoch, int _Millis) {
+      Rtc.setTime (_Epoch, _Millis);
+    }
+    void Webserver::setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis) {
+      Rtc.setTime (_Second, _Minute, _Hour, _Day, _Month, _Year, _Millis);
+    }
+    void Webserver::setTimeStruct (tm _Time) {
+      Rtc.setTimeStruct (_Time);
+    }
+    bool Webserver::timeIsValid () {
+      return Rtc.getEpoch () > JCA_IOT_WEBSERVER_TIME_VALID;
+    }
+    tm Webserver::getTimeStruct () {
+      return Rtc.getTimeStruct ();
+    }
+    String Webserver::getTime () {
+      return Rtc.getTime ();
+    }
+    String Webserver::getDate (){
+      return Rtc.getTime (JCA_IOT_WEBSERVER_TIME_DATEFORMAT);
+    }
+    String Webserver::getTimeString (String _Format) {
+      if (_Format.length() == 0){
+        return Rtc.getTime (JCA_IOT_WEBSERVER_TIME_TIMEFORMAT);
+      } else {
+        return Rtc.getTime (_Format);
+      }
     }
   }
 }

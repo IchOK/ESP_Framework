@@ -29,6 +29,7 @@
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include <LittleFS.h>
+
 #define SPIFFS LittleFS
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
@@ -42,6 +43,8 @@
   #include <WiFi.h>
 #endif
 #include <ESPAsyncWebServer.h>
+
+#include <ESP32Time.h>
 
 #include <JCA_IOT_DebugOut.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
@@ -75,6 +78,12 @@
 #define JCA_IOT_WEBSERVER_PATH_SYS_RESET "/reset"
 #define JCA_IOT_WEBSERVER_PATH_HOME "/home.htm"
 #define JCA_IOT_WEBSERVER_PATH_CONFIG "/config.htm"
+// Time settings
+#define JCA_IOT_WEBSERVER_TIME_OFFSET 3600
+#define JCA_IOT_WEBSERVER_TIME_VALID 1609459200
+#define JCA_IOT_WEBSERVER_TIME_JSONKEY "timeSync"
+#define JCA_IOT_WEBSERVER_TIME_TIMEFORMAT "%d.%m.%G %H:%M:%S"
+#define JCA_IOT_WEBSERVER_TIME_DATEFORMAT "%d.%m.%G"
 
 namespace JCA {
   namespace IOT {
@@ -94,6 +103,7 @@ namespace JCA {
       WiFiConnect Connector;
       AsyncWebServer Server;
       AsyncWebSocket Websocket;
+      ESP32Time Rtc;
       uint16_t Port;
       StaticJsonDocument<1000> JsonDoc;
       SimpleCallback onSystemResetCB;
@@ -127,12 +137,23 @@ namespace JCA {
 
     public:
       // ...Webserver_System.cpp
+      Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
       Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword);
+      Webserver (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset);
       Webserver (const char *_HostnamePrefix, uint16_t _Port);
+      Webserver (unsigned long _Offset);
       Webserver ();
       bool init ();
       bool handle ();
       void onSystemReset(SimpleCallback _CB);
+      void setTime (unsigned long _Epoch = 1609459200, int _Millis = 0); // default (1609459200) = 1st Jan 2021
+      void setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis = 0);
+      void setTimeStruct (tm _Time);
+      bool timeIsValid ();
+      tm getTimeStruct ();
+      String getTime ();
+      String getDate ();
+      String getTimeString (String _Format);
 
       // ...Webserver_Web.cpp
       void onWebHomeReplace (AwsTemplateProcessor _CB);

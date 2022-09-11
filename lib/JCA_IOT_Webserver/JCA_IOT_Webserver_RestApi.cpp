@@ -22,6 +22,11 @@ namespace JCA {
         serializeJson (_Json, JsonBody);
         Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, JsonBody);
       }
+      // Handle TimeSync informations
+      if (_Json.containsKey (JCA_IOT_WEBSERVER_TIME_JSONKEY)) {
+        setTime (_Json[JCA_IOT_WEBSERVER_TIME_JSONKEY].as<unsigned long> (), 0);
+      }
+
       switch (_Request->method ()) {
       case HTTP_GET:
         if (restApiGetCB) {
