@@ -10,6 +10,7 @@
  *
  */
 #include <JCA_IOT_Webserver.h>
+using namespace JCA::SYS;
 
 namespace JCA {
   namespace IOT {
@@ -35,6 +36,8 @@ namespace JCA {
             JsonDoc = OutData.as<JsonArray> ();
           } else if (OutData.is<JsonObject> ()) {
             JsonDoc = OutData.as<JsonObject> ();
+          } else {
+            JsonDoc.clear();
           }
           String response;
           serializeJson (JsonDoc, response);
@@ -52,6 +55,8 @@ namespace JCA {
             JsonDoc = OutData.as<JsonArray> ();
           } else if (OutData.is<JsonObject> ()) {
             JsonDoc = OutData.as<JsonObject> ();
+          } else {
+            JsonDoc.clear ();
           }
           String response;
           serializeJson (JsonDoc, response);
@@ -69,6 +74,8 @@ namespace JCA {
             JsonDoc = OutData.as<JsonArray> ();
           } else if (OutData.is<JsonObject> ()) {
             JsonDoc = OutData.as<JsonObject> ();
+          } else {
+            JsonDoc.clear ();
           }
           String response;
           serializeJson (JsonDoc, response);
@@ -86,6 +93,8 @@ namespace JCA {
             JsonDoc = OutData.as<JsonArray> ();
           } else if (OutData.is<JsonObject> ()) {
             JsonDoc = OutData.as<JsonObject> ();
+          } else {
+            JsonDoc.clear ();
           }
           String response;
           serializeJson (JsonDoc, response);
@@ -103,6 +112,8 @@ namespace JCA {
             JsonDoc = OutData.as<JsonArray> ();
           } else if (OutData.is<JsonObject> ()) {
             JsonDoc = OutData.as<JsonObject> ();
+          } else {
+            JsonDoc.clear ();
           }
           String response;
           serializeJson (JsonDoc, response);

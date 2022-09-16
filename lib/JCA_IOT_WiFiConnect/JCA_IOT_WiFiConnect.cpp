@@ -13,6 +13,7 @@
  * 
  */
 #include <JCA_IOT_WiFiConnect.h>
+using namespace JCA::SYS;
 
 namespace JCA {
   namespace IOT {

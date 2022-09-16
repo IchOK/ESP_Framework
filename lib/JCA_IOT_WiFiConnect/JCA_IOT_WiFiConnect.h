@@ -26,7 +26,7 @@
   #include <SPIFFS.h>
   #include <WiFi.h>
 #endif
-#include <JCA_IOT_DebugOut.h>
+#include <JCA_SYS_DebugOut.h>
 
 // Default Config if not passt other Data to Contructor
 #define JCA_IOT_WIFICONNECT_DEFAULT_SSID_PREFIX "JCA_IOT"
@@ -54,7 +54,7 @@ namespace JCA {
       // Internal
       unsigned long BusyTimer;
       unsigned long ReconnectTimer;
-      const char *ObjectName = "WiFiConnect";
+      const char *ObjectName = "IOT::WiFiConnect";
       // Defined by Contructor
       enum WiFiState State;
       char ApSsid[80];

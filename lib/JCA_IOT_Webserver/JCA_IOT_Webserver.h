@@ -46,7 +46,7 @@
 
 #include <ESP32Time.h>
 
-#include <JCA_IOT_DebugOut.h>
+#include <JCA_SYS_DebugOut.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
 #include <JCA_IOT_Webserver_SVGs.h>
 #include <JCA_IOT_Webserver_Sites.h>
@@ -98,7 +98,7 @@ namespace JCA {
       char ConfPassword[80];
       char FirmwareVersion[10];
       char FirmwareBuild[10];
-      const char *ObjectName = "Webserver";
+      const char *ObjectName = "IOT::Webserver";
       bool Reboot;
       WiFiConnect Connector;
       AsyncWebServer Server;

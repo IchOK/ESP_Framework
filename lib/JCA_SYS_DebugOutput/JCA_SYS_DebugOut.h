@@ -1,5 +1,5 @@
 /**
- * @file JCA_IOT_DebugOut.h
+ * @file JCA_SYS_DebugOut.h
  * @author JCA (https://github.com/ichok)
  * @brief The DebugOut Class is used to handle Debug-Prints,
  * Serial prints for the selected Debug-Level.
@@ -19,10 +19,10 @@
  * @brief
  * Default Baud rate if not defined on init.
  */
-#define JCA_IOT_DEBUGOUT_DEFAULT_BAUD 74880
+#define JCA_SYS_DebugOut_DEFAULT_BAUD 74880
 
 namespace JCA {
-  namespace IOT {
+  namespace SYS {
     /**
      * @brief 
      * Flags for define Debug-Message Level

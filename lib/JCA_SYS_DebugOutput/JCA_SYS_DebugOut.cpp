@@ -1,5 +1,5 @@
 /**
- * @file JCA_IOT_DebugOut.cpp
+ * @file JCA_SYS_DebugOut.cpp
  * @author JCA (https://github.com/ichok)
  * @brief The DebugOut Class is used to handle Debug-Prints,
  * Serial prints for the selected Debug-Level.
@@ -12,10 +12,10 @@
  *
  */
 
-#include <JCA_IOT_DebugOut.h>
+#include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
-  namespace IOT {
+  namespace SYS {
     /**
      * @brief Construct a new DebugOut::DebugOut object
      *
@@ -62,7 +62,7 @@ namespace JCA {
           break;
         }
         if (_Framework) {
-          RetVal += "JCA::IOT::";
+          RetVal += "JCA::";
         }
         RetVal += String(_Object) + String("::") + String(_Function) + String(" - ");
         NewLine = false;
@@ -91,7 +91,7 @@ namespace JCA {
      * @param _Flags Select the diffrent Levels of Debug-Output
      */
     void DebugOut::init (uint16_t _Flags) {
-      init (_Flags, JCA_IOT_DEBUGOUT_DEFAULT_BAUD);
+      init (_Flags, JCA_SYS_DebugOut_DEFAULT_BAUD);
     }
 
     /**
