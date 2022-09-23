@@ -73,8 +73,7 @@ const char SectionConnect[] PROGMEM = R"rawliteral(
 const char SectionSys[] PROGMEM = R"rawliteral(
 <article>
 <header>System Information</header>
-Firmware Version: %FW_VERSION%<br/>
-Firmware Build: %FW_BUILD%<br/>
+Firmware: %FW_VERSION%<br/>
 Board Name: %BOARD_NAME%<br/>
 Board Version: %BOARD_VERSION%<br/>
 Board Variant: %BOARD_VARIANT%<br/>

@@ -77,11 +77,10 @@ namespace JCA {
      * @param _Baud Baud rate of Serial interface
      */
     void DebugOut::init (uint16_t _Flags, unsigned long _Baud) {
-      const char *FunctionName = "init";
       Flags = _Flags;
       if (Flags > 0) {
         DebugSerial.begin (_Baud);
-        println (FLAG_SETUP, true, ObjectName, FunctionName, "Serial stated");
+        println (FLAG_SETUP, true, ObjectName, __func__, "Serial stated");
       }
     }
 

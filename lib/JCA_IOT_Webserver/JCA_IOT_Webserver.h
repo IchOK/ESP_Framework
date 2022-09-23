@@ -14,7 +14,11 @@
  *     - Reset the controller
  * - Style Sheet
  * - Navigation and Logo Icons
- * - ResrAPI
+ * - RestAPI
+ * - WebSocket
+ *   - Websockt use RestAPI Callback-Functions for Events if no other is defined
+ *     - onWsEvent : Default = onRestApiPost
+ *     - onWsUpdate : Default = onRestApiGet
  * @version 0.1
  * @date 2022-09-04
  *
@@ -26,8 +30,8 @@
 #define _JCA_IO_WEBSERVER_
 #include "FS.h"
 #include <Arduino.h>
-#include <AsyncJson.h>
 #include <ArduinoJson.h>
+#include <AsyncJson.h>
 #include <LittleFS.h>
 
 #define SPIFFS LittleFS
@@ -46,11 +50,16 @@
 
 #include <ESP32Time.h>
 
-#include <JCA_SYS_DebugOut.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
 #include <JCA_IOT_Webserver_SVGs.h>
 #include <JCA_IOT_Webserver_Sites.h>
 #include <JCA_IOT_WiFiConnect.h>
+#include <JCA_SYS_DebugOut.h>
+
+// Manual setting Firmware withpout Git
+#ifndef AUTO_VERSION
+  #define AUTO_VERSION "V1.0.0"
+#endif
 
 // Default Config if not passt other Data to Contructor
 #define JCA_IOT_WEBSERVER_DEFAULT_HOSTNAMEPREFIX "JCA_IOT_NODE_"
@@ -59,7 +68,7 @@
 #define JCA_IOT_WEBSERVER_DEFAULT_CONF_PASS "Admin"
 // Config File is readen on Init
 #define JCA_IOT_WEBSERVER_CONFIGPATH "/sysConfig.json"
-// JSON Keys for Config-Post
+// JSON Keys for WiFi Config
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI "wifi"
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_SSID "ssid"
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_PASS "pass"
@@ -67,9 +76,11 @@
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY "gateway"
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET "subnet"
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP "dhcp"
-// JSON Keys for Config-Post
+// JSON Keys for Server Config
 #define JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME "hostname"
 #define JCA_IOT_WEBSERVER_CONFKEY_PORT "port"
+// JSON Keys for Web-Socket Config
+#define JCA_IOT_WEBSERVER_CONFKEY_SOCKETUPDATE "wsUpdate"
 // Website Config
 #define JCA_IOT_WEBSERVER_PATH_CONNECT "/connect"
 #define JCA_IOT_WEBSERVER_PATH_SYS "/sys"
@@ -96,8 +107,7 @@ namespace JCA {
       char Hostname[80];
       char ConfUser[80];
       char ConfPassword[80];
-      char FirmwareVersion[10];
-      char FirmwareBuild[10];
+      char Firmware[80];
       const char *ObjectName = "IOT::Webserver";
       bool Reboot;
       WiFiConnect Connector;
@@ -135,6 +145,15 @@ namespace JCA {
       JsonVariantCallback restApiDeleteCB;
       void onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json);
 
+      // ...Webserver_Socket.cpp
+      uint32_t WsUpdateCycle;
+      uint32_t WsLastUpdate;
+      JsonVariantCallback wsDataCB;
+      JsonVariantCallback wsUpdateCB;
+      void onWsEvent (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len);
+      void wsHandleData (AsyncWebSocketClient *_Client, void *_Arg, uint8_t *_Data, size_t _Len);
+      bool doWsUpdate (AsyncWebSocketClient *_Client);
+
     public:
       // ...Webserver_System.cpp
       Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
@@ -145,7 +164,7 @@ namespace JCA {
       Webserver ();
       bool init ();
       bool handle ();
-      void onSystemReset(SimpleCallback _CB);
+      void onSystemReset (SimpleCallback _CB);
       void setTime (unsigned long _Epoch = 1609459200, int _Millis = 0); // default (1609459200) = 1st Jan 2021
       void setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis = 0);
       void setTimeStruct (tm _Time);
@@ -166,7 +185,11 @@ namespace JCA {
       void onRestApiPatch (JsonVariantCallback _CB);
       void onRestApiDelete (JsonVariantCallback _CB);
 
-      //
+      // ...Webserver_Socket.cpp
+      void onWsData (JsonVariantCallback _CB);
+      void onWsUpdate (JsonVariantCallback _CB);
+      void setWsUpdateCycle (uint32_t _CycleTime);
+      bool doWsUpdate ();
     };
   }
 }

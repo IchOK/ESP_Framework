@@ -15,13 +15,12 @@ using namespace JCA::SYS;
 namespace JCA {
   namespace IOT {
     void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
-      const char *FunctionName = "onRestApiRequest";
       JsonVariant OutData;
-      if (Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, _Request->methodToString ())) {
-        Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Body:");
+      if (Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Request->methodToString ())) {
+        Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Body:");
         String JsonBody;
         serializeJson (_Json, JsonBody);
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, JsonBody);
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, JsonBody);
       }
       // Handle TimeSync informations
       if (_Json.containsKey (JCA_IOT_WEBSERVER_TIME_JSONKEY)) {
@@ -41,8 +40,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -60,8 +59,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -79,8 +78,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -98,8 +97,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -117,8 +116,8 @@ namespace JCA {
           }
           String response;
           serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, FunctionName, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, response);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
           _Request->send (200, "application/json", response);
           return;
         }
@@ -127,7 +126,7 @@ namespace JCA {
       default:
         break;
       }
-      Debug.println (FLAG_TRAFFIC, true, ObjectName, FunctionName, "No Answer defined");
+      Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
       _Request->send (405, "text/plain", _Request->methodToString ());
     }
 

@@ -17,8 +17,8 @@ namespace JCA {
       AccelStepper Stepper;
 
       // Konfig
-      int8_t FeedingHour;
-      int8_t FeedingMinute;
+      int16_t FeedingHour;
+      int16_t FeedingMinute;
       float SteppsPerRotation;
       float FeedingRotations;
       float Acceleration;

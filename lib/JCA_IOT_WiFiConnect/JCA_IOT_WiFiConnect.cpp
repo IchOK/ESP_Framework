@@ -175,32 +175,31 @@ namespace JCA {
      * @return false Data is invalid or can't connect to AP
      */
     bool WiFiConnect::init (const char *_Ssid, const char *_Password, const char *_IP, const char *_Gateway, const char *_Subnet, bool _DHCP) {
-      const char *FunctionName = "init";
-      Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Started");
+      Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Started");
       bool DataValid = true;
       if (!setSsid (_Ssid)) {
         DataValid = false;
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "SSID Invalid");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "SSID Invalid");
       }
       if (!setPassword (_Password)) {
         DataValid = false;
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Pasword Invalid");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Pasword Invalid");
       }
       if (!setIP (_IP)) {
         DataValid = false;
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "IP Invalid");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "IP Invalid");
       }
       if (!setGateway (_Gateway)) {
         DataValid = false;
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Gateway Invalid");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Gateway Invalid");
       }
       if (!setSubnet (_Subnet)) {
         DataValid = false;
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Subnet Invalid");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Subnet Invalid");
       }
       if (!setDHCP (_DHCP)) {
         DataValid = false;
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "DHCP Invalid");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "DHCP Invalid");
       }
       if (DataValid) {
         handle ();
@@ -217,8 +216,7 @@ namespace JCA {
      * @return false never
      */
     bool WiFiConnect::init () {
-      const char *FunctionName = "init";
-      Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Not initialized");
+      Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Not initialized");
       return false;
     }
 
@@ -229,40 +227,39 @@ namespace JCA {
      * @return false if in AP-Mode or trying to connect to AP
      */
     bool WiFiConnect::handle () {
-      const char *FunctionName = "handle";
       switch (State) {
       case Init:
         //-----------------------------
         // Init Connection
         //-----------------------------
         WiFi.persistent (true);
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "[Init] Started");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Init] Started");
         if (isConfigured ()) {
           int ConnectCounter = 0;
           // Set static IP
           if (!DHCP) {
-            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "[Init] Set static IP");
+            Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Init] Set static IP");
             if (!WiFi.config (IP, Gateway, Subnet)) {
-              Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[Init] Static IP failed");
+              Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Init] Static IP failed");
             }
           }
 
           // Connect to Network
-          Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, "[Init] Connect ");
+          Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Connect ");
           WiFi.mode (WIFI_STA);
           WiFi.begin (Ssid, Password);
           while (WiFi.status () != WL_CONNECTED && ConnectCounter < 10) {
-            Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, "0");
+            Debug.print (FLAG_SETUP, true, ObjectName, __func__, "0");
             delay (500);
             ConnectCounter++;
           }
 
           if (WiFi.status () == WL_CONNECTED) {
-            Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, " DONE : ");
-            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, WiFi.localIP().toString());
+            Debug.print (FLAG_SETUP, true, ObjectName, __func__, " DONE : ");
+            Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP().toString());
             State = STA;
           } else {
-            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, " FAILED");
+            Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
             BusyTimer = millis ();
             State = Failed;
           }
@@ -283,14 +280,14 @@ namespace JCA {
 
         // Set static IP
         if (!DHCP) {
-          Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "[Connect] Set static IP");
+          Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Set static IP");
           if (!WiFi.config (IP, Gateway, Subnet)) {
-            Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[Connect] Static IP failed");
+            Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Connect] Static IP failed");
           }
         }
 
         // Connect to Network
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "[Connect] Connect ");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect ");
         WiFi.mode (WIFI_STA);
         WiFi.begin (Ssid, Password);
         BusyTimer = millis ();
@@ -302,13 +299,13 @@ namespace JCA {
         // Wait for Connection
         //-----------------------------
         if (WiFi.status () == WL_CONNECTED && WiFi.getMode () == WIFI_STA) {
-          Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, "[Connect] Connect DONE : ");
-          Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, WiFi.localIP ().toString ());
+          Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect DONE : ");
+          Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP ().toString ());
           State = STA;
         } else {
           digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN));
           if (millis () - BusyTimer > JCA_IOT_WIFICONNECT_DELAY_FAILED) {
-            Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "[Connect] Connect FAILED");
+            Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect FAILED");
             State = Failed;
           }
         }
@@ -318,8 +315,8 @@ namespace JCA {
         //-----------------------------
         // Connection Failt, setup AP
         //-----------------------------
-        Debug.print (FLAG_SETUP, true, ObjectName, FunctionName, "[Failed] Start AP: ");
-        Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, ApSsid);
+        Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Failed] Start AP: ");
+        Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
         WiFi.mode (WIFI_AP);
         WiFi.softAPConfig (ApIP, ApGateway, ApSubnet);
         WiFi.softAP (ApSsid, ApPassword);

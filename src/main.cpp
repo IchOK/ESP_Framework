@@ -10,6 +10,7 @@
 
 // Project function
 #include <JCA_FNC_Feeder.h>
+#include <JCA_FNC_Level.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -29,9 +30,17 @@ using namespace JCA::FNC;
 
 Feeder Spindel (EN_PIN, STEP_PIN, DIR_PIN, "Spindel");
 
+//-------------------------------------------------------
+// Level
+//-------------------------------------------------------
+#define LEVEL_PIN A0// Levelsensor
+
+Level Futter (LEVEL_PIN, "Futter");
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+StaticJsonDocument<1000> JDoc;
 Webserver Server;
 //-------------------------------------------------------
 // System Functions
@@ -52,19 +61,18 @@ String cbWebConfigReplace (const String &var) {
 //-------------------------------------------------------
 // RestAPI Functions
 //-------------------------------------------------------
-StaticJsonDocument<1000> JDoc;
-
 JsonVariant cbRestApiGet (JsonVariant &var) {
   JDoc.clear ();
-  //JsonObject Collection = JDoc.createNestedObject();
   JsonObject Collection = JDoc.to<JsonObject> ();
   Spindel.getAll (Collection);
+  Futter.getAll(Collection);
   Collection["time"] = Server.getTimeString ("");
   return JDoc;
 }
 JsonVariant cbRestApiPost (JsonVariant &var) {
-  Spindel.set (var.as<JsonObject> ());
   JDoc.clear ();
+  Spindel.set (var.as<JsonObject> ());
+  Futter.set (var.as<JsonObject> ());
   return JDoc;
 }
 JsonVariant cbRestApiPut (JsonVariant &var) {
@@ -74,8 +82,9 @@ JsonVariant cbRestApiPut (JsonVariant &var) {
 }
 JsonVariant cbRestApiPatch (JsonVariant &var) {
   JDoc.clear ();
-  JsonObject Collection = JDoc.as<JsonObject> ();
+  JsonObject Collection = JDoc.to<JsonObject> ();
   Spindel.getConfig (Collection);
+  Futter.getConfig (Collection);
   File ConfigFile = LittleFS.open (CONFIGPATH, "w");
   serializeJson (JDoc, ConfigFile);
   ConfigFile.close ();
@@ -84,6 +93,29 @@ JsonVariant cbRestApiPatch (JsonVariant &var) {
 JsonVariant cbRestApiDelete (JsonVariant &var) {
   JDoc.clear ();
   JDoc["message"] = "DELETE not used";
+  return JDoc;
+}
+
+//-------------------------------------------------------
+// RestAPI Functions
+//-------------------------------------------------------
+JsonVariant cbWsUpdate (JsonVariant &var) {
+  JDoc.clear ();
+  JsonObject Collection = JDoc.to<JsonObject> ();
+  Spindel.getAll (Collection);
+  Futter.getAll (Collection);
+  Collection["time"] = Server.getTimeString ("");
+  return JDoc;
+}
+JsonVariant cbWsData (JsonVariant &var) {
+  JDoc.clear ();
+  if (var.as<JsonObject>().containsKey("save")) {
+    if ((var.as<JsonObject> ())["save"].as <bool>()){
+      JDoc = cbRestApiPatch(var);
+    }
+  }
+  Spindel.set (var.as<JsonObject> ());
+  Futter.set (var.as<JsonObject> ());
   return JDoc;
 }
 
@@ -119,6 +151,9 @@ void setup () {
   Server.onRestApiPost (cbRestApiPost);
   Server.onRestApiPut (cbRestApiPut);
   Server.onRestApiPatch (cbRestApiPatch);
+  // Web-Socket
+  Server.onWsData(cbWsData);
+  Server.onWsUpdate(cbWsUpdate);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Custom Code
@@ -136,6 +171,7 @@ void setup () {
 
       // Set custom Objects
       Spindel.set (Collection);
+      Futter.set (Collection);
 
     } else {
       Debug.print (FLAG_ERROR, false, "main", "setup", "deserializeJson() failed: ");
@@ -155,4 +191,5 @@ void loop () {
   tm CurrentTime = Server.getTimeStruct ();
 
   Spindel.update(CurrentTime);
+  Futter.update(CurrentTime);
 }

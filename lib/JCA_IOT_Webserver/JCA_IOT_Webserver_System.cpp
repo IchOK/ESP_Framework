@@ -30,6 +30,8 @@ namespace JCA {
       Reboot = false;
       strncpy (ConfUser, _ConfUser, sizeof (ConfUser));
       strncpy (ConfPassword, _ConfPassword, sizeof (ConfPassword));
+      WsUpdateCycle = 1000;
+      WsLastUpdate = millis();
     }
 
     /**
@@ -86,74 +88,81 @@ namespace JCA {
      * @return false Config-File didn't exists or is not a valid JSON File
      */
     bool Webserver::readConfig () {
-      const char *FunctionName = "readConfig";
       // Get Wifi-Config from File5
       File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
       if (ConfigFile) {
-        Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config File Found");
+        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
         if (!Error) {
-          Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Deserialize Done");
+          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Deserialize Done");
           JsonObject Config = JsonDoc.as<JsonObject> ();
+          //------------------------------------------------------
+          // Read WiFi Config
+          //------------------------------------------------------
           if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config contains WiFi");
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WiFi");
             JsonObject WiFiConfig = Config[JCA_IOT_WEBSERVER_CONFKEY_WIFI].as<JsonObject> ();
-            // Get Network Config
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_SSID)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found SSID");
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found SSID");
               if (!Connector.setSsid (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_SSID].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] SSID invalid");
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] SSID invalid");
               }
             }
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_PASS)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found Password");
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Password");
               if (!Connector.setPassword (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_PASS].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] Password invalid");
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Password invalid");
               }
             }
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found DHCP");
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found DHCP");
               if (!Connector.setDHCP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP].as<bool> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] DHCP invalid");
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] DHCP invalid");
               }
             }
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found IP");
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found IP");
               if (!Connector.setIP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] IP invalid");
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] IP invalid");
               }
             }
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found Gateway");
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Gateway");
               if (!Connector.setGateway (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] Gateway invalid");
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Gateway invalid");
               }
             }
             if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "[WiFi] Found Subnet");
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Subnet");
               if (!Connector.setSubnet (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "[WiFi] Subnet invalid");
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Subnet invalid");
               }
             }
           }
-
+          //------------------------------------------------------
+          // Read Server Config
+          //------------------------------------------------------
           if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config contains Hostname");
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Hostname");
             strncpy (Hostname, Config[JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME].as<const char *> (), sizeof (Hostname));
           }
-
           if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_PORT)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, FunctionName, "Config contains Serverport");
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Serverport");
             Port = Config[JCA_IOT_WEBSERVER_CONFKEY_PORT].as<uint16_t> ();
           }
+          if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_SOCKETUPDATE)) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebSocket Update");
+            WsUpdateCycle = Config[JCA_IOT_WEBSERVER_CONFKEY_SOCKETUPDATE].as<uint32_t> ();
+          }
+
         } else {
-          Debug.print (FLAG_ERROR, true, ObjectName, FunctionName, "deserializeJson() failed: ");
-          Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, Error.c_str ());
+          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "deserializeJson() failed: ");
+          Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
           return false;
         }
         ConfigFile.close ();
       } else {
-        Debug.println (FLAG_ERROR, true, ObjectName, FunctionName, "Config File NOT found");
+        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
         return false;
       }
       return true;
@@ -166,7 +175,6 @@ namespace JCA {
      * @return false Controller runs as AP
      */
     bool Webserver::init () {
-      const char *FunctionName = "init";
       // Read Config
       readConfig();
 
@@ -174,7 +182,8 @@ namespace JCA {
       Connector.init ();
 
       // WebSocket - Init
-      // Server.addHandle(&Websocket);
+      Websocket.onEvent([this] (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) {this->onWsEvent(_Server, _Client,  _Type, _Arg, _Data, _Len);});
+      Server.addHandler(&Websocket);
 
       // Webserver - WiFi Config
       Server.on (JCA_IOT_WEBSERVER_PATH_CONNECT, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectGet (_Request); });
@@ -204,19 +213,19 @@ namespace JCA {
           "/api", HTTP_ANY,
           [this] (AsyncWebServerRequest *_Request) {
             Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Request");
-            DynamicJsonDocument jsonBuffer (1000);
+            DynamicJsonDocument JBuffer (1000);
             JsonVariant InData;
 
-            DeserializationError Error = deserializeJson (jsonBuffer, (char *)(_Request->_tempObject));
+            DeserializationError Error = deserializeJson (JBuffer, (char *)(_Request->_tempObject));
             if (Error) {
               if (Debug.print (FLAG_ERROR, true, ObjectName, "RestAPI", "+ deserializeJson() failed: ")) {
                 Debug.println (FLAG_ERROR, true, ObjectName, "RestAPI", Error.c_str ());
                 Debug.print (FLAG_ERROR, true, ObjectName, "RestAPI", "+ Body:");
                 Debug.println (FLAG_ERROR, true, ObjectName, "RestAPI", (char *)(_Request->_tempObject));
               }
-              jsonBuffer.clear ();
+              JBuffer.clear ();
             }
-            InData = jsonBuffer.as<JsonVariant> ();
+            InData = JBuffer.as<JsonVariant> ();
             this->onRestApiRequest (_Request, InData);
           },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) {
@@ -239,7 +248,7 @@ namespace JCA {
       Server.onNotFound ([] (AsyncWebServerRequest *_Request) { _Request->send (404); });
       Server.begin ();
 
-      Debug.println (FLAG_SETUP, true, ObjectName, FunctionName, "Done");
+      Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Done");
       return Connector.isConnected ();
     }
 
@@ -250,6 +259,13 @@ namespace JCA {
      * @return false Controller runs as AP
      */
     bool Webserver::handle () {
+      uint32_t ActMillis = millis();
+      //Update Cycle WebSocket
+      if (ActMillis - WsLastUpdate >= WsUpdateCycle && WsUpdateCycle > 0) {
+        doWsUpdate(nullptr);
+        WsLastUpdate = ActMillis;
+      }
+      //Check WiFi Connection
       Connector.handle ();
       return Connector.isConnected ();
     }
