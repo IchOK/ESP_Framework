@@ -81,7 +81,7 @@ Board MCU: %BOARD_MCU%<br/>
 </article>
 <article>
 <header>Save Config</header>
-<a href="/config.json" download="config.json"><button>Download Config</button></a>
+<a href="%CONFIGFILE%" download="%CONFIGFILE%"><button>Download Config</button></a>
 </article>
 <article>
 <header>Upload Web-Content</header>

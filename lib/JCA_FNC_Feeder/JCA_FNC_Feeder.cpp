@@ -32,7 +32,7 @@ namespace JCA {
     }
 
     void Feeder::update (struct tm &_Time) {
-      bool AutoFeed = FeedingHour == _Time.tm_hour && FeedingMinute == _Time.tm_min && _Time.tm_year > 2000;
+      bool AutoFeed = FeedingHour == _Time.tm_hour && FeedingMinute == _Time.tm_min && _Time.tm_year > 100;
 
       // Run const Speed
       if (RunConst) {
@@ -136,13 +136,13 @@ namespace JCA {
           }
         }
         if (_Data.containsKey ("SteppsPerRotation")) {
-          SteppsPerRotation = _Data["SteppsPerRotation"].as<int32_t> ();
+          SteppsPerRotation = _Data["SteppsPerRotation"].as<float> ();
           if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "SteppsPerRotation:")) {
             Debug.println (FLAG_CONFIG, false, ObjectName, __func__, SteppsPerRotation);
           }
         }
         if (_Data.containsKey ("FeedingRotations")) {
-          FeedingRotations = _Data["FeedingRotations"].as<int32_t> ();
+          FeedingRotations = _Data["FeedingRotations"].as<float> ();
           if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "FeedingRotations:")) {
             Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingRotations);
           }

@@ -16,118 +16,66 @@ namespace JCA {
   namespace IOT {
     void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
       JsonVariant OutData;
+
       if (Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Request->methodToString ())) {
         Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Body:");
         String JsonBody;
         serializeJson (_Json, JsonBody);
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, JsonBody);
       }
-      // Handle TimeSync informations
-      if (_Json.containsKey (JCA_IOT_WEBSERVER_TIME_JSONKEY)) {
-        setTime (_Json[JCA_IOT_WEBSERVER_TIME_JSONKEY].as<unsigned long> (), 0);
-      }
+      // Handle System-Data
+      recvSystemMsg (_Json);
 
       switch (_Request->method ()) {
       case HTTP_GET:
         if (restApiGetCB) {
           OutData = restApiGetCB (_Json);
-          if (OutData.is<JsonArray> ()) {
-            JsonDoc = OutData.as<JsonArray> ();
-          } else if (OutData.is<JsonObject> ()) {
-            JsonDoc = OutData.as<JsonObject> ();
-          } else {
-            JsonDoc.clear();
-          }
-          String response;
-          serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
-          _Request->send (200, "application/json", response);
-          return;
         }
         break;
 
       case HTTP_POST:
         if (restApiPostCB) {
           OutData = restApiPostCB (_Json);
-          if (OutData.is<JsonArray> ()) {
-            JsonDoc = OutData.as<JsonArray> ();
-          } else if (OutData.is<JsonObject> ()) {
-            JsonDoc = OutData.as<JsonObject> ();
-          } else {
-            JsonDoc.clear ();
-          }
-          String response;
-          serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
-          _Request->send (200, "application/json", response);
-          return;
         }
         break;
 
       case HTTP_PUT:
         if (restApiPutCB) {
           OutData = restApiPutCB (_Json);
-          if (OutData.is<JsonArray> ()) {
-            JsonDoc = OutData.as<JsonArray> ();
-          } else if (OutData.is<JsonObject> ()) {
-            JsonDoc = OutData.as<JsonObject> ();
-          } else {
-            JsonDoc.clear ();
-          }
-          String response;
-          serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
-          _Request->send (200, "application/json", response);
-          return;
         }
         break;
 
       case HTTP_PATCH:
         if (restApiPatchCB) {
           OutData = restApiPatchCB (_Json);
-          if (OutData.is<JsonArray> ()) {
-            JsonDoc = OutData.as<JsonArray> ();
-          } else if (OutData.is<JsonObject> ()) {
-            JsonDoc = OutData.as<JsonObject> ();
-          } else {
-            JsonDoc.clear ();
-          }
-          String response;
-          serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
-          _Request->send (200, "application/json", response);
-          return;
         }
         break;
 
       case HTTP_DELETE:
         if (restApiDeleteCB) {
           OutData = restApiDeleteCB (_Json);
-          if (OutData.is<JsonArray> ()) {
-            JsonDoc = OutData.as<JsonArray> ();
-          } else if (OutData.is<JsonObject> ()) {
-            JsonDoc = OutData.as<JsonObject> ();
-          } else {
-            JsonDoc.clear ();
-          }
-          String response;
-          serializeJson (JsonDoc, response);
-          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
-          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
-          _Request->send (200, "application/json", response);
-          return;
         }
         break;
 
       default:
         break;
       }
-      Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
-      _Request->send (405, "text/plain", _Request->methodToString ());
+
+      if (!OutData.is<JsonObject> ()) {
+        JsonDoc.clear ();
+        OutData = JsonDoc.to<JsonVariant>();
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
+      }
+
+      // Add System Informations
+      createSystemMsg (OutData);
+      JsonDoc = OutData.as<JsonObject> ();
+
+      String response;
+      serializeJson (JsonDoc, response);
+      Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
+      Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
+      _Request->send (200, "application/json", response);
     }
 
     void Webserver::onRestApiGet (JsonVariantCallback _CB) {

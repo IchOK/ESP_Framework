@@ -168,6 +168,32 @@ namespace JCA {
       return true;
     }
 
+    void Webserver::recvSystemMsg(JsonVariant &_Json) {
+      if (_Json.containsKey (JCA_IOT_WEBSERVER_MSGKEY_SYS)) {
+        JsonObject JSystem = _Json[JCA_IOT_WEBSERVER_MSGKEY_SYS];
+        if (JSystem.containsKey (JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESYNC)) {
+          setTime (JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESYNC].as<uint32_t>());
+        }
+        if (JSystem.containsKey (JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE)) {
+          WsUpdateCycle = JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE].as<uint32_t> ();
+        }
+      }
+    }
+
+    void Webserver::createSystemMsg (JsonVariant &_Json) {
+      JsonObject JSystem = _Json.createNestedObject (JCA_IOT_WEBSERVER_MSGKEY_SYS);
+      JsonObject JTime = JSystem.createNestedObject (JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESTRUCT);
+      JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_TIME] = getTimeString ("");
+      JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE] = WsUpdateCycle;
+      tm TimeAct = Rtc.getTimeStruct ();
+      JTime["hour"] = TimeAct.tm_hour;
+      JTime["min"] = TimeAct.tm_min;
+      JTime["sec"] = TimeAct.tm_sec;
+      JTime["year"] = TimeAct.tm_year;
+      JTime["mon"] = TimeAct.tm_mon;
+      JTime["mday"] = TimeAct.tm_mday;
+    }
+
     /**
      * @brief Define all Default Web-Requests and init the Webserver
      *

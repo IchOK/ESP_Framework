@@ -62,18 +62,25 @@ namespace JCA {
           }
 
           InData = JBuffer.as<JsonVariant> ();
+
+          // Handle System-Data
+          recvSystemMsg (InData);
+
           if (wsDataCB) {
             OutData = wsDataCB (InData);
           } else if (restApiPostCB) {
             OutData = restApiPostCB (InData);
           }
-          if (OutData.is<JsonArray> ()) {
-            JsonDoc = OutData.as<JsonArray> ();
-          } else if (OutData.is<JsonObject> ()) {
-            JsonDoc = OutData.as<JsonObject> ();
-          } else {
-            return;
+          if (!OutData.is<JsonObject> ()) {
+            JsonDoc.clear ();
+            OutData = JsonDoc.to<JsonVariant> ();
+            Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
           }
+
+          // Add System Informations
+          createSystemMsg (OutData);
+          JsonDoc = OutData.as<JsonObject> ();
+
           String Response;
           serializeJson (JsonDoc, Response);
           Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Response);
@@ -87,32 +94,43 @@ namespace JCA {
     bool Webserver::doWsUpdate (AsyncWebSocketClient *_Client) {
       JsonVariant OutData;
       JsonVariant InData;
+
+      if (_Client != nullptr) {
+        // check if selected Client can send Data
+        if (!_Client->canSend ()) {
+          return false;
+        }
+      } else {
+        // check if selected Client can send Data
+        if (Websocket.count() == 0){
+          return false;
+        }
+      }
+
       if (wsUpdateCB) {
         OutData = wsUpdateCB (InData);
       } else if (restApiGetCB) {
         OutData = restApiGetCB (InData);
       }
-      if (OutData.is<JsonArray> ()) {
-        JsonDoc = OutData.as<JsonArray> ();
-      } else if (OutData.is<JsonObject> ()) {
-        JsonDoc = OutData.as<JsonObject> ();
-      } else {
-        return false;
+      if (!OutData.is<JsonObject> ()) {
+        JsonDoc.clear ();
+        OutData = JsonDoc.to<JsonVariant> ();
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
       }
+
+      // Add System Informations
+      createSystemMsg (OutData);
+      JsonDoc = OutData.as<JsonObject> ();
+
       String Response;
       serializeJson (JsonDoc, Response);
       Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Response);
       if (_Client != nullptr) {
-        if (_Client->canSend ()) {
-          _Client->text (Response);
-        } else {
-          return false;
-        }
+        _Client->text (Response);
       } else {
         Websocket.textAll (Response);
       }
       return true;
     }
-
   }
 }

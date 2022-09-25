@@ -159,11 +159,14 @@ namespace JCA {
      * @param _Request Request data from Web-Client
      */
     void Webserver::onWebSystemUpdate (AsyncWebServerRequest *_Request) {
-      Reboot = !Update.hasError ();
-      AsyncWebServerResponse *Response = _Request->beginResponse (301);
-      Response->addHeader ("Location", JCA_IOT_WEBSERVER_PATH_SYS);
-      Response->addHeader ("Retry-After", "60");
-      _Request->send (Response);
+      if(!Update.hasError ()){
+        AsyncWebServerResponse *Response = _Request->beginResponse (301);
+        Response->addHeader ("Location", JCA_IOT_WEBSERVER_PATH_SYS);
+        Response->addHeader ("Retry-After", "60");
+        _Request->send (Response);
+        delay (100);
+        onSystemResetCB ();
+      }
     }
 
     /**
@@ -347,6 +350,9 @@ namespace JCA {
       }
       if (var == "BOARD_MCU") {
         return String (BOARD_MCU);
+      }
+      if (var == "CONFIGFILE") {
+        return String (JCA_IOT_WEBSERVER_CONFIGPATH);
       }
       return String ();
     }

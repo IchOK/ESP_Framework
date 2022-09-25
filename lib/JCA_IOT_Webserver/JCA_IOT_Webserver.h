@@ -89,10 +89,15 @@
 #define JCA_IOT_WEBSERVER_PATH_SYS_RESET "/reset"
 #define JCA_IOT_WEBSERVER_PATH_HOME "/home.htm"
 #define JCA_IOT_WEBSERVER_PATH_CONFIG "/config.htm"
+// JSON Keys for System Telegrams
+#define JCA_IOT_WEBSERVER_MSGKEY_SYS "System"
+#define JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESYNC "timeSync"
+#define JCA_IOT_WEBSERVER_MSGKEY_SYS_TIME "time"
+#define JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESTRUCT "timeSt"
+#define JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE "wsUpdate"
 // Time settings
 #define JCA_IOT_WEBSERVER_TIME_OFFSET 3600
 #define JCA_IOT_WEBSERVER_TIME_VALID 1609459200
-#define JCA_IOT_WEBSERVER_TIME_JSONKEY "timeSync"
 #define JCA_IOT_WEBSERVER_TIME_TIMEFORMAT "%d.%m.%G %H:%M:%S"
 #define JCA_IOT_WEBSERVER_TIME_DATEFORMAT "%d.%m.%G"
 
@@ -118,6 +123,8 @@ namespace JCA {
       StaticJsonDocument<1000> JsonDoc;
       SimpleCallback onSystemResetCB;
       bool readConfig ();
+      void recvSystemMsg(JsonVariant &_Json);
+      void createSystemMsg (JsonVariant &_Json);
 
       // ...Webserver_Web.cpp
       AwsTemplateProcessor replaceHomeWildcardsCB;

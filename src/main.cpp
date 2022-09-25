@@ -66,7 +66,6 @@ JsonVariant cbRestApiGet (JsonVariant &var) {
   JsonObject Collection = JDoc.to<JsonObject> ();
   Spindel.getAll (Collection);
   Futter.getAll(Collection);
-  Collection["time"] = Server.getTimeString ("");
   return JDoc;
 }
 JsonVariant cbRestApiPost (JsonVariant &var) {
@@ -127,7 +126,7 @@ void setup () {
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
-  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
+  Debug.init (FLAG_NONE);//FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
