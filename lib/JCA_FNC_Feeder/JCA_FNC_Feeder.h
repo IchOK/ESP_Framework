@@ -7,12 +7,38 @@
 #include <time.h>
 
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_FNC_Parent.h>
 
 namespace JCA {
   namespace FNC {
-    class Feeder {
+    class Feeder : public Parent{
     private:
-      char ObjectName[80];
+      // Datapoint description
+      static const char *NameFeedingHour;
+      static const char *NameFeedingMinute;
+      static const char *NameSteppsPerRotation;
+      static const char *NameFeedingRotations;
+      static const char *NameAcceleration;
+      static const char *NameMaxSpeed;
+      static const char *NameConstSpeed;
+      static const char *UnitFeedingHour;
+      static const char *UnitFeedingMinute;
+      static const char *UnitSteppsPerRotation;
+      static const char *UnitFeedingRotaions;
+      static const char *UnitAcceleration;
+      static const char *UnitMaxSpeed;
+      static const char *UnitConstSpeed;
+      static const char *NameFeeding;
+      static const char *NameDistanceToGo;
+      static const char *NameRunConst;
+      static const char *NameSpeed;
+      static const char *UnitFeeding;
+      static const char *UnitDistanceToGo;
+      static const char *UnitRunConst;
+      static const char *UnitSpeed;
+      static const char *CmdRunConst;
+      static const char *CmdDoFeed;
+
       // Hardware
       AccelStepper Stepper;
 
@@ -38,12 +64,8 @@ namespace JCA {
       void createData (JsonObject &_Data);
 
     public:
-      Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char* _Name);
+      Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name);
       void update (struct tm &_Time);
-      void set (JsonObject _Collection);
-      void getConfig (JsonObject &_Collection);
-      void getData (JsonObject &_Collection);
-      void getAll (JsonObject &_Collection);
     };
   }
 }

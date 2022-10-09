@@ -4,11 +4,36 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    const char *Feeder::NameFeedingHour = "FeedingHour";
+    const char *Feeder::NameFeedingMinute = "FeedingMinute";
+    const char *Feeder::NameSteppsPerRotation = "SteppsPerRotation";
+    const char *Feeder::NameFeedingRotations = "FeedingRotations";
+    const char *Feeder::NameAcceleration = "Acceleration";
+    const char *Feeder::NameMaxSpeed = "MaxSpeed";
+    const char *Feeder::NameConstSpeed = "ConstSpeed";
+    const char *Feeder::UnitFeedingHour = "h";
+    const char *Feeder::UnitFeedingMinute = "m";
+    const char *Feeder::UnitSteppsPerRotation = "st/rot";
+    const char *Feeder::UnitFeedingRotaions = "rot";
+    const char *Feeder::UnitAcceleration = "st/s2";
+    const char *Feeder::UnitMaxSpeed = "st/s";
+    const char *Feeder::UnitConstSpeed = "st/s";
+    const char *Feeder::NameFeeding = "Feeding";
+    const char *Feeder::NameDistanceToGo = "DistanceToGo";
+    const char *Feeder::NameRunConst = "RunConst";
+    const char *Feeder::NameSpeed = "Speed";
+    const char *Feeder::UnitFeeding = "";
+    const char *Feeder::UnitDistanceToGo = "st";
+    const char *Feeder::UnitRunConst = "";
+    const char *Feeder::UnitSpeed = "st/s";
+    const char *Feeder::CmdRunConst = "runConst";
+    const char *Feeder::CmdDoFeed = "doFeed";
+
     Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name)
-        : Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
+        : Parent(_Name)
+        , Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
 
       // Intern
-      strncpy (ObjectName, _Name, sizeof (ObjectName));
       DoFeed = false;
       AutoFeedDone = false;
 
@@ -26,7 +51,7 @@ namespace JCA {
       Feeding = false;
 
       // Hardware
-      Stepper.setEnablePin(_PinEnable);
+      Stepper.setEnablePin (_PinEnable);
       Stepper.setPinsInverted (false, false, true);
       Stepper.disableOutputs ();
     }
@@ -60,138 +85,105 @@ namespace JCA {
       AutoFeedDone = AutoFeed;
     }
 
-    void Feeder::set (JsonObject _Collection) {
-      if (_Collection.containsKey (ObjectName)) {
-        JsonObject ObjectData = _Collection[ObjectName].as<JsonObject>();
-        if (ObjectData.containsKey ("config")) {
-          setConfig (ObjectData["config"].as<JsonObject> ());
-        }
-        if (ObjectData.containsKey ("data")) {
-          setData (ObjectData["data"].as<JsonObject> ());
-        }
-      }
-    }
-
-    void Feeder::getConfig (JsonObject &_Collection) {
-      JsonObject ObjectData = _Collection.createNestedObject (ObjectName);
-      JsonObject Config = ObjectData.createNestedObject ("config");
-      createConfig(Config);
-      if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "ObjectData:")) {
-        String ObjectStr;
-        serializeJson (ObjectData, ObjectStr);
-        Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ObjectStr);
-      }
-    }
-
-    void Feeder::getData (JsonObject &_Collection) {
-      JsonObject ObjectData = _Collection.createNestedObject (ObjectName);
-      JsonObject Data = ObjectData.createNestedObject ("data");
-      createData (Data);
-      if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "ObjectData:")) {
-        String ObjectStr;
-        serializeJson (ObjectData, ObjectStr);
-        Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ObjectStr);
-      }
-    }
-
-    void Feeder::getAll (JsonObject &_Collection) {
-      JsonObject ObjectData = _Collection.createNestedObject (ObjectName);
-      JsonObject Config = ObjectData.createNestedObject ("config");
-      JsonObject Data = ObjectData.createNestedObject ("data");
-      createConfig (Config);
-      createData (Data);
-    }
-
     void Feeder::createConfig (JsonObject &_Data) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      _Data["FeedingHour"] = FeedingHour;
-      _Data["FeedingMinute"] = FeedingMinute;
-      _Data["SteppsPerRotation"] = SteppsPerRotation;
-      _Data["FeedingRotations"] = FeedingRotations;
-      _Data["Acceleration"] = Acceleration;
-      _Data["MaxSpeed"] = MaxSpeed;
-      _Data["ConstSpeed"] = ConstSpeed;
+      createTag (_Data, NameFeedingHour, UnitFeedingHour, FeedingHour);
+      createTag (_Data, NameFeedingMinute, UnitFeedingMinute, FeedingHour);
+      createTag (_Data, NameSteppsPerRotation, UnitSteppsPerRotation, SteppsPerRotation);
+      createTag (_Data, NameFeedingRotations, UnitFeedingRotaions, FeedingRotations);
+      createTag (_Data, NameAcceleration, UnitAcceleration, Acceleration);
+      createTag (_Data, NameMaxSpeed, UnitMaxSpeed, MaxSpeed);
+      createTag (_Data, NameConstSpeed, UnitConstSpeed, ConstSpeed);
     }
 
-      void Feeder::createData (JsonObject & _Data) {
-        Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-        _Data["Feeding"] = Feeding;
-        _Data["DistanceToGo"] = Stepper.distanceToGo ();
-        _Data["RunConst"] = RunConst;
-        _Data["Speed"] = Stepper.speed ();
-      }
+    void Feeder::createData (JsonObject &_Data) {
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
+      createTag (_Data, NameFeeding, UnitFeeding, Feeding);
+      createTag (_Data, NameDistanceToGo, UnitDistanceToGo, Stepper.distanceToGo ());
+      createTag (_Data, NameRunConst, UnitRunConst, RunConst);
+      createTag (_Data, NameSpeed, UnitSpeed, Stepper.speed ());
+    }
 
-      void Feeder::setConfig (JsonObject _Data) {
-        Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
-        if (_Data.containsKey ("FeedingHour")) {
-          FeedingHour = _Data["FeedingHour"].as<int16_t> ();
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "FeedingHour:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingHour);
-          }
-        }
-        if (_Data.containsKey ("FeedingMinute")) {
-          FeedingMinute = _Data["FeedingMinute"].as<int16_t> ();
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "FeedingMinute:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingMinute);
-          }
-        }
-        if (_Data.containsKey ("SteppsPerRotation")) {
-          SteppsPerRotation = _Data["SteppsPerRotation"].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "SteppsPerRotation:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, SteppsPerRotation);
-          }
-        }
-        if (_Data.containsKey ("FeedingRotations")) {
-          FeedingRotations = _Data["FeedingRotations"].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "FeedingRotations:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingRotations);
-          }
-        }
-        if (_Data.containsKey ("Acceleration")) {
-          Acceleration = _Data["Acceleration"].as<float> ();
-          Stepper.setAcceleration (Acceleration);
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "Acceleration:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, Acceleration);
-          }
-        }
-        if (_Data.containsKey ("MaxSpeed")) {
-          MaxSpeed = _Data["MaxSpeed"].as<float> ();
-          Stepper.setMaxSpeed (MaxSpeed);
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "MaxSpeed:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, MaxSpeed);
-          }
-        }
-        if (_Data.containsKey ("ConstSpeed")) {
-          ConstSpeed = _Data["ConstSpeed"].as<float> ();
-          Stepper.setSpeed (ConstSpeed);
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "ConstSpeed:")) {
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ConstSpeed);
-          }
+    void Feeder::setConfig (JsonObject _Data) {
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
+      if (_Data.containsKey (NameFeedingHour)) {
+        FeedingHour = _Data[NameFeedingHour].as<int16_t> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameFeedingHour)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingHour);
         }
       }
-
-      void Feeder::setData (JsonObject _Data) {
-        if (_Data.containsKey ("runConst")) {
-          RunConst = _Data["runConst"].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, ObjectName, __func__, "RunConst:")) {
-            Debug.println (FLAG_LOOP, false, ObjectName, __func__, RunConst);
-          }
-          if (RunConst) {
-            Stepper.enableOutputs ();
-          } else {
-            Stepper.disableOutputs ();
-          }
+      if (_Data.containsKey (NameFeedingMinute)) {
+        FeedingMinute = _Data[NameFeedingMinute].as<int16_t> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameFeedingMinute)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingMinute);
         }
-
-        if (_Data.containsKey ("doFeed")) {
-          DoFeed = _Data["doFeed"].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, ObjectName, __func__, "DoFeed:")) {
-            Debug.println (FLAG_LOOP, false, ObjectName, __func__, DoFeed);
-          }
-          if (DoFeed) {
-            RunConst = false;
-          }
+      }
+      if (_Data.containsKey (NameSteppsPerRotation)) {
+        SteppsPerRotation = _Data[NameSteppsPerRotation].as<float> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameSteppsPerRotation)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, SteppsPerRotation);
+        }
+      }
+      if (_Data.containsKey (NameFeedingRotations)) {
+        FeedingRotations = _Data[NameFeedingRotations].as<float> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameFeedingRotations)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, FeedingRotations);
+        }
+      }
+      if (_Data.containsKey (NameAcceleration)) {
+        Acceleration = _Data[NameAcceleration].as<float> ();
+        Stepper.setAcceleration (Acceleration);
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameAcceleration)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, Acceleration);
+        }
+      }
+      if (_Data.containsKey (NameMaxSpeed)) {
+        MaxSpeed = _Data[NameMaxSpeed].as<float> ();
+        Stepper.setMaxSpeed (MaxSpeed);
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameMaxSpeed)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, MaxSpeed);
+        }
+      }
+      if (_Data.containsKey (NameConstSpeed)) {
+        ConstSpeed = _Data[NameConstSpeed].as<float> ();
+        Stepper.setSpeed (ConstSpeed);
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameConstSpeed)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ConstSpeed);
         }
       }
     }
+
+    void Feeder::setData (JsonObject _Data) {
+      if (_Data.containsKey (CmdRunConst)) {
+        RunConst = _Data[CmdRunConst].as<bool> ();
+        if (Debug.print (FLAG_LOOP, false, ObjectName, __func__, CmdRunConst)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_LOOP, false, ObjectName, __func__, RunConst);
+        }
+        if (RunConst) {
+          Stepper.enableOutputs ();
+        } else {
+          Stepper.disableOutputs ();
+        }
+      }
+
+      if (_Data.containsKey (CmdDoFeed)) {
+        DoFeed = _Data[CmdDoFeed].as<bool> ();
+        if (Debug.print (FLAG_LOOP, false, ObjectName, __func__, CmdDoFeed)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
+          Debug.println (FLAG_LOOP, false, ObjectName, __func__, DoFeed);
+        }
+        if (DoFeed) {
+          RunConst = false;
+        }
+      }
+    }
+  }
 }

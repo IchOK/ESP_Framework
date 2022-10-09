@@ -4,8 +4,23 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    Level::Level (uint8_t _Pin, const char *_Name) {
-      strncpy (ObjectName, _Name, sizeof (ObjectName));
+    const char *Level::NameRawEmpty = "RawEmpty";
+    const char *Level::NameRawFull = "RawFull";
+    const char *Level::NameAlarmLevel = "AlarmLevel";
+    const char *Level::NameReadInterval = "ReadInterval";
+    const char *Level::UnitRawEmpty = "#";
+    const char *Level::UnitRawFull = "#";
+    const char *Level::UnitAlarmLevel = "%";
+    const char *Level::UnitReadInterval = "s";
+    const char *Level::NameLevel = "Level";
+    const char *Level::NameAlarm = "Alarm";
+    const char *Level::NameRawValue = "RawValue";
+    const char *Level::UnitLevel = "%";
+    const char *Level::UnitAlarm = "";
+    const char *Level::UnitRawValue = "#";
+
+    Level::Level (uint8_t _Pin, const char *_Name)
+        : Parent (_Name) {
       RawEmpty = 0;
       RawFull = 1024;
       Pin = _Pin;
@@ -29,7 +44,7 @@ namespace JCA {
       if (IntervalCount >= ReadInterval) {
         IntervalCount = 0;
         RawValue = analogRead (Pin);
-        Value = (float)(RawValue - RawEmpty) / (float)(RawFull - RawEmpty) * 100.0;
+        Value = Value * 0.9 + (float)(RawValue - RawEmpty) / (float)(RawFull - RawEmpty) * 10.0;
         if (Alarm) {
           if (Value > AlarmLevel + 5.0) {
             Alarm = false;
@@ -42,48 +57,6 @@ namespace JCA {
       }
     }
 
-    void Level::set (JsonObject _Collection) {
-      if (_Collection.containsKey (ObjectName)) {
-        JsonObject ObjectData = _Collection[ObjectName].as<JsonObject> ();
-        if (ObjectData.containsKey ("config")) {
-          setConfig (ObjectData["config"].as<JsonObject> ());
-        }
-        if (ObjectData.containsKey ("data")) {
-          setData (ObjectData["data"].as<JsonObject> ());
-        }
-      }
-    }
-
-    void Level::getConfig (JsonObject &_Collection) {
-      JsonObject ObjectData = _Collection.createNestedObject (ObjectName);
-      JsonObject Config = ObjectData.createNestedObject ("config");
-      createConfig (Config);
-      if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "ObjectData:")) {
-        String ObjectStr;
-        serializeJson (ObjectData, ObjectStr);
-        Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ObjectStr);
-      }
-    }
-
-    void Level::getData (JsonObject &_Collection) {
-      JsonObject ObjectData = _Collection.createNestedObject (ObjectName);
-      JsonObject Data = ObjectData.createNestedObject ("data");
-      createData (Data);
-      if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "ObjectData:")) {
-        String ObjectStr;
-        serializeJson (ObjectData, ObjectStr);
-        Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ObjectStr);
-      }
-    }
-
-    void Level::getAll (JsonObject &_Collection) {
-      JsonObject ObjectData = _Collection.createNestedObject (ObjectName);
-      JsonObject Config = ObjectData.createNestedObject ("config");
-      JsonObject Data = ObjectData.createNestedObject ("data");
-      createConfig (Config);
-      createData (Data);
-    }
-
     float Level::getValue () {
       return Value;
     }
@@ -94,27 +67,31 @@ namespace JCA {
 
     void Level::setConfig (JsonObject _Data) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
-      if (_Data.containsKey ("RawEmpty")) {
-        RawEmpty = _Data["RawEmpty"].as<int> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "RawEmpty:")) {
+      if (_Data.containsKey (NameRawEmpty)) {
+        RawEmpty = _Data[NameRawEmpty].as<int16_t> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameRawEmpty)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
           Debug.println (FLAG_CONFIG, false, ObjectName, __func__, RawEmpty);
         }
       }
-      if (_Data.containsKey ("RawFull")) {
-        RawFull = _Data["RawFull"].as<int> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "RawFull:")) {
+      if (_Data.containsKey (NameRawFull)) {
+        RawFull = _Data[NameRawFull].as<int16_t> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameRawFull)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
           Debug.println (FLAG_CONFIG, false, ObjectName, __func__, RawFull);
         }
       }
-      if (_Data.containsKey ("AlarmLevel")) {
-        AlarmLevel = _Data["AlarmLevel"].as<float> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "AlarmLevel:")) {
+      if (_Data.containsKey (NameAlarmLevel)) {
+        AlarmLevel = _Data[NameAlarmLevel].as<int16_t> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameAlarmLevel)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
           Debug.println (FLAG_CONFIG, false, ObjectName, __func__, AlarmLevel);
         }
       }
-      if (_Data.containsKey ("ReadInterval")) {
-        ReadInterval = _Data["ReadInterval"].as<float> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, "ReadInterval:")) {
+      if (_Data.containsKey (NameReadInterval)) {
+        ReadInterval = _Data[NameReadInterval].as<int16_t> ();
+        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameReadInterval)) {
+          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
           Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ReadInterval);
         }
       }
@@ -126,17 +103,17 @@ namespace JCA {
 
     void Level::createConfig (JsonObject &_Data) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      _Data["RawEmpty"] = RawEmpty;
-      _Data["RawFull"] = RawFull;
-      _Data["AlarmLevel"] = AlarmLevel;
-      _Data["ReadInterval"] = ReadInterval;
+      createTag (_Data, NameRawEmpty, UnitRawEmpty, RawEmpty);
+      createTag (_Data, NameRawFull, UnitRawFull, RawFull);
+      createTag (_Data, NameAlarmLevel, UnitAlarmLevel, AlarmLevel);
+      createTag (_Data, NameReadInterval, UnitReadInterval, ReadInterval);
     }
 
     void Level::createData (JsonObject &_Data) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      _Data["Value"] = Value;
-      _Data["Alarm"] = Alarm;
-      _Data["RawValue"] = RawValue;
+      createTag (_Data, NameLevel, UnitLevel, Value);
+      createTag (_Data, NameAlarm, UnitAlarm, Alarm);
+      createTag (_Data, NameRawValue, UnitRawValue, RawValue);
     }
   }
 }

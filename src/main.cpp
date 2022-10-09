@@ -40,7 +40,7 @@ Level Futter (LEVEL_PIN, "Futter");
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-StaticJsonDocument<1000> JDoc;
+StaticJsonDocument<2000> JDoc;
 Webserver Server;
 //-------------------------------------------------------
 // System Functions
@@ -126,7 +126,8 @@ void setup () {
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
-  Debug.init (FLAG_NONE);//FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
+  Debug.init (FLAG_NONE);
+  //Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem

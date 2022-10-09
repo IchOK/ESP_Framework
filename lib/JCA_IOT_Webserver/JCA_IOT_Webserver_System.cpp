@@ -14,6 +14,12 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace IOT {
+    const char *Webserver::JsonTagObjectName = "System";
+    const char *Webserver::JsonTagUpdate = "wsUpdate";
+    const char *Webserver::JsonTagTime = "time";
+    const char *Webserver::JsonTagTimeSync = "timeSync";
+    const char *Webserver::JsonTagHostname = "hostname";
+
     /**
      * @brief Construct a new Webserver::Webserver object
      *
@@ -169,29 +175,33 @@ namespace JCA {
     }
 
     void Webserver::recvSystemMsg(JsonVariant &_Json) {
-      if (_Json.containsKey (JCA_IOT_WEBSERVER_MSGKEY_SYS)) {
-        JsonObject JSystem = _Json[JCA_IOT_WEBSERVER_MSGKEY_SYS];
-        if (JSystem.containsKey (JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESYNC)) {
-          setTime (JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESYNC].as<uint32_t>());
+      if (_Json.containsKey (JsonTagObjectName)) {
+        JsonObject JSystem = _Json[JsonTagObjectName];
+        JsonVariant Config = findConfig (JSystem);
+        if (Config.is<JsonObject> ()) {
+          if (Config.containsKey (JsonTagUpdate)) {
+            WsUpdateCycle = Config[JsonTagUpdate].as<uint32_t> ();
+          }
+          if (Config.containsKey (JsonTagHostname)) {
+            strncpy (Hostname, Config[JsonTagUpdate].as<const char *> (), sizeof(Hostname));
+          }
         }
-        if (JSystem.containsKey (JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE)) {
-          WsUpdateCycle = JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE].as<uint32_t> ();
+        JsonVariant Data = findData (JSystem);
+        if (Data.is<JsonObject> ()) {
+          if (Data.containsKey (JsonTagTimeSync)) {
+            setTime (Data[JsonTagTimeSync].as<uint32_t> ());
+          }
         }
       }
     }
 
     void Webserver::createSystemMsg (JsonVariant &_Json) {
-      JsonObject JSystem = _Json.createNestedObject (JCA_IOT_WEBSERVER_MSGKEY_SYS);
-      JsonObject JTime = JSystem.createNestedObject (JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESTRUCT);
-      JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_TIME] = getTimeString ("");
-      JSystem[JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE] = WsUpdateCycle;
-      tm TimeAct = Rtc.getTimeStruct ();
-      JTime["hour"] = TimeAct.tm_hour;
-      JTime["min"] = TimeAct.tm_min;
-      JTime["sec"] = TimeAct.tm_sec;
-      JTime["year"] = TimeAct.tm_year;
-      JTime["mon"] = TimeAct.tm_mon;
-      JTime["mday"] = TimeAct.tm_mday;
+      JsonObject JSystem = _Json.createNestedObject (JsonTagObjectName);
+      JsonObject Config = addConfig(JSystem);
+      createTag (Config, JsonTagUpdate, "ms", WsLastUpdate);
+      createTag (Config, JsonTagHostname, "", (const char *)Hostname);
+      JsonObject Data = addData (JSystem);
+      createTag (Data, JsonTagTime, "", getTimeString (""));
     }
 
     /**

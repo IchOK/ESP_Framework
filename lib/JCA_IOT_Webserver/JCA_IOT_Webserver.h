@@ -55,6 +55,7 @@
 #include <JCA_IOT_Webserver_Sites.h>
 #include <JCA_IOT_WiFiConnect.h>
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_IOT_Protocol.h>
 
 // Manual setting Firmware withpout Git
 #ifndef AUTO_VERSION
@@ -89,12 +90,6 @@
 #define JCA_IOT_WEBSERVER_PATH_SYS_RESET "/reset"
 #define JCA_IOT_WEBSERVER_PATH_HOME "/home.htm"
 #define JCA_IOT_WEBSERVER_PATH_CONFIG "/config.htm"
-// JSON Keys for System Telegrams
-#define JCA_IOT_WEBSERVER_MSGKEY_SYS "System"
-#define JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESYNC "timeSync"
-#define JCA_IOT_WEBSERVER_MSGKEY_SYS_TIME "time"
-#define JCA_IOT_WEBSERVER_MSGKEY_SYS_TIMESTRUCT "timeSt"
-#define JCA_IOT_WEBSERVER_MSGKEY_SYS_UPDATE "wsUpdate"
 // Time settings
 #define JCA_IOT_WEBSERVER_TIME_OFFSET 3600
 #define JCA_IOT_WEBSERVER_TIME_VALID 1609459200
@@ -106,9 +101,14 @@ namespace JCA {
     typedef std::function<JsonVariant (JsonVariant &)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
-    class Webserver {
+    class Webserver : public Protocol{
     private:
       // ...Webserver_System.cpp
+      static const char* JsonTagObjectName;
+      static const char* JsonTagUpdate;
+      static const char* JsonTagTime;
+      static const char* JsonTagTimeSync;
+      static const char* JsonTagHostname;
       char Hostname[80];
       char ConfUser[80];
       char ConfPassword[80];
@@ -120,7 +120,7 @@ namespace JCA {
       AsyncWebSocket Websocket;
       ESP32Time Rtc;
       uint16_t Port;
-      StaticJsonDocument<1000> JsonDoc;
+      StaticJsonDocument<2000> JsonDoc;
       SimpleCallback onSystemResetCB;
       bool readConfig ();
       void recvSystemMsg(JsonVariant &_Json);

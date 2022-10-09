@@ -1,26 +1,26 @@
-function createViewSlave(slaves, config) {
-  let slave = document.createElement("article");
-  slave.setAttribute("name", config.name);
+function createViewSlave(elements, key, values) {
+  let element = document.createElement("article");
+  element.setAttribute("name", key);
   let x;
   x = document.createElement("header");
-  x.innerText = config.name;
-  slave.appendChild(x);
+  x.innerText = key;
+  element.appendChild(x);
   
-  config.tags.forEach((_tagConfig) => {
-    createViewTag(slave, _tagConfig);
+  Object.keys(values).forEach(key => {
+    createViewTag(element, key, values[key]);
   });
-  slaves.appendChild(slave);
+  elements.appendChild(element);
 }
 
-function createViewTag(slave, config) {
+function createViewTag(element, key, value) {
   let tag = document.createElement("div");
-  tag.setAttribute("name", config.name);
+  tag.setAttribute("name", key);
   tag.setAttribute("style", "align-items:baseline ;");
   tag.classList.add("grid");
   let x;
   x = document.createElement("p");
   x.id = "name";
-  x.innerText = config.name;
+  x.innerText = key;
   tag.appendChild(x);
   
   let y = document.createElement("div");
@@ -32,16 +32,9 @@ function createViewTag(slave, config) {
   x.type = "text";
   y.appendChild(x);
   
-  x = document.createElement("span");
-  x.setAttribute("name", "unit");
-  x.setAttribute("style", "margin-left:-50px;text-align:left;");
-  if ("unit" in config) {
-    x.innerText = config.unit;
-  }
-  y.appendChild(x);
   tag.appendChild(y);
   
-  slave.appendChild(tag);
+  element.appendChild(tag);
 }
 
 function getViewSlave(slaves, name) {
@@ -57,5 +50,5 @@ function getViewTag(slave, name) {
 function updateViewTag(tag, data) {
   let x
   x = tag.querySelector("input[name='value']");
-  x.value = data.value;
+  x.value = data;
 }

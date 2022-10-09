@@ -6,13 +6,29 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
+#include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
-    class Level {
+    class Level : public Parent{
     private:
-      char ObjectName[80];
+      // Datapoint description
+      static const char *NameRawEmpty;
+      static const char *NameRawFull;
+      static const char *NameAlarmLevel;
+      static const char *NameReadInterval;
+      static const char *UnitRawEmpty;
+      static const char *UnitRawFull;
+      static const char *UnitAlarmLevel;
+      static const char *UnitReadInterval;
+      static const char *NameLevel;
+      static const char *NameAlarm;
+      static const char *NameRawValue;
+      static const char *UnitLevel;
+      static const char *UnitAlarm;
+      static const char *UnitRawValue;
+
       // Hardware
       uint8_t Pin;
 
@@ -38,10 +54,6 @@ namespace JCA {
     public:
       Level (uint8_t _Pin, const char* _Name);
       void update (struct tm &_Time);
-      void set (JsonObject _Collection);
-      void getConfig (JsonObject &_Collection);
-      void getData (JsonObject &_Collection);
-      void getAll (JsonObject &_Collection);
       float getValue();
       bool getAlarm();
     };
