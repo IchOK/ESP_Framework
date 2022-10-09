@@ -88,7 +88,7 @@ namespace JCA {
     void Feeder::createConfig (JsonObject &_Data) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
       createTag (_Data, NameFeedingHour, UnitFeedingHour, FeedingHour);
-      createTag (_Data, NameFeedingMinute, UnitFeedingMinute, FeedingHour);
+      createTag (_Data, NameFeedingMinute, UnitFeedingMinute, FeedingMinute);
       createTag (_Data, NameSteppsPerRotation, UnitSteppsPerRotation, SteppsPerRotation);
       createTag (_Data, NameFeedingRotations, UnitFeedingRotaions, FeedingRotations);
       createTag (_Data, NameAcceleration, UnitAcceleration, Acceleration);
