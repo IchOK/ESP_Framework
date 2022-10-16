@@ -16,24 +16,10 @@
   </style>
   <script src="/view.js"></script>
   <script type="text/javascript">
-    console.log("Start");
+    console.log("Data Start");
     function handleWsMsg(msg) {
-      if (ConfigDone) {
-        let _elements = JSON.parse(msg.data);
-        let _Spindel = _elements.Spindel;
-        let _Futter = _elements.Futter;
-        let elements = document.getElementById("elements");
-        let Spindel = getViewSlave(elements, "Spindel");
-        let Futter = getViewSlave(elements, "Futter");
-        Object.keys(_Spindel.config).forEach(key => {
-          let tag = getViewTag(Spindel, key);
-          updateViewTag(tag, _Spindel.config[key]);
-        });
-        Object.keys(_Futter.config).forEach(key => {
-          let tag = getViewTag(Futter, key);
-          updateViewTag(tag, _Futter.config[key]);
-        });
-      }
+        let DataObject = JSON.parse(msg.data);
+        updateView(DataObject, "data", true);
     }
 
     var ws = new WebSocket("ws://" + location.host + "/ws");
@@ -41,26 +27,7 @@
       handleWsMsg(_msg);
     };
 
-    function showConfig() {
-      fetch("/usrConfig.json")
-        .then(response => {
-          return response.json();
-        }).then(config => {
-          //Get Slaves from Config-File
-          console.log(config);
-          let elements = document.getElementById("elements");
-
-          //Creat a DIV for each Function that contains the tags
-          console.log(config);
-          Object.keys(config).forEach(key => {
-            createViewSlave(elements, key, config[key].config);
-          });
-          ConfigDone = true;
-        });
-    }
-    document.addEventListener("DOMContentLoaded", showConfig);
-    console.log("done");
-
+    console.log("Data Done");
   </script>
 </head>
 
