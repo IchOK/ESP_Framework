@@ -50,12 +50,12 @@
 
 #include <ESP32Time.h>
 
+#include <JCA_FNC_Parent.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
 #include <JCA_IOT_Webserver_SVGs.h>
 #include <JCA_IOT_Webserver_Sites.h>
 #include <JCA_IOT_WiFiConnect.h>
 #include <JCA_SYS_DebugOut.h>
-#include <JCA_IOT_Protocol.h>
 
 // Manual setting Firmware withpout Git
 #ifndef AUTO_VERSION
@@ -101,14 +101,23 @@ namespace JCA {
     typedef std::function<JsonVariant (JsonVariant &)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
-    class Webserver : public Protocol{
+    class Webserver : public JCA::FNC::Protocol {
     private:
       // ...Webserver_System.cpp
-      static const char* JsonTagObjectName;
-      static const char* JsonTagUpdate;
-      static const char* JsonTagTime;
-      static const char* JsonTagTimeSync;
-      static const char* JsonTagHostname;
+      static const char *ElementName;
+      static const char *Hostname_Name;
+      static const char *Hostname_Comment;
+      static const char *WsUpdateCycle_Name;
+      static const char *WsUpdateCycle_Unit;
+      static const char *WsUpdateCycle_Comment;
+      static const char *TimeSync_Name;
+      static const char *TimeSync_Type;
+      static const char *TimeSync_Comment;
+      static const char *SaveConfig_Name;
+      static const char *SaveConfig_Type;
+      static const char *SaveConfig_Comment;
+      static const char *Time_Name;
+      static const char *Time_Comment;
       char Hostname[80];
       char ConfUser[80];
       char ConfPassword[80];
@@ -122,9 +131,17 @@ namespace JCA {
       uint16_t Port;
       StaticJsonDocument<2000> JsonDoc;
       SimpleCallback onSystemResetCB;
+      SimpleCallback onSaveConfigCB;
       bool readConfig ();
-      void recvSystemMsg(JsonVariant &_Json);
-      void createSystemMsg (JsonVariant &_Json);
+      void setConfig (JsonArray _Tags);
+      void setData (JsonArray _Tags);
+      void setCmd (JsonArray _Tags);
+      void createConfigTags (JsonArray &_Tags);
+      void createDataTags (JsonArray &_Tags);
+      void createCmdInfoTags (JsonArray &_Tags);
+
+      //      void recvSystemMsg (JsonVariant &_Json);
+      //      void createSystemMsg (JsonVariant &_Json);
 
       // ...Webserver_Web.cpp
       AwsTemplateProcessor replaceHomeWildcardsCB;
@@ -171,7 +188,9 @@ namespace JCA {
       Webserver ();
       bool init ();
       bool handle ();
+      void update (struct tm &_Time);
       void onSystemReset (SimpleCallback _CB);
+      void onSaveConfig (SimpleCallback _CB);
       void setTime (unsigned long _Epoch = 1609459200, int _Millis = 0); // default (1609459200) = 1st Jan 2021
       void setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis = 0);
       void setTimeStruct (tm _Time);

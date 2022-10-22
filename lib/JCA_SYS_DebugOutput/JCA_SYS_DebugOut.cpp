@@ -32,7 +32,7 @@ namespace JCA {
     DebugOut::~DebugOut () {
     }
 
-    String DebugOut::getPrefix (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function) {
+    String DebugOut::getPrefix (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function) {
       String RetVal = "";
       if (NewLine) {
         switch (_Flag)
@@ -64,7 +64,7 @@ namespace JCA {
         if (_Framework) {
           RetVal += "JCA::";
         }
-        RetVal += String(_Object) + String("::") + String(_Function) + String(" - ");
+        RetVal += String(_ElementName) + String("::") + String(_Function) + String(" - ");
         NewLine = false;
       }
       return RetVal;
@@ -99,15 +99,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const Printable &_Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message) {
       if (_Flag & Flags) {
-        DebugSerial.print(getPrefix(_Flag, _Framework, _Object, _Function));
+        DebugSerial.print(getPrefix(_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print(_Message);
         return true;
       } else {
@@ -120,14 +120,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const Printable &_Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -142,15 +142,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const String &_Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -163,14 +163,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const String &_Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -185,15 +185,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const char *_Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const char *_Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -206,14 +206,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const char *_Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const char *_Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -228,15 +228,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, double _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, double _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -249,14 +249,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, double _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, double _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -271,15 +271,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long long _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long long _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -292,14 +292,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long long _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long long _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -314,15 +314,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long long _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long long _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -335,14 +335,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long long _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long long _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -357,15 +357,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -378,14 +378,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -400,15 +400,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -421,14 +421,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -443,15 +443,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned int _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned int _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -464,14 +464,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned int _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned int _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -486,15 +486,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, int _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, int _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -507,14 +507,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, int _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, int _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -529,15 +529,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned char _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -550,14 +550,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned char _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;
@@ -572,15 +572,15 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, char _Message) {
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message) {
       if (_Flag & Flags) {
-        DebugSerial.print (getPrefix (_Flag, _Framework, _Object, _Function));
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
         return true;
       } else {
@@ -593,14 +593,14 @@ namespace JCA {
      *
      * @param _Flag Flag for Debug Message, only Output if Flag set on init
      * @param _Framework use from Framework, add the Namespace tp Prefix
-     * @param _Object Name of the Object or Function-Group that calls the Function
+     * @param _ElementName Name of the Object or Function-Group that calls the Function
      * @param _Function Name of the Function
      * @param _Message Message Text
      * @return true Message was output to Debug-Interface
      * @return false Message not output to Debug-Interface
      */
-    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, char _Message) {
-      if (print (_Flag, _Framework, _Object, _Function, _Message)) {
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message) {
+      if (print (_Flag, _Framework, _ElementName, _Function, _Message)) {
         DebugSerial.println ();
         NewLine = true;
         return true;

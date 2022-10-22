@@ -64,23 +64,31 @@ namespace JCA {
           InData = JBuffer.as<JsonVariant> ();
 
           // Handle System-Data
-          recvSystemMsg (InData);
+          if (InData.containsKey (Protocol::JsonTagElements)) {
+            JsonArray Elements = (InData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+            set (Elements);
+          }
 
+          // Call externak datahandling Functions
           if (wsDataCB) {
             OutData = wsDataCB (InData);
           } else if (restApiPostCB) {
             OutData = restApiPostCB (InData);
           }
-          if (!OutData.is<JsonObject> ()) {
-            JsonDoc.clear ();
-            OutData = JsonDoc.to<JsonVariant> ();
-            Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
-          }
 
           // Add System Informations
-          createSystemMsg (OutData);
-          JsonDoc = OutData.as<JsonObject> ();
+          JsonArray Elements;
+          if (OutData.containsKey (Protocol::JsonTagElements)) {
+            Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+          } else {
+            JsonDoc.clear ();
+            Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
+            Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
+          }
+          getAll (Elements);
 
+          // Create Response
+          JsonDoc = OutData.as<JsonObject> ();
           String Response;
           serializeJson (JsonDoc, Response);
           Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Response);
@@ -107,21 +115,26 @@ namespace JCA {
         }
       }
 
+      // Call externak datahandling Functions
       if (wsUpdateCB) {
         OutData = wsUpdateCB (InData);
       } else if (restApiGetCB) {
         OutData = restApiGetCB (InData);
       }
-      if (!OutData.is<JsonObject> ()) {
-        JsonDoc.clear ();
-        OutData = JsonDoc.to<JsonVariant> ();
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
-      }
 
       // Add System Informations
-      createSystemMsg (OutData);
-      JsonDoc = OutData.as<JsonObject> ();
+      JsonArray Elements;
+      if (OutData.containsKey (Protocol::JsonTagElements)) {
+        Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+      } else {
+        JsonDoc.clear ();
+        Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
+      }
+      getAll (Elements);
 
+      // Create Response
+      JsonDoc = OutData.as<JsonObject> ();
       String Response;
       serializeJson (JsonDoc, Response);
       Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Response);

@@ -45,7 +45,7 @@ namespace JCA {
       uint16_t Flags;
       HardwareSerial DebugSerial;
       bool NewLine;
-      String getPrefix (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function);
+      String getPrefix (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function);
 
     public:
       DebugOut (const HardwareSerial &_Serial);
@@ -54,30 +54,30 @@ namespace JCA {
       void init (uint16_t _Flags, unsigned long _Baud);
       void init (uint16_t _Flags);
 
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const Printable &_Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const Printable &_Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const String &_Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const String &_Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const char *_Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, const char *_Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, double _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, double _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long long _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long long _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long long _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long long _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned long _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, long _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned int _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned int _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, int _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, int _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned char _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, unsigned char _Message);
-      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, char _Message);
-      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, const char *_Object, const char *_Function, char _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const char *_Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const char *_Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, double _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, double _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long long _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long long _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long long _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long long _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned int _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned int _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, int _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, int _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message);
+      bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message);
+      bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message);
     };
 
     extern DebugOut Debug;

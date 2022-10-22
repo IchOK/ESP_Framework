@@ -11,33 +11,62 @@
 
 namespace JCA {
   namespace FNC {
-    class Feeder : public Parent{
+    class Feeder : public Protocol{
     private:
-      // Datapoint description
-      static const char *NameFeedingHour;
-      static const char *NameFeedingMinute;
-      static const char *NameSteppsPerRotation;
-      static const char *NameFeedingRotations;
-      static const char *NameAcceleration;
-      static const char *NameMaxSpeed;
-      static const char *NameConstSpeed;
-      static const char *UnitFeedingHour;
-      static const char *UnitFeedingMinute;
-      static const char *UnitSteppsPerRotation;
-      static const char *UnitFeedingRotaions;
-      static const char *UnitAcceleration;
-      static const char *UnitMaxSpeed;
-      static const char *UnitConstSpeed;
-      static const char *NameFeeding;
-      static const char *NameDistanceToGo;
-      static const char *NameRunConst;
-      static const char *NameSpeed;
-      static const char *UnitFeeding;
-      static const char *UnitDistanceToGo;
-      static const char *UnitRunConst;
-      static const char *UnitSpeed;
-      static const char *CmdRunConst;
-      static const char *CmdDoFeed;
+      // Protocol Datapoint description
+      static const char *FeedingHour_Name;
+      static const char *FeedingHour_Unit;
+      static const char *FeedingHour_Comment;
+      static const char *FeedingMinute_Name;
+      static const char *FeedingMinute_Unit;
+      static const char *FeedingMinute_Comment;
+      static const char *SteppsPerRotation_Name;
+      static const char *SteppsPerRotation_Unit;
+      static const char *SteppsPerRotation_Comment;
+      static const char *FeedingRotations_Name;
+      static const char *FeedingRotaions_Unit;
+      static const char *FeedingRotaions_Comment;
+      static const char *Acceleration_Name;
+      static const char *Acceleration_Unit;
+      static const char *Acceleration_Comment;
+      static const char *MaxSpeed_Name;
+      static const char *MaxSpeed_Unit;
+      static const char *MaxSpeed_Comment;
+      static const char *ConstSpeed_Name;
+      static const char *ConstSpeed_Unit;
+      static const char *ConstSpeed_Comment;
+      static const char *Feeding_Name;
+      static const char *Feeding_Comment;
+      static const char *Feeding_TextOn;
+      static const char *Feeding_TextOff;
+      static const char *DistanceToGo_Name;
+      static const char *DistanceToGo_Unit;
+      static const char *DistanceToGo_Comment;
+      static const char *RunConst_Name;
+      static const char *RunConst_Comment;
+      static const char *RunConst_TextOn;
+      static const char *RunConst_TextOff;
+      static const char *Speed_Name;
+      static const char *Speed_Unit;
+      static const char *Speed_Comment;
+      static const char *CmdRunConst_Name;
+      static const char *CmdRunConst_Comment;
+      static const char *CmdRunConst_Type;
+      static const char *CmdRunConst_TextOn;
+      static const char *CmdRunConst_TextOff;
+      static const char *CmdDoFeed_Name;
+      static const char *CmdDoFeed_Comment;
+      static const char *CmdDoFeed_Type;
+      static const char *CmdDoFeed_TextOn;
+      static const char *CmdDoFeed_TextOff;
+      
+      // Protocol Functions
+      void setConfig (JsonArray _Tags);
+      void setData (JsonArray _Tags);
+      void setCmd (JsonArray _Tags);
+      void createConfigTags (JsonArray &_Tags);
+      void createDataTags (JsonArray &_Tags);
+      void createCmdInfoTags (JsonArray &_Tags);
 
       // Hardware
       AccelStepper Stepper;
@@ -58,10 +87,6 @@ namespace JCA {
       // Intern
       bool DoFeed;
       bool AutoFeedDone;
-      void setConfig (JsonObject _Data);
-      void setData (JsonObject _Data);
-      void createConfig (JsonObject &_Data);
-      void createData (JsonObject &_Data);
 
     public:
       Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name);

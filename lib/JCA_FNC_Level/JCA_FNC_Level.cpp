@@ -4,23 +4,37 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    const char *Level::NameRawEmpty = "RawEmpty";
-    const char *Level::NameRawFull = "RawFull";
-    const char *Level::NameAlarmLevel = "AlarmLevel";
-    const char *Level::NameReadInterval = "ReadInterval";
-    const char *Level::UnitRawEmpty = "#";
-    const char *Level::UnitRawFull = "#";
-    const char *Level::UnitAlarmLevel = "%";
-    const char *Level::UnitReadInterval = "s";
-    const char *Level::NameLevel = "Level";
-    const char *Level::NameAlarm = "Alarm";
-    const char *Level::NameRawValue = "RawValue";
-    const char *Level::UnitLevel = "%";
-    const char *Level::UnitAlarm = "";
-    const char *Level::UnitRawValue = "#";
+    const char *Level::RawEmpty_Name = "RawEmpty";
+    const char *Level::RawEmpty_Unit = "#";
+    const char *Level::RawEmpty_Comment = nullptr;
+    const char *Level::RawFull_Name = "RawFull";
+    const char *Level::RawFull_Unit = "#";
+    const char *Level::RawFull_Comment = nullptr;
+    const char *Level::AlarmLevel_Name = "AlarmLevel";
+    const char *Level::AlarmLevel_Unit = "%";
+    const char *Level::AlarmLevel_Comment = nullptr;
+    const char *Level::ReadInterval_Name = "ReadInterval";
+    const char *Level::ReadInterval_Unit = "s";
+    const char *Level::ReadInterval_Comment = nullptr;
+    const char *Level::Level_Name = "Level";
+    const char *Level::Level_Unit = "%";
+    const char *Level::Level_Comment = nullptr;
+    const char *Level::Alarm_Name = "Alarm";
+    const char *Level::Alarm_Comment = nullptr;
+    const char *Level::Alarm_TextOn = nullptr;
+    const char *Level::Alarm_TextOff = nullptr;
+    const char *Level::RawValue_Name = "RawValue";
+    const char *Level::RawValue_Unit = "#";
+    const char *Level::RawValue_Comment = nullptr;
 
+    /**
+     * @brief Construct a new Level::Level object
+     *
+     * @param _Pin Analog Pin conected to the Level-Sensor
+     * @param _Name Element Name inside the Communication
+     */
     Level::Level (uint8_t _Pin, const char *_Name)
-        : Parent (_Name) {
+        : Protocol (_Name) {
       RawEmpty = 0;
       RawFull = 1024;
       Pin = _Pin;
@@ -33,6 +47,100 @@ namespace JCA {
       RawValue = 0;
     }
 
+    /**
+     * @brief Set the Element Config
+     * Only existing Tags will be updated
+     * @param _Tags Array of Config-Tags ("config": [])
+     */
+    void Level::setConfig (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
+      for (JsonObject Tag : _Tags) {
+        if (Tag[JsonTagName] == RawEmpty_Name) {
+          RawEmpty = Tag[JsonTagValue].as<int16_t> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, RawEmpty_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, RawEmpty);
+          }
+        }
+        if (Tag[JsonTagName] == RawFull_Name) {
+          RawFull = Tag[JsonTagValue].as<int16_t> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, RawFull_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, RawFull);
+          }
+        }
+        if (Tag[JsonTagName] == AlarmLevel_Name) {
+          AlarmLevel = Tag[JsonTagValue].as<int16_t> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AlarmLevel_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, AlarmLevel);
+          }
+        }
+        if (Tag[JsonTagName] == ReadInterval_Name) {
+          ReadInterval = Tag[JsonTagValue].as<int16_t> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, ReadInterval_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, ReadInterval);
+          }
+        }
+      }
+    }
+
+    /**
+     * @brief Set the Element Data
+     * currently not used
+     * @param _Tags Array of Data-Tags ("data": [])
+     */
+    void Level::setData (JsonArray _Tags) {
+    }
+
+    /**
+     * @brief Execute the Commands
+     * currently not used
+     * @param _Tags Array of Commands ("cmd": [])
+     */
+    void Level::setCmd (JsonArray _Tags) {
+    }
+
+    /**
+     * @brief Create a list of Config-Tags containing the current Value
+     *
+     * @param _Tags Array the Tags have to add
+     */
+    void Level::createConfigTags (JsonArray &_Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
+      createTag (_Tags, RawEmpty_Name, RawEmpty_Comment, RawEmpty_Unit, RawEmpty);
+      createTag (_Tags, RawFull_Name, RawFull_Comment, RawFull_Unit, RawFull);
+      createTag (_Tags, AlarmLevel_Name, Alarm_Comment, AlarmLevel_Unit, AlarmLevel);
+      createTag (_Tags, ReadInterval_Name, ReadInterval_Comment, ReadInterval_Unit, ReadInterval);
+    }
+
+    /**
+     * @brief Create a list of Data-Tags containing the current Value
+     *
+     * @param _Tags Array the Tags have to add
+     */
+    void Level::createDataTags (JsonArray &_Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
+      createTag (_Tags, Level_Name, Level_Comment, Level_Unit, Value);
+      createTag (_Tags, Alarm_Name, Alarm_Comment, Alarm_TextOn, Alarm_TextOff, Alarm);
+      createTag (_Tags, RawValue_Name, RawValue_Comment, RawValue_Unit, RawValue);
+    }
+
+    /**
+     * @brief Create a list of Command-Informations
+     *
+     * @param _Tags Array the Command-Infos have to add
+     */
+    void Level::createCmdInfoTags (JsonArray &_Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
+    }
+
+    /**
+     * @brief Handling Level-Sensor
+     * Read and scale the Level and check if the Alarm value is reached
+     * @param time Current Time to check the Samplerate
+     */
     void Level::update (struct tm &time) {
 
       // Get Seconds of Day
@@ -57,63 +165,23 @@ namespace JCA {
       }
     }
 
+    /**
+     * @brief Get the scaled Level Value
+     * just return the last Value, don't read the current Hardware-Value
+     * @return float Current Level (0-100%)
+     */
     float Level::getValue () {
       return Value;
     }
 
+    /**
+     * @brief Level Alarm of the Feeder
+     * 
+     * @return true Level is less Limit
+     * @return false Level is good
+     */
     bool Level::getAlarm () {
       return Alarm;
-    }
-
-    void Level::setConfig (JsonObject _Data) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
-      if (_Data.containsKey (NameRawEmpty)) {
-        RawEmpty = _Data[NameRawEmpty].as<int16_t> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameRawEmpty)) {
-          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, RawEmpty);
-        }
-      }
-      if (_Data.containsKey (NameRawFull)) {
-        RawFull = _Data[NameRawFull].as<int16_t> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameRawFull)) {
-          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, RawFull);
-        }
-      }
-      if (_Data.containsKey (NameAlarmLevel)) {
-        AlarmLevel = _Data[NameAlarmLevel].as<int16_t> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameAlarmLevel)) {
-          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, AlarmLevel);
-        }
-      }
-      if (_Data.containsKey (NameReadInterval)) {
-        ReadInterval = _Data[NameReadInterval].as<int16_t> ();
-        if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, NameReadInterval)) {
-          Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-          Debug.println (FLAG_CONFIG, false, ObjectName, __func__, ReadInterval);
-        }
-      }
-    }
-
-    void Level::setData (JsonObject _Data) {
-      ;
-    }
-
-    void Level::createConfig (JsonObject &_Data) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Data, NameRawEmpty, UnitRawEmpty, RawEmpty);
-      createTag (_Data, NameRawFull, UnitRawFull, RawFull);
-      createTag (_Data, NameAlarmLevel, UnitAlarmLevel, AlarmLevel);
-      createTag (_Data, NameReadInterval, UnitReadInterval, ReadInterval);
-    }
-
-    void Level::createData (JsonObject &_Data) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Data, NameLevel, UnitLevel, Value);
-      createTag (_Data, NameAlarm, UnitAlarm, Alarm);
-      createTag (_Data, NameRawValue, UnitRawValue, RawValue);
     }
   }
 }

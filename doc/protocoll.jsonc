@@ -1,0 +1,54 @@
+{
+  // List of Elements configurated in the Controller Firmware
+  "elements": [
+    {
+      // Every Element will showen in an single Area on the website
+      "name": "ElementName",
+      "comment": "Discription of the Element if exists",
+      "data": [
+        {
+          //Datapoints showen iin an single row on the website
+          "name": "DatapointName",
+          "comment": "Discription of the Datapoint if exists, tooltip",
+          "value": "Value [float, int, bool, string]",
+          "unit": "Unit [float, int]",
+          "on": "Button-Text On [bool]",
+          "off": "Button-Text Off [bool]"
+        }, {
+
+        }
+      ],
+      "config": [
+        {
+          //Config Tags showen iin an single row on the website
+          "name": "ConfigTagName",
+          "comment": "Discription of the ConfigText if exists, tooltip",
+          "value": "Value [float, int, bool, string]",
+          "unit": "Unit [float, int]",
+          "on": "Button-Text On [bool]",
+          "off": "Button-Text Off [bool]"
+        },
+        {}
+      ],
+      "cmdInfo": [
+        {
+          //Information about possible Commands of the Element (read only)
+          "name": "ConfigTagName",
+          "comment": "Discription of the ConfigText if exists, tooltip",
+          "type": "Type [float, int, bool, string]"
+        },
+        {}
+      ],
+      "cmd": [
+        {
+          //Commands to the Element (write only)
+          "name": "ConfigTagName",
+          "value": "Value [float, int, bool, string]"
+        },
+        {}
+      ]
+    }, {
+      
+    }
+  ]
+}

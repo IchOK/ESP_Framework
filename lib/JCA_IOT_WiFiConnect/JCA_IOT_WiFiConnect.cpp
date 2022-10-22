@@ -69,7 +69,7 @@ namespace JCA {
      * @return false SSID is invalid
      */
     bool WiFiConnect::setSsid (const char *_Ssid) {
-      if (_Ssid == NULL) {
+      if (_Ssid == nullptr) {
         return false;
       } else if (strlen (_Ssid) > sizeof (Ssid)) {
         strncpy (Ssid, _Ssid, sizeof (Ssid));
@@ -88,7 +88,7 @@ namespace JCA {
      * @return false Password is invalid
      */
     bool WiFiConnect::setPassword (const char *_Password) {
-      if (_Password == NULL) {
+      if (_Password == nullptr) {
         return false;
       } else if (strlen (_Password) > sizeof (Password)) {
         strncpy (Password, _Password, sizeof (Password));
@@ -107,7 +107,7 @@ namespace JCA {
      * @return false IP is invalid
      */
     bool WiFiConnect::setIP (const char *_IP) {
-      if (_IP == NULL) {
+      if (_IP == nullptr) {
         return false;
       } else if (IP.fromString (_IP)) {
         return true;
@@ -124,7 +124,7 @@ namespace JCA {
      * @return false Dateway is invalid
      */
     bool WiFiConnect::setGateway (const char *_Gateway) {
-      if (_Gateway == NULL) {
+      if (_Gateway == nullptr) {
         return false;
       } else if (Gateway.fromString (_Gateway)) {
         return true;
@@ -141,7 +141,7 @@ namespace JCA {
      * @return false Subnet-Mask is invalid
      */
     bool WiFiConnect::setSubnet (const char *_Subnet) {
-      if (_Subnet == NULL) {
+      if (_Subnet == nullptr) {
         return false;
       } else if (Subnet.fromString (_Subnet)) {
         return true;
@@ -369,10 +369,10 @@ namespace JCA {
      * @return false invalid
      */
     bool WiFiConnect::isConfigured () {
-      if (Ssid == NULL) {
+      if (Ssid == nullptr) {
         return false;
       }
-      if (Password == NULL) {
+      if (Password == nullptr) {
         return false;
       }
       if (!DHCP) {

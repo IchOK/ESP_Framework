@@ -11,6 +11,7 @@
 // Project function
 #include <JCA_FNC_Feeder.h>
 #include <JCA_FNC_Level.h>
+#include <JCA_FNC_Parent.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -33,7 +34,7 @@ Feeder Spindel (EN_PIN, STEP_PIN, DIR_PIN, "Spindel");
 //-------------------------------------------------------
 // Level
 //-------------------------------------------------------
-#define LEVEL_PIN A0// Levelsensor
+#define LEVEL_PIN A0 // Levelsensor
 
 Level Futter (LEVEL_PIN, "Futter");
 
@@ -47,6 +48,15 @@ Webserver Server;
 //-------------------------------------------------------
 void cbSystemReset () {
   ESP.restart ();
+}
+void cbSaveConfig () {
+  JDoc.clear ();
+  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
+  Spindel.getConfig (Elements);
+  Futter.getConfig (Elements);
+  File ConfigFile = LittleFS.open (CONFIGPATH, "w");
+  serializeJson (JDoc, ConfigFile);
+  ConfigFile.close ();
 }
 
 //-------------------------------------------------------
@@ -63,15 +73,19 @@ String cbWebConfigReplace (const String &var) {
 //-------------------------------------------------------
 JsonVariant cbRestApiGet (JsonVariant &var) {
   JDoc.clear ();
-  JsonObject Collection = JDoc.to<JsonObject> ();
-  Spindel.getAll (Collection);
-  Futter.getAll(Collection);
+  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
+  Server.getAll(Elements);
+  Spindel.getAll (Elements);
+  Futter.getAll (Elements);
   return JDoc;
 }
 JsonVariant cbRestApiPost (JsonVariant &var) {
+  if (var.containsKey (Protocol::JsonTagElements)) {
+    JsonArray Elements = (var.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+    Spindel.set (Elements);
+    Futter.set (Elements);
+  }
   JDoc.clear ();
-  Spindel.set (var.as<JsonObject> ());
-  Futter.set (var.as<JsonObject> ());
   return JDoc;
 }
 JsonVariant cbRestApiPut (JsonVariant &var) {
@@ -80,13 +94,7 @@ JsonVariant cbRestApiPut (JsonVariant &var) {
   return JDoc;
 }
 JsonVariant cbRestApiPatch (JsonVariant &var) {
-  JDoc.clear ();
-  JsonObject Collection = JDoc.to<JsonObject> ();
-  Spindel.getConfig (Collection);
-  Futter.getConfig (Collection);
-  File ConfigFile = LittleFS.open (CONFIGPATH, "w");
-  serializeJson (JDoc, ConfigFile);
-  ConfigFile.close ();
+  cbSaveConfig();
   return JDoc;
 }
 JsonVariant cbRestApiDelete (JsonVariant &var) {
@@ -100,21 +108,18 @@ JsonVariant cbRestApiDelete (JsonVariant &var) {
 //-------------------------------------------------------
 JsonVariant cbWsUpdate (JsonVariant &var) {
   JDoc.clear ();
-  JsonObject Collection = JDoc.to<JsonObject> ();
-  Spindel.getAll (Collection);
-  Futter.getAll (Collection);
-  Collection["time"] = Server.getTimeString ("");
+  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
+  Server.getAll (Elements);
+  Spindel.getAll (Elements);
+  Futter.getAll (Elements);
   return JDoc;
 }
 JsonVariant cbWsData (JsonVariant &var) {
   JDoc.clear ();
-  if (var.as<JsonObject>().containsKey("save")) {
-    if ((var.as<JsonObject> ())["save"].as <bool>()){
-      JDoc = cbRestApiPatch(var);
-    }
-  }
-  Spindel.set (var.as<JsonObject> ());
-  Futter.set (var.as<JsonObject> ());
+  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
+  Server.getAll (Elements);
+  Spindel.getAll (Elements);
+  Futter.getAll (Elements);
   return JDoc;
 }
 
@@ -127,7 +132,7 @@ void setup () {
   digitalWrite (STAT_PIN, LOW);
 
   Debug.init (FLAG_NONE);
-  //Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
+  // Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
@@ -152,8 +157,8 @@ void setup () {
   Server.onRestApiPut (cbRestApiPut);
   Server.onRestApiPatch (cbRestApiPatch);
   // Web-Socket
-  Server.onWsData(cbWsData);
-  Server.onWsUpdate(cbWsUpdate);
+  Server.onWsData (cbWsData);
+  Server.onWsUpdate (cbWsUpdate);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Custom Code
@@ -167,12 +172,11 @@ void setup () {
     DeserializationError Error = deserializeJson (JDoc, ConfigFile);
     if (!Error) {
       Debug.println (FLAG_CONFIG, false, "main", "setup", "Deserialize Done");
-      JsonObject Collection = JDoc.as<JsonObject> ();
-
-      // Set custom Objects
-      Spindel.set (Collection);
-      Futter.set (Collection);
-
+      if (JDoc.containsKey (Protocol::JsonTagElements)) {
+        JsonArray Elements = (JDoc.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+        Spindel.set (Elements);
+        Futter.set (Elements);
+      }
     } else {
       Debug.print (FLAG_ERROR, false, "main", "setup", "deserializeJson() failed: ");
       Debug.println (FLAG_ERROR, false, "main", "setup", Error.c_str ());
@@ -190,6 +194,6 @@ void loop () {
   Server.handle ();
   tm CurrentTime = Server.getTimeStruct ();
 
-  Spindel.update(CurrentTime);
-  Futter.update(CurrentTime);
+  Spindel.update (CurrentTime);
+  Futter.update (CurrentTime);
 }

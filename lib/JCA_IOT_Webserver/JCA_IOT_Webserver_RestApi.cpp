@@ -23,9 +23,14 @@ namespace JCA {
         serializeJson (_Json, JsonBody);
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, JsonBody);
       }
-      // Handle System-Data
-      recvSystemMsg (_Json);
 
+      // Handle System-Data
+      if (_Json.containsKey (Protocol::JsonTagElements)) {
+        JsonArray Elements = (_Json.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+        set (Elements);
+      }
+
+      // Call externak datahandling Functions
       switch (_Request->method ()) {
       case HTTP_GET:
         if (restApiGetCB) {
@@ -61,16 +66,19 @@ namespace JCA {
         break;
       }
 
-      if (!OutData.is<JsonObject> ()) {
+      // Add System Informations
+      JsonArray Elements;
+      if (OutData.containsKey(Protocol::JsonTagElements)) {
+        Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+      } else {
         JsonDoc.clear ();
-        OutData = JsonDoc.to<JsonVariant>();
+        Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
       }
+      getAll(Elements);
 
-      // Add System Informations
-      createSystemMsg (OutData);
+      // Create Response
       JsonDoc = OutData.as<JsonObject> ();
-
       String response;
       serializeJson (JsonDoc, response);
       Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");

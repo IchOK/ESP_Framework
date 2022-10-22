@@ -11,23 +11,39 @@
 
 namespace JCA {
   namespace FNC {
-    class Level : public Parent{
+    class Level : public Protocol{
     private:
       // Datapoint description
-      static const char *NameRawEmpty;
-      static const char *NameRawFull;
-      static const char *NameAlarmLevel;
-      static const char *NameReadInterval;
-      static const char *UnitRawEmpty;
-      static const char *UnitRawFull;
-      static const char *UnitAlarmLevel;
-      static const char *UnitReadInterval;
-      static const char *NameLevel;
-      static const char *NameAlarm;
-      static const char *NameRawValue;
-      static const char *UnitLevel;
-      static const char *UnitAlarm;
-      static const char *UnitRawValue;
+      static const char *RawEmpty_Name;
+      static const char *RawEmpty_Unit;
+      static const char *RawEmpty_Comment;
+      static const char *RawFull_Name;
+      static const char *RawFull_Unit;
+      static const char *RawFull_Comment;
+      static const char *AlarmLevel_Name;
+      static const char *AlarmLevel_Unit;
+      static const char *AlarmLevel_Comment;
+      static const char *ReadInterval_Name;
+      static const char *ReadInterval_Unit;
+      static const char *ReadInterval_Comment;
+      static const char *Level_Name;
+      static const char *Level_Unit;
+      static const char *Level_Comment;
+      static const char *Alarm_Name;
+      static const char *Alarm_Comment;
+      static const char *Alarm_TextOn;
+      static const char *Alarm_TextOff;
+      static const char *RawValue_Name;
+      static const char *RawValue_Unit;
+      static const char *RawValue_Comment;
+
+      // Protocol Functions
+      void setConfig (JsonArray _Tags);
+      void setData (JsonArray _Tags);
+      void setCmd (JsonArray _Tags);
+      void createConfigTags (JsonArray &_Tags);
+      void createDataTags (JsonArray &_Tags);
+      void createCmdInfoTags (JsonArray &_Tags);
 
       // Hardware
       uint8_t Pin;
@@ -46,10 +62,6 @@ namespace JCA {
       // Intern
       int8_t LastSeconds;
       uint16_t IntervalCount;
-      void setConfig (JsonObject _Data);
-      void setData (JsonObject _Data);
-      void createConfig (JsonObject &_Data);
-      void createData (JsonObject &_Data);
 
     public:
       Level (uint8_t _Pin, const char* _Name);
