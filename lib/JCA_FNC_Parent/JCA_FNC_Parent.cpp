@@ -10,6 +10,7 @@ namespace JCA {
     const char *Protocol::JsonTagCmdInfo = "cmdInfo";
     const char *Protocol::JsonTagCmd = "cmd";
     const char *Protocol::JsonTagName = "name";
+    const char *Protocol::JsonTagText = "text";
     const char *Protocol::JsonTagComment = "comment";
     const char *Protocol::JsonTagValue = "value";
     const char *Protocol::JsonTagUnit = "unit";
@@ -113,12 +114,14 @@ namespace JCA {
      * Contains Element Name and comment if defined
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @return JsonObject Tag to attach value, unit, ...
      */
-    JsonObject Protocol::createEmptyTag (JsonArray &_Tags, const char *_Name, const char *_Comment) {
+    JsonObject Protocol::createEmptyTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment) {
       JsonObject Tag = _Tags.createNestedObject ();
       Tag[JsonTagName] = _Name;
+      Tag[JsonTagText] = _Text;
       if (_Comment != nullptr) {
         Tag[JsonTagComment] = _Comment;
       }
@@ -130,13 +133,14 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Button-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _BtnOnText Buttontext if Value is True, if not defined (nullptr) set to "ON"
      * @param _BntOffText Buttontext if Value is False, if not defined (nullptr) set to "OFF"
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_BtnOnText, const char *_BntOffText, bool _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_BtnOnText, const char *_BntOffText, bool _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_BtnOnText != nullptr) {
         Tag[JsonTagOn] = _BtnOnText;
@@ -155,12 +159,13 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Value-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, float _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, float _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_Unit != nullptr) {
         Tag[JsonTagUnit] = _Unit;
@@ -172,12 +177,13 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Value-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, int16_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, int16_t _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_Unit != nullptr) {
         Tag[JsonTagUnit] = _Unit;
@@ -189,12 +195,13 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Value-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, uint16_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, uint16_t _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_Unit != nullptr) {
         Tag[JsonTagUnit] = _Unit;
@@ -206,12 +213,13 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Value-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, int32_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, int32_t _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_Unit != nullptr) {
         Tag[JsonTagUnit] = _Unit;
@@ -223,12 +231,13 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Value-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, uint32_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, uint32_t _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_Unit != nullptr) {
         Tag[JsonTagUnit] = _Unit;
@@ -240,12 +249,13 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the Value-Information
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, long _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, long _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
       if (_Unit != nullptr) {
         Tag[JsonTagUnit] = _Unit;
@@ -257,11 +267,12 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the String
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, String _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, String _Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
     }
 
@@ -270,11 +281,12 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the String
      * @param _Tags Array of Tags like Data ("data": []) or Config
      * @param _Name Name of the Tag to add
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Value) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagValue] = _Value;
     }
 
@@ -283,11 +295,12 @@ namespace JCA {
      * use createEmptyTag to create the Body and attach the String
      * @param _Tags Array of Command-Inormations ("cmdInfo": [])
      * @param _Name Name of the Command
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Type Type for the HMI to know what ist requested (boot, in16, string, ...)
      */
-    void Protocol::createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Type) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagType] = _Type;
     }
 
@@ -296,13 +309,14 @@ namespace JCA {
      * contains additional Information for Button dynamic
      * @param _Tags Array of Command-Inormations ("cmdInfo": [])
      * @param _Name Name of the Command
+     * @param _Text Text for Website Lable
      * @param _Comment Comment, if not used set nullptr
      * @param _Type sould be bool
      * @param _BtnOnText Buttontext for True, if not defined (nullptr) set to "ON"
      * @param _BntOffText Buttontext for False, if not defined (nullptr) set to "OFF"
      */
-    void Protocol::createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Type, const char *_BtnOnText, const char *_BntOffText) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Comment);
+    void Protocol::createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnOnText, const char *_BntOffText) {
+      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment);
       Tag[JsonTagType] = _Type;
       if (_BtnOnText != nullptr) {
         Tag[JsonTagOn] = _BtnOnText;

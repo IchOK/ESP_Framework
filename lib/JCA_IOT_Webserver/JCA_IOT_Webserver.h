@@ -106,17 +106,22 @@ namespace JCA {
       // ...Webserver_System.cpp
       static const char *ElementName;
       static const char *Hostname_Name;
+      static const char *Hostname_Text;
       static const char *Hostname_Comment;
       static const char *WsUpdateCycle_Name;
+      static const char *WsUpdateCycle_Text;
       static const char *WsUpdateCycle_Unit;
       static const char *WsUpdateCycle_Comment;
       static const char *TimeSync_Name;
+      static const char *TimeSync_Text;
       static const char *TimeSync_Type;
       static const char *TimeSync_Comment;
       static const char *SaveConfig_Name;
+      static const char *SaveConfig_Text;
       static const char *SaveConfig_Type;
       static const char *SaveConfig_Comment;
       static const char *Time_Name;
+      static const char *Time_Text;
       static const char *Time_Comment;
       char Hostname[80];
       char ConfUser[80];

@@ -17,17 +17,22 @@ namespace JCA {
   namespace IOT {
     const char *Webserver::ElementName = "System";
     const char *Webserver::Hostname_Name = "hostname";
-    const char *Webserver::Hostname_Comment = nullptr;
+    const char *Webserver::Hostname_Text = "Hostname";
+    const char *Webserver::Hostname_Comment = "Hostname wirde erst nache dem Reboot aktiv";
     const char *Webserver::WsUpdateCycle_Name = "wsUpdate";
+    const char *Webserver::WsUpdateCycle_Text  = "Websocket Updatezyklus";
     const char *Webserver::WsUpdateCycle_Unit = "ms";
     const char *Webserver::WsUpdateCycle_Comment = nullptr;
     const char *Webserver::TimeSync_Name = "timeSync";
+    const char *Webserver::TimeSync_Text = "Uhrzeit syncronisieren";
     const char *Webserver::TimeSync_Type = "uint32";
     const char *Webserver::TimeSync_Comment = nullptr;
     const char *Webserver::SaveConfig_Name = "saveConfig";
+    const char *Webserver::SaveConfig_Text = "Konfiguration speichern";
     const char *Webserver::SaveConfig_Type = "bool";
     const char *Webserver::SaveConfig_Comment = "Save the current Config to ConfigFile";
     const char *Webserver::Time_Name = "time";
+    const char *Webserver::Time_Text = "Systemzeit";
     const char *Webserver::Time_Comment = nullptr;
 
     /**
@@ -251,8 +256,8 @@ namespace JCA {
      */
     void Webserver::createConfigTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Tags, Hostname_Name, Hostname_Comment, Hostname);
-      createTag (_Tags, WsUpdateCycle_Name, WsUpdateCycle_Comment, WsUpdateCycle_Unit, WsUpdateCycle);
+      createTag (_Tags, Hostname_Name, Hostname_Text, Hostname_Comment, Hostname);
+      createTag (_Tags, WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, WsUpdateCycle_Unit, WsUpdateCycle);
     }
 
     /**
@@ -262,7 +267,7 @@ namespace JCA {
      */
     void Webserver::createDataTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Tags, Time_Name, Time_Comment, getTime());
+      createTag (_Tags, Time_Name, Time_Text, Time_Comment, getTime ());
     }
 
     /**
@@ -272,8 +277,8 @@ namespace JCA {
      */
     void Webserver::createCmdInfoTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createCmdInfo (_Tags, TimeSync_Name, TimeSync_Comment, TimeSync_Type);
-      createCmdInfo (_Tags, SaveConfig_Name, SaveConfig_Comment, SaveConfig_Type);
+      createCmdInfo (_Tags, TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type);
+      createCmdInfo (_Tags, SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type);
     }
 
     /**

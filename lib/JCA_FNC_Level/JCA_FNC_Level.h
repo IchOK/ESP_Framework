@@ -15,25 +15,32 @@ namespace JCA {
     private:
       // Datapoint description
       static const char *RawEmpty_Name;
+      static const char *RawEmpty_Text;
       static const char *RawEmpty_Unit;
       static const char *RawEmpty_Comment;
       static const char *RawFull_Name;
+      static const char *RawFull_Text;
       static const char *RawFull_Unit;
       static const char *RawFull_Comment;
       static const char *AlarmLevel_Name;
+      static const char *AlarmLevel_Text;
       static const char *AlarmLevel_Unit;
       static const char *AlarmLevel_Comment;
       static const char *ReadInterval_Name;
+      static const char *ReadInterval_Text;
       static const char *ReadInterval_Unit;
       static const char *ReadInterval_Comment;
       static const char *Level_Name;
+      static const char *Level_Text;
       static const char *Level_Unit;
       static const char *Level_Comment;
       static const char *Alarm_Name;
+      static const char *Alarm_Text;
       static const char *Alarm_Comment;
       static const char *Alarm_TextOn;
       static const char *Alarm_TextOff;
       static const char *RawValue_Name;
+      static const char *RawValue_Text;
       static const char *RawValue_Unit;
       static const char *RawValue_Comment;
 

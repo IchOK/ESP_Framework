@@ -5,25 +5,32 @@ using namespace JCA::SYS;
 namespace JCA {
   namespace FNC {
     const char *Level::RawEmpty_Name = "RawEmpty";
+    const char *Level::RawEmpty_Text = "Rohwert Leer";
     const char *Level::RawEmpty_Unit = "#";
     const char *Level::RawEmpty_Comment = nullptr;
     const char *Level::RawFull_Name = "RawFull";
+    const char *Level::RawFull_Text = "Rohwert Voll";
     const char *Level::RawFull_Unit = "#";
     const char *Level::RawFull_Comment = nullptr;
     const char *Level::AlarmLevel_Name = "AlarmLevel";
+    const char *Level::AlarmLevel_Text = "Alarm Grenzwert";
     const char *Level::AlarmLevel_Unit = "%";
     const char *Level::AlarmLevel_Comment = nullptr;
     const char *Level::ReadInterval_Name = "ReadInterval";
+    const char *Level::ReadInterval_Text = "Leseintervall";
     const char *Level::ReadInterval_Unit = "s";
     const char *Level::ReadInterval_Comment = nullptr;
     const char *Level::Level_Name = "Level";
+    const char *Level::Level_Text = "Niveau";
     const char *Level::Level_Unit = "%";
     const char *Level::Level_Comment = nullptr;
     const char *Level::Alarm_Name = "Alarm";
+    const char *Level::Alarm_Text = "Alarm";
     const char *Level::Alarm_Comment = nullptr;
     const char *Level::Alarm_TextOn = nullptr;
     const char *Level::Alarm_TextOff = nullptr;
     const char *Level::RawValue_Name = "RawValue";
+    const char *Level::RawValue_Text = "Rohwert";
     const char *Level::RawValue_Unit = "#";
     const char *Level::RawValue_Comment = nullptr;
 
@@ -109,10 +116,10 @@ namespace JCA {
      */
     void Level::createConfigTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, RawEmpty_Name, RawEmpty_Comment, RawEmpty_Unit, RawEmpty);
-      createTag (_Tags, RawFull_Name, RawFull_Comment, RawFull_Unit, RawFull);
-      createTag (_Tags, AlarmLevel_Name, Alarm_Comment, AlarmLevel_Unit, AlarmLevel);
-      createTag (_Tags, ReadInterval_Name, ReadInterval_Comment, ReadInterval_Unit, ReadInterval);
+      createTag (_Tags, RawEmpty_Name, RawEmpty_Text, RawEmpty_Comment, RawEmpty_Unit, RawEmpty);
+      createTag (_Tags, RawFull_Name, RawFull_Text, RawFull_Comment, RawFull_Unit, RawFull);
+      createTag (_Tags, AlarmLevel_Name, AlarmLevel_Text, Alarm_Comment, AlarmLevel_Unit, AlarmLevel);
+      createTag (_Tags, ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, ReadInterval_Unit, ReadInterval);
     }
 
     /**
@@ -122,9 +129,9 @@ namespace JCA {
      */
     void Level::createDataTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, Level_Name, Level_Comment, Level_Unit, Value);
-      createTag (_Tags, Alarm_Name, Alarm_Comment, Alarm_TextOn, Alarm_TextOff, Alarm);
-      createTag (_Tags, RawValue_Name, RawValue_Comment, RawValue_Unit, RawValue);
+      createTag (_Tags, Level_Name, Level_Text, Level_Comment, Level_Unit, Value);
+      createTag (_Tags, Alarm_Name, Alarm_Text, Alarm_Comment, Alarm_TextOn, Alarm_TextOff, Alarm);
+      createTag (_Tags, RawValue_Name, RawValue_Text, RawValue_Comment, RawValue_Unit, RawValue);
     }
 
     /**
@@ -176,7 +183,7 @@ namespace JCA {
 
     /**
      * @brief Level Alarm of the Feeder
-     * 
+     *
      * @return true Level is less Limit
      * @return false Level is good
      */

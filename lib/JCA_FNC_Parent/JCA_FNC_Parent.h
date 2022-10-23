@@ -34,18 +34,18 @@ namespace JCA {
       
       // Create Protocol-Structure
       JsonObject createEmptyElement (JsonArray &_Elements);
-      JsonObject createEmptyTag (JsonArray &_Tags, const char *_Name, const char *_Comment);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_BtnOnText, const char *_BntOffText, bool _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, float _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, int16_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, uint16_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, int32_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, uint32_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Unit, long _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, String _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Value);
-      void createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Type);
-      void createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Comment, const char *_Type, const char *_BtnOnText, const char *_BntOffText);
+      JsonObject createEmptyTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_BtnOnText, const char *_BntOffText, bool _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, float _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, int16_t _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, uint16_t _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, int32_t _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, uint32_t _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Unit, long _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, String _Value);
+      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Value);
+      void createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type);
+      void createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnOnText, const char *_BntOffText);
 
     public:
       // Json Tags
@@ -55,6 +55,7 @@ namespace JCA {
       static const char *JsonTagCmdInfo;
       static const char *JsonTagCmd;
       static const char *JsonTagName;
+      static const char *JsonTagText;
       static const char *JsonTagComment;
       static const char *JsonTagValue;
       static const char *JsonTagUnit;

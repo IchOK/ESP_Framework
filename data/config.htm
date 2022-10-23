@@ -16,21 +16,42 @@
   </style>
   <script src="/view.js"></script>
   <script type="text/javascript">
-    console.log("Data Start");
     function saveConfig() {
-      
+      let OutData = { "elements": [{ "name": "System", "cmd": [{ "name": "saveConfig", "value": true }] }] };
+      ws.send(JSON.stringify(OutData));
     }
     function handleWsMsg(msg) {
-        let DataObject = JSON.parse(msg.data);
-        updateView(DataObject, "config", false);
+      let DataObject = JSON.parse(msg.data);
+      updateView(DataObject.elements, "config", false);
+    }
+    function onChange(ValueInput) {
+
+      let Value = ValueInput.value;
+      let ViewTag = ValueInput.parentElement.parentElement;
+      let ViewElement = ViewTag.parentElement;
+      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "config": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      ws.send(JSON.stringify(OutData));
+    }
+    function onClick(ValueInput) {
+      let stat = ValueInput.getAttribute("stat");
+      let Value;
+      if (stat == "on") {
+        Value = false;
+      } else if (stat == "off") {
+        Value = true;
+      } else {
+        return;
+      }
+      let ViewTag = ValueInput.parentElement.parentElement;
+      let ViewElement = ViewTag.parentElement;
+      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "config": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      ws.send(JSON.stringify(OutData));
     }
 
     var ws = new WebSocket("ws://" + location.host + "/ws");
     ws.onmessage = function (_msg) {
       handleWsMsg(_msg);
     };
-
-    console.log("Data Done");
   </script>
 </head>
 
@@ -48,7 +69,7 @@
     </ul>
   </nav>
   <main class="container">
-    <section id="slaves">
+    <section id="elements">
     </section>
     <button onclick="saveConfig()">Save</button>
   </main>

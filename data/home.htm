@@ -16,18 +16,38 @@
   </style>
   <script src="/view.js"></script>
   <script type="text/javascript">
-    console.log("Data Start");
     function handleWsMsg(msg) {
-        let DataObject = JSON.parse(msg.data);
-        updateView(DataObject, "data", true);
+      let DataObject = JSON.parse(msg.data);
+      updateView(DataObject.elements, "data", false);
+    }
+    function onChange(ValueInput) {
+
+      let Value = ValueInput.value;
+      let ViewTag = ValueInput.parentElement.parentElement;
+      let ViewElement = ViewTag.parentElement;
+      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "data": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      ws.send(JSON.stringify(OutData));
+    }
+    function onClick(ValueInput) {
+      let stat = ValueInput.getAttribute("stat");
+      let Value;
+      if (stat == "on") {
+        Value = false;
+      } else if (stat == "off") {
+        Value = true;
+      } else {
+        return;
+      }
+      let ViewTag = ValueInput.parentElement.parentElement;
+      let ViewElement = ViewTag.parentElement;
+      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "data": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      ws.send(JSON.stringify(OutData));
     }
 
     var ws = new WebSocket("ws://" + location.host + "/ws");
     ws.onmessage = function (_msg) {
       handleWsMsg(_msg);
     };
-
-    console.log("Data Done");
   </script>
 </head>
 
@@ -38,18 +58,10 @@
       <li>Online Daten</li>
     </ul>
     <ul>
-      <li>
-        <a href="/home.htm">%SVG_HOME%</a>
-      </li>
-      <li>
-        <a href="/config.htm">%SVG_CONFIG%</a>
-      </li>
-      <li>
-        <a href="/connect">%SVG_WIFI%</a>
-      </li>
-      <li>
-        <a href="/sys">%SVG_SYSTEM%</a>
-      </li>
+      <li><a href="/home.htm">%SVG_HOME%</a></li>
+      <li><a href="/config.htm">%SVG_CONFIG%</a></li>
+      <li><a href="/connect">%SVG_WIFI%</a></li>
+      <li><a href="/sys">%SVG_SYSTEM%</a></li>
     </ul>
   </nav>
   <main class="container">

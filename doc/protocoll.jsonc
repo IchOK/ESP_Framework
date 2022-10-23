@@ -9,6 +9,7 @@
         {
           //Datapoints showen iin an single row on the website
           "name": "DatapointName",
+          "text": "Readable Datepointname",
           "comment": "Discription of the Datapoint if exists, tooltip",
           "value": "Value [float, int, bool, string]",
           "unit": "Unit [float, int]",
