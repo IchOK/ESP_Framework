@@ -31,6 +31,7 @@ namespace JCA {
     const char *Webserver::SaveConfig_Text = "Konfiguration speichern";
     const char *Webserver::SaveConfig_Type = "bool";
     const char *Webserver::SaveConfig_Comment = "Save the current Config to ConfigFile";
+    const char *Webserver::SaveConfig_BtnText = "SAVE";
     const char *Webserver::Time_Name = "time";
     const char *Webserver::Time_Text = "Systemzeit";
     const char *Webserver::Time_Comment = nullptr;
@@ -256,8 +257,8 @@ namespace JCA {
      */
     void Webserver::createConfigTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Tags, Hostname_Name, Hostname_Text, Hostname_Comment, Hostname);
-      createTag (_Tags, WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, WsUpdateCycle_Unit, WsUpdateCycle);
+      createTag (_Tags, Hostname_Name, Hostname_Text, Hostname_Comment, false, Hostname);
+      createTag (_Tags, WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, false, WsUpdateCycle_Unit, WsUpdateCycle);
     }
 
     /**
@@ -267,7 +268,7 @@ namespace JCA {
      */
     void Webserver::createDataTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Tags, Time_Name, Time_Text, Time_Comment, getTime ());
+      createTag (_Tags, Time_Name, Time_Text, Time_Comment, true, getTime ());
     }
 
     /**
@@ -278,7 +279,7 @@ namespace JCA {
     void Webserver::createCmdInfoTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
       createCmdInfo (_Tags, TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type);
-      createCmdInfo (_Tags, SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type);
+      createCmdInfo (_Tags, SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type, SaveConfig_BtnText);
     }
 
     /**

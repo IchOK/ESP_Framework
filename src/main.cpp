@@ -115,6 +115,11 @@ JsonVariant cbWsUpdate (JsonVariant &var) {
   return JDoc;
 }
 JsonVariant cbWsData (JsonVariant &var) {
+  if (var.containsKey (Protocol::JsonTagElements)) {
+    JsonArray Elements = (var.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+    Spindel.set (Elements);
+    Futter.set (Elements);
+  }
   JDoc.clear ();
   JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
   Server.getAll (Elements);
@@ -132,7 +137,7 @@ void setup () {
   digitalWrite (STAT_PIN, LOW);
 
   Debug.init (FLAG_NONE);
-  // Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC | FLAG_LOOP);
+  //Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC);// | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
@@ -148,6 +153,7 @@ void setup () {
   // System
   Server.init ();
   Server.onSystemReset (cbSystemReset);
+  Server.onSaveConfig (cbSaveConfig);
   // Web
   Server.onWebHomeReplace (cbWebHomeReplace);
   Server.onWebConfigReplace (cbWebConfigReplace);

@@ -60,18 +60,11 @@ namespace JCA {
       static const char *Speed_Text;
       static const char *Speed_Unit;
       static const char *Speed_Comment;
-      static const char *CmdRunConst_Name;
-      static const char *CmdRunConst_Text;
-      static const char *CmdRunConst_Comment;
-      static const char *CmdRunConst_Type;
-      static const char *CmdRunConst_TextOn;
-      static const char *CmdRunConst_TextOff;
       static const char *CmdDoFeed_Name;
       static const char *CmdDoFeed_Text;
       static const char *CmdDoFeed_Comment;
       static const char *CmdDoFeed_Type;
-      static const char *CmdDoFeed_TextOn;
-      static const char *CmdDoFeed_TextOff;
+      static const char *CmdDoFeed_BtnText;
       
       // Protocol Functions
       void setConfig (JsonArray _Tags);

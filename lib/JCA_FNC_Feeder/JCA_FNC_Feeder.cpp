@@ -50,18 +50,11 @@ namespace JCA {
     const char *Feeder::Speed_Text = "aktuelle Geschwindigkeit";
     const char *Feeder::Speed_Unit = "st/s";
     const char *Feeder::Speed_Comment = nullptr;
-    const char *Feeder::CmdRunConst_Name = "runConst";
-    const char *Feeder::CmdRunConst_Text = "Konstante Drehung";
-    const char *Feeder::CmdRunConst_Comment = nullptr;
-    const char *Feeder::CmdRunConst_Type = "bool";
-    const char *Feeder::CmdRunConst_TextOn = nullptr;
-    const char *Feeder::CmdRunConst_TextOff = nullptr;
     const char *Feeder::CmdDoFeed_Name = "doFeed";
     const char *Feeder::CmdDoFeed_Text = "Jetzt Füttern";
     const char *Feeder::CmdDoFeed_Comment = nullptr;
     const char *Feeder::CmdDoFeed_Type = "bool";
-    const char *Feeder::CmdDoFeed_TextOn = nullptr;
-    const char *Feeder::CmdDoFeed_TextOff = nullptr;
+    const char *Feeder::CmdDoFeed_BtnText = "GO";
 
     /**
      * @brief Construct a new Feeder::Feeder object
@@ -166,18 +159,10 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void Feeder::setData (JsonArray _Tags) {
-    }
-
-    /**
-     * @brief Execute the Commands
-     *
-     * @param _Tags Array of Commands ("cmd": [])
-     */
-    void Feeder::setCmd (JsonArray _Tags) {
       for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == CmdRunConst_Name) {
+        if (Tag[JsonTagName] == RunConst_Name) {
           RunConst = Tag[JsonTagValue].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, Name, __func__, CmdRunConst_Name)) {
+          if (Debug.print (FLAG_LOOP, false, Name, __func__, RunConst_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_LOOP, false, Name, __func__, RunConst);
           }
@@ -202,19 +187,27 @@ namespace JCA {
     }
 
     /**
+     * @brief Execute the Commands
+     *
+     * @param _Tags Array of Commands ("cmd": [])
+     */
+    void Feeder::setCmd (JsonArray _Tags) {
+    }
+
+    /**
      * @brief Create a list of Config-Tags containing the current Value
      *
      * @param _Tags Array the Tags have to add
      */
     void Feeder::createConfigTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, FeedingHour_Name, FeedingHour_Text, FeedingHour_Comment, FeedingHour_Unit, FeedingHour);
-      createTag (_Tags, FeedingMinute_Name, FeedingMinute_Text, FeedingMinute_Comment, FeedingMinute_Unit, FeedingMinute);
-      createTag (_Tags, SteppsPerRotation_Name, SteppsPerRotation_Text, SteppsPerRotation_Comment, SteppsPerRotation_Unit, SteppsPerRotation);
-      createTag (_Tags, FeedingRotations_Name, FeedingRotations_Text, FeedingRotaions_Comment, FeedingRotaions_Unit, FeedingRotations);
-      createTag (_Tags, Acceleration_Name, Acceleration_Text, Acceleration_Comment, Acceleration_Unit, Acceleration);
-      createTag (_Tags, MaxSpeed_Name, MaxSpeed_Text, MaxSpeed_Comment, MaxSpeed_Unit, MaxSpeed);
-      createTag (_Tags, ConstSpeed_Name, ConstSpeed_Text, ConstSpeed_Comment, ConstSpeed_Unit, ConstSpeed);
+      createTag (_Tags, FeedingHour_Name, FeedingHour_Text, FeedingHour_Comment, false, FeedingHour_Unit, FeedingHour);
+      createTag (_Tags, FeedingMinute_Name, FeedingMinute_Text, FeedingMinute_Comment, false, FeedingMinute_Unit, FeedingMinute);
+      createTag (_Tags, SteppsPerRotation_Name, SteppsPerRotation_Text, SteppsPerRotation_Comment, false, SteppsPerRotation_Unit, SteppsPerRotation);
+      createTag (_Tags, FeedingRotations_Name, FeedingRotations_Text, FeedingRotaions_Comment, false, FeedingRotaions_Unit, FeedingRotations);
+      createTag (_Tags, Acceleration_Name, Acceleration_Text, Acceleration_Comment, false, Acceleration_Unit, Acceleration);
+      createTag (_Tags, MaxSpeed_Name, MaxSpeed_Text, MaxSpeed_Comment, false, MaxSpeed_Unit, MaxSpeed);
+      createTag (_Tags, ConstSpeed_Name, ConstSpeed_Text, ConstSpeed_Comment, false, ConstSpeed_Unit, ConstSpeed);
     }
 
     /**
@@ -224,10 +217,11 @@ namespace JCA {
      */
     void Feeder::createDataTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, Feeding_Name, Feeding_Text, Feeding_Comment, Feeding_TextOn, Feeding_TextOff, Feeding);
-      createTag (_Tags, DistanceToGo_Name, DistanceToGo_Text, DistanceToGo_Comment, DistanceToGo_Unit, Stepper.distanceToGo ());
-      createTag (_Tags, RunConst_Name, RunConst_Text, RunConst_Comment, RunConst_TextOn, RunConst_TextOff, RunConst);
-      createTag (_Tags, Speed_Name, Speed_Text, Speed_Comment, Speed_Unit, Stepper.speed ());
+      createTag (_Tags, Feeding_Name, Feeding_Text, Feeding_Comment, true, Feeding_TextOn, Feeding_TextOff, Feeding);
+      createTag (_Tags, DistanceToGo_Name, DistanceToGo_Text, DistanceToGo_Comment, true, DistanceToGo_Unit, Stepper.distanceToGo ());
+      createTag (_Tags, RunConst_Name, RunConst_Text, RunConst_Comment, false, RunConst_TextOn, RunConst_TextOff, RunConst);
+      createTag (_Tags, Speed_Name, Speed_Text, Speed_Comment, true, Speed_Unit, Stepper.speed ());
+      createCmdInfo (_Tags, CmdDoFeed_Name, CmdDoFeed_Text, CmdDoFeed_Comment, CmdDoFeed_Type, CmdDoFeed_BtnText);
     }
 
     /**
@@ -236,9 +230,6 @@ namespace JCA {
      * @param _Tags Array the Command-Infos have to add
      */
     void Feeder::createCmdInfoTags (JsonArray &_Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createCmdInfo (_Tags, CmdRunConst_Name, CmdRunConst_Text, CmdRunConst_Comment, CmdRunConst_Type, CmdRunConst_TextOn, CmdRunConst_TextOff);
-      createCmdInfo (_Tags, CmdDoFeed_Name, CmdDoFeed_Text, CmdDoFeed_Comment, CmdDoFeed_Type, CmdDoFeed_TextOn, CmdDoFeed_TextOff);
     }
 
     /**

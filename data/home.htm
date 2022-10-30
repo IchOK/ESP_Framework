@@ -18,29 +18,14 @@
   <script type="text/javascript">
     function handleWsMsg(msg) {
       let DataObject = JSON.parse(msg.data);
-      updateView(DataObject.elements, "data", false);
+      updateView(DataObject.elements, "data");
     }
     function onChange(ValueInput) {
-
-      let Value = ValueInput.value;
-      let ViewTag = ValueInput.parentElement.parentElement;
-      let ViewElement = ViewTag.parentElement;
-      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "data": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      let OutData = getOnChangeObject(ValueInput);
       ws.send(JSON.stringify(OutData));
     }
     function onClick(ValueInput) {
-      let stat = ValueInput.getAttribute("stat");
-      let Value;
-      if (stat == "on") {
-        Value = false;
-      } else if (stat == "off") {
-        Value = true;
-      } else {
-        return;
-      }
-      let ViewTag = ValueInput.parentElement.parentElement;
-      let ViewElement = ViewTag.parentElement;
-      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "data": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      let OutData = getOnClickObject(ValueInput);
       ws.send(JSON.stringify(OutData));
     }
 

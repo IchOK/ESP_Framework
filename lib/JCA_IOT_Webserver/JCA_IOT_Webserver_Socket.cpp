@@ -28,9 +28,11 @@ namespace JCA {
     }
 
     void Webserver::onWsEvent (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) {
+      Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Start");
       if (_Type == WS_EVT_CONNECT) {
         doWsUpdate (_Client);
-      } else if (_Type == WS_EVT_DATA) {
+      }
+      else if (_Type == WS_EVT_DATA) {
         wsHandleData (_Client, _Arg, _Data, _Len);
       }
     }
@@ -40,16 +42,21 @@ namespace JCA {
       if (Info->opcode == WS_TEXT) {
         // Initialise Message-Buffer on first Frame
         if (Info->index == 0) {
-          _Client->_tempObject = malloc (Info->len);
+          _Client->_tempObject = malloc (Info->len + 1);
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ MsgLen: ");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Info->len);
         }
         // Append Data to Message-Buffer
         memcpy ((uint8_t *)(_Client->_tempObject) + Info->index, _Data, _Len);
         // Handle Message if last Frame ist received
         if (Info->final && Info->index + _Len == Info->len) {
-
+          ((uint8_t *)(_Client->_tempObject))[Info->len] = 0;
           DynamicJsonDocument JBuffer (1000);
           JsonVariant InData;
           JsonVariant OutData;
+
+          Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Buffer: ");
+          Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, (char *)(_Client->_tempObject));
 
           DeserializationError Error = deserializeJson (JBuffer, (char *)(_Client->_tempObject));
           if (Error) {
@@ -129,7 +136,7 @@ namespace JCA {
       } else {
         JsonDoc.clear ();
         Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
+        Debug.println (FLAG_LOOP, true, ObjectName, __func__, "No Answer defined");
       }
       getAll (Elements);
 
@@ -137,7 +144,7 @@ namespace JCA {
       JsonDoc = OutData.as<JsonObject> ();
       String Response;
       serializeJson (JsonDoc, Response);
-      Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Response);
+      Debug.println (FLAG_LOOP, true, ObjectName, __func__, Response);
       if (_Client != nullptr) {
         _Client->text (Response);
       } else {

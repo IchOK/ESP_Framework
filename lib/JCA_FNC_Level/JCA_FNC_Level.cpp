@@ -116,10 +116,10 @@ namespace JCA {
      */
     void Level::createConfigTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, RawEmpty_Name, RawEmpty_Text, RawEmpty_Comment, RawEmpty_Unit, RawEmpty);
-      createTag (_Tags, RawFull_Name, RawFull_Text, RawFull_Comment, RawFull_Unit, RawFull);
-      createTag (_Tags, AlarmLevel_Name, AlarmLevel_Text, Alarm_Comment, AlarmLevel_Unit, AlarmLevel);
-      createTag (_Tags, ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, ReadInterval_Unit, ReadInterval);
+      createTag (_Tags, RawEmpty_Name, RawEmpty_Text, RawEmpty_Comment, false, RawEmpty_Unit, RawEmpty);
+      createTag (_Tags, RawFull_Name, RawFull_Text, RawFull_Comment, false, RawFull_Unit, RawFull);
+      createTag (_Tags, AlarmLevel_Name, AlarmLevel_Text, Alarm_Comment, false, AlarmLevel_Unit, AlarmLevel);
+      createTag (_Tags, ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval);
     }
 
     /**
@@ -129,9 +129,9 @@ namespace JCA {
      */
     void Level::createDataTags (JsonArray &_Tags) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, Level_Name, Level_Text, Level_Comment, Level_Unit, Value);
-      createTag (_Tags, Alarm_Name, Alarm_Text, Alarm_Comment, Alarm_TextOn, Alarm_TextOff, Alarm);
-      createTag (_Tags, RawValue_Name, RawValue_Text, RawValue_Comment, RawValue_Unit, RawValue);
+      createTag (_Tags, Level_Name, Level_Text, Level_Comment, true, Level_Unit, Value);
+      createTag (_Tags, Alarm_Name, Alarm_Text, Alarm_Comment, true, Alarm_TextOn, Alarm_TextOff, Alarm);
+      createTag (_Tags, RawValue_Name, RawValue_Text, RawValue_Comment, true, RawValue_Unit, RawValue);
     }
 
     /**

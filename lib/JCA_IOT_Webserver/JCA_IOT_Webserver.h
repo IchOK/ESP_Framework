@@ -120,6 +120,7 @@ namespace JCA {
       static const char *SaveConfig_Text;
       static const char *SaveConfig_Type;
       static const char *SaveConfig_Comment;
+      static const char *SaveConfig_BtnText;
       static const char *Time_Name;
       static const char *Time_Text;
       static const char *Time_Comment;

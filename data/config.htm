@@ -16,35 +16,17 @@
   </style>
   <script src="/view.js"></script>
   <script type="text/javascript">
-    function saveConfig() {
-      let OutData = { "elements": [{ "name": "System", "cmd": [{ "name": "saveConfig", "value": true }] }] };
-      ws.send(JSON.stringify(OutData));
-    }
     function handleWsMsg(msg) {
       let DataObject = JSON.parse(msg.data);
-      updateView(DataObject.elements, "config", false);
+      updateView(DataObject.elements, "config");
+      updateView(DataObject.elements, "cmdInfo");
     }
     function onChange(ValueInput) {
-
-      let Value = ValueInput.value;
-      let ViewTag = ValueInput.parentElement.parentElement;
-      let ViewElement = ViewTag.parentElement;
-      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "config": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      let OutData = getOnChangeObject(ValueInput);
       ws.send(JSON.stringify(OutData));
     }
     function onClick(ValueInput) {
-      let stat = ValueInput.getAttribute("stat");
-      let Value;
-      if (stat == "on") {
-        Value = false;
-      } else if (stat == "off") {
-        Value = true;
-      } else {
-        return;
-      }
-      let ViewTag = ValueInput.parentElement.parentElement;
-      let ViewElement = ViewTag.parentElement;
-      let OutData = { "elements": [{ "name": ViewElement.getAttribute("name"), "config": [{ "name": ViewTag.getAttribute("name"), "value": Value }] }] };
+      let OutData = getOnClickObject(ValueInput);
       ws.send(JSON.stringify(OutData));
     }
 
@@ -71,7 +53,6 @@
   <main class="container">
     <section id="elements">
     </section>
-    <button onclick="saveConfig()">Save</button>
   </main>
 </body>
 </ht???
