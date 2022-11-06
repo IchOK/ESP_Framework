@@ -41,7 +41,6 @@ Level Futter (LEVEL_PIN, "Futter");
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-StaticJsonDocument<2000> JDoc;
 Webserver Server;
 //-------------------------------------------------------
 // System Functions
@@ -50,12 +49,13 @@ void cbSystemReset () {
   ESP.restart ();
 }
 void cbSaveConfig () {
-  JDoc.clear ();
-  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
-  Spindel.getConfig (Elements);
-  Futter.getConfig (Elements);
   File ConfigFile = LittleFS.open (CONFIGPATH, "w");
-  serializeJson (JDoc, ConfigFile);
+  bool ElementInit = false;
+  ConfigFile.println("{\"elements\":[");
+  Server.writeSetup(ConfigFile, ElementInit);
+  Spindel.writeSetup (ConfigFile, ElementInit);
+  Futter.writeSetup (ConfigFile, ElementInit);
+  ConfigFile.println ("]}");
   ConfigFile.close ();
 }
 
@@ -71,67 +71,58 @@ String cbWebConfigReplace (const String &var) {
 //-------------------------------------------------------
 // RestAPI Functions
 //-------------------------------------------------------
-JsonVariant cbRestApiGet (JsonVariant &var) {
-  JDoc.clear ();
-  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
-  Server.getAll(Elements);
-  Spindel.getAll (Elements);
-  Futter.getAll (Elements);
-  return JDoc;
+void cbRestApiGet (JsonVariant &_In, JsonVariant &_Out) {
+  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
+  Server.getValues (Elements);
+  Spindel.getValues (Elements);
+  Futter.getValues (Elements);
 }
-JsonVariant cbRestApiPost (JsonVariant &var) {
-  if (var.containsKey (Protocol::JsonTagElements)) {
-    JsonArray Elements = (var.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+
+void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
+  if (_In.containsKey (Protocol::JsonTagElements)) {
+    JsonArray Elements = (_In.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+    Server.set (Elements);
     Spindel.set (Elements);
     Futter.set (Elements);
   }
-  JDoc.clear ();
-  return JDoc;
 }
-JsonVariant cbRestApiPut (JsonVariant &var) {
-  JDoc.clear ();
-  JDoc["message"] = "PUT not Used";
-  return JDoc;
+
+void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
+  _Out["message"] = "PUT not Used";
 }
-JsonVariant cbRestApiPatch (JsonVariant &var) {
+
+void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
   cbSaveConfig();
-  return JDoc;
 }
-JsonVariant cbRestApiDelete (JsonVariant &var) {
-  JDoc.clear ();
-  JDoc["message"] = "DELETE not used";
-  return JDoc;
+
+void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
+  _Out["message"] = "DELETE not used";
 }
 
 //-------------------------------------------------------
-// RestAPI Functions
+// Websocket Functions
 //-------------------------------------------------------
-JsonVariant cbWsUpdate (JsonVariant &var) {
-  JDoc.clear ();
-  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
-  Server.getAll (Elements);
-  Spindel.getAll (Elements);
-  Futter.getAll (Elements);
-  return JDoc;
+void cbWsUpdate (JsonVariant &_In, JsonVariant &_Out) {
+  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
+  Spindel.getValues (Elements);
+  Futter.getValues (Elements);
 }
-JsonVariant cbWsData (JsonVariant &var) {
-  if (var.containsKey (Protocol::JsonTagElements)) {
-    JsonArray Elements = (var.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
+  if (_In.containsKey (Protocol::JsonTagElements)) {
+    JsonArray Elements = (_In.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
     Spindel.set (Elements);
     Futter.set (Elements);
   }
-  JDoc.clear ();
-  JsonArray Elements = JDoc.createNestedArray (Protocol::JsonTagElements);
-  Server.getAll (Elements);
-  Spindel.getAll (Elements);
-  Futter.getAll (Elements);
-  return JDoc;
+  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
+  Spindel.getValues (Elements);
+  Futter.getValues (Elements);
 }
 
 //#######################################################
 // Setup
 //#######################################################
 void setup () {
+  DynamicJsonDocument JDoc(10000);
 
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
