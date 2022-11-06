@@ -110,6 +110,7 @@ namespace JCA {
      * @return false Config-File didn't exists or is not a valid JSON File
      */
     bool Webserver::readConfig () {
+      DynamicJsonDocument JsonDoc(1000);
       // Get Wifi-Config from File5
       File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
       if (ConfigFile) {
@@ -255,10 +256,12 @@ namespace JCA {
      *
      * @param _Tags Array the Tags have to add
      */
-    void Webserver::createConfigTags (JsonArray &_Tags) {
+    void Webserver::writeSetupConfig (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Tags, Hostname_Name, Hostname_Text, Hostname_Comment, false, Hostname);
-      createTag (_Tags, WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, false, WsUpdateCycle_Unit, WsUpdateCycle);
+      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      _SetupFile.println ("{" + createSetupTag (Hostname_Name, Hostname_Text, Hostname_Comment, false, Hostname) + "}");
+      _SetupFile.println (",{" + createSetupTag (WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, false, WsUpdateCycle_Unit, WsUpdateCycle) + "}");
+      _SetupFile.println ("]");
     }
 
     /**
@@ -266,9 +269,11 @@ namespace JCA {
      *
      * @param _Tags Array the Tags have to add
      */
-    void Webserver::createDataTags (JsonArray &_Tags) {
+    void Webserver::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createTag (_Tags, Time_Name, Time_Text, Time_Comment, true, getTime ());
+      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      _SetupFile.println ("{" + createSetupTag (Time_Name, Time_Text, Time_Comment, true, getTime ()) + "}");
+      _SetupFile.println ("]");
     }
 
     /**
@@ -276,10 +281,21 @@ namespace JCA {
      *
      * @param _Tags Array the Command-Infos have to add
      */
-    void Webserver::createCmdInfoTags (JsonArray &_Tags) {
+    void Webserver::writeSetupCmdInfo (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
-      createCmdInfo (_Tags, TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type);
-      createCmdInfo (_Tags, SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type, SaveConfig_BtnText);
+      _SetupFile.println (",\"" + String(JsonTagCmdInfo) + "\":[");
+      _SetupFile.println ("{" + createSetupCmdInfo (TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type) + "}");
+      _SetupFile.println (",{" + createSetupCmdInfo (SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type, SaveConfig_BtnText) + "}");
+      _SetupFile.println ("]");
+    }
+
+    void Webserver::createConfigValues (JsonObject &_Values) {
+      _Values[Hostname_Name] = Hostname;
+      _Values[WsUpdateCycle_Name] = WsUpdateCycle;
+    }
+
+    void Webserver::createDataValues (JsonObject &_Values) {
+      _Values[Time_Name] = getTime ();
     }
 
     /**
@@ -302,11 +318,6 @@ namespace JCA {
       // Webserver - WiFi Config
       Server.on (JCA_IOT_WEBSERVER_PATH_CONNECT, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectGet (_Request); });
       Server.on (JCA_IOT_WEBSERVER_PATH_CONNECT, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectPost (_Request); });
-      if (Connector.isConnected ()) {
-        Server.on ("/", HTTP_GET, [] (AsyncWebServerRequest *request) { request->redirect (JCA_IOT_WEBSERVER_PATH_HOME); });
-      } else {
-        Server.on ("/", HTTP_GET, [] (AsyncWebServerRequest *request) { request->redirect (JCA_IOT_WEBSERVER_PATH_CONNECT); });
-      }
 
       // Webserver - System Config
       Server.on (JCA_IOT_WEBSERVER_PATH_SYS, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemGet (_Request); });
@@ -349,7 +360,7 @@ namespace JCA {
             Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Data");
 
             if (_Total > 0 && _Request->_tempObject == nullptr) {
-              _Request->_tempObject = malloc (_Total);
+              _Request->_tempObject = malloc (_Total + 10);
             }
             if (_Request->_tempObject != nullptr) {
               memcpy ((uint8_t *)(_Request->_tempObject) + _Index, _Data, _Len);
@@ -359,7 +370,7 @@ namespace JCA {
       // Webserver - If not defined
       Server.serveStatic ("/", LittleFS, "/")
           .setDefaultFile (JCA_IOT_WEBSERVER_PATH_HOME);
-      Server.onNotFound ([] (AsyncWebServerRequest *_Request) { _Request->send (404); });
+      Server.onNotFound ([] (AsyncWebServerRequest *_Request) { _Request->redirect (JCA_IOT_WEBSERVER_PATH_SYS); });
       Server.begin ();
 
       Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Done");

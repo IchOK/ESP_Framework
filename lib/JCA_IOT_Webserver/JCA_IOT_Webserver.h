@@ -98,7 +98,7 @@
 
 namespace JCA {
   namespace IOT {
-    typedef std::function<JsonVariant (JsonVariant &)> JsonVariantCallback;
+    typedef std::function<void (JsonVariant &, JsonVariant &)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
     class Webserver : public JCA::FNC::Protocol {
@@ -135,19 +135,20 @@ namespace JCA {
       AsyncWebSocket Websocket;
       ESP32Time Rtc;
       uint16_t Port;
-      StaticJsonDocument<2000> JsonDoc;
       SimpleCallback onSystemResetCB;
       SimpleCallback onSaveConfigCB;
       bool readConfig ();
+
+      // Protocol Functions
+      void createConfigValues (JsonObject &_Values);
+      void createDataValues (JsonObject &_Values);
       void setConfig (JsonArray _Tags);
       void setData (JsonArray _Tags);
       void setCmd (JsonArray _Tags);
-      void createConfigTags (JsonArray &_Tags);
-      void createDataTags (JsonArray &_Tags);
-      void createCmdInfoTags (JsonArray &_Tags);
 
-      //      void recvSystemMsg (JsonVariant &_Json);
-      //      void createSystemMsg (JsonVariant &_Json);
+      void writeSetupConfig (File _SetupFile);
+      void writeSetupData (File _SetupFile);
+      void writeSetupCmdInfo (File _SetupFile);
 
       // ...Webserver_Web.cpp
       AwsTemplateProcessor replaceHomeWildcardsCB;

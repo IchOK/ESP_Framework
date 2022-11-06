@@ -98,40 +98,15 @@ namespace JCA {
       return JsonVariant ();
     }
 
-    /**
-     * @brief Add the Elemet-Body to the Array
-     * Contains Element Name and comment if defined
-     * @param _Elements Array of Elements ("elements": [])
-     * @return JsonObject Element to attach data, config, ...
-     */
-    JsonObject Protocol::createEmptyElement (JsonArray &_Elements) {
-      JsonObject Element = _Elements.createNestedObject ();
-      Element[JsonTagName] = Name;
-      if (Comment.length () > 0) {
-        Element[JsonTagComment] = Comment;
-      }
-      return Element;
-    }
-
-    /**
-     * @brief Add a Default-Tag-Structur to the Array
-     * Contains Element Name and comment if defined
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @return JsonObject Tag to attach value, unit, ...
-     */
-    JsonObject Protocol::createEmptyTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly) {
-      JsonObject Tag = _Tags.createNestedObject ();
-      Tag[JsonTagName] = _Name;
-      Tag[JsonTagText] = _Text;
-      Tag[JsonTagReadOnly] = _ReadOnly;
+    String Protocol::createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly) {
+      String SetupTag;
+      SetupTag += "\"" + String(JsonTagName) + "\":\"" + String(_Name) + "\"";
+      SetupTag += ",\"" + String(JsonTagText) + "\":\"" + String(_Text) + "\"";
       if (_Comment != nullptr) {
-        Tag[JsonTagComment] = _Comment;
+        SetupTag += ",\"" + String(JsonTagComment) + "\":\"" + String(_Comment) + "\"";
       }
-      return Tag;
+      SetupTag += ",\"" + String(JsonTagReadOnly) + "\":" + String(_ReadOnly);
+      return SetupTag;
     }
 
     /**
@@ -146,19 +121,20 @@ namespace JCA {
      * @param _BntOffText Buttontext if Value is False, if not defined (nullptr) set to "OFF"
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BntOffText, bool _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_BtnOnText != nullptr) {
-        Tag[JsonTagOn] = _BtnOnText;
+        SetupTag += ",\"" + String(JsonTagOn) + "\":\"" + String(_BtnOnText) + "\"";
       } else {
-        Tag[JsonTagOn] = BtnOnDefault;
+        SetupTag += ",\"" + String(JsonTagOn) + "\":\"" + String(BtnOnDefault) + "\"";
       }
-      if (_BntOffText != nullptr) {
-        Tag[JsonTagOff] = _BntOffText;
+      if (_BtnOffText != nullptr) {
+        SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(_BtnOffText) + "\"";
       } else {
-        Tag[JsonTagOff] = BtnOffDefault;
+        SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(BtnOffDefault) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagName) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -172,12 +148,13 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        Tag[JsonTagUnit] = _Unit;
+        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -191,12 +168,13 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        Tag[JsonTagUnit] = _Unit;
+        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -210,12 +188,13 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        Tag[JsonTagUnit] = _Unit;
+        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -229,12 +208,13 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        Tag[JsonTagUnit] = _Unit;
+        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -248,12 +228,13 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        Tag[JsonTagUnit] = _Unit;
+        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -267,12 +248,13 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        Tag[JsonTagUnit] = _Unit;
+        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
       }
+      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      return SetupTag;
     }
 
     /**
@@ -285,9 +267,10 @@ namespace JCA {
      * @param _ReadOnly Disable Input on Website
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
+      SetupTag += ",\"" + String(JsonTagValue) + "\":\"" + _Value + "\"";
+      return SetupTag;
     }
 
     /**
@@ -300,9 +283,10 @@ namespace JCA {
      * @param _ReadOnly Disable Input on Website
      * @param _Value Current value of the Tag
      */
-    void Protocol::createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, _ReadOnly);
-      Tag[JsonTagValue] = _Value;
+    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
+      SetupTag += ",\"" + String(JsonTagValue) + "\":\"" + String(_Value) + "\"";
+      return SetupTag;
     }
 
     /**
@@ -314,9 +298,10 @@ namespace JCA {
      * @param _Comment Comment, if not used set nullptr
      * @param _Type Type for the HMI to know what ist requested (boot, in16, string, ...)
      */
-    void Protocol::createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, false);
-      Tag[JsonTagType] = _Type;
+    String Protocol::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
+      SetupTag += ",\"" + String(JsonTagType) + "\":\"" + String(_Type) + "\"";
+      return SetupTag;
     }
 
     /**
@@ -329,70 +314,13 @@ namespace JCA {
      * @param _Type sould be bool
      * @param _BtnText Buttontext, if not defined (nullptr) set to "ON"
      */
-    void Protocol::createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText) {
-      JsonObject Tag = createEmptyTag (_Tags, _Name, _Text, _Comment, false);
-      Tag[JsonTagType] = _Type;
+    String Protocol::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText) {
+      String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
       if (_BtnText != nullptr) {
-        Tag[JsonTagOff] = _BtnText;
-      } else {
-        Tag[JsonTagOff] = BtnOffDefault;
+        SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(_BtnText) + "\"";
       }
-    }
-
-    /**
-     * @brief Add the Elemet with all Config-Tags to the Array
-     *
-     * @param _Elements Array of Elements ("elements": []) the Element have to add
-     */
-    void Protocol::getConfig (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      JsonObject Element = createEmptyElement (_Elements);
-      JsonArray Tags;
-      Tags = Element.createNestedArray (JsonTagConfig);
-      createConfigTags (Tags);
-    }
-
-    /**
-     * @brief Add the Element with all Data-Tags to the Array
-     *
-     * @param _Elements Array of Elements ("elements": []) the Element have to add
-     */
-    void Protocol::getData (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      JsonObject Element = createEmptyElement (_Elements);
-      JsonArray Tags;
-      Tags = Element.createNestedArray (JsonTagData);
-      createDataTags (Tags);
-    }
-
-    /**
-     * @brief Add the Element with all Command-Infos-Tags to the Array
-     *
-     * @param _Elements Array of Elements ("elements": []) the Element have to add
-     */
-    void Protocol::getCmdInfo (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      JsonObject Element = createEmptyElement (_Elements);
-      JsonArray Tags;
-      Tags = Element.createNestedArray (JsonTagCmdInfo);
-      createCmdInfoTags (Tags);
-    }
-
-    /**
-     * @brief Add the complete Element to the Array
-     *
-     * @param _Elements Array of Elements ("elements": []) the Element have to add
-     */
-    void Protocol::getAll (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      JsonObject Element = createEmptyElement (_Elements);
-      JsonArray Tags;
-      Tags = Element.createNestedArray (JsonTagData);
-      createDataTags (Tags);
-      Tags = Element.createNestedArray (JsonTagConfig);
-      createConfigTags (Tags);
-      Tags = Element.createNestedArray (JsonTagCmdInfo);
-      createCmdInfoTags (Tags);
+      SetupTag += ",\"" + String(JsonTagType) + "\":\"" + String(_Type) + "\"";
+      return SetupTag;
     }
 
     /**
@@ -415,6 +343,32 @@ namespace JCA {
       if (_Tags.is<JsonArray> ()) {
         setCmd (_Tags.as<JsonArray> ());
       }
+    }
+
+    void Protocol::getValues (JsonObject &_Elements) {
+      JsonObject Element = _Elements.createNestedObject (Name);
+      JsonObject Values;
+      Values = Element.createNestedObject (JsonTagData);
+      createDataValues (Values);
+      Values = Element.createNestedObject (JsonTagConfig);
+      createConfigValues (Values);
+    }
+
+    void Protocol::writeSetup (File _SetupFile, bool &_ElementInit) {
+      if (_ElementInit) {
+        _SetupFile.println(",{");
+      } else {
+        _SetupFile.println ("{");
+        _ElementInit = true;
+      }
+      _SetupFile.println ("\"" + String(JsonTagName) + "\":\"" + Name + "\"");
+      if (Comment.length() > 0) {
+        _SetupFile.println(",\"" + String(JsonTagComment) + "\":\"" + Comment + "\"");
+      }
+      writeSetupConfig (_SetupFile);
+      writeSetupData (_SetupFile);
+      writeSetupCmdInfo (_SetupFile);
+      _SetupFile.println ("}");
     }
   }
 }

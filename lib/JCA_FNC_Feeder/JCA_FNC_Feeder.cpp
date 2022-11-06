@@ -199,15 +199,17 @@ namespace JCA {
      *
      * @param _Tags Array the Tags have to add
      */
-    void Feeder::createConfigTags (JsonArray &_Tags) {
+    void Feeder::writeSetupConfig (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, FeedingHour_Name, FeedingHour_Text, FeedingHour_Comment, false, FeedingHour_Unit, FeedingHour);
-      createTag (_Tags, FeedingMinute_Name, FeedingMinute_Text, FeedingMinute_Comment, false, FeedingMinute_Unit, FeedingMinute);
-      createTag (_Tags, SteppsPerRotation_Name, SteppsPerRotation_Text, SteppsPerRotation_Comment, false, SteppsPerRotation_Unit, SteppsPerRotation);
-      createTag (_Tags, FeedingRotations_Name, FeedingRotations_Text, FeedingRotaions_Comment, false, FeedingRotaions_Unit, FeedingRotations);
-      createTag (_Tags, Acceleration_Name, Acceleration_Text, Acceleration_Comment, false, Acceleration_Unit, Acceleration);
-      createTag (_Tags, MaxSpeed_Name, MaxSpeed_Text, MaxSpeed_Comment, false, MaxSpeed_Unit, MaxSpeed);
-      createTag (_Tags, ConstSpeed_Name, ConstSpeed_Text, ConstSpeed_Comment, false, ConstSpeed_Unit, ConstSpeed);
+      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      _SetupFile.println ("{" + createSetupTag (FeedingHour_Name, FeedingHour_Text, FeedingHour_Comment, false, FeedingHour_Unit, FeedingHour) + "}");
+      _SetupFile.println (",{" + createSetupTag (FeedingMinute_Name, FeedingMinute_Text, FeedingMinute_Comment, false, FeedingMinute_Unit, FeedingMinute) + "}");
+      _SetupFile.println (",{" + createSetupTag (SteppsPerRotation_Name, SteppsPerRotation_Text, SteppsPerRotation_Comment, false, SteppsPerRotation_Unit, SteppsPerRotation) + "}");
+      _SetupFile.println (",{" + createSetupTag (FeedingRotations_Name, FeedingRotations_Text, FeedingRotaions_Comment, false, FeedingRotaions_Unit, FeedingRotations) + "}");
+      _SetupFile.println (",{" + createSetupTag (Acceleration_Name, Acceleration_Text, Acceleration_Comment, false, Acceleration_Unit, Acceleration) + "}");
+      _SetupFile.println (",{" + createSetupTag (MaxSpeed_Name, MaxSpeed_Text, MaxSpeed_Comment, false, MaxSpeed_Unit, MaxSpeed) + "}");
+      _SetupFile.println (",{" + createSetupTag (ConstSpeed_Name, ConstSpeed_Text, ConstSpeed_Comment, false, ConstSpeed_Unit, ConstSpeed) + "}");
+      _SetupFile.println ("]");
     }
 
     /**
@@ -215,13 +217,15 @@ namespace JCA {
      *
      * @param _Tags Array the Tags have to add
      */
-    void Feeder::createDataTags (JsonArray &_Tags) {
+    void Feeder::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, Feeding_Name, Feeding_Text, Feeding_Comment, true, Feeding_TextOn, Feeding_TextOff, Feeding);
-      createTag (_Tags, DistanceToGo_Name, DistanceToGo_Text, DistanceToGo_Comment, true, DistanceToGo_Unit, Stepper.distanceToGo ());
-      createTag (_Tags, RunConst_Name, RunConst_Text, RunConst_Comment, false, RunConst_TextOn, RunConst_TextOff, RunConst);
-      createTag (_Tags, Speed_Name, Speed_Text, Speed_Comment, true, Speed_Unit, Stepper.speed ());
-      createCmdInfo (_Tags, CmdDoFeed_Name, CmdDoFeed_Text, CmdDoFeed_Comment, CmdDoFeed_Type, CmdDoFeed_BtnText);
+      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      _SetupFile.println ("{" + createSetupTag (Feeding_Name, Feeding_Text, Feeding_Comment, true, Feeding_TextOn, Feeding_TextOff, Feeding) + "}");
+      _SetupFile.println (",{" + createSetupTag (DistanceToGo_Name, DistanceToGo_Text, DistanceToGo_Comment, true, DistanceToGo_Unit, Stepper.distanceToGo ()) + "}");
+      _SetupFile.println (",{" + createSetupTag (RunConst_Name, RunConst_Text, RunConst_Comment, false, RunConst_TextOn, RunConst_TextOff, RunConst) + "}");
+      _SetupFile.println (",{" + createSetupTag (Speed_Name, Speed_Text, Speed_Comment, true, Speed_Unit, Stepper.speed ()) + "}");
+      _SetupFile.println (",{" + createSetupCmdInfo (CmdDoFeed_Name, CmdDoFeed_Text, CmdDoFeed_Comment, CmdDoFeed_Type, CmdDoFeed_BtnText) + "}");
+      _SetupFile.println ("]");
     }
 
     /**
@@ -229,7 +233,37 @@ namespace JCA {
      *
      * @param _Tags Array the Command-Infos have to add
      */
-    void Feeder::createCmdInfoTags (JsonArray &_Tags) {
+    void Feeder::writeSetupCmdInfo (File _SetupFile) {
+    }
+
+    void Feeder::createConfigValues (JsonObject &_Values) {
+      _Values[FeedingHour_Name] = FeedingHour;
+      _Values[FeedingMinute_Name] = FeedingMinute;
+      _Values[SteppsPerRotation_Name] = SteppsPerRotation;
+      _Values[FeedingRotations_Name] = FeedingRotations;
+      _Values[Acceleration_Name] = Acceleration;
+      _Values[MaxSpeed_Name] = MaxSpeed;
+      _Values[ConstSpeed_Name] = ConstSpeed;
+    }
+
+    void Feeder::createDataValues (JsonObject &_Values) {
+      _Values[Feeding_Name] = Feeding;
+      _Values[DistanceToGo_Name] = Stepper.distanceToGo ();
+      _Values[RunConst_Name] = RunConst;
+      _Values[Speed_Name] = Stepper.speed ();
+      _Values[CmdDoFeed_Name] = CmdDoFeed_BtnText;
+    }
+
+    void writeSetupConfig (File _SetupFile) {
+
+    }
+
+    void writeSetupData (File _SetupFile) {
+
+    }
+
+    void writeSetupCmdInfo (File _SetupFile) {
+
     }
 
     /**

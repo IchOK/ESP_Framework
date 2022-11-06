@@ -15,7 +15,8 @@ using namespace JCA::SYS;
 namespace JCA {
   namespace IOT {
     void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
-      JsonVariant OutData;
+      DynamicJsonDocument JsonDoc(10000);
+      JsonVariant OutData = JsonDoc.as<JsonVariant>();
 
       if (Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Request->methodToString ())) {
         Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Body:");
@@ -24,41 +25,35 @@ namespace JCA {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, JsonBody);
       }
 
-      // Handle System-Data
-      if (_Json.containsKey (Protocol::JsonTagElements)) {
-        JsonArray Elements = (_Json.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
-        set (Elements);
-      }
-
       // Call externak datahandling Functions
       switch (_Request->method ()) {
       case HTTP_GET:
         if (restApiGetCB) {
-          OutData = restApiGetCB (_Json);
+          restApiGetCB (_Json, OutData);
         }
         break;
 
       case HTTP_POST:
         if (restApiPostCB) {
-          OutData = restApiPostCB (_Json);
+          restApiPostCB (_Json, OutData);
         }
         break;
 
       case HTTP_PUT:
         if (restApiPutCB) {
-          OutData = restApiPutCB (_Json);
+          restApiPutCB (_Json, OutData);
         }
         break;
 
       case HTTP_PATCH:
         if (restApiPatchCB) {
-          OutData = restApiPatchCB (_Json);
+          restApiPatchCB (_Json, OutData);
         }
         break;
 
       case HTTP_DELETE:
         if (restApiDeleteCB) {
-          OutData = restApiDeleteCB (_Json);
+          restApiDeleteCB (_Json, OutData);
         }
         break;
 
@@ -67,20 +62,11 @@ namespace JCA {
       }
 
       // Add System Informations
-      JsonArray Elements;
-      if (OutData.containsKey(Protocol::JsonTagElements)) {
-        Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
-      } else {
-        JsonDoc.clear ();
-        Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
-      }
-      getAll(Elements);
+      OutData["used"] = JsonDoc.memoryUsage();
 
       // Create Response
-      JsonDoc = OutData.as<JsonObject> ();
       String response;
-      serializeJson (JsonDoc, response);
+      serializeJson (OutData, response);
       Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Response:");
       Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, response);
       _Request->send (200, "application/json", response);

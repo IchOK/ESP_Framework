@@ -114,12 +114,14 @@ namespace JCA {
      *
      * @param _Tags Array the Tags have to add
      */
-    void Level::createConfigTags (JsonArray &_Tags) {
+    void Level::writeSetupConfig (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, RawEmpty_Name, RawEmpty_Text, RawEmpty_Comment, false, RawEmpty_Unit, RawEmpty);
-      createTag (_Tags, RawFull_Name, RawFull_Text, RawFull_Comment, false, RawFull_Unit, RawFull);
-      createTag (_Tags, AlarmLevel_Name, AlarmLevel_Text, Alarm_Comment, false, AlarmLevel_Unit, AlarmLevel);
-      createTag (_Tags, ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval);
+      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      _SetupFile.println ("{" + createSetupTag (RawEmpty_Name, RawEmpty_Text, RawEmpty_Comment, false, RawEmpty_Unit, RawEmpty) + "}");
+      _SetupFile.println (",{" + createSetupTag (RawFull_Name, RawFull_Text, RawFull_Comment, false, RawFull_Unit, RawFull) + "}");
+      _SetupFile.println (",{" + createSetupTag (AlarmLevel_Name, AlarmLevel_Text, Alarm_Comment, false, AlarmLevel_Unit, AlarmLevel) + "}");
+      _SetupFile.println (",{" + createSetupTag (ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval) + "}");
+      _SetupFile.println ("]");
     }
 
     /**
@@ -127,11 +129,13 @@ namespace JCA {
      *
      * @param _Tags Array the Tags have to add
      */
-    void Level::createDataTags (JsonArray &_Tags) {
+    void Level::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      createTag (_Tags, Level_Name, Level_Text, Level_Comment, true, Level_Unit, Value);
-      createTag (_Tags, Alarm_Name, Alarm_Text, Alarm_Comment, true, Alarm_TextOn, Alarm_TextOff, Alarm);
-      createTag (_Tags, RawValue_Name, RawValue_Text, RawValue_Comment, true, RawValue_Unit, RawValue);
+      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      _SetupFile.println ("{" + createSetupTag (Level_Name, Level_Text, Level_Comment, true, Level_Unit, Value) + "}");
+      _SetupFile.println (",{" + createSetupTag (Alarm_Name, Alarm_Text, Alarm_Comment, true, Alarm_TextOn, Alarm_TextOff, Alarm) + "}");
+      _SetupFile.println (",{" + createSetupTag (RawValue_Name, RawValue_Text, RawValue_Comment, true, RawValue_Unit, RawValue) + "}");
+      _SetupFile.println ("]");
     }
 
     /**
@@ -139,8 +143,21 @@ namespace JCA {
      *
      * @param _Tags Array the Command-Infos have to add
      */
-    void Level::createCmdInfoTags (JsonArray &_Tags) {
+    void Level::writeSetupCmdInfo (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
+    }
+
+    void Level::createConfigValues (JsonObject &_Values) {
+      _Values[RawEmpty_Name] = RawEmpty;
+      _Values[RawFull_Name] = RawFull;
+      _Values[AlarmLevel_Name] = AlarmLevel;
+      _Values[ReadInterval_Name] = ReadInterval;
+    }
+
+    void Level::createDataValues (JsonObject &_Values) {
+      _Values[Level_Name] = Value;
+      _Values[Alarm_Name] = Alarm;
+      _Values[RawValue_Name] = RawValue;
     }
 
     /**

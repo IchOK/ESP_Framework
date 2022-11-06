@@ -29,6 +29,7 @@ namespace JCA {
      * @param _Request Request data from Web-Client
      */
     void Webserver::onWebConnectPost (AsyncWebServerRequest *_Request) {
+      DynamicJsonDocument JsonDoc(1000);
       JsonObject Config;
       JsonObject WiFiConfig;
 

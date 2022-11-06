@@ -30,6 +30,15 @@
       ws.send(JSON.stringify(OutData));
     }
 
+    fetch("http://" + location.host + "/usrConfig.json")
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        createView(data.elements, "config");
+        createView(data.elements, "cmdInfo");
+      });
     var ws = new WebSocket("ws://" + location.host + "/ws");
     ws.onmessage = function (_msg) {
       handleWsMsg(_msg);

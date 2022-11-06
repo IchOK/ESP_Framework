@@ -2,6 +2,7 @@
 #ifndef _JCA_FNC_PARENT_
 #define _JCA_FNC_PARENT_
 
+#include "FS.h"
 #include <ArduinoJson.h>
 
 #include <JCA_SYS_DebugOut.h>
@@ -20,12 +21,15 @@ namespace JCA {
       String Comment;
 
       // Prototypes for Child Elements
-      virtual void createConfigTags (JsonArray &_Tags) = 0;
-      virtual void createDataTags (JsonArray &_Tags) = 0;
-      virtual void createCmdInfoTags (JsonArray &_Tags) = 0;
+      virtual void createConfigValues (JsonObject &_Values) = 0;
+      virtual void createDataValues (JsonObject &_Values) = 0;
       virtual void setConfig (JsonArray _Tags) = 0;
       virtual void setData (JsonArray _Tags) = 0;
       virtual void setCmd (JsonArray _Tags) = 0;
+
+      virtual void writeSetupConfig (File _SetupFile) = 0;
+      virtual void writeSetupData (File _SetupFile) = 0;
+      virtual void writeSetupCmdInfo (File _SetupFile) = 0;
 
       // Get Element-Data by Name
       JsonVariant findConfig (JsonArray &_Elements);
@@ -33,19 +37,18 @@ namespace JCA {
       JsonVariant findCmd (JsonArray &_Elements);
       
       // Create Protocol-Structure
-      JsonObject createEmptyElement (JsonArray &_Elements);
-      JsonObject createEmptyTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BntOffText, bool _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value);
-      void createTag (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value);
-      void createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type);
-      void createCmdInfo (JsonArray &_Tags, const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText);
+      String createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value);
+      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value);
+      String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type);
+      String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText);
 
     public:
       // Json Tags
@@ -68,11 +71,10 @@ namespace JCA {
       Protocol (String _Name, String _Comment);
       Protocol (String _Name);
       virtual void update (struct tm &_Time) = 0;
-      void getConfig (JsonArray &_Elements);
-      void getData (JsonArray &_Elements);
-      void getCmdInfo (JsonArray &_Elements);
-      void getAll (JsonArray &_Elements);
       void set (JsonArray &_Elements);
+
+      void getValues (JsonObject &_Elements);
+      void writeSetup (File _SetupFile, bool &_ElementInit);
     };
   }
 }

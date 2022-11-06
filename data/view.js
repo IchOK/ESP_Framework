@@ -1,4 +1,4 @@
-function updateView(DataElements, ViewType) {
+function createView(DataElements, ViewType) {
   //Loop Elements
   let ViewElements = document.getElementById("elements");
   DataElements.forEach ((DataElement, EIndex) => {
@@ -10,18 +10,35 @@ function updateView(DataElements, ViewType) {
           if (ViewElement === null) {
             ViewElement = createViewElement(ViewElements, DataElement);
           }
-          //for (const DataTag in DataElement[ViewType]) {
           DataTags.forEach((DataTag, DIndex) => {
             let ViewTag = ViewElement.querySelector("div[name='" + DataTag.name + "']");
             if (ViewTag === null) {
               ViewTag = createViewTag(ViewElement, DataTag, ViewType);
             }
-            updateViewTag(ViewTag, DataTag);
           });
         }
       }
     }
   });
+}
+
+function updateView(DataElements, ViewType) {
+  //Loop Elements
+  let ViewElements = document.getElementById("elements");
+  for (const [DataElementName, DataElementValue] of Object.entries(DataElements)) {
+    if (ViewType in DataElementValue) {
+      let ViewElement = ViewElements.querySelector("article[name='" + DataElementName + "']");
+      if (ViewElement !== null) {
+        let DataTagValues = DataElementValue[ViewType];
+        for (const [DataTagName, DataTagValue] of Object.entries(DataTagValues)) {
+          let ViewTag = ViewElement.querySelector("div[name='" + DataTagName + "']");
+          if (ViewTag !== null) {
+            updateViewTag(ViewTag, DataTagValue);
+          }
+        }
+      }
+    }
+  }
 }
 
 function createViewElement(ViewElements, DataElement) {
@@ -124,11 +141,12 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
   ValueInput.setAttribute("name", "value");
   ValueInput.setAttribute("style", "text-align:center;");
   if (IsCommand) {
-    ValueInput.setAttribute("stat", "off");
     ValueInput.value = DataTag.off;
+    ValueInput.setAttribute("textOff", DataTag.off);
     ValueInput.classList = "secondary";
   } else {
-    ValueInput.setAttribute("stat", "undef");
+    ValueInput.setAttribute("textOn", DataTag.on);
+    ValueInput.setAttribute("textOff", DataTag.off);
     ValueInput.classList = "secondary outline"
   }
   ValueInput.disabled = DataTag.readOnly;
@@ -138,23 +156,19 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
   ViewTagValue.appendChild(ValueInput);
 }
 
-function updateViewTag(ViewTag, DataTag) {
-  if (typeof DataTag.value === "number" || typeof DataTag.value === "string") {
-    let ValueInput = ViewTag.querySelector("input[name='value']");
-    if (document.activeElement !== ValueInput) {
-      ValueInput.value = DataTag.value
-    }
-  }
-  else if (typeof DataTag.value === "boolean") {
-    let ValueInput = ViewTag.querySelector("input[name='value']");
-    if (DataTag.value) {
-      ValueInput.setAttribute("stat", "on");
-      ValueInput.value = DataTag.on;
-      ValueInput.className = "primary"
+function updateViewTag(ViewTag, DataTagValue) {
+  let ValueInput = ViewTag.querySelector("input[name='value']");
+  if (ValueInput.type === "button") {
+    if (DataTagValue) {
+      ValueInput.value = ValueInput.getAttribute("textOn");
+      ValueInput.className = "primary";
     } else {
-      ValueInput.setAttribute("stat", "off");
-      ValueInput.value = DataTag.off;
-      ValueInput.className = "primary outline"
+      ValueInput.value = ValueInput.getAttribute("textOff");
+      ValueInput.className = "primary outline";
+    }
+  } else {
+    if (ValueInput !== document.activeElement) {
+        ValueInput.value = DataTagValue;
     }
   }
 }
@@ -175,11 +189,11 @@ function getOnChangeObject (ValueInput) {
 }
 
 function getOnClickObject(ValueInput) {
-  let stat = ValueInput.getAttribute("stat");
+  let text = ValueInput.getAttribute("stat");
   let Value;
-  if (stat == "on") {
+  if (text == ValueInput.getAttribute("textOn")) {
     Value = false;
-  } else if (stat == "off") {
+  } else if (text == ValueInput.getAttribute("textOff")) {
     Value = true;
   } else {
     return;

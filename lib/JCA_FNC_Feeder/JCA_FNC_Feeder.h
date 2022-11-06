@@ -67,12 +67,15 @@ namespace JCA {
       static const char *CmdDoFeed_BtnText;
       
       // Protocol Functions
+      void createConfigValues (JsonObject &_Values);
+      void createDataValues (JsonObject &_Values);
       void setConfig (JsonArray _Tags);
       void setData (JsonArray _Tags);
       void setCmd (JsonArray _Tags);
-      void createConfigTags (JsonArray &_Tags);
-      void createDataTags (JsonArray &_Tags);
-      void createCmdInfoTags (JsonArray &_Tags);
+
+      void writeSetupConfig (File _SetupFile);
+      void writeSetupData (File _SetupFile);
+      void writeSetupCmdInfo (File _SetupFile);
 
       // Hardware
       AccelStepper Stepper;

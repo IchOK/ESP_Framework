@@ -42,7 +42,7 @@ namespace JCA {
       if (Info->opcode == WS_TEXT) {
         // Initialise Message-Buffer on first Frame
         if (Info->index == 0) {
-          _Client->_tempObject = malloc (Info->len + 1);
+          _Client->_tempObject = malloc (Info->len + 10);
           Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ MsgLen: ");
           Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Info->len);
         }
@@ -51,24 +51,25 @@ namespace JCA {
         // Handle Message if last Frame ist received
         if (Info->final && Info->index + _Len == Info->len) {
           ((uint8_t *)(_Client->_tempObject))[Info->len] = 0;
-          DynamicJsonDocument JBuffer (1000);
+          DynamicJsonDocument JsonInDoc (1000);
+          DynamicJsonDocument JsonOutDoc (10000);
           JsonVariant InData;
-          JsonVariant OutData;
+          JsonVariant OutData = JsonOutDoc.as<JsonVariant> ();
 
           Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Buffer: ");
           Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, (char *)(_Client->_tempObject));
 
-          DeserializationError Error = deserializeJson (JBuffer, (char *)(_Client->_tempObject));
+          DeserializationError Error = deserializeJson (JsonInDoc, (char *)(_Client->_tempObject));
           if (Error) {
             if (Debug.print (FLAG_ERROR, true, ObjectName, __func__, "+ deserializeJson() failed: ")) {
               Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
               Debug.print (FLAG_ERROR, true, ObjectName, __func__, "+ Body:");
               Debug.println (FLAG_ERROR, true, ObjectName, __func__, (char *)(_Client->_tempObject));
             }
-            JBuffer.clear ();
+            JsonInDoc.clear ();
           }
 
-          InData = JBuffer.as<JsonVariant> ();
+          InData = JsonInDoc.as<JsonVariant> ();
 
           // Handle System-Data
           if (InData.containsKey (Protocol::JsonTagElements)) {
@@ -78,26 +79,24 @@ namespace JCA {
 
           // Call externak datahandling Functions
           if (wsDataCB) {
-            OutData = wsDataCB (InData);
+            wsDataCB (InData, OutData);
           } else if (restApiPostCB) {
-            OutData = restApiPostCB (InData);
+            restApiPostCB (InData, OutData);
           }
 
           // Add System Informations
-          JsonArray Elements;
+          JsonObject Elements;
           if (OutData.containsKey (Protocol::JsonTagElements)) {
-            Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+            Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonObject> ();
           } else {
-            JsonDoc.clear ();
-            Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
+            Elements = JsonOutDoc.createNestedObject (Protocol::JsonTagElements);
             Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
           }
-          getAll (Elements);
+          getValues (Elements);
 
           // Create Response
-          JsonDoc = OutData.as<JsonObject> ();
           String Response;
-          serializeJson (JsonDoc, Response);
+          serializeJson (OutData, Response);
           Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, Response);
           if (_Client->canSend ()) {
             _Client->text (Response);
@@ -107,8 +106,9 @@ namespace JCA {
     }
 
     bool Webserver::doWsUpdate (AsyncWebSocketClient *_Client) {
-      JsonVariant OutData;
+      DynamicJsonDocument JsonDoc(10000);
       JsonVariant InData;
+      JsonVariant OutData = JsonDoc.as<JsonVariant> ();
 
       if (_Client != nullptr) {
         // check if selected Client can send Data
@@ -124,26 +124,25 @@ namespace JCA {
 
       // Call externak datahandling Functions
       if (wsUpdateCB) {
-        OutData = wsUpdateCB (InData);
+        wsUpdateCB (InData, OutData);
       } else if (restApiGetCB) {
-        OutData = restApiGetCB (InData);
+        restApiGetCB (InData, OutData);
       }
 
       // Add System Informations
-      JsonArray Elements;
+      JsonObject Elements;
       if (OutData.containsKey (Protocol::JsonTagElements)) {
-        Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+        Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonObject> ();
       } else {
         JsonDoc.clear ();
-        Elements = JsonDoc.createNestedArray (Protocol::JsonTagElements);
+        Elements = JsonDoc.createNestedObject (Protocol::JsonTagElements);
         Debug.println (FLAG_LOOP, true, ObjectName, __func__, "No Answer defined");
       }
-      getAll (Elements);
+      getValues (Elements);
 
       // Create Response
-      JsonDoc = OutData.as<JsonObject> ();
       String Response;
-      serializeJson (JsonDoc, Response);
+      serializeJson (OutData, Response);
       Debug.println (FLAG_LOOP, true, ObjectName, __func__, Response);
       if (_Client != nullptr) {
         _Client->text (Response);
