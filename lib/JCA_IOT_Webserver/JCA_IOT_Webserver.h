@@ -98,7 +98,7 @@
 
 namespace JCA {
   namespace IOT {
-    typedef std::function<void (JsonVariant &, JsonVariant &)> JsonVariantCallback;
+    typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
     class Webserver : public JCA::FNC::Protocol {

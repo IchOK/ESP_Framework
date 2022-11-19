@@ -26,13 +26,13 @@ namespace JCA {
      * @param _ApGateway AP Gateway-Adress
      * @param _APSubnet AP Subnet-Mask
      */
-    WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_APSubnet) {
+    WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet) {
       sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
       strncpy (ApPassword, _Password, sizeof (ApPassword));
       ApIP.fromString (_ApIP);
 //      ApGateway.fromString (_ApGateway);
 //      ApGateway.fromString ("0.0.0.0");
-      ApSubnet.fromString (_APSubnet);
+      ApSubnet.fromString (_ApSubnet);
       State = Init;
       DHCP = true;
     }

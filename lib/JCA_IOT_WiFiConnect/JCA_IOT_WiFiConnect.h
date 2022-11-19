@@ -73,7 +73,7 @@ namespace JCA {
 
     public:
       // Constuctor/Destructor
-      WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_APSubnet);
+      WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet);
       WiFiConnect (const char *_SsidPrefix, const char *_Password);
       WiFiConnect ();
       ~WiFiConnect ();

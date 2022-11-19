@@ -238,11 +238,19 @@ namespace JCA {
      * @param _Request 
      */
     void Webserver::onWebHomeGet (AsyncWebServerRequest *_Request) {
-      _Request->send (LittleFS, JCA_IOT_WEBSERVER_PATH_HOME, String (), false, [this] (const String &_Var) -> String { return this->replaceHomeWildcards (_Var); });
+      if (LittleFS.exists (JCA_IOT_WEBSERVER_PATH_HOME)) {
+        _Request->send (LittleFS, JCA_IOT_WEBSERVER_PATH_HOME, String (), false, [this] (const String &_Var) -> String { return this->replaceHomeWildcards (_Var); });
+      } else {
+        _Request->redirect (JCA_IOT_WEBSERVER_PATH_SYS);
+      }
     }
 
     void Webserver::onWebConfigGet (AsyncWebServerRequest *_Request) {
-      _Request->send (LittleFS, JCA_IOT_WEBSERVER_PATH_CONFIG, String (), false, [this] (const String &_Var) -> String { return this->replaceConfigWildcards (_Var); });
+      if (LittleFS.exists (JCA_IOT_WEBSERVER_PATH_CONFIG)) {
+        _Request->send (LittleFS, JCA_IOT_WEBSERVER_PATH_CONFIG, String (), false, [this] (const String &_Var) -> String { return this->replaceConfigWildcards (_Var); });
+      } else {
+        _Request->redirect (JCA_IOT_WEBSERVER_PATH_SYS);
+      }
     }
 
     /**
