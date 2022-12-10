@@ -71,28 +71,12 @@ namespace JCA {
 
           InData = JsonInDoc.as<JsonVariant> ();
 
-          // Handle System-Data
-          if (InData.containsKey (Protocol::JsonTagElements)) {
-            JsonArray Elements = (InData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
-            set (Elements);
-          }
-
           // Call externak datahandling Functions
           if (wsDataCB) {
             wsDataCB (InData, OutData);
           } else if (restApiPostCB) {
             restApiPostCB (InData, OutData);
           }
-
-          // Add System Informations
-          JsonObject Elements;
-          if (OutData.containsKey (Protocol::JsonTagElements)) {
-            Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonObject> ();
-          } else {
-            Elements = JsonOutDoc.createNestedObject (Protocol::JsonTagElements);
-            Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "No Answer defined");
-          }
-          getValues (Elements);
 
           // Create Response
           String Response;
@@ -128,17 +112,6 @@ namespace JCA {
       } else if (restApiGetCB) {
         restApiGetCB (InData, OutData);
       }
-
-      // Add System Informations
-      JsonObject Elements;
-      if (OutData.containsKey (Protocol::JsonTagElements)) {
-        Elements = (OutData.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonObject> ();
-      } else {
-        JsonDoc.clear ();
-        Elements = JsonDoc.createNestedObject (Protocol::JsonTagElements);
-        Debug.println (FLAG_LOOP, true, ObjectName, __func__, "No Answer defined");
-      }
-      getValues (Elements);
 
       // Create Response
       String Response;

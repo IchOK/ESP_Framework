@@ -251,7 +251,7 @@ namespace JCA {
       _Values[DistanceToGo_Name] = Stepper.distanceToGo ();
       _Values[RunConst_Name] = RunConst;
       _Values[Speed_Name] = Stepper.speed ();
-      _Values[CmdDoFeed_Name] = CmdDoFeed_BtnText;
+      _Values[CmdDoFeed_Name] = false;
     }
 
     void writeSetupConfig (File _SetupFile) {

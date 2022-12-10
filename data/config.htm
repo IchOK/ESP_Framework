@@ -29,6 +29,10 @@
       let OutData = getOnClickObject(ValueInput);
       ws.send(JSON.stringify(OutData));
     }
+    function onSaveConfig() {
+      let OutData = {"elements":[{"name":"System","cmd":[{"name":"saveConfig","value":true}]}]};
+      ws.send(JSON.stringify(OutData));
+    }
 
     fetch("http://" + location.host + "/usrConfig.json")
       .then(response => {
@@ -62,6 +66,7 @@
   <main class="container">
     <section id="elements">
     </section>
+    <button onclick="onSaveConfig()">Save Config</button>
   </main>
 </body>
 </ht???
