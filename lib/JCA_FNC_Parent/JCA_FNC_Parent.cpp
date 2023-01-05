@@ -133,7 +133,12 @@ namespace JCA {
       } else {
         SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(BtnOffDefault) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagName) + "\":" + String(_Value);
+      SetupTag += ",\"" + String(JsonTagValue) + "\":";
+      if (_Value) {
+        SetupTag += "true";
+      } else {
+        SetupTag += "false";
+      }
       return SetupTag;
     }
 

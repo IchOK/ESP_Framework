@@ -140,6 +140,7 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
   ValueInput.type = "button";
   ValueInput.setAttribute("name", "value");
   ValueInput.setAttribute("style", "text-align:center;");
+  ValueInput.setAttribute("cmd", IsCommand);
   if (IsCommand) {
     ValueInput.value = DataTag.off;
     ValueInput.setAttribute("textOff", DataTag.off);
@@ -159,12 +160,14 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
 function updateViewTag(ViewTag, DataTagValue) {
   let ValueInput = ViewTag.querySelector("input[name='value']");
   if (ValueInput.type === "button") {
-    if (DataTagValue) {
-      ValueInput.value = ValueInput.getAttribute("textOn");
-      ValueInput.className = "primary";
-    } else {
-      ValueInput.value = ValueInput.getAttribute("textOff");
-      ValueInput.className = "primary outline";
+    if (ValueInput.getAttribute("cmd") == "false") {
+      if (DataTagValue) {
+        ValueInput.value = ValueInput.getAttribute("textOn");
+        ValueInput.className = "primary";
+      } else {
+        ValueInput.value = ValueInput.getAttribute("textOff");
+        ValueInput.className = "primary outline";
+      }
     }
   } else {
     if (ValueInput !== document.activeElement) {
@@ -189,14 +192,18 @@ function getOnChangeObject (ValueInput) {
 }
 
 function getOnClickObject(ValueInput) {
-  let text = ValueInput.getAttribute("stat");
   let Value;
-  if (text == ValueInput.getAttribute("textOn")) {
-    Value = false;
-  } else if (text == ValueInput.getAttribute("textOff")) {
+  if (ValueInput.getAttribute("cmd") == true) {
     Value = true;
   } else {
-    return;
+    let text = ValueInput.getAttribute("value");
+    if (text === ValueInput.getAttribute("textOn")) {
+      Value = false;
+    } else if (text === ValueInput.getAttribute("textOff")) {
+      Value = true;
+    } else {
+      return;
+    }
   }
   let ViewTag = ValueInput.parentElement.parentElement;
   let TagGrp = ViewTag.getAttribute("tagGroup");

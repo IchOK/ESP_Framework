@@ -59,6 +59,21 @@ void cbSaveConfig () {
   ConfigFile.close ();
 }
 
+void getAllValues(JsonVariant &_Out) {
+  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
+  Server.getValues (Elements);
+  Spindel.getValues (Elements);
+  Futter.getValues (Elements);
+}
+
+void setAll(JsonVariant &_In) {
+  if (_In.containsKey (Protocol::JsonTagElements)) {
+    JsonArray Elements = (_In.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+    Server.set (Elements);
+    Spindel.set (Elements);
+    Futter.set (Elements);
+  }
+}
 //-------------------------------------------------------
 // Website Functions
 //-------------------------------------------------------
@@ -72,19 +87,11 @@ String cbWebConfigReplace (const String &var) {
 // RestAPI Functions
 //-------------------------------------------------------
 void cbRestApiGet (JsonVariant &_In, JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
-  Server.getValues (Elements);
-  Spindel.getValues (Elements);
-  Futter.getValues (Elements);
+  getAllValues(_Out);
 }
 
 void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
-  if (_In.containsKey (Protocol::JsonTagElements)) {
-    JsonArray Elements = (_In.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
-    Server.set (Elements);
-    Spindel.set (Elements);
-    Futter.set (Elements);
-  }
+  setAll(_In);
 }
 
 void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
@@ -103,19 +110,13 @@ void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
 // Websocket Functions
 //-------------------------------------------------------
 void cbWsUpdate (JsonVariant &_In, JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
-  Spindel.getValues (Elements);
-  Futter.getValues (Elements);
+  getAllValues(_Out);
 }
 void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
-  if (_In.containsKey (Protocol::JsonTagElements)) {
-    JsonArray Elements = (_In.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
-    Spindel.set (Elements);
-    Futter.set (Elements);
-  }
-  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
-  Spindel.getValues (Elements);
-  Futter.getValues (Elements);
+  setAll(_In);
+
+  // Return Value update
+  getAllValues(_Out);
 }
 
 //#######################################################
@@ -169,11 +170,8 @@ void setup () {
     DeserializationError Error = deserializeJson (JDoc, ConfigFile);
     if (!Error) {
       Debug.println (FLAG_CONFIG, false, "main", "setup", "Deserialize Done");
-      if (JDoc.containsKey (Protocol::JsonTagElements)) {
-        JsonArray Elements = (JDoc.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
-        Spindel.set (Elements);
-        Futter.set (Elements);
-      }
+      JsonVariant InConfig = JDoc.as<JsonVariant>();
+      setAll(InConfig);
     } else {
       Debug.print (FLAG_ERROR, false, "main", "setup", "deserializeJson() failed: ");
       Debug.println (FLAG_ERROR, false, "main", "setup", Error.c_str ());
