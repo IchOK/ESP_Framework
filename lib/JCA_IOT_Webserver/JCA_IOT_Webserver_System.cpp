@@ -46,7 +46,7 @@ namespace JCA {
      * @param _Offset RTC Timeoffset in seconds
      */
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
-        : Protocol (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
+        : Parent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
       Port = _Port;
       Reboot = false;

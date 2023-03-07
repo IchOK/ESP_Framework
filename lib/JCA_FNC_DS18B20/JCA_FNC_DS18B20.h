@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_DS18B20.h
+ * @author JCA (https://github.com/ichok)
+ * @brief Framework Element to get Data from DS18B20 Sensor
+ * @version 1.0
+ * @date 2023-01-06
+ *
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ *
+ */
 
 #ifndef _JCA_FNC_DS18B20_
 #define _JCA_FNC_DS18B20_
@@ -9,20 +20,23 @@
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
-#define JCA_FNC_DS18B20_TYPE_S 0x10
-#define JCA_FNC_DS18B20_TYPE_B 0x28
-#define JCA_FNC_DS18B20_TYPE_22 0x22
-
-#define JCA_FNC_DS18B20_CMD_CONV 0x44
-#define JCA_FNC_DS18B20_CMD_READ 0xBE
-#define JCA_FNC_DS18B20_CMD_WRITE 0x4E
-#define JCA_FNC_DS18B20_CMD_COPY 0x48
-#define JCA_FNC_DS18B20_CMD_RECALL 0xB8
-#define JCA_FNC_DS18B20_CMD_POWER 0xB4
-
 namespace JCA {
   namespace FNC {
-    class DS18B20 : public Protocol{
+    typedef enum DS18B20_TYPE{
+      TYPE_S  = 0x10,
+      TYPE_B  = 0x28,
+      TYPE_22 = 0x22
+    };
+    typedef enum DS18B20_CMD{
+      CONV    = 0x44,
+      READ    = 0xBE,
+      WRITE   = 0x4E,
+      COPY    = 0x48,
+      RECALL  = 0xB8,
+      POWER   = 0xB4
+    };
+
+    class DS18B20 : public Parent{
     private:
       // Datapoint description
       static const char *Filter_Name;
@@ -42,7 +56,7 @@ namespace JCA {
       static const char *Temp_Unit;
       static const char *Temp_Comment;
 
-      // Protocol Functions
+      // Parent Functions
       void createConfigValues (JsonObject &_Values);
       void createDataValues (JsonObject &_Values);
       void setConfig (JsonArray _Tags);

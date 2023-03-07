@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_Level.cpp
+ * @author JCA (https://github.com/ichok)
+ * @brief Framework Element get a Level by an analog Distancesensor. With Calibation an Alarmlevel
+ * @version 1.0
+ * @date 2022-11-06
+ *
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ *
+ */
 
 #include <JCA_FNC_Level.h>
 using namespace JCA::SYS;
@@ -41,7 +52,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     Level::Level (uint8_t _Pin, const char *_Name)
-        : Protocol (_Name) {
+        : Parent (_Name) {
       RawEmpty = 0;
       RawFull = 1024;
       Pin = _Pin;

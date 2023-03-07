@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_DS18B20.cpp
+ * @author JCA (https://github.com/ichok)
+ * @brief Framework Element to get Data from DS18B20 Sensor
+ * @version 1.0
+ * @date 2023-01-06
+ * 
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ * 
+ */
 
 #include <JCA_FNC_DS18B20.h>
 using namespace JCA::SYS;
@@ -28,7 +39,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     DS18B20::DS18B20 (OneWire* _Wire, const char* _Name)
-        : Protocol (_Name) {
+        : Parent (_Name) {
       Wire = _Wire;
       Addr[0] = 0;
       Addr[1] = 0;
@@ -157,7 +168,7 @@ namespace JCA {
         // OneWire Bus is free to write Data
         if (Wire->reset ()) {
           Wire->select (this->Addr);
-          Wire->write (JCA_FNC_DS18B20_CMD_CONV);
+          Wire->write (DS18B20_CMD::CONV);
           this->Resend = (uint32_t)(this->ReadInterval);
           this->ReadData = true;
         } else {
@@ -170,12 +181,12 @@ namespace JCA {
         if (Wire->reset ()) {
           // send Data Request
           Wire->select (this->Addr);
-          Wire->write (JCA_FNC_DS18B20_CMD_READ);
+          Wire->write (DS18B20_CMD::READ);
           Wire->read_bytes (this->Raw, 9);
           // check data Consistens
           if (OneWire::crc8 (this->Raw, 8) == this->Raw[8]) {
             raw = (this->Raw[1] << 8) | Raw[0];
-            if (Addr[0] == JCA_FNC_DS18B20_TYPE_S) {
+            if (Addr[0] == DS18B20_TYPE::TYPE_S) {
               // Type DS18S20 has special Data-Setup, allways use 9 bit resolition
               raw = raw << 3;
               if (this->Raw[7] == 0x10) {

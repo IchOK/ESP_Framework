@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_Level.h
+ * @author JCA (https://github.com/ichok)
+ * @brief Framework Element get a Level by an analog Distancesensor. With Calibation an Alarmlevel
+ * @version 0.1
+ * @date 2022-11-06
+ *
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ *
+ */
 
 #ifndef _JCA_FNC_LEVEL_
 #define _JCA_FNC_LEVEL_
@@ -11,7 +22,7 @@
 
 namespace JCA {
   namespace FNC {
-    class Level : public Protocol{
+    class Level : public Parent{
     private:
       // Datapoint description
       static const char *RawEmpty_Name;
@@ -44,7 +55,7 @@ namespace JCA {
       static const char *RawValue_Unit;
       static const char *RawValue_Comment;
 
-      // Protocol Functions
+      // Parent Functions
       void createConfigValues (JsonObject &_Values);
       void createDataValues (JsonObject &_Values);
       void setConfig (JsonArray _Tags);

@@ -101,7 +101,7 @@ namespace JCA {
     typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
-    class Webserver : public JCA::FNC::Protocol {
+    class Webserver : public JCA::FNC::Parent {
     private:
       // ...Webserver_System.cpp
       static const char *ElementName;

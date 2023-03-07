@@ -1,44 +1,55 @@
+/**
+ * @file JCA_FNC_Parent.cpp
+ * @author JCA (https://github.com/ichok)
+ * @brief Parent Class of all Framework Elements.
+ * @version 1.0
+ * @date 2022-12-10
+ * 
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ * 
+ */
 
 #include <JCA_FNC_Parent.h>
 using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    const char *Protocol::JsonTagElements = "elements";
-    const char *Protocol::JsonTagConfig = "config";
-    const char *Protocol::JsonTagData = "data";
-    const char *Protocol::JsonTagCmdInfo = "cmdInfo";
-    const char *Protocol::JsonTagCmd = "cmd";
-    const char *Protocol::JsonTagName = "name";
-    const char *Protocol::JsonTagText = "text";
-    const char *Protocol::JsonTagComment = "comment";
-    const char *Protocol::JsonTagValue = "value";
-    const char *Protocol::JsonTagUnit = "unit";
-    const char *Protocol::JsonTagOn = "on";
-    const char *Protocol::JsonTagOff = "off";
-    const char *Protocol::JsonTagType = "type";
-    const char *Protocol::JsonTagReadOnly = "readOnly";
-    const char *Protocol::BtnOnDefault = "ON";
-    const char *Protocol::BtnOffDefault = "OFF";
-    const char *Protocol::DebugSeparator = " - ";
+    const char *Parent::JsonTagElements = "elements";
+    const char *Parent::JsonTagConfig = "config";
+    const char *Parent::JsonTagData = "data";
+    const char *Parent::JsonTagCmdInfo = "cmdInfo";
+    const char *Parent::JsonTagCmd = "cmd";
+    const char *Parent::JsonTagName = "name";
+    const char *Parent::JsonTagText = "text";
+    const char *Parent::JsonTagComment = "comment";
+    const char *Parent::JsonTagValue = "value";
+    const char *Parent::JsonTagUnit = "unit";
+    const char *Parent::JsonTagOn = "on";
+    const char *Parent::JsonTagOff = "off";
+    const char *Parent::JsonTagType = "type";
+    const char *Parent::JsonTagReadOnly = "readOnly";
+    const char *Parent::BtnOnDefault = "ON";
+    const char *Parent::BtnOffDefault = "OFF";
+    const char *Parent::DebugSeparator = " - ";
     
     /**
-     * @brief Construct a new Protocol::Protocol object
+     * @brief Construct a new Parent::Parent object
      * 
      * @param _Name Element Name inside the Communication
      * @param _Comment Comment if requested
      */
-    Protocol::Protocol (String _Name, String _Comment) {
+    Parent::Parent (String _Name, String _Comment) {
       Name = _Name;
       Comment = _Comment;
     }
 
     /**
-     * @brief Construct a new Protocol::Protocol object
+     * @brief Construct a new Parent::Parent object
      * 
      * @param _Name Element Name inside the Communication
      */
-    Protocol::Protocol (String _Name) : Protocol (_Name, "") {
+    Parent::Parent (String _Name) : Parent (_Name, "") {
     }
 
     /**
@@ -48,7 +59,7 @@ namespace JCA {
      * @param _Elements Array of Elements ("elements": [])
      * @return JsonVariant if not found returns an empty Variant
      */
-    JsonVariant Protocol::findConfig (JsonArray &_Elements) {
+    JsonVariant Parent::findConfig (JsonArray &_Elements) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
       for (JsonObject Element : _Elements) {
         if (Element[JsonTagName] == Name) {
@@ -67,7 +78,7 @@ namespace JCA {
      * @param _Elements Array of Elements ("elements": [])
      * @return JsonVariant if not found returns an empty Variant
      */
-    JsonVariant Protocol::findData (JsonArray &_Elements) {
+    JsonVariant Parent::findData (JsonArray &_Elements) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
       for (JsonObject Element : _Elements) {
         if (Element[JsonTagName] == Name) {
@@ -86,7 +97,7 @@ namespace JCA {
      * @param _Elements Array of Elements ("elements": [])
      * @return JsonVariant if not found returns an empty Variant
      */
-    JsonVariant Protocol::findCmd (JsonArray &_Elements) {
+    JsonVariant Parent::findCmd (JsonArray &_Elements) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
       for (JsonObject Element : _Elements) {
         if (Element[JsonTagName] == Name) {
@@ -98,7 +109,7 @@ namespace JCA {
       return JsonVariant ();
     }
 
-    String Protocol::createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly) {
+    String Parent::createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly) {
       String SetupTag;
       SetupTag += "\"" + String(JsonTagName) + "\":\"" + String(_Name) + "\"";
       SetupTag += ",\"" + String(JsonTagText) + "\":\"" + String(_Text) + "\"";
@@ -121,7 +132,7 @@ namespace JCA {
      * @param _BntOffText Buttontext if Value is False, if not defined (nullptr) set to "OFF"
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_BtnOnText != nullptr) {
         SetupTag += ",\"" + String(JsonTagOn) + "\":\"" + String(_BtnOnText) + "\"";
@@ -153,7 +164,7 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
@@ -173,7 +184,7 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
@@ -193,7 +204,7 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
@@ -213,7 +224,7 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
@@ -233,7 +244,7 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
@@ -253,7 +264,7 @@ namespace JCA {
      * @param _Unit Unit, if not used set nullptr
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
@@ -272,7 +283,7 @@ namespace JCA {
      * @param _ReadOnly Disable Input on Website
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       SetupTag += ",\"" + String(JsonTagValue) + "\":\"" + _Value + "\"";
       return SetupTag;
@@ -288,7 +299,7 @@ namespace JCA {
      * @param _ReadOnly Disable Input on Website
      * @param _Value Current value of the Tag
      */
-    String Protocol::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value) {
+    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       SetupTag += ",\"" + String(JsonTagValue) + "\":\"" + String(_Value) + "\"";
       return SetupTag;
@@ -303,7 +314,7 @@ namespace JCA {
      * @param _Comment Comment, if not used set nullptr
      * @param _Type Type for the HMI to know what ist requested (boot, in16, string, ...)
      */
-    String Protocol::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
+    String Parent::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
       SetupTag += ",\"" + String(JsonTagType) + "\":\"" + String(_Type) + "\"";
       return SetupTag;
@@ -319,7 +330,7 @@ namespace JCA {
      * @param _Type sould be bool
      * @param _BtnText Buttontext, if not defined (nullptr) set to "ON"
      */
-    String Protocol::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText) {
+    String Parent::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
       if (_BtnText != nullptr) {
         SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(_BtnText) + "\"";
@@ -333,7 +344,7 @@ namespace JCA {
      * Check if the Element in the Array and pass the Tag-Arrays to the Element Data
      * @param _Elements Array of Elements that maybe const Tags for the Element
      */
-    void Protocol::set (JsonArray &_Elements) {
+    void Parent::set (JsonArray &_Elements) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
       JsonVariant _Tags;
       _Tags = findConfig (_Elements);
@@ -350,7 +361,7 @@ namespace JCA {
       }
     }
 
-    void Protocol::getValues (JsonObject &_Elements) {
+    void Parent::getValues (JsonObject &_Elements) {
       JsonObject Element = _Elements.createNestedObject (Name);
       JsonObject Values;
       Values = Element.createNestedObject (JsonTagData);
@@ -359,7 +370,7 @@ namespace JCA {
       createConfigValues (Values);
     }
 
-    void Protocol::writeSetup (File _SetupFile, bool &_ElementInit) {
+    void Parent::writeSetup (File _SetupFile, bool &_ElementInit) {
       if (_ElementInit) {
         _SetupFile.println(",{");
       } else {

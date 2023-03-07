@@ -1,3 +1,15 @@
+/**
+ * @file main.cpp
+ * @author JCA (https://github.com/ichok)
+ * @brief Akku Manager charging and discharging with Capacity calculation
+ * @version 0.1
+ * @date 2023-03-07
+ * 
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ * 
+ */
+
 // Firmware
 #include "FS.h"
 #include <Arduino.h>
@@ -60,15 +72,15 @@ void cbSaveConfig () {
 }
 
 void getAllValues(JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (Protocol::JsonTagElements);
+  JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
   Spindel.getValues (Elements);
   Futter.getValues (Elements);
 }
 
 void setAll(JsonVariant &_In) {
-  if (_In.containsKey (Protocol::JsonTagElements)) {
-    JsonArray Elements = (_In.as<JsonObject> ())[Protocol::JsonTagElements].as<JsonArray> ();
+  if (_In.containsKey (Parent::JsonTagElements)) {
+    JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
     Spindel.set (Elements);
     Futter.set (Elements);

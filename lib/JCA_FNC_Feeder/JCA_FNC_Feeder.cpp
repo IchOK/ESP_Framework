@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_Feeder.cpp
+ * @author JCA (https://github.com/ichok)
+ * @brief Framework Element for a daily Feeder. With variable Time and Amount
+ * @version 1.0
+ * @date 2022-11-06
+ * 
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ * 
+ */
 
 #include <JCA_FNC_Feeder.h>
 using namespace JCA::SYS;
@@ -65,7 +76,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name)
-        : Protocol (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
+        : Parent (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
 
       // Intern
       DoFeed = false;

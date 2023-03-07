@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_Parent.h
+ * @author JCA (https://github.com/ichok)
+ * @brief Parent Class of all Framework Elements.
+ * @version 1.0
+ * @date 2022-12-10
+ *
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ *
+ */
 
 #ifndef _JCA_FNC_PARENT_
 #define _JCA_FNC_PARENT_
@@ -9,9 +20,9 @@
 
 namespace JCA {
   namespace FNC {
-    class Protocol {
+    class Parent {
     protected:
-      // Element Strings for Protocol and Debug-Output
+      // Element Strings for Parent and Debug-Output
       static const char *BtnOnDefault;
       static const char *BtnOffDefault;
       static const char *DebugSeparator;
@@ -36,7 +47,7 @@ namespace JCA {
       JsonVariant findData (JsonArray &_Elements);
       JsonVariant findCmd (JsonArray &_Elements);
       
-      // Create Protocol-Structure
+      // Create Parent-Structure
       String createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly);
       String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value);
       String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value);
@@ -68,8 +79,8 @@ namespace JCA {
       static const char *JsonTagReadOnly;
 
       // external Functions
-      Protocol (String _Name, String _Comment);
-      Protocol (String _Name);
+      Parent (String _Name, String _Comment);
+      Parent (String _Name);
       virtual void update (struct tm &_Time) = 0;
       void set (JsonArray &_Elements);
 

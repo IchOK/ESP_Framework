@@ -1,3 +1,14 @@
+/**
+ * @file JCA_FNC_Feeder.h
+ * @author JCA (https://github.com/ichok)
+ * @brief Framework Element for a daily Feeder. With variable Time and Amount
+ * @version 1.0
+ * @date 2022-11-06
+ *
+ * Copyright Jochen Cabrera 2022
+ * Apache License
+ *
+ */
 
 #ifndef _JCA_FNC_FEEDER_
 #define _JCA_FNC_FEEDER_
@@ -11,9 +22,9 @@
 
 namespace JCA {
   namespace FNC {
-    class Feeder : public Protocol{
+    class Feeder : public Parent{
     private:
-      // Protocol Datapoint description
+      // Parent Datapoint description
       static const char *FeedingHour_Name;
       static const char *FeedingHour_Text;
       static const char *FeedingHour_Unit;
@@ -66,7 +77,7 @@ namespace JCA {
       static const char *CmdDoFeed_Type;
       static const char *CmdDoFeed_BtnText;
       
-      // Protocol Functions
+      // Parent Functions
       void createConfigValues (JsonObject &_Values);
       void createDataValues (JsonObject &_Values);
       void setConfig (JsonArray _Tags);
