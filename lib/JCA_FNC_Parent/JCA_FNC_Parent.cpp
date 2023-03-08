@@ -340,6 +340,57 @@ namespace JCA {
     }
 
     /**
+     * @brief Convert Hex-String to Byte-Array
+     *
+     * @param _HexString String with HEX-Values without Format-Prefix
+     * @param _ByteArray Pointer to the Byte-Array
+     * @param _Length Length of the Byte Array
+     */
+    void Parent::HexStringToByteArray (String _HexString, uint8_t *_ByteArray, uint8_t _Length) {
+      if (_HexString.length () == _Length * 2) {
+        for (size_t i = 0; i < _Length; i++) {
+          _ByteArray[i] = HexCharToInt (_HexString.charAt (i * 2 + 1)) + HexCharToInt (_HexString.charAt (i * 2)) * 16;
+        }
+      }
+    }
+
+    /**
+     * @brief Convert a single HEX-Char to Integer
+     *
+     * @param _HexChar HEX-Value as Char
+     * @return uint8_t Integer-Value
+     */
+    uint8_t Parent::HexCharToInt (char _HexChar) {
+      unsigned Result = -1;
+      if (('0' <= _HexChar) && (_HexChar <= '9')) {
+        Result = _HexChar - '0';
+      } else if (('A' <= _HexChar) && (_HexChar <= 'F')) {
+        Result = 10 + _HexChar - 'A';
+      } else if (('a' <= _HexChar) && (_HexChar <= 'f')) {
+        Result = 10 + _HexChar - 'a';
+      }
+      return Result;
+    }
+
+    /**
+     * @brief Convert Byte-Array to Hex-String
+     *
+     * @param _ByteArray Pointer to the Byte-Array
+     * @param _Length Length of the Byte Array
+     * @return String HEX-Decodet
+     */
+    String Parent::ByteArrayToHexString (uint8_t *_ByteArray, uint8_t _Length) {
+      String Result = "";
+      for (size_t i = 0; i < _Length; i++) {
+        if (_ByteArray[i] < 16) {
+          Result += "0";
+        }
+        Result += String (_ByteArray[i], HEX);
+      }
+      return Result;
+    }
+
+    /**
      * @brief Set Data, Config and execute Commands
      * Check if the Element in the Array and pass the Tag-Arrays to the Element Data
      * @param _Elements Array of Elements that maybe const Tags for the Element
@@ -361,6 +412,11 @@ namespace JCA {
       }
     }
 
+    /**
+     * @brief Create an Element-Object with Data- and Config-Values
+     * 
+     * @param _Elements Object of Elements to add the Element
+     */
     void Parent::getValues (JsonObject &_Elements) {
       JsonObject Element = _Elements.createNestedObject (Name);
       JsonObject Values;
@@ -370,6 +426,12 @@ namespace JCA {
       createConfigValues (Values);
     }
 
+    /**
+     * @brief Write Element-Tags to Setup-File
+     * 
+     * @param _SetupFile File to Write
+     * @param _ElementInit First Element added
+     */
     void Parent::writeSetup (File _SetupFile, bool &_ElementInit) {
       if (_ElementInit) {
         _SetupFile.println(",{");

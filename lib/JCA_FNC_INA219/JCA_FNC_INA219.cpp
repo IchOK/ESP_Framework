@@ -49,6 +49,7 @@ namespace JCA {
      */
     INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name)
         : Parent (_Name), Sensor(_Wire, _Addr) {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
     }
     /**
      * @brief Construct a new INA219::INA219 object
@@ -58,6 +59,7 @@ namespace JCA {
      */
     INA219::INA219 (const uint8_t _Addr, const char *_Name)
         : Parent (_Name), Sensor (_Addr) {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
     }
     /**
      * @brief Construct a new INA219::INA219 object
@@ -67,6 +69,31 @@ namespace JCA {
      */
     INA219::INA219 (const char *_Name)
         : Parent (_Name), Sensor () {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+    }
+
+    /**
+     * @brief Add Config-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Config-Tags ("config": {})
+     */
+    void INA219::createConfigValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[ReadInterval_Name] = ReadInterval;
+    }
+
+    /**
+     * @brief Add Data-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Data-Tags ("data": {})
+     */
+    void INA219::createDataValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[PowerPlus_Name] = PowerPlus;
+      _Values[VoltagePlus_Name] = VoltagePlus;
+      _Values[PowerMinus_Name] = PowerMinus;
+      _Values[VoltageMinus_Name] = VoltageMinus;
+      _Values[Current_Name] = Current;
     }
 
     /**
@@ -93,6 +120,7 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void INA219::setData (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
@@ -101,28 +129,29 @@ namespace JCA {
      * @param _Tags Array of Commands ("cmd": [])
      */
     void INA219::setCmd (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
-     * @brief Create a list of Config-Tags containing the current Value
+     * @brief Write the Config-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void INA219::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval) + "}");
       _SetupFile.println ("]");
     }
 
     /**
-     * @brief Create a list of Data-Tags containing the current Value
+     * @brief Write the Data-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void INA219::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (PowerPlus_Name, PowerPlus_Text, PowerPlus_Comment, true, PowerPlus_Unit, PowerPlus) + "}");
       _SetupFile.println (",{" + createSetupTag (VoltagePlus_Name, VoltagePlus_Text, VoltagePlus_Comment, true, VoltagePlus_Unit, VoltagePlus) + "}");
       _SetupFile.println (",{" + createSetupTag (PowerMinus_Name, PowerMinus_Text, PowerMinus_Comment, true, PowerMinus_Unit, PowerMinus) + "}");
@@ -132,24 +161,12 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Command-Informations
+     * @brief Write the Command-Tags to Setup-File
      *
-     * @param _Tags Array the Command-Infos have to add
+     * @param _SetupFile File to write
      */
     void INA219::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-    }
-
-    void INA219::createConfigValues (JsonObject &_Values) {
-      _Values[ReadInterval_Name] = ReadInterval;
-    }
-
-    void INA219::createDataValues (JsonObject &_Values) {
-      _Values[PowerPlus_Name] = PowerPlus;
-      _Values[VoltagePlus_Name] = VoltagePlus;
-      _Values[PowerMinus_Name] = PowerMinus;
-      _Values[VoltageMinus_Name] = VoltageMinus;
-      _Values[Current_Name] = Current;
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**
@@ -158,9 +175,7 @@ namespace JCA {
      * @param time Current Time to check the Samplerate
      */
     void INA219::update (struct tm &time) {
-      int i;
-      int16_t raw;
-      uint8_t cfg;
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       uint32_t DiffMillis = millis () - LastMillis;
 
       // If Resend counts to 0 resend convertion Request

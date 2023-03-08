@@ -47,6 +47,7 @@ namespace JCA {
      */
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
         : Parent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
+      Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
       sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
       Port = _Port;
       Reboot = false;
@@ -110,7 +111,8 @@ namespace JCA {
      * @return false Config-File didn't exists or is not a valid JSON File
      */
     bool Webserver::readConfig () {
-      DynamicJsonDocument JsonDoc(1000);
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Read");
+      DynamicJsonDocument JsonDoc (1000);
       // Get Wifi-Config from File5
       File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
       if (ConfigFile) {
@@ -192,6 +194,27 @@ namespace JCA {
     }
 
     /**
+     * @brief Add Config-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Config-Tags ("config": {})
+     */
+    void Webserver::createConfigValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[Hostname_Name] = Hostname;
+      _Values[WsUpdateCycle_Name] = WsUpdateCycle;
+    }
+
+    /**
+     * @brief Add Data-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Data-Tags ("data": {})
+     */
+    void Webserver::createDataValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[Time_Name] = getTime ();
+    }
+
+    /**
      * @brief Set the Element Config
      * Only existing Tags will be updated
      * @param _Tags Array of Config-Tags ("config": [])
@@ -222,6 +245,7 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void Webserver::setData (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
     }
 
     /**
@@ -252,12 +276,12 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Config-Tags containing the current Value
+     * @brief Write the Config-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Webserver::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
       _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Hostname_Name, Hostname_Text, Hostname_Comment, false, Hostname) + "}");
       _SetupFile.println (",{" + createSetupTag (WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, false, WsUpdateCycle_Unit, WsUpdateCycle) + "}");
@@ -265,37 +289,28 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Data-Tags containing the current Value
+     * @brief Write the Data-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Webserver::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
       _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Time_Name, Time_Text, Time_Comment, true, getTime ()) + "}");
       _SetupFile.println ("]");
     }
 
     /**
-     * @brief Create a list of Command-Informations
+     * @brief Write the Command-Tags to Setup-File
      *
-     * @param _Tags Array the Command-Infos have to add
+     * @param _SetupFile File to write
      */
     void Webserver::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Get");
+      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
       _SetupFile.println (",\"" + String(JsonTagCmdInfo) + "\":[");
       _SetupFile.println ("{" + createSetupCmdInfo (TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type) + "}");
       _SetupFile.println (",{" + createSetupCmdInfo (SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type, SaveConfig_BtnText) + "}");
       _SetupFile.println ("]");
-    }
-
-    void Webserver::createConfigValues (JsonObject &_Values) {
-      _Values[Hostname_Name] = Hostname;
-      _Values[WsUpdateCycle_Name] = WsUpdateCycle;
-    }
-
-    void Webserver::createDataValues (JsonObject &_Values) {
-      _Values[Time_Name] = getTime ();
     }
 
     /**
@@ -305,6 +320,7 @@ namespace JCA {
      * @return false Controller runs as AP
      */
     bool Webserver::init () {
+      Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Init");
       // Read Config
       readConfig ();
 
@@ -385,6 +401,7 @@ namespace JCA {
      * @return false Controller runs as AP
      */
     bool Webserver::handle () {
+      Debug.println (FLAG_LOOP, false, ObjectName, __func__, "Run");
       uint32_t ActMillis = millis ();
       // Update Cycle WebSocket
       if (ActMillis - WsLastUpdate >= WsUpdateCycle && WsUpdateCycle > 0) {

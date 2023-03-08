@@ -61,6 +61,11 @@ namespace JCA {
       String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type);
       String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText);
 
+      // Conversion Functions
+      void HexStringToByteArray (String _HexString, uint8_t *_ByteArray, uint8_t _Length);
+      uint8_t HexCharToInt (char _HexChar);
+      String ByteArrayToHexString (uint8_t *_ByteArray, uint8_t _Length);
+
     public:
       // Json Tags
       static const char *JsonTagElements;

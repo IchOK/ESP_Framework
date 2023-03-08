@@ -77,6 +77,7 @@ namespace JCA {
      */
     Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name)
         : Parent (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
 
       // Intern
       DoFeed = false;
@@ -99,6 +100,36 @@ namespace JCA {
       Stepper.setEnablePin (_PinEnable);
       Stepper.setPinsInverted (false, false, true);
       Stepper.disableOutputs ();
+    }
+
+    /**
+     * @brief Add Config-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Config-Tags ("config": {})
+     */
+    void Feeder::createConfigValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[FeedingHour_Name] = FeedingHour;
+      _Values[FeedingMinute_Name] = FeedingMinute;
+      _Values[SteppsPerRotation_Name] = SteppsPerRotation;
+      _Values[FeedingRotations_Name] = FeedingRotations;
+      _Values[Acceleration_Name] = Acceleration;
+      _Values[MaxSpeed_Name] = MaxSpeed;
+      _Values[ConstSpeed_Name] = ConstSpeed;
+    }
+
+    /**
+     * @brief Add Data-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Data-Tags ("data": {})
+     */
+    void Feeder::createDataValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[Feeding_Name] = Feeding;
+      _Values[DistanceToGo_Name] = Stepper.distanceToGo ();
+      _Values[RunConst_Name] = RunConst;
+      _Values[Speed_Name] = Stepper.speed ();
+      _Values[CmdDoFeed_Name] = false;
     }
 
     /**
@@ -170,6 +201,7 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void Feeder::setData (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
       for (JsonObject Tag : _Tags) {
         if (Tag[JsonTagName] == RunConst_Name) {
           RunConst = Tag[JsonTagValue].as<bool> ();
@@ -203,16 +235,17 @@ namespace JCA {
      * @param _Tags Array of Commands ("cmd": [])
      */
     void Feeder::setCmd (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
-     * @brief Create a list of Config-Tags containing the current Value
+     * @brief Write the Config-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Feeder::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (FeedingHour_Name, FeedingHour_Text, FeedingHour_Comment, false, FeedingHour_Unit, FeedingHour) + "}");
       _SetupFile.println (",{" + createSetupTag (FeedingMinute_Name, FeedingMinute_Text, FeedingMinute_Comment, false, FeedingMinute_Unit, FeedingMinute) + "}");
       _SetupFile.println (",{" + createSetupTag (SteppsPerRotation_Name, SteppsPerRotation_Text, SteppsPerRotation_Comment, false, SteppsPerRotation_Unit, SteppsPerRotation) + "}");
@@ -224,13 +257,13 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Data-Tags containing the current Value
+     * @brief Write the Data-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Feeder::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Feeding_Name, Feeding_Text, Feeding_Comment, true, Feeding_TextOn, Feeding_TextOff, Feeding) + "}");
       _SetupFile.println (",{" + createSetupTag (DistanceToGo_Name, DistanceToGo_Text, DistanceToGo_Comment, true, DistanceToGo_Unit, Stepper.distanceToGo ()) + "}");
       _SetupFile.println (",{" + createSetupTag (RunConst_Name, RunConst_Text, RunConst_Comment, false, RunConst_TextOn, RunConst_TextOff, RunConst) + "}");
@@ -240,41 +273,12 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Command-Informations
+     * @brief Write the Command-Tags to Setup-File
      *
-     * @param _Tags Array the Command-Infos have to add
+     * @param _SetupFile File to write
      */
     void Feeder::writeSetupCmdInfo (File _SetupFile) {
-    }
-
-    void Feeder::createConfigValues (JsonObject &_Values) {
-      _Values[FeedingHour_Name] = FeedingHour;
-      _Values[FeedingMinute_Name] = FeedingMinute;
-      _Values[SteppsPerRotation_Name] = SteppsPerRotation;
-      _Values[FeedingRotations_Name] = FeedingRotations;
-      _Values[Acceleration_Name] = Acceleration;
-      _Values[MaxSpeed_Name] = MaxSpeed;
-      _Values[ConstSpeed_Name] = ConstSpeed;
-    }
-
-    void Feeder::createDataValues (JsonObject &_Values) {
-      _Values[Feeding_Name] = Feeding;
-      _Values[DistanceToGo_Name] = Stepper.distanceToGo ();
-      _Values[RunConst_Name] = RunConst;
-      _Values[Speed_Name] = Stepper.speed ();
-      _Values[CmdDoFeed_Name] = false;
-    }
-
-    void writeSetupConfig (File _SetupFile) {
-
-    }
-
-    void writeSetupData (File _SetupFile) {
-
-    }
-
-    void writeSetupCmdInfo (File _SetupFile) {
-
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**
@@ -283,6 +287,7 @@ namespace JCA {
      * @param _Time Current Time to check automated feeding
      */
     void Feeder::update (struct tm &_Time) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       bool AutoFeed = FeedingHour == _Time.tm_hour && FeedingMinute == _Time.tm_min && _Time.tm_year > 100;
 
       // Run const Speed

@@ -22,19 +22,19 @@
 
 namespace JCA {
   namespace FNC {
-    typedef enum DS18B20_TYPE{
+    typedef enum DS18B20_Type_T{
       TYPE_S  = 0x10,
       TYPE_B  = 0x28,
       TYPE_22 = 0x22
-    };
-    typedef enum DS18B20_CMD{
+    } DS18B20_Type;
+    typedef enum DS18B20_Cmd_T{
       CONV    = 0x44,
       READ    = 0xBE,
       WRITE   = 0x4E,
       COPY    = 0x48,
       RECALL  = 0xB8,
       POWER   = 0xB4
-    };
+    } DS18B20_Cmd;
 
     class DS18B20 : public Parent{
     private:
@@ -83,10 +83,6 @@ namespace JCA {
       int32_t Resend;
       bool ReadData;
       uint32_t LastMillis;
-
-      void HexStringToByteArray (String _HexString, uint8_t *_ByteArray, uint8_t _Length);
-      uint8_t HexCharToInt(char _HexChar);
-      String ByteArrayToHexString (uint8_t *_ByteArray, uint8_t _Length);
 
     public:
       DS18B20 (OneWire *_Wire, const char *_Name);

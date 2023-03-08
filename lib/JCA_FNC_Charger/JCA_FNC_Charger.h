@@ -22,13 +22,13 @@
 
 namespace JCA {
   namespace FNC {
-    typedef enum Charger_State{
+    typedef enum Charger_State_T {
       IDLE,
       CHARGE_CURRENT,
       CHARGE_VOLTAGE,
       WAIT,
       DISCHARGE
-    };
+    } Charger_State;
 
     class Charger : public Parent{
     private:
@@ -132,7 +132,7 @@ namespace JCA {
       float DischargedWH;
 
       // Intern
-      Charger_State ChargeState;
+      Charger_State_T ChargeState;
 
     public:
       Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);

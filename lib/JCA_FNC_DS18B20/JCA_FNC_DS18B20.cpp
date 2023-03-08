@@ -40,6 +40,7 @@ namespace JCA {
      */
     DS18B20::DS18B20 (OneWire* _Wire, const char* _Name)
         : Parent (_Name) {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       Wire = _Wire;
       Addr[0] = 0;
       Addr[1] = 0;
@@ -48,13 +49,35 @@ namespace JCA {
       Addr[4] = 0;
       Addr[5] = 0;
       Addr[6] = 0;
-      Addr[71] = 0;
+      Addr[7] = 0;
       ReadInterval = 1;
       Filter = 5.0;
       Value = 0.0;
       Resend = 0;
       ReadData = false;
       LastMillis = millis();
+    }
+
+    /**
+     * @brief Add Config-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Config-Tags ("config": {})
+     */
+    void DS18B20::createConfigValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[Filter_Name] = Filter;
+      _Values[Addr_Name] = ByteArrayToHexString (Addr, 8);
+      _Values[ReadInterval_Name] = ReadInterval;
+    }
+
+    /**
+     * @brief Add Data-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Data-Tags ("data": {})
+     */
+    void DS18B20::createDataValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[Temp_Name] = Value;
     }
 
     /**
@@ -97,6 +120,7 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void DS18B20::setData (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
@@ -105,15 +129,16 @@ namespace JCA {
      * @param _Tags Array of Commands ("cmd": [])
      */
     void DS18B20::setCmd (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
-     * @brief Create a list of Config-Tags containing the current Value
+     * @brief Write the Config-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void DS18B20::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Filter_Name, Filter_Text, Filter_Comment, false, Filter_Unit, Filter) + "}");
       _SetupFile.println (",{" + createSetupTag (Addr_Name, Addr_Text, Addr_Comment, false, ByteArrayToHexString(Addr, 8)) + "}");
@@ -122,34 +147,24 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Data-Tags containing the current Value
+     * @brief Write the Data-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void DS18B20::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Temp_Name, Temp_Text, Temp_Comment, true, Temp_Unit, Value) + "}");
       _SetupFile.println ("]");
     }
 
     /**
-     * @brief Create a list of Command-Informations
+     * @brief Write the Command-Tags to Setup-File
      *
-     * @param _Tags Array the Command-Infos have to add
+     * @param _SetupFile File to write
      */
     void DS18B20::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-    }
-
-    void DS18B20::createConfigValues (JsonObject &_Values) {
-      _Values[Filter_Name] = Filter;
-      _Values[Addr_Name] = ByteArrayToHexString(Addr, 8);
-      _Values[ReadInterval_Name] = ReadInterval;
-    }
-
-    void DS18B20::createDataValues (JsonObject &_Values) {
-      _Values[Temp_Name] = Value;
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**
@@ -158,9 +173,8 @@ namespace JCA {
      * @param time Current Time to check the Samplerate
      */
     void DS18B20::update (struct tm &time) {
-      int i;
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       int16_t raw;
-      uint8_t cfg;
       uint32_t DiffMillis = millis () - LastMillis;
 
       // If Resend counts to 0 resend convertion Request
@@ -168,7 +182,7 @@ namespace JCA {
         // OneWire Bus is free to write Data
         if (Wire->reset ()) {
           Wire->select (this->Addr);
-          Wire->write (DS18B20_CMD::CONV);
+          Wire->write (DS18B20_Cmd_T::CONV);
           this->Resend = (uint32_t)(this->ReadInterval);
           this->ReadData = true;
         } else {
@@ -181,12 +195,12 @@ namespace JCA {
         if (Wire->reset ()) {
           // send Data Request
           Wire->select (this->Addr);
-          Wire->write (DS18B20_CMD::READ);
+          Wire->write (DS18B20_Cmd_T::READ);
           Wire->read_bytes (this->Raw, 9);
           // check data Consistens
           if (OneWire::crc8 (this->Raw, 8) == this->Raw[8]) {
             raw = (this->Raw[1] << 8) | Raw[0];
-            if (Addr[0] == DS18B20_TYPE::TYPE_S) {
+            if (Addr[0] == DS18B20_Type_T::TYPE_S) {
               // Type DS18S20 has special Data-Setup, allways use 9 bit resolition
               raw = raw << 3;
               if (this->Raw[7] == 0x10) {
@@ -229,57 +243,6 @@ namespace JCA {
      */
     float DS18B20::getValue () {
       return Value;
-    }
-
-    /**
-     * @brief Convert Hex-String to Byte-Array
-     * 
-     * @param _HexString String with HEX-Values without Format-Prefix
-     * @param _ByteArray Pointer to the Byte-Array
-     * @param _Length Length of the Byte Array
-     */
-    void DS18B20::HexStringToByteArray (String _HexString, uint8_t *_ByteArray, uint8_t _Length) {
-      if (_HexString.length() == _Length * 2) {
-        for (size_t i = 0; i < _Length; i++) {
-          _ByteArray[i] = HexCharToInt (_HexString.charAt (i * 2 + 1)) + HexCharToInt (_HexString.charAt (i * 2)) * 16;
-        }
-      }
-    }
-
-    /**
-     * @brief Convert a single HEX-Char to Integer
-     * 
-     * @param _HexChar HEX-Value as Char
-     * @return uint8_t Integer-Value
-     */
-    uint8_t DS18B20::HexCharToInt (char _HexChar) {
-      unsigned Result = -1;
-      if (('0' <= _HexChar) && (_HexChar <= '9')) {
-        Result = _HexChar - '0';
-      } else if (('A' <= _HexChar) && (_HexChar <= 'F')) {
-        Result = 10 + _HexChar - 'A';
-      } else if (('a' <= _HexChar) && (_HexChar <= 'f')) {
-        Result = 10 + _HexChar - 'a';
-      }
-      return Result;
-    }
-
-    /**
-     * @brief Convert Byte-Array to Hex-String
-     *
-     * @param _ByteArray Pointer to the Byte-Array
-     * @param _Length Length of the Byte Array
-     * @return String HEX-Decodet
-     */
-    String DS18B20::ByteArrayToHexString (uint8_t *_ByteArray, uint8_t _Length) {
-      String Result = "";
-      for (size_t i = 0; i < _Length; i++) {
-        if (_ByteArray[i] < 16) {
-          Result += "0";
-        }
-        Result += String (_ByteArray[i], HEX);
-      }
-      return Result;
     }
   }
 }

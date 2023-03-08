@@ -88,9 +88,10 @@ namespace JCA {
      */
     Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name)
         : Parent (_Name) {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
 
       // Intern
-      ChargeState = Charger_State::IDLE;
+      ChargeState = Charger_State_T::IDLE;
 
       // Konfig
       AccuVoltageMax = 4.2;
@@ -112,6 +113,38 @@ namespace JCA {
       PinCharge = _PinCharge;
       PinDischarge = _PinDischarge;
       Sensor = _Sensor;
+    }
+
+    /**
+     * @brief Add Config-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Config-Tags ("config": {})
+     */
+    void Charger::createConfigValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[AccuVoltageMax_Name] = AccuVoltageMax;
+      _Values[AccuVoltageMin_Name] = AccuVoltageMin;
+      _Values[AccuChargeCurrent_Name] = AccuChargeCurrent;
+      _Values[AccuDischargeCurrent_Name] = AccuDischargeCurrent;
+      _Values[ChargeEndCurrent_Name] = ChargeEndCurrent;
+      _Values[WaitDischarge_Name] = WaitDischarge;
+      _Values[RechargeVoltage_Name] = RechargeVoltage;
+    }
+
+    /**
+     * @brief Add Data-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Data-Tags ("data": {})
+     */
+    void Charger::createDataValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[DoCheck_Name] = DoCheck;
+      _Values[DoCharge_Name] = DoCharge;
+      _Values[Current_Name] = Current;
+      _Values[ChargedAH_Name] = ChargedAH;
+      _Values[ChargedWH_Name] = ChargedWH;
+      _Values[DischargedAH_Name] = DischargedAH;
+      _Values[DischargedWH_Name] = DischargedWH;
     }
 
     /**
@@ -180,6 +213,7 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void Charger::setData (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
       for (JsonObject Tag : _Tags) {
         if (Tag[JsonTagName] == DoCharge_Name) {
           DoCharge = Tag[JsonTagValue].as<bool> ();
@@ -211,16 +245,17 @@ namespace JCA {
      * @param _Tags Array of Commands ("cmd": [])
      */
     void Charger::setCmd (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
-     * @brief Create a list of Config-Tags containing the current Value
+     * @brief Write the Config-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Charger::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (AccuVoltageMax_Name, AccuVoltageMax_Text, AccuVoltageMax_Comment, false, AccuVoltageMax_Unit, AccuVoltageMax) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuVoltageMin_Name, AccuVoltageMin_Text, AccuVoltageMin_Comment, false, AccuVoltageMin_Unit, AccuVoltageMin) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuChargeCurrent_Name, AccuChargeCurrent_Text, AccuChargeCurrent_Comment, false, AccuChargeCurrent_Unit, AccuChargeCurrent) + "}");
@@ -232,13 +267,13 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Data-Tags containing the current Value
+     * @brief Write the Data-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Charger::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (DoCheck_Name, DoCheck_Text, DoCheck_Comment, false, DoCheck_TextOn, DoCheck_TextOff, DoCheck) + "}");
       _SetupFile.println (",{" + createSetupTag (DoCharge_Name, DoCharge_Text, DoCharge_Comment, false, DoCharge_TextOn, DoCharge_TextOff, DoCharge) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuVoltage_Name, AccuVoltage_Text, AccuVoltage_Comment, true, AccuVoltage_Unit, AccuVoltage) + "}");
@@ -251,43 +286,12 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Command-Informations
+     * @brief Write the Command-Tags to Setup-File
      *
-     * @param _Tags Array the Command-Infos have to add
+     * @param _SetupFile File to write
      */
     void Charger::writeSetupCmdInfo (File _SetupFile) {
-    }
-
-    void Charger::createConfigValues (JsonObject &_Values) {
-      _Values[AccuVoltageMax_Name] = AccuVoltageMax;
-      _Values[AccuVoltageMin_Name] = AccuVoltageMin;
-      _Values[AccuChargeCurrent_Name] = AccuChargeCurrent;
-      _Values[AccuDischargeCurrent_Name] = AccuDischargeCurrent;
-      _Values[ChargeEndCurrent_Name] = ChargeEndCurrent;
-      _Values[WaitDischarge_Name] = WaitDischarge;
-      _Values[RechargeVoltage_Name] = RechargeVoltage;
-    }
-
-    void Charger::createDataValues (JsonObject &_Values) {
-      _Values[DoCheck_Name] = DoCheck;
-      _Values[DoCharge_Name] = DoCharge;
-      _Values[Current_Name] = Current;
-      _Values[ChargedAH_Name] = ChargedAH;
-      _Values[ChargedWH_Name] = ChargedWH;
-      _Values[DischargedAH_Name] = DischargedAH;
-      _Values[DischargedWH_Name] = DischargedWH;
-    }
-
-    void writeSetupConfig (File _SetupFile) {
-
-    }
-
-    void writeSetupData (File _SetupFile) {
-
-    }
-
-    void writeSetupCmdInfo (File _SetupFile) {
-
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**
@@ -296,8 +300,7 @@ namespace JCA {
      * @param _Time Current Time to check automated feeding
      */
     void Charger::update (struct tm &_Time) {
-      bool AutoFeed = AccuVoltageMax == _Time.tm_hour && AccuVoltageMin == _Time.tm_min && _Time.tm_year > 100;
-
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
     }
   }
 }

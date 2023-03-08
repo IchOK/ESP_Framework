@@ -53,6 +53,7 @@ namespace JCA {
      */
     Level::Level (uint8_t _Pin, const char *_Name)
         : Parent (_Name) {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       RawEmpty = 0;
       RawFull = 1024;
       Pin = _Pin;
@@ -63,6 +64,31 @@ namespace JCA {
       LastSeconds = 0;
       IntervalCount = 0;
       RawValue = 0;
+    }
+
+    /**
+     * @brief Add Config-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Config-Tags ("config": {})
+     */
+    void Level::createConfigValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[RawEmpty_Name] = RawEmpty;
+      _Values[RawFull_Name] = RawFull;
+      _Values[AlarmLevel_Name] = AlarmLevel;
+      _Values[ReadInterval_Name] = ReadInterval;
+    }
+
+    /**
+     * @brief Add Data-Tags to a JSON-Object, containing the current Value
+     *
+     * @param _Values Object to add the Data-Tags ("data": {})
+     */
+    void Level::createDataValues (JsonObject &_Values) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      _Values[Level_Name] = Value;
+      _Values[Alarm_Name] = Alarm;
+      _Values[RawValue_Name] = RawValue;
     }
 
     /**
@@ -110,6 +136,7 @@ namespace JCA {
      * @param _Tags Array of Data-Tags ("data": [])
      */
     void Level::setData (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
@@ -118,16 +145,17 @@ namespace JCA {
      * @param _Tags Array of Commands ("cmd": [])
      */
     void Level::setCmd (JsonArray _Tags) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
     }
 
     /**
-     * @brief Create a list of Config-Tags containing the current Value
+     * @brief Write the Config-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Level::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (RawEmpty_Name, RawEmpty_Text, RawEmpty_Comment, false, RawEmpty_Unit, RawEmpty) + "}");
       _SetupFile.println (",{" + createSetupTag (RawFull_Name, RawFull_Text, RawFull_Comment, false, RawFull_Unit, RawFull) + "}");
       _SetupFile.println (",{" + createSetupTag (AlarmLevel_Name, AlarmLevel_Text, Alarm_Comment, false, AlarmLevel_Unit, AlarmLevel) + "}");
@@ -136,13 +164,13 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Data-Tags containing the current Value
+     * @brief Write the Data-Tags to Setup-File
      *
-     * @param _Tags Array the Tags have to add
+     * @param _SetupFile File to write
      */
     void Level::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Level_Name, Level_Text, Level_Comment, true, Level_Unit, Value) + "}");
       _SetupFile.println (",{" + createSetupTag (Alarm_Name, Alarm_Text, Alarm_Comment, true, Alarm_TextOn, Alarm_TextOff, Alarm) + "}");
       _SetupFile.println (",{" + createSetupTag (RawValue_Name, RawValue_Text, RawValue_Comment, true, RawValue_Unit, RawValue) + "}");
@@ -150,25 +178,12 @@ namespace JCA {
     }
 
     /**
-     * @brief Create a list of Command-Informations
+     * @brief Write the Command-Tags to Setup-File
      *
-     * @param _Tags Array the Command-Infos have to add
+     * @param _SetupFile File to write
      */
     void Level::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Get");
-    }
-
-    void Level::createConfigValues (JsonObject &_Values) {
-      _Values[RawEmpty_Name] = RawEmpty;
-      _Values[RawFull_Name] = RawFull;
-      _Values[AlarmLevel_Name] = AlarmLevel;
-      _Values[ReadInterval_Name] = ReadInterval;
-    }
-
-    void Level::createDataValues (JsonObject &_Values) {
-      _Values[Level_Name] = Value;
-      _Values[Alarm_Name] = Alarm;
-      _Values[RawValue_Name] = RawValue;
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**
@@ -177,7 +192,7 @@ namespace JCA {
      * @param time Current Time to check the Samplerate
      */
     void Level::update (struct tm &time) {
-
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       // Get Seconds of Day
       if (LastSeconds != time.tm_sec) {
         IntervalCount++;

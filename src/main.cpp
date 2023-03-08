@@ -21,7 +21,10 @@
 #include <JCA_SYS_DebugOut.h>
 
 // Project function
+#include <JCA_FNC_Charger.h>
+#include <JCA_FNC_DS18B20.h>
 #include <JCA_FNC_Feeder.h>
+#include <JCA_FNC_INA219.h>
 #include <JCA_FNC_Level.h>
 #include <JCA_FNC_Parent.h>
 
