@@ -27,7 +27,15 @@ namespace JCA {
      * @param _APSubnet AP Subnet-Mask
      */
     WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet) {
-      sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
+      #ifdef ESP8266
+        sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
+      #elif ESP32
+        uint32_t ESP32ChipId = 0;
+        for (int i = 0; i < 17; i = i + 8) {
+          ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
+        }
+        sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP32ChipId);
+      #endif
       strncpy (ApPassword, _Password, sizeof (ApPassword));
       ApIP.fromString (_ApIP);
       //      ApGateway.fromString (_ApGateway);
@@ -376,15 +384,27 @@ namespace JCA {
         return false;
       }
       if (!DHCP) {
-        if (!IP.isSet ()) {
-          return false;
-        }
-        if (!Gateway.isSet ()) {
-          return false;
-        }
-        if (!Subnet.isSet ()) {
-          return false;
-        }
+        #ifdef ESP8266
+          if (!IP.isSet ()) {
+            return false;
+          }
+          if (!Gateway.isSet ()) {
+            return false;
+          }
+          if (!Subnet.isSet ()) {
+            return false;
+          }
+        #elif ESP32
+          if (IP == INADDR_NONE) {
+            return false;
+          }
+          if (Gateway == INADDR_NONE) {
+            return false;
+          }
+          if (Subnet == INADDR_NONE) {
+            return false;
+          }
+        #endif
       }
       return true;
     }

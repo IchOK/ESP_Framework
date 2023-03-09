@@ -45,6 +45,7 @@
   #include <FS.h>
   #include <SPIFFS.h>
   #include <WiFi.h>
+  #include <Update.h>
 #endif
 #include <ESPAsyncWebServer.h>
 

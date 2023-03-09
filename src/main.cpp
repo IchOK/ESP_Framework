@@ -14,11 +14,13 @@
 #include "FS.h"
 #include <Arduino.h>
 #include <LittleFS.h>
+#include <time.h>
 
 #ifdef ESP8266
   #define SPIFFS LittleFS
+  #define SERIAL_BAUD 74880
 #elif ESP32
-  
+  #define SERIAL_BAUD 115200
 #endif
 
 // Basics
@@ -148,15 +150,21 @@ void setup () {
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
-  Debug.init (FLAG_NONE);
-  // Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC);// | FLAG_LOOP);
+  // Debug.init (FLAG_NONE);
+  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC, 115200); // | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef ESP32
+  if (!LittleFS.begin (true)) {
+#else
   if (!LittleFS.begin ()) {
+#endif
     Debug.println (FLAG_ERROR, false, "root", "setup", "LITTLEFS Mount Failed");
     return;
+  } else {
+    Debug.println (FLAG_SETUP, false, "root", "setup", "LITTLEFS Mount Done");
   }
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++

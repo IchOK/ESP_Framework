@@ -78,16 +78,21 @@ namespace JCA {
     const char *Charger::DischargedWH_Unit = "WH";
     const char *Charger::DischargedWH_Comment = nullptr;
 
-    /**
-     * @brief Construct a new Charger::Charger object
-     *
-     * @param _PinEnable Pin that is connected to the Enable in on the Stepper-Driver
-     * @param _PinStep Pin that is connected to the Step in on the Stepper-Driver
-     * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
-     * @param _Name Element Name inside the Communication
-     */
+/**
+ * @brief Construct a new Charger::Charger object
+ *
+ * @param _PinEnable Pin that is connected to the Enable in on the Stepper-Driver
+ * @param _PinStep Pin that is connected to the Step in on the Stepper-Driver
+ * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
+ * @param _Name Element Name inside the Communication
+ */
+#ifdef ESP8266
     Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name)
-        : Parent (_Name), Output() {
+        : Parent (_Name) {
+#elif ESP32
+    Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name)
+        : Parent (_Name), Output () {
+#endif
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
 
       // Intern
@@ -297,9 +302,14 @@ namespace JCA {
     /**
      * @brief Init the Charger
      */
-    bool Charger::init (){
-      Output.write(PinCharge, 0, 10000);
-      Output.write(PinDischarge, 0, 10000);
+    bool Charger::init () {
+#ifdef ESP8266
+      analogWrite (PinCharge, 0);
+      analogWrite (PinDischarge, 0);
+#elif ESP32
+      Output.write (PinCharge, 0, 10000);
+      Output.write (PinDischarge, 0, 10000);
+#endif
       return true;
     }
 

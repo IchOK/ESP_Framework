@@ -48,7 +48,15 @@ namespace JCA {
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
         : Parent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
-      sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
+      #ifdef ESP8266
+        sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
+      #elif ESP32
+        uint32_t ESP32ChipId = 0;
+        for (int i = 0; i < 17; i = i + 8) {
+          ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
+        }
+        sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP32ChipId);
+      #endif
       Port = _Port;
       Reboot = false;
       strncpy (ConfUser, _ConfUser, sizeof (ConfUser));

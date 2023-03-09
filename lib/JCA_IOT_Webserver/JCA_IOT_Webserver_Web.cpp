@@ -187,8 +187,12 @@ namespace JCA {
       if (!_Index) {
         Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "Update Start: ");
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Filename.c_str ());
+        #ifdef ESP8266
         Update.runAsync (true);
         if (!Update.begin ((ESP.getFreeSketchSpace () - 0x1000) & 0xFFFFF000)) {
+        #elif ESP32
+        if (!Update.begin ()) {
+        #endif
           if (Debug.print (FLAG_ERROR, true, ObjectName, __func__, "")) {
             Update.printError (Serial);
           }
@@ -352,7 +356,7 @@ namespace JCA {
         return String (ARDUINO_BOARD);
       }
       if (var == "BOARD_VERSION") {
-        return String (ARDUINO_ESP8266_RELEASE);
+        return String ("");
       }
       if (var == "BOARD_VARIANT") {
         return String (BOARD_VARIANT);

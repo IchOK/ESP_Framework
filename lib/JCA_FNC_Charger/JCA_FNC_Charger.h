@@ -142,7 +142,7 @@ namespace JCA {
 
     public:
       Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);
-      bool init();
+      bool init ();
       void update (struct tm &_Time);
     };
   }
