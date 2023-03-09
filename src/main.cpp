@@ -14,7 +14,12 @@
 #include "FS.h"
 #include <Arduino.h>
 #include <LittleFS.h>
-#define SPIFFS LittleFS
+
+#ifdef ESP8266
+  #define SPIFFS LittleFS
+#elif ESP32
+  
+#endif
 
 // Basics
 #include <JCA_IOT_Webserver.h>

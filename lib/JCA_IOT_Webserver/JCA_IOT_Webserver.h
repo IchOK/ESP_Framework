@@ -34,8 +34,8 @@
 #include <AsyncJson.h>
 #include <LittleFS.h>
 
-#define SPIFFS LittleFS
 #ifdef ESP8266
+  #define SPIFFS LittleFS
   #include <ESP8266WiFi.h>
   #include <ESP8266mDNS.h>
   #include <ESPAsyncTCP.h>

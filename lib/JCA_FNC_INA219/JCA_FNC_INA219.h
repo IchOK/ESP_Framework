@@ -84,6 +84,7 @@ namespace JCA {
       INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name);
       INA219 (const uint8_t _Addr, const char *_Name);
       INA219 (const char *_Name);
+      bool init();
       void update (struct tm &_Time);
       float getPowerPlus ();
       float getVoltagePlus ();

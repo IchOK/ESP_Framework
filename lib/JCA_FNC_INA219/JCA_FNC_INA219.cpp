@@ -170,6 +170,13 @@ namespace JCA {
     }
 
     /**
+     * @brief Init the Sensor
+     */
+    bool INA219::init (){
+      return Sensor.init();
+    }
+
+    /**
      * @brief Handling INA219-Sensor
      * Read and Skale the Temperature
      * @param time Current Time to check the Samplerate
