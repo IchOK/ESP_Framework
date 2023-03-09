@@ -15,15 +15,13 @@
 
 #include <ArduinoJson.h>
 #include <INA219_WE.h>
-//#include <OneWire.h>
-//#include <time.h>
 
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
-    class INA219 : public Parent{
+    class INA219 : public Parent {
     private:
       // Datapoint description
       static const char *ReadInterval_Name;
@@ -87,11 +85,11 @@ namespace JCA {
       INA219 (const uint8_t _Addr, const char *_Name);
       INA219 (const char *_Name);
       void update (struct tm &_Time);
-      float getPowerPlus();
-      float getVoltagePlus();
-      float getPowerMinus();
-      float getVoltageMinus();
-      float getCurrent();
+      float getPowerPlus ();
+      float getVoltagePlus ();
+      float getPowerMinus ();
+      float getVoltageMinus ();
+      float getCurrent ();
     };
   }
 }

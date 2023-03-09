@@ -22,7 +22,7 @@
 
 namespace JCA {
   namespace FNC {
-    class Level : public Parent{
+    class Level : public Parent {
     private:
       // Datapoint description
       static const char *RawEmpty_Name;
@@ -85,10 +85,10 @@ namespace JCA {
       uint16_t IntervalCount;
 
     public:
-      Level (uint8_t _Pin, const char* _Name);
+      Level (uint8_t _Pin, const char *_Name);
       void update (struct tm &_Time);
-      float getValue();
-      bool getAlarm();
+      float getValue ();
+      bool getAlarm ();
     };
   }
 }

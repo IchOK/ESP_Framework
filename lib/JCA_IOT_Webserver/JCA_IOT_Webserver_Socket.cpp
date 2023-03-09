@@ -31,8 +31,7 @@ namespace JCA {
       Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Start");
       if (_Type == WS_EVT_CONNECT) {
         doWsUpdate (_Client);
-      }
-      else if (_Type == WS_EVT_DATA) {
+      } else if (_Type == WS_EVT_DATA) {
         wsHandleData (_Client, _Arg, _Data, _Len);
       }
     }
@@ -90,7 +89,7 @@ namespace JCA {
     }
 
     bool Webserver::doWsUpdate (AsyncWebSocketClient *_Client) {
-      DynamicJsonDocument JsonDoc(10000);
+      DynamicJsonDocument JsonDoc (10000);
       JsonVariant InData;
       JsonVariant OutData = JsonDoc.as<JsonVariant> ();
 
@@ -101,7 +100,7 @@ namespace JCA {
         }
       } else {
         // check if selected Client can send Data
-        if (Websocket.count() == 0){
+        if (Websocket.count () == 0) {
           return false;
         }
       }

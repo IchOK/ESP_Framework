@@ -46,7 +46,7 @@ namespace JCA {
       JsonVariant findConfig (JsonArray &_Elements);
       JsonVariant findData (JsonArray &_Elements);
       JsonVariant findCmd (JsonArray &_Elements);
-      
+
       // Create Parent-Structure
       String createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly);
       String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value);

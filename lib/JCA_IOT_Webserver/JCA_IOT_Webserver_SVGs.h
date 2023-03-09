@@ -10,13 +10,13 @@
  *
  */
 #ifndef _JCA_IOT_WEBSERVER_SVGS_
-  #define _JCA_IOT_WEBSERVER_SVGS_
+#define _JCA_IOT_WEBSERVER_SVGS_
 
-  #include <Arduino.h>
+#include <Arduino.h>
 
 /**
  * @brief Home Button
- * 
+ *
  */
 const char SvgHome[] PROGMEM = R"rawliteral(
 <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 200 200">
@@ -29,7 +29,7 @@ const char SvgHome[] PROGMEM = R"rawliteral(
 
 /**
  * @brief Config Button
- * 
+ *
  */
 const char SvgConfig[] PROGMEM = R"rawliteral(
 <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 200 200">
@@ -50,7 +50,7 @@ const char SvgConfig[] PROGMEM = R"rawliteral(
 
 /**
  * @brief WiFi Connect Button
- * 
+ *
  */
 const char SvgWiFi[] PROGMEM = R"rawliteral(
 <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 200 200">
@@ -69,7 +69,7 @@ const char SvgWiFi[] PROGMEM = R"rawliteral(
 
 /**
  * @brief System button
- * 
+ *
  */
 const char SvgSystem[] PROGMEM = R"rawliteral(
 <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 200 200">
@@ -83,7 +83,7 @@ const char SvgSystem[] PROGMEM = R"rawliteral(
 
 /**
  * @brief JCA Logo
- * 
+ *
  */
 const char SvgLogo[] PROGMEM = R"rawliteral(
 <svg width="50" height="50" version="1.1" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">

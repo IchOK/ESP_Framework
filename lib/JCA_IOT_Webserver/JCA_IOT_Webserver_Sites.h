@@ -11,9 +11,9 @@
  */
 
 #ifndef _JCA_IOT_WEBSERVER_SITES_
-  #define _JCA_IOT_WEBSERVER_SITES_
+#define _JCA_IOT_WEBSERVER_SITES_
 
-  #include <Arduino.h>
+#include <Arduino.h>
 
 /**
  * @brief Static Web Frame for Famework Sites

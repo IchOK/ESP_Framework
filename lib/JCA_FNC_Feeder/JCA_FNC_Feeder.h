@@ -17,12 +17,12 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_SYS_DebugOut.h>
 #include <JCA_FNC_Parent.h>
+#include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
-    class Feeder : public Parent{
+    class Feeder : public Parent {
     private:
       // Parent Datapoint description
       static const char *FeedingHour_Name;
@@ -76,7 +76,7 @@ namespace JCA {
       static const char *CmdDoFeed_Comment;
       static const char *CmdDoFeed_Type;
       static const char *CmdDoFeed_BtnText;
-      
+
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
       void createDataValues (JsonObject &_Values);

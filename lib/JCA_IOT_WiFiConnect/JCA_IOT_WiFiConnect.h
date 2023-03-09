@@ -69,7 +69,7 @@ namespace JCA {
       IPAddress IP;
       IPAddress Gateway;
       IPAddress Subnet;
-      bool isConfigured();
+      bool isConfigured ();
 
     public:
       // Constuctor/Destructor
@@ -79,7 +79,7 @@ namespace JCA {
       ~WiFiConnect ();
 
       // Setter
-      bool setSsid(const char *_Ssid);
+      bool setSsid (const char *_Ssid);
       bool setPassword (const char *_Password);
       bool setIP (const char *_IP);
       bool setGateway (const char *_Gateway);
@@ -89,9 +89,9 @@ namespace JCA {
       bool init ();
 
       // Handling
-      bool doConnect();
+      bool doConnect ();
       bool handle ();
-      bool isConnected();
+      bool isConnected ();
       String replaceWildcards (const String &var);
     };
   }

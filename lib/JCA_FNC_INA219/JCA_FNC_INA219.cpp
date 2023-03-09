@@ -4,10 +4,10 @@
  * @brief Framework Element to get Data from INA219 Sensor
  * @version 0.1
  * @date 2023-03-07
- * 
+ *
  * Copyright Jochen Cabrera 2023
  * Apache License
- * 
+ *
  */
 
 #include <JCA_FNC_INA219.h>
@@ -48,7 +48,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name)
-        : Parent (_Name), Sensor(_Wire, _Addr) {
+        : Parent (_Name), Sensor (_Wire, _Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
     }
     /**
@@ -182,7 +182,7 @@ namespace JCA {
       if (this->Resend <= 0) {
         // Read Values from Sensor
         ShuntVoltage_mV = Sensor.getShuntVoltage_mV ();
-        BusVoltage_V= Sensor.getBusVoltage_V ();
+        BusVoltage_V = Sensor.getBusVoltage_V ();
         Current_mA = Sensor.getCurrent_mA ();
 
         // Calc internal Values
