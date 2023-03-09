@@ -35,8 +35,7 @@ namespace JCA {
     String DebugOut::getPrefix (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function) {
       String RetVal = "";
       if (NewLine) {
-        switch (_Flag)
-        {
+        switch (_Flag) {
         case FLAG_ERROR:
           RetVal += "[ERROR] ";
           break;
@@ -58,13 +57,13 @@ namespace JCA {
           break;
 
         default:
-          RetVal += "[---]" ;
+          RetVal += "[---]";
           break;
         }
         if (_Framework) {
           RetVal += "JCA::";
         }
-        RetVal += String(_ElementName) + String("::") + String(_Function) + String(" - ");
+        RetVal += String (_ElementName) + String ("::") + String (_Function) + String (" - ");
         NewLine = false;
       }
       return RetVal;
@@ -72,7 +71,7 @@ namespace JCA {
 
     /**
      * @brief Initalises the Debug-Level and Debug-Interface
-     * 
+     *
      * @param _Flags Select the diffrent Levels of Debug-Output
      * @param _Baud Baud rate of Serial interface
      */
@@ -107,8 +106,8 @@ namespace JCA {
      */
     bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message) {
       if (_Flag & Flags) {
-        DebugSerial.print(getPrefix(_Flag, _Framework, _ElementName, _Function));
-        DebugSerial.print(_Message);
+        DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
+        DebugSerial.print (_Message);
         return true;
       } else {
         return false;

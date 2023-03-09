@@ -15,7 +15,7 @@ using namespace JCA::SYS;
 namespace JCA {
   namespace IOT {
 
-    void Webserver::onWebHomeReplace (AwsTemplateProcessor _CB){
+    void Webserver::onWebHomeReplace (AwsTemplateProcessor _CB) {
       replaceHomeWildcardsCB = _CB;
     }
 
@@ -25,11 +25,11 @@ namespace JCA {
 
     /**
      * @brief Handle the POST-Request on the Connection-Site
-     * 
+     *
      * @param _Request Request data from Web-Client
      */
     void Webserver::onWebConnectPost (AsyncWebServerRequest *_Request) {
-      DynamicJsonDocument JsonDoc(1000);
+      DynamicJsonDocument JsonDoc (1000);
       JsonObject Config;
       JsonObject WiFiConfig;
 
@@ -54,7 +54,7 @@ namespace JCA {
           JsonDoc.clear ();
           WiFiConfig = Config.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
         }
-        ConfigFile.close();
+        ConfigFile.close ();
       } else {
         Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
         Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Create new Konfig");
@@ -82,14 +82,14 @@ namespace JCA {
       // Save Config Object
       ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "w");
       size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
-      ConfigFile.close();
+      ConfigFile.close ();
       Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "Write Config File [");
       Debug.print (FLAG_CONFIG, true, ObjectName, __func__, WrittenBytes);
       Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "]");
 
       // Read back Config-File
-      readConfig();
-      
+      readConfig ();
+
       // Connect and Answer to the Client
       if (Connector.doConnect ()) {
         _Request->send (200, "text/plain", "Connect to Network");
@@ -160,7 +160,7 @@ namespace JCA {
      * @param _Request Request data from Web-Client
      */
     void Webserver::onWebSystemUpdate (AsyncWebServerRequest *_Request) {
-      if(!Update.hasError ()){
+      if (!Update.hasError ()) {
         AsyncWebServerResponse *Response = _Request->beginResponse (301);
         Response->addHeader ("Location", JCA_IOT_WEBSERVER_PATH_SYS);
         Response->addHeader ("Retry-After", "60");
@@ -189,7 +189,7 @@ namespace JCA {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Filename.c_str ());
         Update.runAsync (true);
         if (!Update.begin ((ESP.getFreeSketchSpace () - 0x1000) & 0xFFFFF000)) {
-          if (Debug.print (FLAG_ERROR, true, ObjectName, __func__, "")){
+          if (Debug.print (FLAG_ERROR, true, ObjectName, __func__, "")) {
             Update.printError (Serial);
           }
         }
@@ -228,14 +228,14 @@ namespace JCA {
       _Request->send (Response);
       if (onSystemResetCB) {
         delay (100);
-        onSystemResetCB();
+        onSystemResetCB ();
       }
     }
 
     /**
-     * @brief 
-     * 
-     * @param _Request 
+     * @brief
+     *
+     * @param _Request
      */
     void Webserver::onWebHomeGet (AsyncWebServerRequest *_Request) {
       if (LittleFS.exists (JCA_IOT_WEBSERVER_PATH_HOME)) {
@@ -255,7 +255,7 @@ namespace JCA {
 
     /**
      * @brief Replace Default Wildcards in Websites
-     * 
+     *
      * @param var Wildcard
      * @return String Replace String
      */
@@ -278,7 +278,7 @@ namespace JCA {
       if (var == "SVG_SYSTEM") {
         return String (SvgSystem);
       }
-      return String();
+      return String ();
     }
 
     /**
@@ -290,7 +290,7 @@ namespace JCA {
     String Webserver::replaceHomeWildcards (const String &var) {
       String RetVal;
       if (replaceConfigWildcardsCB) {
-        RetVal = replaceConfigWildcardsCB(var);
+        RetVal = replaceConfigWildcardsCB (var);
         if (!RetVal.isEmpty ()) {
           return RetVal;
         }
@@ -311,7 +311,7 @@ namespace JCA {
     String Webserver::replaceConfigWildcards (const String &var) {
       String RetVal;
       if (replaceConfigWildcardsCB) {
-        RetVal = replaceConfigWildcardsCB(var);
+        RetVal = replaceConfigWildcardsCB (var);
         if (!RetVal.isEmpty ()) {
           return RetVal;
         }
@@ -332,7 +332,7 @@ namespace JCA {
     String Webserver::replaceSystemWildcards (const String &var) {
       String RetVal;
       RetVal = replaceDefaultWildcards (var);
-      if (!RetVal.isEmpty()) {
+      if (!RetVal.isEmpty ()) {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Replace from Default Function");
         return RetVal;
       }
@@ -376,7 +376,7 @@ namespace JCA {
       String RetVal;
       RetVal = Connector.replaceWildcards (var);
       if (!RetVal.isEmpty ()) {
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Replace from Connector Function") ;
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Replace from Connector Function");
         return RetVal;
       }
       RetVal = replaceDefaultWildcards (var);

@@ -4,10 +4,10 @@
  * @brief Framework Element to get Data from DS18B20 Sensor
  * @version 1.0
  * @date 2023-01-06
- * 
+ *
  * Copyright Jochen Cabrera 2022
  * Apache License
- * 
+ *
  */
 
 #include <JCA_FNC_DS18B20.h>
@@ -38,7 +38,7 @@ namespace JCA {
      * @param _Wire Pointer to the OneWire Interface
      * @param _Name Element Name inside the Communication
      */
-    DS18B20::DS18B20 (OneWire* _Wire, const char* _Name)
+    DS18B20::DS18B20 (OneWire *_Wire, const char *_Name)
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       Wire = _Wire;
@@ -55,7 +55,7 @@ namespace JCA {
       Value = 0.0;
       Resend = 0;
       ReadData = false;
-      LastMillis = millis();
+      LastMillis = millis ();
     }
 
     /**
@@ -98,7 +98,7 @@ namespace JCA {
         if (Tag[JsonTagName] == Addr_Name) {
           String AddrHex = Tag[JsonTagValue].as<String> ();
           // Convert HEX-String to Byte-Array
-          HexStringToByteArray(AddrHex, Addr, 8);
+          HexStringToByteArray (AddrHex, Addr, 8);
           if (Debug.print (FLAG_CONFIG, false, Name, __func__, Addr_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_CONFIG, false, Name, __func__, AddrHex);
@@ -139,9 +139,9 @@ namespace JCA {
      */
     void DS18B20::writeSetupConfig (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Filter_Name, Filter_Text, Filter_Comment, false, Filter_Unit, Filter) + "}");
-      _SetupFile.println (",{" + createSetupTag (Addr_Name, Addr_Text, Addr_Comment, false, ByteArrayToHexString(Addr, 8)) + "}");
+      _SetupFile.println (",{" + createSetupTag (Addr_Name, Addr_Text, Addr_Comment, false, ByteArrayToHexString (Addr, 8)) + "}");
       _SetupFile.println (",{" + createSetupTag (ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval) + "}");
       _SetupFile.println ("]");
     }
@@ -153,7 +153,7 @@ namespace JCA {
      */
     void DS18B20::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Temp_Name, Temp_Text, Temp_Comment, true, Temp_Unit, Value) + "}");
       _SetupFile.println ("]");
     }

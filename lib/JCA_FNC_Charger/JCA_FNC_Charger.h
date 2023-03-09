@@ -15,10 +15,13 @@
 
 #include <ArduinoJson.h>
 #include <time.h>
+#ifdef ESP32
+  #include <pwmWrite.h>
+#endif
 
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_FNC_Parent.h>
 #include <JCA_FNC_INA219.h>
+#include <JCA_FNC_Parent.h>
+#include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
@@ -30,7 +33,7 @@ namespace JCA {
       DISCHARGE
     } Charger_State;
 
-    class Charger : public Parent{
+    class Charger : public Parent {
     private:
       // Parent Datapoint description
       static const char *AccuVoltageMax_Name;
@@ -108,7 +111,10 @@ namespace JCA {
       void writeSetupCmdInfo (File _SetupFile);
 
       // Hardware
-      INA219* Sensor;
+      INA219 *Sensor;
+#ifdef ESP32
+      Pwm Output;
+#endif
       uint8_t PinCharge;
       uint8_t PinDischarge;
 
@@ -136,6 +142,7 @@ namespace JCA {
 
     public:
       Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);
+      bool init();
       void update (struct tm &_Time);
     };
   }

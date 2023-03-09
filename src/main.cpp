@@ -4,17 +4,22 @@
  * @brief Akku Manager charging and discharging with Capacity calculation
  * @version 0.1
  * @date 2023-03-07
- * 
+ *
  * Copyright Jochen Cabrera 2022
  * Apache License
- * 
+ *
  */
 
 // Firmware
 #include "FS.h"
 #include <Arduino.h>
 #include <LittleFS.h>
-#define SPIFFS LittleFS
+
+#ifdef ESP8266
+  #define SPIFFS LittleFS
+#elif ESP32
+  
+#endif
 
 // Basics
 #include <JCA_IOT_Webserver.h>
@@ -66,22 +71,22 @@ void cbSystemReset () {
 void cbSaveConfig () {
   File ConfigFile = LittleFS.open (CONFIGPATH, "w");
   bool ElementInit = false;
-  ConfigFile.println("{\"elements\":[");
-  Server.writeSetup(ConfigFile, ElementInit);
+  ConfigFile.println ("{\"elements\":[");
+  Server.writeSetup (ConfigFile, ElementInit);
   Spindel.writeSetup (ConfigFile, ElementInit);
   Futter.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
 
-void getAllValues(JsonVariant &_Out) {
+void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
   Spindel.getValues (Elements);
   Futter.getValues (Elements);
 }
 
-void setAll(JsonVariant &_In) {
+void setAll (JsonVariant &_In) {
   if (_In.containsKey (Parent::JsonTagElements)) {
     JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
@@ -102,11 +107,11 @@ String cbWebConfigReplace (const String &var) {
 // RestAPI Functions
 //-------------------------------------------------------
 void cbRestApiGet (JsonVariant &_In, JsonVariant &_Out) {
-  getAllValues(_Out);
+  getAllValues (_Out);
 }
 
 void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
-  setAll(_In);
+  setAll (_In);
 }
 
 void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
@@ -114,7 +119,7 @@ void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
 }
 
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
-  cbSaveConfig();
+  cbSaveConfig ();
 }
 
 void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
@@ -125,26 +130,26 @@ void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
 // Websocket Functions
 //-------------------------------------------------------
 void cbWsUpdate (JsonVariant &_In, JsonVariant &_Out) {
-  getAllValues(_Out);
+  getAllValues (_Out);
 }
 void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
-  setAll(_In);
+  setAll (_In);
 
   // Return Value update
-  getAllValues(_Out);
+  getAllValues (_Out);
 }
 
-//#######################################################
-// Setup
-//#######################################################
+// #######################################################
+//  Setup
+// #######################################################
 void setup () {
-  DynamicJsonDocument JDoc(10000);
+  DynamicJsonDocument JDoc (10000);
 
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
   Debug.init (FLAG_NONE);
-  //Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC);// | FLAG_LOOP);
+  // Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC);// | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
@@ -185,8 +190,8 @@ void setup () {
     DeserializationError Error = deserializeJson (JDoc, ConfigFile);
     if (!Error) {
       Debug.println (FLAG_CONFIG, false, "main", "setup", "Deserialize Done");
-      JsonVariant InConfig = JDoc.as<JsonVariant>();
-      setAll(InConfig);
+      JsonVariant InConfig = JDoc.as<JsonVariant> ();
+      setAll (InConfig);
     } else {
       Debug.print (FLAG_ERROR, false, "main", "setup", "deserializeJson() failed: ");
       Debug.println (FLAG_ERROR, false, "main", "setup", Error.c_str ());
@@ -197,9 +202,9 @@ void setup () {
   }
 }
 
-//#######################################################
-// Loop
-//#######################################################
+// #######################################################
+//  Loop
+// #######################################################
 void loop () {
   Server.handle ();
   tm CurrentTime = Server.getTimeStruct ();

@@ -4,10 +4,10 @@
  * @brief Parent Class of all Framework Elements.
  * @version 1.0
  * @date 2022-12-10
- * 
+ *
  * Copyright Jochen Cabrera 2022
  * Apache License
- * 
+ *
  */
 
 #include <JCA_FNC_Parent.h>
@@ -32,10 +32,10 @@ namespace JCA {
     const char *Parent::BtnOnDefault = "ON";
     const char *Parent::BtnOffDefault = "OFF";
     const char *Parent::DebugSeparator = " - ";
-    
+
     /**
      * @brief Construct a new Parent::Parent object
-     * 
+     *
      * @param _Name Element Name inside the Communication
      * @param _Comment Comment if requested
      */
@@ -46,7 +46,7 @@ namespace JCA {
 
     /**
      * @brief Construct a new Parent::Parent object
-     * 
+     *
      * @param _Name Element Name inside the Communication
      */
     Parent::Parent (String _Name) : Parent (_Name, "") {
@@ -111,12 +111,12 @@ namespace JCA {
 
     String Parent::createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly) {
       String SetupTag;
-      SetupTag += "\"" + String(JsonTagName) + "\":\"" + String(_Name) + "\"";
-      SetupTag += ",\"" + String(JsonTagText) + "\":\"" + String(_Text) + "\"";
+      SetupTag += "\"" + String (JsonTagName) + "\":\"" + String (_Name) + "\"";
+      SetupTag += ",\"" + String (JsonTagText) + "\":\"" + String (_Text) + "\"";
       if (_Comment != nullptr) {
-        SetupTag += ",\"" + String(JsonTagComment) + "\":\"" + String(_Comment) + "\"";
+        SetupTag += ",\"" + String (JsonTagComment) + "\":\"" + String (_Comment) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagReadOnly) + "\":" + String(_ReadOnly);
+      SetupTag += ",\"" + String (JsonTagReadOnly) + "\":" + String (_ReadOnly);
       return SetupTag;
     }
 
@@ -135,16 +135,16 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_BtnOnText != nullptr) {
-        SetupTag += ",\"" + String(JsonTagOn) + "\":\"" + String(_BtnOnText) + "\"";
+        SetupTag += ",\"" + String (JsonTagOn) + "\":\"" + String (_BtnOnText) + "\"";
       } else {
-        SetupTag += ",\"" + String(JsonTagOn) + "\":\"" + String(BtnOnDefault) + "\"";
+        SetupTag += ",\"" + String (JsonTagOn) + "\":\"" + String (BtnOnDefault) + "\"";
       }
       if (_BtnOffText != nullptr) {
-        SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(_BtnOffText) + "\"";
+        SetupTag += ",\"" + String (JsonTagOff) + "\":\"" + String (_BtnOffText) + "\"";
       } else {
-        SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(BtnOffDefault) + "\"";
+        SetupTag += ",\"" + String (JsonTagOff) + "\":\"" + String (BtnOffDefault) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":";
+      SetupTag += ",\"" + String (JsonTagValue) + "\":";
       if (_Value) {
         SetupTag += "true";
       } else {
@@ -167,9 +167,9 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
+        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
       return SetupTag;
     }
 
@@ -187,9 +187,9 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
+        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
       return SetupTag;
     }
 
@@ -207,9 +207,9 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
+        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
       return SetupTag;
     }
 
@@ -227,9 +227,9 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
+        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
       return SetupTag;
     }
 
@@ -247,9 +247,9 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
+        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
       return SetupTag;
     }
 
@@ -267,9 +267,9 @@ namespace JCA {
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
       if (_Unit != nullptr) {
-        SetupTag += ",\"" + String(JsonTagUnit) + "\":\"" + String(_Unit) + "\"";
+        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagValue) + "\":" + String(_Value);
+      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
       return SetupTag;
     }
 
@@ -285,7 +285,7 @@ namespace JCA {
      */
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      SetupTag += ",\"" + String(JsonTagValue) + "\":\"" + _Value + "\"";
+      SetupTag += ",\"" + String (JsonTagValue) + "\":\"" + _Value + "\"";
       return SetupTag;
     }
 
@@ -301,7 +301,7 @@ namespace JCA {
      */
     String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      SetupTag += ",\"" + String(JsonTagValue) + "\":\"" + String(_Value) + "\"";
+      SetupTag += ",\"" + String (JsonTagValue) + "\":\"" + String (_Value) + "\"";
       return SetupTag;
     }
 
@@ -316,7 +316,7 @@ namespace JCA {
      */
     String Parent::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
-      SetupTag += ",\"" + String(JsonTagType) + "\":\"" + String(_Type) + "\"";
+      SetupTag += ",\"" + String (JsonTagType) + "\":\"" + String (_Type) + "\"";
       return SetupTag;
     }
 
@@ -333,9 +333,9 @@ namespace JCA {
     String Parent::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText) {
       String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
       if (_BtnText != nullptr) {
-        SetupTag += ",\"" + String(JsonTagOff) + "\":\"" + String(_BtnText) + "\"";
+        SetupTag += ",\"" + String (JsonTagOff) + "\":\"" + String (_BtnText) + "\"";
       }
-      SetupTag += ",\"" + String(JsonTagType) + "\":\"" + String(_Type) + "\"";
+      SetupTag += ",\"" + String (JsonTagType) + "\":\"" + String (_Type) + "\"";
       return SetupTag;
     }
 
@@ -400,11 +400,11 @@ namespace JCA {
       JsonVariant _Tags;
       _Tags = findConfig (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        setConfig(_Tags.as<JsonArray>());
+        setConfig (_Tags.as<JsonArray> ());
       }
       _Tags = findData (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        setData(_Tags.as<JsonArray>());
+        setData (_Tags.as<JsonArray> ());
       }
       _Tags = findCmd (_Elements);
       if (_Tags.is<JsonArray> ()) {
@@ -414,7 +414,7 @@ namespace JCA {
 
     /**
      * @brief Create an Element-Object with Data- and Config-Values
-     * 
+     *
      * @param _Elements Object of Elements to add the Element
      */
     void Parent::getValues (JsonObject &_Elements) {
@@ -428,20 +428,20 @@ namespace JCA {
 
     /**
      * @brief Write Element-Tags to Setup-File
-     * 
+     *
      * @param _SetupFile File to Write
      * @param _ElementInit First Element added
      */
     void Parent::writeSetup (File _SetupFile, bool &_ElementInit) {
       if (_ElementInit) {
-        _SetupFile.println(",{");
+        _SetupFile.println (",{");
       } else {
         _SetupFile.println ("{");
         _ElementInit = true;
       }
-      _SetupFile.println ("\"" + String(JsonTagName) + "\":\"" + Name + "\"");
-      if (Comment.length() > 0) {
-        _SetupFile.println(",\"" + String(JsonTagComment) + "\":\"" + Comment + "\"");
+      _SetupFile.println ("\"" + String (JsonTagName) + "\":\"" + Name + "\"");
+      if (Comment.length () > 0) {
+        _SetupFile.println (",\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
       }
       writeSetupConfig (_SetupFile);
       writeSetupData (_SetupFile);

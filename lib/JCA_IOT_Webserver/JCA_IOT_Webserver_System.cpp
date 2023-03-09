@@ -20,7 +20,7 @@ namespace JCA {
     const char *Webserver::Hostname_Text = "Hostname";
     const char *Webserver::Hostname_Comment = "Hostname wirde erst nache dem Reboot aktiv";
     const char *Webserver::WsUpdateCycle_Name = "wsUpdate";
-    const char *Webserver::WsUpdateCycle_Text  = "Websocket Updatezyklus";
+    const char *Webserver::WsUpdateCycle_Text = "Websocket Updatezyklus";
     const char *Webserver::WsUpdateCycle_Unit = "ms";
     const char *Webserver::WsUpdateCycle_Comment = nullptr;
     const char *Webserver::TimeSync_Name = "timeSync";
@@ -265,7 +265,7 @@ namespace JCA {
         }
         if (Tag[JsonTagName] == SaveConfig_Name) {
           if (Tag[JsonTagValue].as<bool> ()) {
-            onSaveConfigCB();
+            onSaveConfigCB ();
           }
           if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, SaveConfig_Name)) {
             Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
@@ -282,7 +282,7 @@ namespace JCA {
      */
     void Webserver::writeSetupConfig (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
-      _SetupFile.println (",\"" + String(JsonTagConfig) + "\":[");
+      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Hostname_Name, Hostname_Text, Hostname_Comment, false, Hostname) + "}");
       _SetupFile.println (",{" + createSetupTag (WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, false, WsUpdateCycle_Unit, WsUpdateCycle) + "}");
       _SetupFile.println ("]");
@@ -295,7 +295,7 @@ namespace JCA {
      */
     void Webserver::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
-      _SetupFile.println (",\"" + String(JsonTagData) + "\":[");
+      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (Time_Name, Time_Text, Time_Comment, true, getTime ()) + "}");
       _SetupFile.println ("]");
     }
@@ -307,7 +307,7 @@ namespace JCA {
      */
     void Webserver::writeSetupCmdInfo (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
-      _SetupFile.println (",\"" + String(JsonTagCmdInfo) + "\":[");
+      _SetupFile.println (",\"" + String (JsonTagCmdInfo) + "\":[");
       _SetupFile.println ("{" + createSetupCmdInfo (TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type) + "}");
       _SetupFile.println (",{" + createSetupCmdInfo (SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type, SaveConfig_BtnText) + "}");
       _SetupFile.println ("]");

@@ -7,10 +7,10 @@
  * - Check configured WiFi after WatchDog is in AP Mode
  * @version 0.1
  * @date 2022-09-03
- * 
+ *
  * Copyright Jochen Cabrera 2022
  * Apache License
- * 
+ *
  */
 #include <JCA_IOT_WiFiConnect.h>
 using namespace JCA::SYS;
@@ -19,7 +19,7 @@ namespace JCA {
   namespace IOT {
     /**
      * @brief Construct a new WiFiConnect::WiFiConnect object
-     * 
+     *
      * @param _SsidPrefix SSID Prefix for AP, extend with ChipID
      * @param _Password Password for AP
      * @param _ApIP AP IP-Adress
@@ -30,8 +30,8 @@ namespace JCA {
       sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
       strncpy (ApPassword, _Password, sizeof (ApPassword));
       ApIP.fromString (_ApIP);
-//      ApGateway.fromString (_ApGateway);
-//      ApGateway.fromString ("0.0.0.0");
+      //      ApGateway.fromString (_ApGateway);
+      //      ApGateway.fromString ("0.0.0.0");
       ApSubnet.fromString (_ApSubnet);
       State = Init;
       DHCP = true;
@@ -56,14 +56,14 @@ namespace JCA {
 
     /**
      * @brief Destroy the WiFiConnect::WiFiConnect object
-     * 
+     *
      */
     WiFiConnect::~WiFiConnect () {
     }
 
     /**
      * @brief Set the Station SSID
-     * 
+     *
      * @param _Ssid SSID auf the Ap to connect to
      * @return true SSID is valid
      * @return false SSID is invalid
@@ -101,7 +101,7 @@ namespace JCA {
 
     /**
      * @brief Set the Station IP
-     * 
+     *
      * @param _IP IP-Address if Station use fix Address
      * @return true IP is valid
      * @return false IP is invalid
@@ -118,7 +118,7 @@ namespace JCA {
 
     /**
      * @brief Set the Station Gateway
-     * 
+     *
      * @param _Gateway Gateway-Address if Station use fix Address
      * @return true Gateway is valid
      * @return false Dateway is invalid
@@ -135,7 +135,7 @@ namespace JCA {
 
     /**
      * @brief Set the Station Subnet-Mask
-     * 
+     *
      * @param _Subnet Subnet-Mask if Station use fix Address
      * @return true Subnet-Mask is valid
      * @return false Subnet-Mask is invalid
@@ -152,9 +152,9 @@ namespace JCA {
 
     /**
      * @brief Set the Station DHCP mode
-     * 
+     *
      * @param _DHCP use DHCP or fix Address
-     * @return true always 
+     * @return true always
      * @return false never
      */
     bool WiFiConnect::setDHCP (bool _DHCP) {
@@ -164,7 +164,7 @@ namespace JCA {
 
     /**
      * @brief initialize the WiFi Connection and pass the data for Station mode
-     * 
+     *
      * @param _Ssid SSID of remote AP
      * @param _Password Password of remote AP
      * @param _IP IP if use fix Address
@@ -222,7 +222,7 @@ namespace JCA {
 
     /**
      * @brief Handle the Connection State and WatchDogs
-     * 
+     *
      * @return true if connected to AP
      * @return false if in AP-Mode or trying to connect to AP
      */
@@ -256,7 +256,7 @@ namespace JCA {
 
           if (WiFi.status () == WL_CONNECTED) {
             Debug.print (FLAG_SETUP, true, ObjectName, __func__, " DONE : ");
-            Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP().toString());
+            Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP ().toString ());
             State = STA;
           } else {
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
@@ -344,16 +344,16 @@ namespace JCA {
         }
         break;
       }
-      return isConnected();
+      return isConnected ();
     }
 
     /**
      * @brief Trigger a reconnect to AP
-     * 
+     *
      * @return true Station alreadxy was connected, reconnect
      * @return false connect to Station in progress
      */
-    bool WiFiConnect::doConnect() {
+    bool WiFiConnect::doConnect () {
       if (isConfigured ()) {
         State = Connect;
         handle ();
@@ -361,10 +361,10 @@ namespace JCA {
       }
       return false;
     }
-    
+
     /**
      * @brief Check if the Station Config is valid
-     * 
+     *
      * @return true valid
      * @return false invalid
      */
@@ -391,7 +391,7 @@ namespace JCA {
 
     /**
      * @brief Check if the Controller is connected to AP
-     * 
+     *
      * @return true connected
      * @return false disconnected
      */
@@ -401,7 +401,7 @@ namespace JCA {
 
     /**
      * @brief Replace Connection Wildcard in Website
-     * 
+     *
      * @param var Wildcard
      * @return String Replace String
      */
@@ -427,7 +427,7 @@ namespace JCA {
       if (var == "STYLE") {
         return F (":root{--ColorWiFi:var(--contrast)}");
       }
-      return String();
+      return String ();
     }
 
   } // namespace IOT

@@ -22,21 +22,21 @@
 
 namespace JCA {
   namespace FNC {
-    typedef enum DS18B20_Type_T{
-      TYPE_S  = 0x10,
-      TYPE_B  = 0x28,
+    typedef enum DS18B20_Type_T {
+      TYPE_S = 0x10,
+      TYPE_B = 0x28,
       TYPE_22 = 0x22
     } DS18B20_Type;
-    typedef enum DS18B20_Cmd_T{
-      CONV    = 0x44,
-      READ    = 0xBE,
-      WRITE   = 0x4E,
-      COPY    = 0x48,
-      RECALL  = 0xB8,
-      POWER   = 0xB4
+    typedef enum DS18B20_Cmd_T {
+      CONV = 0x44,
+      READ = 0xBE,
+      WRITE = 0x4E,
+      COPY = 0x48,
+      RECALL = 0xB8,
+      POWER = 0xB4
     } DS18B20_Cmd;
 
-    class DS18B20 : public Parent{
+    class DS18B20 : public Parent {
     private:
       // Datapoint description
       static const char *Filter_Name;
@@ -68,7 +68,7 @@ namespace JCA {
       void writeSetupCmdInfo (File _SetupFile);
 
       // Hardware
-      OneWire* Wire;
+      OneWire *Wire;
 
       // Konfig
       float Filter;
@@ -87,7 +87,7 @@ namespace JCA {
     public:
       DS18B20 (OneWire *_Wire, const char *_Name);
       void update (struct tm &_Time);
-      float getValue();
+      float getValue ();
     };
   }
 }

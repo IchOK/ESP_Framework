@@ -4,10 +4,10 @@
  * @brief Framework Element for a daily Feeder. With variable Time and Amount
  * @version 1.0
  * @date 2022-11-06
- * 
+ *
  * Copyright Jochen Cabrera 2022
  * Apache License
- * 
+ *
  */
 
 #include <JCA_FNC_Feeder.h>

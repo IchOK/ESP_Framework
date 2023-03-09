@@ -15,8 +15,8 @@ using namespace JCA::SYS;
 namespace JCA {
   namespace IOT {
     void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
-      DynamicJsonDocument JsonDoc(10000);
-      JsonVariant OutData = JsonDoc.as<JsonVariant>();
+      DynamicJsonDocument JsonDoc (10000);
+      JsonVariant OutData = JsonDoc.as<JsonVariant> ();
 
       if (Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Request->methodToString ())) {
         Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "+ Body:");
@@ -62,7 +62,7 @@ namespace JCA {
       }
 
       // Add System Informations
-      OutData["used"] = JsonDoc.memoryUsage();
+      OutData["used"] = JsonDoc.memoryUsage ();
 
       // Create Response
       String response;

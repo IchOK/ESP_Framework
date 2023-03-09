@@ -4,10 +4,10 @@
  * @brief Framework Element for a daily Charger. With variable Time and Amount
  * @version 1.0
  * @date 2022-11-06
- * 
+ *
  * Copyright Jochen Cabrera 2022
  * Apache License
- * 
+ *
  */
 
 #include <JCA_FNC_Charger.h>
@@ -87,7 +87,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name)
-        : Parent (_Name) {
+        : Parent (_Name), Output() {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
 
       // Intern
@@ -292,6 +292,15 @@ namespace JCA {
      */
     void Charger::writeSetupCmdInfo (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+    }
+
+    /**
+     * @brief Init the Charger
+     */
+    bool Charger::init (){
+      Output.write(PinCharge, 0, 10000);
+      Output.write(PinDischarge, 0, 10000);
+      return true;
     }
 
     /**
