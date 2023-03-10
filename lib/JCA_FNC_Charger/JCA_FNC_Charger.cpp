@@ -103,6 +103,9 @@ namespace JCA {
       AccuVoltageMin = 3.0;
       AccuChargeCurrent = 1.0;
       AccuDischargeCurrent = 1.0;
+      ChargeEndCurrent = 0.1;
+      WaitDischarge = 20;
+      RechargeVoltage = 4.0;
 
       // Daten
       DoCharge = true;

@@ -23,9 +23,11 @@ const char PageFrame[] PROGMEM = R"rawliteral(
 <html>
 <head>
 <title>%TITLE%</title>
-<link rel="stylesheet" type="text/css" href="/style.css">
-<link rel="stylesheet" type="text/css" href="/styleMobile.css">
-<link rel="stylesheet" type="text/css" href="/styleAddon.css">
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+<link rel="icon" type="image/png" href="/images/favicon.png">
+<link rel="stylesheet" type="text/css" href="/style/style.css">
+<link rel="stylesheet" type="text/css" href="/style/styleMobile.css">
+<link rel="stylesheet" type="text/css" href="/style/styleAddon.css">
 <style>:root{--ColorHome:var(--secondary);--ColorConfig:var(--secondary);--ColorWiFi:var(--secondary);--ColorSystem:var(--secondary)}</style>
 <style>%STYLE%</style>
 </head>

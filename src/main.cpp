@@ -60,6 +60,16 @@ Feeder Spindel (EN_PIN, STEP_PIN, DIR_PIN, "Spindel");
 
 Level Futter (LEVEL_PIN, "Futter");
 
+//-------------------------------------------------------
+// Charger
+//-------------------------------------------------------
+#define CHARGE_PIN 1    // PWM-Output Charging
+#define DISCHARGE_PIN 2 // PWM-Output Discharge
+#define SENSOR_ADR 0x40 // I2C-Address INA219
+
+INA219 PowerSensor (SENSOR_ADR, "PowerSensor");
+Charger Laderegler (&PowerSensor, CHARGE_PIN, DISCHARGE_PIN, "Laderegler");
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -77,6 +87,8 @@ void cbSaveConfig () {
   Server.writeSetup (ConfigFile, ElementInit);
   Spindel.writeSetup (ConfigFile, ElementInit);
   Futter.writeSetup (ConfigFile, ElementInit);
+  PowerSensor.writeSetup (ConfigFile, ElementInit);
+  Laderegler.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -86,6 +98,8 @@ void getAllValues (JsonVariant &_Out) {
   Server.getValues (Elements);
   Spindel.getValues (Elements);
   Futter.getValues (Elements);
+  PowerSensor.getValues (Elements);
+  Laderegler.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
@@ -94,6 +108,8 @@ void setAll (JsonVariant &_In) {
     Server.set (Elements);
     Spindel.set (Elements);
     Futter.set (Elements);
+    PowerSensor.set (Elements);
+    Laderegler.set (Elements);
   }
 }
 //-------------------------------------------------------
@@ -189,6 +205,11 @@ void setup () {
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Custom Code
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  //-------------------------------------------------------
+  // Init Elements
+  //-------------------------------------------------------
+  PowerSensor.init();
+  Laderegler.init();
   //-------------------------------------------------------
   // Read Config File
   //-------------------------------------------------------
