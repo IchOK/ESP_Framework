@@ -151,7 +151,7 @@ void setup () {
   digitalWrite (STAT_PIN, LOW);
 
   // Debug.init (FLAG_NONE);
-  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC, 115200); // | FLAG_LOOP);
+  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC, SERIAL_BAUD); // | FLAG_LOOP);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem

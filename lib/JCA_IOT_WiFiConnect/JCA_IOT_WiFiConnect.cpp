@@ -209,12 +209,12 @@ namespace JCA {
         DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "DHCP Invalid");
       }
-      if (DataValid) {
+//      if (DataValid) {
         handle ();
         return isConnected ();
-      } else {
-        return false;
-      }
+//      } else {
+//        return false;
+//      }
     }
 
     /**
@@ -225,6 +225,7 @@ namespace JCA {
      */
     bool WiFiConnect::init () {
       Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Not initialized");
+      handle ();
       return false;
     }
 
@@ -268,12 +269,26 @@ namespace JCA {
             State = STA;
           } else {
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
-            BusyTimer = millis ();
-            State = Failed;
+//            BusyTimer = millis ();
+//            State = Failed;
+            Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
+            Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
+            WiFi.mode (WIFI_AP);
+            WiFi.softAPConfig (ApIP, ApGateway, ApSubnet);
+            WiFi.softAP (ApSsid, ApPassword);
+            State = AP;
+            ReconnectTimer = millis ();
           }
         } else {
-          BusyTimer = millis ();
-          State = Failed;
+//          BusyTimer = millis ();
+//          State = Failed;
+          Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
+          Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
+          WiFi.mode (WIFI_AP);
+          WiFi.softAPConfig (ApIP, ApGateway, ApSubnet);
+          WiFi.softAP (ApSsid, ApPassword);
+          State = AP;
+          ReconnectTimer = millis ();
         }
         break;
 
