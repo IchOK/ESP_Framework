@@ -74,8 +74,8 @@ namespace JCA {
       float Current;
 
       // Intern
-      int32_t Resend;
       uint32_t LastMillis;
+      uint32_t UpdateMillis;
       float ShuntVoltage_mV;
       float BusVoltage_V;
       float Current_mA;
@@ -86,6 +86,7 @@ namespace JCA {
       INA219 (const char *_Name);
       bool init();
       void update (struct tm &_Time);
+      void setInterval (uint16_t _ReadInterval);
       float getPowerPlus ();
       float getVoltagePlus ();
       float getPowerMinus ();

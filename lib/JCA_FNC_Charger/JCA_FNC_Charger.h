@@ -23,13 +23,17 @@
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
+#define CURRENT_AH_STEPS 0.001
+#define POWER_AH_STEPS 0.001
+
 namespace JCA {
   namespace FNC {
     typedef enum Charger_State_T {
       IDLE,
       CHARGE_CURRENT,
       CHARGE_VOLTAGE,
-      WAIT,
+      WAIT_CHARGE,
+      WAIT_DISCHARCH,
       DISCHARGE
     } Charger_State;
 
@@ -98,6 +102,29 @@ namespace JCA {
       static const char *DischargedWH_Text;
       static const char *DischargedWH_Unit;
       static const char *DischargedWH_Comment;
+      static const char *ChargeSP_Name;
+      static const char *ChargeSP_Text;
+      static const char *ChargeSP_Unit;
+      static const char *ChargeSP_Comment;
+      static const char *DischargeSP_Name;
+      static const char *DischargeSP_Text;
+      static const char *DischargeSP_Unit;
+      static const char *DischargeSP_Comment;
+      static const char *ChargeState_Name;
+      static const char *ChargeState_Text;
+      static const char *ChargeState_Comment;
+      static const char *ChargeState_Case_Undef;
+      static const char *ChargeState_Case_Idle;
+      static const char *ChargeState_Case_ChargeCurrent;
+      static const char *ChargeState_Case_ChargeVoltage;
+      static const char *ChargeState_Case_WaitCharge;
+      static const char *ChargeState_Case_WaitDischarge;
+      static const char *ChargeState_Case_Discharge;
+
+      static const float CurrentHyst;
+      static const float VoltageHyst;
+      static const float OutputStep;
+      static const uint16_t UpdateInterval;
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
@@ -136,9 +163,21 @@ namespace JCA {
       float ChargedWH;
       float DischargedAH;
       float DischargedWH;
+      float ChargeSP;
+      float DischargeSP;
+      Charger_State_T ChargeState;
 
       // Intern
-      Charger_State_T ChargeState;
+      uint8_t Resolution;
+      uint32_t Frequency;
+      float DutyScale;
+      uint32_t LastMillis;
+      uint32_t UpdateMillis;
+      uint32_t DelayDischarge;
+      float CurrentStep;
+      float PowerStep;
+      bool DischargeHold;
+      float DischargeSave;
 
     public:
       Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);

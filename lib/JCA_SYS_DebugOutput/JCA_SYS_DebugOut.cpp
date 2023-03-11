@@ -56,8 +56,16 @@ namespace JCA {
           RetVal += "[LOOP] ";
           break;
 
+        case FLAG_PROTOCOL:
+          RetVal += "[PROTO] ";
+          break;
+
+        case FLAG_DATA:
+          RetVal += "[DATA] ";
+          break;
+
         default:
-          RetVal += "[---]";
+          RetVal += "[---] ";
           break;
         }
         if (_Framework) {

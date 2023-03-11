@@ -50,6 +50,7 @@ namespace JCA {
     INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name)
         : Parent (_Name), Sensor (_Wire, _Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      ReadInterval = 1;
     }
     /**
      * @brief Construct a new INA219::INA219 object
@@ -60,6 +61,7 @@ namespace JCA {
     INA219::INA219 (const uint8_t _Addr, const char *_Name)
         : Parent (_Name), Sensor (_Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      ReadInterval = 1;
     }
     /**
      * @brief Construct a new INA219::INA219 object
@@ -70,6 +72,7 @@ namespace JCA {
     INA219::INA219 (const char *_Name)
         : Parent (_Name), Sensor () {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      ReadInterval = 1;
     }
 
     /**
@@ -172,8 +175,15 @@ namespace JCA {
     /**
      * @brief Init the Sensor
      */
-    bool INA219::init (){
-      return Sensor.init();
+    bool INA219::init () {
+      LastMillis = millis ();
+      UpdateMillis = 0;
+      if (Sensor.init ()) {
+        Sensor.setADCMode(SAMPLE_MODE_64);
+        return true;
+      } else {
+        return false;
+      }
     }
 
     /**
@@ -183,10 +193,12 @@ namespace JCA {
      */
     void INA219::update (struct tm &time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
-      uint32_t DiffMillis = millis () - LastMillis;
+      // Get Update Intervall
+      uint32_t ActMillis = millis ();
+      UpdateMillis += (ActMillis - LastMillis);
+      LastMillis = ActMillis;
 
-      // If Resend counts to 0 resend convertion Request
-      if (this->Resend <= 0) {
+      if (UpdateMillis >= ReadInterval) {
         // Read Values from Sensor
         ShuntVoltage_mV = Sensor.getShuntVoltage_mV ();
         BusVoltage_V = Sensor.getBusVoltage_V ();
@@ -198,10 +210,36 @@ namespace JCA {
         Current = Current_mA / 1000.0;
         PowerPlus = VoltagePlus * Current;
         PowerMinus = VoltageMinus * Current;
-
-      } else {
-        this->Resend -= DiffMillis;
+        if (Debug.print (FLAG_DATA, false, Name, __func__, "Values:")) {
+          Debug.println (FLAG_DATA, false, Name, __func__, Sensor.getOverflow ());
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Shunt Voltage[mV]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, ShuntVoltage_mV);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Bus Voltage   [V]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, BusVoltage_V);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Current      [mA]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, Current_mA);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Voltage Plus  [V]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, VoltagePlus);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Voltage Minus [V]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, VoltageMinus);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Current       [A]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, Current);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Power Plus    [W]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, PowerPlus);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Power Minus   [W]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, PowerMinus);
+        }
+        UpdateMillis = 0;
       }
+    }
+
+    /**
+     * @brief Set the Update Interval to sync with other Elements
+     * 
+     * @param _ReadInterval new Update Interval
+     */
+    void INA219::setInterval (uint16_t _ReadInterval) {
+      ReadInterval = _ReadInterval;
     }
 
     /**

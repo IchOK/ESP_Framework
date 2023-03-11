@@ -11,7 +11,7 @@ def get_firmware_specifier_build_flag():
 def get_program_name():
   my_flags = env.ParseFlags(env['BUILD_FLAGS'])
   defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
-  return ("FW_" + os.path.basename(os.getcwd()) + "_" + defines.get("AUTO_VERSION"))
+  return ("FW_" + os.path.basename(os.getcwd()) + "_" + defines.get("AUTO_VERSION").replace("\"", ""))
 
 env.Append(
   BUILD_FLAGS=[get_firmware_specifier_build_flag()]

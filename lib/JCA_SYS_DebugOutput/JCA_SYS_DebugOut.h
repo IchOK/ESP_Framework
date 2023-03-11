@@ -28,13 +28,14 @@ namespace JCA {
      * Flags for define Debug-Message Level
      */
     enum DEBUGOUT_FLAGS : uint16_t {
-      FLAG_NONE = 0x0,     ///< Don't send any Messages
-      FLAG_ERROR = 0x1,    ///< Error Message
-      FLAG_SETUP = 0x2,    ///< From Setup or Init Functions
-      FLAG_CONFIG = 0x4,   ///< Informations about (Re-)Configuraton
-      FLAG_TRAFFIC = 0x8,  ///< Informations about Network traffic or data
-      FLAG_LOOP = 0x10,    ///< Loop Informations, like readen Values or Counter (not recomended)
-      FLAG_PROTOCOL = 0x20 ///< Loop Informations, like readen Values or Counter (not recomended)
+      FLAG_NONE = 0x0,      ///< Don't send any Messages
+      FLAG_ERROR = 0x1,     ///< Error Message
+      FLAG_SETUP = 0x2,     ///< From Setup or Init Functions
+      FLAG_CONFIG = 0x4,    ///< Informations about (Re-)Configuraton
+      FLAG_TRAFFIC = 0x8,   ///< Informations about Network traffic or data
+      FLAG_LOOP = 0x10,     ///< Loop Informations, like readen Values or Counter (not recomended)
+      FLAG_PROTOCOL = 0x20, ///< Protocoll Informations from Parent Element (not recomended)
+      FLAG_DATA = 0x40      ///< Data, readen from Sensors or calculated
     };
     /**
      * @brief

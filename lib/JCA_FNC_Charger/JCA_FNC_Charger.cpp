@@ -54,14 +54,14 @@ namespace JCA {
     const char *Charger::DoCharge_TextOn = nullptr;
     const char *Charger::DoCharge_TextOff = nullptr;
     const char *Charger::AccuVoltage_Name = "AccuVoltage";
-    const char *Charger::AccuVoltage_Text = "Verbleibende Schritte";
-    const char *Charger::AccuVoltage_Unit = "st";
+    const char *Charger::AccuVoltage_Text = "Akku Spannung";
+    const char *Charger::AccuVoltage_Unit = "V";
     const char *Charger::AccuVoltage_Comment = nullptr;
     const char *Charger::Current_Name = "Current";
-    const char *Charger::Current_Text = "aktuelle Geschwindigkeit";
-    const char *Charger::Current_Unit = "st/s";
+    const char *Charger::Current_Text = "Akku Strom";
+    const char *Charger::Current_Unit = "A";
     const char *Charger::Current_Comment = nullptr;
-    const char *Charger::ChargedAH_Name = "ChagedAH";
+    const char *Charger::ChargedAH_Name = "ChargedAH";
     const char *Charger::ChargedAH_Text = "Geladener Strom";
     const char *Charger::ChargedAH_Unit = "AH";
     const char *Charger::ChargedAH_Comment = nullptr;
@@ -77,6 +77,29 @@ namespace JCA {
     const char *Charger::DischargedWH_Text = "Entledene Leistung";
     const char *Charger::DischargedWH_Unit = "WH";
     const char *Charger::DischargedWH_Comment = nullptr;
+    const char *Charger::DischargeSP_Name = "DischargeSP";
+    const char *Charger::DischargeSP_Text = "PWM Entladen";
+    const char *Charger::DischargeSP_Unit = "%";
+    const char *Charger::DischargeSP_Comment = nullptr;
+    const char *Charger::ChargeSP_Name = "ChargeSP";
+    const char *Charger::ChargeSP_Text = "PWM Laden";
+    const char *Charger::ChargeSP_Unit = "%";
+    const char *Charger::ChargeSP_Comment = nullptr;
+    const char *Charger::ChargeState_Name = "ChargeState";
+    const char *Charger::ChargeState_Text = "Status";
+    const char *Charger::ChargeState_Comment = nullptr;
+    const char *Charger::ChargeState_Case_Undef = "Undefiniert";
+    const char *Charger::ChargeState_Case_Idle = "Inaktiv";
+    const char *Charger::ChargeState_Case_ChargeCurrent = "Laden-Strom";
+    const char *Charger::ChargeState_Case_ChargeVoltage = "Laden-Spannung";
+    const char *Charger::ChargeState_Case_WaitCharge = "Warten-Laden";
+    const char *Charger::ChargeState_Case_WaitDischarge = "Warten-Entladen";
+    const char *Charger::ChargeState_Case_Discharge = "Entladen";
+
+    const float Charger::CurrentHyst = 0.02;
+    const float Charger::VoltageHyst = 0.02;
+    const float Charger::OutputStep = 0.1;
+    const uint16_t Charger::UpdateInterval = 100;
 
 /**
  * @brief Construct a new Charger::Charger object
@@ -97,6 +120,9 @@ namespace JCA {
 
       // Intern
       ChargeState = Charger_State_T::IDLE;
+      Resolution = 10;
+      DutyScale = (pow (2.0, float (Resolution)) - 1.0) / 100.0;
+      Frequency = 3000;
 
       // Konfig
       AccuVoltageMax = 4.2;
@@ -108,7 +134,7 @@ namespace JCA {
       RechargeVoltage = 4.0;
 
       // Daten
-      DoCharge = true;
+      DoCharge = false;
       DoCheck = false;
       AccuVoltage = 0.0;
       Current = 0.0;
@@ -116,6 +142,8 @@ namespace JCA {
       ChargedWH = 0.0;
       DischargedAH = 0.0;
       DischargedWH = 0.0;
+      ChargeSP = 0.0;
+      DischargeSP = 0.0;
 
       // Hardware
       PinCharge = _PinCharge;
@@ -148,11 +176,37 @@ namespace JCA {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
       _Values[DoCheck_Name] = DoCheck;
       _Values[DoCharge_Name] = DoCharge;
+      _Values[AccuVoltage_Name] = AccuVoltage;
       _Values[Current_Name] = Current;
       _Values[ChargedAH_Name] = ChargedAH;
       _Values[ChargedWH_Name] = ChargedWH;
       _Values[DischargedAH_Name] = DischargedAH;
       _Values[DischargedWH_Name] = DischargedWH;
+      _Values[ChargeSP_Name] = ChargeSP;
+      _Values[DischargeSP_Name] = DischargeSP;
+      switch (ChargeState) {
+      case Charger_State_T::IDLE:
+        _Values[ChargeState_Name] = ChargeState_Case_Idle;
+        break;
+      case Charger_State_T::CHARGE_CURRENT:
+        _Values[ChargeState_Name] = ChargeState_Case_ChargeCurrent;
+        break;
+      case Charger_State_T::CHARGE_VOLTAGE:
+        _Values[ChargeState_Name] = ChargeState_Case_ChargeVoltage;
+        break;
+      case Charger_State_T::WAIT_CHARGE:
+        _Values[ChargeState_Name] = ChargeState_Case_WaitCharge;
+        break;
+      case Charger_State_T::WAIT_DISCHARCH:
+        _Values[ChargeState_Name] = ChargeState_Case_WaitDischarge;
+        break;
+      case Charger_State_T::DISCHARGE:
+        _Values[ChargeState_Name] = ChargeState_Case_Discharge;
+        break;
+      default:
+        _Values[ChargeState_Name] = ChargeState_Case_Undef;
+        break;
+      }
     }
 
     /**
@@ -164,14 +218,14 @@ namespace JCA {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
       for (JsonObject Tag : _Tags) {
         if (Tag[JsonTagName] == AccuVoltageMax_Name) {
-          AccuVoltageMax = Tag[JsonTagValue].as<int16_t> ();
+          AccuVoltageMax = Tag[JsonTagValue].as<float> ();
           if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuVoltageMax_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_CONFIG, false, Name, __func__, AccuVoltageMax);
           }
         }
         if (Tag[JsonTagName] == AccuVoltageMin_Name) {
-          AccuVoltageMin = Tag[JsonTagValue].as<int16_t> ();
+          AccuVoltageMin = Tag[JsonTagValue].as<float> ();
           if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuVoltageMin_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_CONFIG, false, Name, __func__, AccuVoltageMin);
@@ -199,7 +253,7 @@ namespace JCA {
           }
         }
         if (Tag[JsonTagName] == WaitDischarge_Name) {
-          WaitDischarge = Tag[JsonTagValue].as<float> ();
+          WaitDischarge = Tag[JsonTagValue].as<uint16_t> ();
           if (Debug.print (FLAG_CONFIG, false, Name, __func__, WaitDischarge_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_CONFIG, false, Name, __func__, WaitDischarge);
@@ -284,12 +338,15 @@ namespace JCA {
       _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
       _SetupFile.println ("{" + createSetupTag (DoCheck_Name, DoCheck_Text, DoCheck_Comment, false, DoCheck_TextOn, DoCheck_TextOff, DoCheck) + "}");
       _SetupFile.println (",{" + createSetupTag (DoCharge_Name, DoCharge_Text, DoCharge_Comment, false, DoCharge_TextOn, DoCharge_TextOff, DoCharge) + "}");
+      _SetupFile.println (",{" + createSetupTag (ChargeState_Name, ChargeState_Text, ChargeState_Comment, true, "Idle") + "}");
       _SetupFile.println (",{" + createSetupTag (AccuVoltage_Name, AccuVoltage_Text, AccuVoltage_Comment, true, AccuVoltage_Unit, AccuVoltage) + "}");
       _SetupFile.println (",{" + createSetupTag (Current_Name, Current_Text, Current_Comment, true, Current_Unit, Current) + "}");
       _SetupFile.println (",{" + createSetupTag (ChargedAH_Name, ChargedAH_Text, ChargedAH_Comment, true, ChargedAH_Unit, ChargedAH) + "}");
       _SetupFile.println (",{" + createSetupTag (ChargedWH_Name, ChargedWH_Text, ChargedWH_Comment, true, ChargedWH_Unit, ChargedWH) + "}");
       _SetupFile.println (",{" + createSetupTag (DischargedAH_Name, DischargedAH_Text, DischargedAH_Comment, true, DischargedAH_Unit, DischargedAH) + "}");
       _SetupFile.println (",{" + createSetupTag (DischargedWH_Name, DischargedWH_Text, DischargedWH_Comment, true, DischargedWH_Unit, DischargedWH) + "}");
+      _SetupFile.println (",{" + createSetupTag (ChargeSP_Name, ChargeSP_Text, ChargeSP_Comment, true, ChargeSP_Unit, ChargeSP) + "}");
+      _SetupFile.println (",{" + createSetupTag (DischargeSP_Name, DischargeSP_Text, DischargeSP_Comment, true, DischargeSP_Unit, DischargeSP) + "}");
       _SetupFile.println ("]");
     }
 
@@ -307,12 +364,21 @@ namespace JCA {
      */
     bool Charger::init () {
 #ifdef ESP8266
+      analogWriteResolution (Resolution);
+      analogWriteFreq (Frequency);
       analogWrite (PinCharge, 0);
       analogWrite (PinDischarge, 0);
 #elif ESP32
-      Output.write (PinCharge, 0, 10000);
-      Output.write (PinDischarge, 0, 10000);
+      Output.setResolution (PinCharge, Resolution);
+      Output.setResolution (PinDischarge, Resolution);
+      Output.setFrequency (PinCharge, Frequency);
+      Output.setFrequency (PinDischarge, Frequency);
+      Output.write (PinCharge, 0);
+      Output.write (PinDischarge, 0);
 #endif
+      Sensor->setInterval (UpdateInterval);
+      LastMillis = millis ();
+      UpdateMillis = 0;
       return true;
     }
 
@@ -323,6 +389,253 @@ namespace JCA {
      */
     void Charger::update (struct tm &_Time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
+      // Get Update Intervall
+      uint32_t ActMillis = millis ();
+      UpdateMillis += (ActMillis - LastMillis);
+      LastMillis = ActMillis;
+
+      if (UpdateMillis >= UpdateInterval) {
+        // Read Sensor Date
+        AccuVoltage = Sensor->getVoltagePlus ();
+        Current = abs (Sensor->getCurrent ());
+        float Power = abs (Sensor->getPowerPlus ());
+        float UpdateHours = float (UpdateMillis) / 3600000.0;
+
+        if (!(DoCharge || DoCheck)) {
+          ChargeState = Charger_State_T::IDLE;
+        }
+        switch (ChargeState) {
+        case Charger_State_T::IDLE:
+          //----------------------------------------
+          // Idle, waiting for Requests
+          //----------------------------------------
+          ChargeSP = 0.0;
+          DischargeSP = 0.0;
+
+          if (DoCharge || DoCheck) {
+            CurrentStep = 0.0;
+            PowerStep = 0.0,
+            ChargedAH = 0.0;
+            ChargedWH = 0.0;
+            DischargedAH = 0.0;
+            DischargedWH = 0.0;
+            ChargeState = Charger_State_T::CHARGE_CURRENT;
+          }
+          break;
+
+        case Charger_State_T::CHARGE_CURRENT:
+          //----------------------------------------
+          // Charging the accu by constant current
+          //----------------------------------------
+          DischargeSP = 0.0;
+
+          // Calculate charged Power
+          if (DoCharge) {
+            CurrentStep += (Current * UpdateHours);
+            if (CurrentStep >= CURRENT_AH_STEPS) {
+              ChargedAH += CURRENT_AH_STEPS;
+              CurrentStep -= CURRENT_AH_STEPS;
+            }
+            PowerStep += (Power * UpdateHours);
+            if (PowerStep >= POWER_AH_STEPS) {
+              ChargedWH += POWER_AH_STEPS;
+              PowerStep -= POWER_AH_STEPS;
+            }
+          }
+
+          if (AccuVoltage >= AccuVoltageMax) {
+            // Check Voltage to change to constant Voltage Mode
+            ChargeSP -= OutputStep;
+            ChargeState = Charger_State_T::CHARGE_VOLTAGE;
+          } else {
+            // controll charging current
+            float CurrentDiff = Current - AccuChargeCurrent;
+            if (CurrentDiff > CurrentHyst) {
+              ChargeSP -= OutputStep;
+            } else if (CurrentDiff < CurrentHyst) {
+              ChargeSP += OutputStep;
+            }
+          }
+          break;
+
+        case Charger_State_T::CHARGE_VOLTAGE:
+          //----------------------------------------
+          // Charging the accu by constant voltage
+          //----------------------------------------
+          DischargeSP = 0.0;
+
+          // Calculate charged Power
+          if (DoCharge) {
+            CurrentStep += (Current * UpdateHours);
+            if (CurrentStep >= CURRENT_AH_STEPS) {
+              ChargedAH += CURRENT_AH_STEPS;
+              CurrentStep -= CURRENT_AH_STEPS;
+            }
+            PowerStep += (Power * UpdateHours);
+            if (PowerStep >= POWER_AH_STEPS) {
+              ChargedWH += POWER_AH_STEPS;
+              PowerStep -= POWER_AH_STEPS;
+            }
+          }
+
+          if (Current >= AccuChargeCurrent + CurrentHyst) {
+            // Check Voltage to change to constant Voltage Mode
+            ChargeSP -= OutputStep;
+            ChargeState = Charger_State_T::CHARGE_CURRENT;
+          } else if (Current < ChargeEndCurrent) {
+            ChargeSP = 0.0;
+
+            if (DoCharge) {
+              // Finalize charged calculation
+              ChargedAH += CurrentStep;
+              CurrentStep = 0.0;
+              ChargedWH += PowerStep;
+              PowerStep = 0.0;
+              ChargeState = Charger_State_T::WAIT_CHARGE;
+            } else if (DoCheck) {
+              DelayDischarge = 0;
+              ChargeState = Charger_State_T::WAIT_DISCHARCH;
+            } else {
+              ChargeState = Charger_State_T::IDLE;
+            }
+          } else {
+            // controll charging voltage
+            float VoltageDiff = AccuVoltage - AccuVoltageMax;
+            if (VoltageDiff > VoltageHyst) {
+              ChargeSP -= OutputStep;
+            } else if (VoltageDiff < VoltageHyst) {
+              ChargeSP += OutputStep;
+            }
+          }
+          break;
+
+        case Charger_State_T::WAIT_CHARGE:
+          //----------------------------------------
+          // Waiting for recharge
+          //----------------------------------------
+          ChargeSP = 0.0;
+          DischargeSP = 0.0;
+          if (AccuVoltage <= RechargeVoltage) {
+            ChargeState = Charger_State_T::CHARGE_CURRENT;
+          }
+          break;
+
+        case Charger_State_T::WAIT_DISCHARCH:
+          //----------------------------------------
+          // waiting until discharging
+          //----------------------------------------
+          ChargeSP = 0.0;
+
+          if ((AccuVoltage <= (AccuVoltageMax - VoltageHyst)) || ((AccuVoltage <= AccuVoltageMax) && (DischargeHold || (Current < ChargeEndCurrent)))) {
+            if (!DischargeHold) {
+              DischargeHold = true;
+              DischargeSave = DischargeSP;
+            }
+            DischargeSP = 0.0;
+            // Wait for Calculation, accu Voltage have to be stable
+            DelayDischarge += UpdateMillis;
+            if (DelayDischarge >= uint32_t (WaitDischarge) * 1000) {
+              ChargeState = Charger_State_T::DISCHARGE;
+            }
+
+          } else {
+            if (DischargeHold) {
+              DischargeHold = false;
+              DischargeSP = DischargeSave;
+            }
+            DelayDischarge = 0;
+            // controll discharging current
+            float CurrentDiff = Current - AccuDischargeCurrent;
+            if (CurrentDiff > CurrentHyst) {
+              DischargeSP -= OutputStep;
+            } else if (CurrentDiff < CurrentHyst) {
+              DischargeSP += OutputStep;
+            }
+          }
+
+          break;
+
+        case Charger_State_T::DISCHARGE:
+          //----------------------------------------
+          // Discharge until Low-Level
+          //----------------------------------------
+          ChargeSP = 0.0;
+
+          // Calculate discharged Power
+          CurrentStep += (Current * UpdateHours);
+          if (CurrentStep >= CURRENT_AH_STEPS) {
+            DischargedAH += CURRENT_AH_STEPS;
+            CurrentStep -= CURRENT_AH_STEPS;
+          }
+          PowerStep += (Power * UpdateHours);
+          if (PowerStep >= POWER_AH_STEPS) {
+            DischargedWH += POWER_AH_STEPS;
+            PowerStep -= POWER_AH_STEPS;
+          }
+
+          if (AccuVoltage <= AccuVoltageMin) {
+            DischargeSP = 0.0;
+            DelayDischarge += UpdateMillis;
+            // Wait for Calculation, accu Voltage have to be stable
+            if (DelayDischarge >= uint32_t (WaitDischarge) * 1000) {
+              DoCheck = false;
+              DoCharge = true;
+              DischargedAH += CurrentStep;
+              CurrentStep = 0.0;
+              DischargedWH += PowerStep;
+              PowerStep = 0.0;
+              ChargeState = Charger_State_T::CHARGE_CURRENT;
+            }
+          } else {
+            DelayDischarge = 0;
+            // controll discharging current
+            float CurrentDiff = Current - AccuDischargeCurrent;
+            if (CurrentDiff > CurrentHyst) {
+              DischargeSP -= OutputStep;
+            } else if (CurrentDiff < CurrentHyst) {
+              DischargeSP += OutputStep;
+            }
+          }
+
+          break;
+
+        default:
+          ChargeSP = 0.0;
+          DischargeSP = 0.0;
+          ChargeState = Charger_State_T::IDLE;
+          break;
+        }
+        if (Debug.print (FLAG_DATA, false, Name, __func__, "State:")) {
+          Debug.println (FLAG_DATA, false, Name, __func__, ChargeState);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Voltage   [V]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, AccuVoltage);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Current   [A]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, Current);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Charge    [%]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, ChargeSP);
+          Debug.print (FLAG_DATA, false, Name, __func__, " - Discharge [%]: ");
+          Debug.println (FLAG_DATA, false, Name, __func__, DischargeSP);
+        }
+        // Write Output
+        if (ChargeSP < 0.0) {
+          ChargeSP = 0.0;
+        } else if (ChargeSP > 100.0) {
+          ChargeSP = 100.0;
+        }
+        if (DischargeSP < 0.0) {
+          DischargeSP = 0.0;
+        } else if (DischargeSP > 100.0) {
+          DischargeSP = 100.0;
+        }
+#ifdef ESP8266
+        analogWrite (PinCharge, uint32_t (ChargeSP * DutyScale));
+        analogWrite (PinDischarge, uint32_t (DischargeSP * DutyScale));
+#elif ESP32
+        Output.write (PinCharge, uint32_t (ChargeSP * DutyScale));
+        Output.write (PinDischarge, uint32_t (DischargeSP * DutyScale));
+#endif
+        UpdateMillis = 0;
+      }
     }
   }
 }

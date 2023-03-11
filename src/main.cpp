@@ -15,6 +15,7 @@
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <time.h>
+#include <Wire.h>
 
 #ifdef ESP8266
   #define SPIFFS LittleFS
@@ -45,30 +46,30 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
 //-------------------------------------------------------
-// Feeder
+// INA291 Sensor
 //-------------------------------------------------------
-#define EN_PIN D1   // Enable
-#define STEP_PIN D2 // Step
-#define DIR_PIN D3  // Direction
+#define SDA_PIN 21
+#define SCL_PIN 22
+#define SENSOR1_ADR 0x40   // Modul 1 INA219-Address (A0=0 / A1=0)
+#define SENSOR2_ADR 0x41   // Modul 2 INA219-Address (A0=1 / A1=0)
+#define SENSOR3_ADR 0x44   // Modul 3 INA219-Address (A0=0 / A1=1)
+#define SENSOR4_ADR 0x45   // Modul 4 INA219-Address (A0=1 / A1=1)
 
-Feeder Spindel (EN_PIN, STEP_PIN, DIR_PIN, "Spindel");
-
-//-------------------------------------------------------
-// Level
-//-------------------------------------------------------
-#define LEVEL_PIN A0 // Levelsensor
-
-Level Futter (LEVEL_PIN, "Futter");
+INA219 PowerSensor1 (SENSOR1_ADR, "PowerSensor1");
 
 //-------------------------------------------------------
 // Charger
 //-------------------------------------------------------
-#define CHARGE_PIN 1    // PWM-Output Charging
-#define DISCHARGE_PIN 2 // PWM-Output Discharge
-#define SENSOR_ADR 0x40 // I2C-Address INA219
+#define CHARGE1_PIN 18     // Modul 1 Charging-PWM
+#define CHARGE2_PIN 26     // Modul 2 Charging-PWM
+#define CHARGE3_PIN 33     // Modul 3 Charging-PWM
+#define CHARGE4_PIN 13     // Modul 4 Charging-PWM
+#define DISCHARGE1_PIN 27  // Modul 1 Discharge-PWM
+#define DISCHARGE2_PIN 25  // Modul 2 Discharge-PWM
+#define DISCHARGE3_PIN 32  // Modul 3 Discharge-PWM
+#define DISCHARGE4_PIN 4   // Modul 4 Discharge-PWM
 
-INA219 PowerSensor (SENSOR_ADR, "PowerSensor");
-Charger Laderegler (&PowerSensor, CHARGE_PIN, DISCHARGE_PIN, "Laderegler");
+Charger Laderegler1 (&PowerSensor1, CHARGE1_PIN, DISCHARGE1_PIN, "Laderegler1");
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -85,10 +86,8 @@ void cbSaveConfig () {
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
   Server.writeSetup (ConfigFile, ElementInit);
-  Spindel.writeSetup (ConfigFile, ElementInit);
-  Futter.writeSetup (ConfigFile, ElementInit);
-  PowerSensor.writeSetup (ConfigFile, ElementInit);
-  Laderegler.writeSetup (ConfigFile, ElementInit);
+  PowerSensor1.writeSetup (ConfigFile, ElementInit);
+  Laderegler1.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -96,20 +95,16 @@ void cbSaveConfig () {
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
-  Spindel.getValues (Elements);
-  Futter.getValues (Elements);
-  PowerSensor.getValues (Elements);
-  Laderegler.getValues (Elements);
+  PowerSensor1.getValues (Elements);
+  Laderegler1.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In.containsKey (Parent::JsonTagElements)) {
     JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
-    Spindel.set (Elements);
-    Futter.set (Elements);
-    PowerSensor.set (Elements);
-    Laderegler.set (Elements);
+    PowerSensor1.set (Elements);
+    Laderegler1.set (Elements);
   }
 }
 //-------------------------------------------------------
@@ -166,8 +161,16 @@ void setup () {
   pinMode (STAT_PIN, OUTPUT);
   digitalWrite (STAT_PIN, LOW);
 
-  // Debug.init (FLAG_NONE);
-  Debug.init (FLAG_ERROR | FLAG_SETUP | FLAG_CONFIG | FLAG_TRAFFIC, SERIAL_BAUD); // | FLAG_LOOP);
+  // Config Debug-Output
+  uint16_t DebugFlags = FLAG_NONE;
+  //DebugFlags |= FLAG_ERROR;
+  //DebugFlags |= FLAG_SETUP;
+  //DebugFlags |= FLAG_CONFIG;
+  //DebugFlags |= FLAG_TRAFFIC;
+  //DebugFlags |= FLAG_LOOP;
+  //DebugFlags |= FLAG_PROTOCOL;
+  //DebugFlags |= FLAG_DATA;
+  Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Filesystem
@@ -208,8 +211,11 @@ void setup () {
   //-------------------------------------------------------
   // Init Elements
   //-------------------------------------------------------
-  PowerSensor.init();
-  Laderegler.init();
+  Wire.begin(SDA_PIN, SCL_PIN);
+  if(!PowerSensor1.init()){
+    Debug.println (FLAG_SETUP, false, "main", "setup", "Power Sensor not connected");
+  }
+  Laderegler1.init();
   //-------------------------------------------------------
   // Read Config File
   //-------------------------------------------------------
@@ -234,10 +240,17 @@ void setup () {
 // #######################################################
 //  Loop
 // #######################################################
+int8_t LastSeconds = 0;
 void loop () {
   Server.handle ();
   tm CurrentTime = Server.getTimeStruct ();
+  if (LastSeconds != CurrentTime.tm_sec) {
+    if (Debug.print (FLAG_LOOP, false, "main", "loop", "Current Time: ")) {
+      Debug.println (FLAG_LOOP, false, "main", "loop", Server.getTimeString (""));
+    }
+    LastSeconds = CurrentTime.tm_sec;
+  }
 
-  Spindel.update (CurrentTime);
-  Futter.update (CurrentTime);
+  PowerSensor1.update (CurrentTime);
+  Laderegler1.update (CurrentTime);
 }
