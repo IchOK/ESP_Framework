@@ -120,6 +120,14 @@ namespace JCA {
       static const char *ChargeState_Case_WaitCharge;
       static const char *ChargeState_Case_WaitDischarge;
       static const char *ChargeState_Case_Discharge;
+      static const char *DischargeEndCurrent_Name;
+      static const char *DischargeEndCurrent_Text;
+      static const char *DischargeEndCurrent_Unit;
+      static const char *DischargeEndCurrent_Comment;
+      static const char *DischargeVoltage_Name;
+      static const char *DischargeVoltage_Text;
+      static const char *DischargeVoltage_Unit;
+      static const char *DischargeVoltage_Comment;
 
       static const float CurrentHyst;
       static const float VoltageHyst;
@@ -140,7 +148,7 @@ namespace JCA {
       // Hardware
       INA219 *Sensor;
 #ifdef ESP32
-      Pwm Output;
+      Pwm *Output;
 #endif
       uint8_t PinCharge;
       uint8_t PinDischarge;
@@ -151,6 +159,7 @@ namespace JCA {
       float AccuChargeCurrent;
       float AccuDischargeCurrent;
       float ChargeEndCurrent;
+      float DischargeEndCurrent;
       uint16_t WaitDischarge;
       float RechargeVoltage;
 
@@ -163,6 +172,7 @@ namespace JCA {
       float ChargedWH;
       float DischargedAH;
       float DischargedWH;
+      float DischargeVoltage;
       float ChargeSP;
       float DischargeSP;
       Charger_State_T ChargeState;
@@ -173,14 +183,18 @@ namespace JCA {
       float DutyScale;
       uint32_t LastMillis;
       uint32_t UpdateMillis;
-      uint32_t DelayDischarge;
+      uint32_t StepDelay;
       float CurrentStep;
       float PowerStep;
       bool DischargeHold;
       float DischargeSave;
 
     public:
-      Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);
+      #ifdef ESP8266
+        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);
+      #elif ESP32
+        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, Pwm *_Output);
+      #endif
       bool init ();
       void update (struct tm &_Time);
     };

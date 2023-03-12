@@ -14,8 +14,11 @@
 #include "FS.h"
 #include <Arduino.h>
 #include <LittleFS.h>
-#include <time.h>
 #include <Wire.h>
+#include <time.h>
+#ifdef ESP32
+  #include <pwmWrite.h>
+#endif
 
 #ifdef ESP8266
   #define SPIFFS LittleFS
@@ -50,26 +53,34 @@ using namespace JCA::FNC;
 //-------------------------------------------------------
 #define SDA_PIN 21
 #define SCL_PIN 22
-#define SENSOR1_ADR 0x40   // Modul 1 INA219-Address (A0=0 / A1=0)
-#define SENSOR2_ADR 0x41   // Modul 2 INA219-Address (A0=1 / A1=0)
-#define SENSOR3_ADR 0x44   // Modul 3 INA219-Address (A0=0 / A1=1)
-#define SENSOR4_ADR 0x45   // Modul 4 INA219-Address (A0=1 / A1=1)
+#define SENSOR1_ADR 0x40 // Modul 1 INA219-Address (A0=0 / A1=0)
+#define SENSOR2_ADR 0x41 // Modul 2 INA219-Address (A0=1 / A1=0)
+#define SENSOR3_ADR 0x44 // Modul 3 INA219-Address (A0=0 / A1=1)
+#define SENSOR4_ADR 0x45 // Modul 4 INA219-Address (A0=1 / A1=1)
 
 INA219 PowerSensor1 (SENSOR1_ADR, "PowerSensor1");
+INA219 PowerSensor2 (SENSOR2_ADR, "PowerSensor2");
 
 //-------------------------------------------------------
 // Charger
 //-------------------------------------------------------
-#define CHARGE1_PIN 18     // Modul 1 Charging-PWM
-#define CHARGE2_PIN 26     // Modul 2 Charging-PWM
-#define CHARGE3_PIN 33     // Modul 3 Charging-PWM
-#define CHARGE4_PIN 13     // Modul 4 Charging-PWM
-#define DISCHARGE1_PIN 27  // Modul 1 Discharge-PWM
-#define DISCHARGE2_PIN 25  // Modul 2 Discharge-PWM
-#define DISCHARGE3_PIN 32  // Modul 3 Discharge-PWM
-#define DISCHARGE4_PIN 4   // Modul 4 Discharge-PWM
+#define CHARGE1_PIN 18    // Modul 1 Charging-PWM
+#define CHARGE2_PIN 26    // Modul 2 Charging-PWM
+#define CHARGE3_PIN 33    // Modul 3 Charging-PWM
+#define CHARGE4_PIN 13    // Modul 4 Charging-PWM
+#define DISCHARGE1_PIN 27 // Modul 1 Discharge-PWM
+#define DISCHARGE2_PIN 25 // Modul 2 Discharge-PWM
+#define DISCHARGE3_PIN 32 // Modul 3 Discharge-PWM
+#define DISCHARGE4_PIN 4  // Modul 4 Discharge-PWM
 
+#ifdef ESP8266
 Charger Laderegler1 (&PowerSensor1, CHARGE1_PIN, DISCHARGE1_PIN, "Laderegler1");
+Charger Laderegler2 (&PowerSensor2, CHARGE2_PIN, DISCHARGE2_PIN, "Laderegler2");
+#elif ESP32
+Pwm OutputPwm;
+Charger Laderegler1 (&PowerSensor1, CHARGE1_PIN, DISCHARGE1_PIN, "Laderegler1", &OutputPwm);
+Charger Laderegler2 (&PowerSensor2, CHARGE2_PIN, DISCHARGE2_PIN, "Laderegler2", &OutputPwm);
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -86,8 +97,10 @@ void cbSaveConfig () {
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
   Server.writeSetup (ConfigFile, ElementInit);
-  PowerSensor1.writeSetup (ConfigFile, ElementInit);
   Laderegler1.writeSetup (ConfigFile, ElementInit);
+  Laderegler2.writeSetup (ConfigFile, ElementInit);
+  PowerSensor1.writeSetup (ConfigFile, ElementInit);
+  PowerSensor2.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -95,16 +108,20 @@ void cbSaveConfig () {
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
-  PowerSensor1.getValues (Elements);
   Laderegler1.getValues (Elements);
+  Laderegler2.getValues (Elements);
+  PowerSensor1.getValues (Elements);
+  PowerSensor2.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In.containsKey (Parent::JsonTagElements)) {
     JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
-    PowerSensor1.set (Elements);
     Laderegler1.set (Elements);
+    Laderegler2.set (Elements);
+    PowerSensor1.set (Elements);
+    PowerSensor2.set (Elements);
   }
 }
 //-------------------------------------------------------
@@ -163,13 +180,13 @@ void setup () {
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
-  //DebugFlags |= FLAG_ERROR;
-  //DebugFlags |= FLAG_SETUP;
-  //DebugFlags |= FLAG_CONFIG;
-  //DebugFlags |= FLAG_TRAFFIC;
-  //DebugFlags |= FLAG_LOOP;
-  //DebugFlags |= FLAG_PROTOCOL;
-  //DebugFlags |= FLAG_DATA;
+  // DebugFlags |= FLAG_ERROR;
+  // DebugFlags |= FLAG_SETUP;
+  // DebugFlags |= FLAG_CONFIG;
+  // DebugFlags |= FLAG_TRAFFIC;
+  // DebugFlags |= FLAG_LOOP;
+  // DebugFlags |= FLAG_PROTOCOL;
+  // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -211,11 +228,15 @@ void setup () {
   //-------------------------------------------------------
   // Init Elements
   //-------------------------------------------------------
-  Wire.begin(SDA_PIN, SCL_PIN);
-  if(!PowerSensor1.init()){
-    Debug.println (FLAG_SETUP, false, "main", "setup", "Power Sensor not connected");
+  Wire.begin (SDA_PIN, SCL_PIN);
+  if (!PowerSensor1.init ()) {
+    Debug.println (FLAG_SETUP, false, "main", "setup", "Power Sensor 1 not connected");
   }
-  Laderegler1.init();
+  Laderegler1.init ();
+  if (!PowerSensor2.init ()) {
+    Debug.println (FLAG_SETUP, false, "main", "setup", "Power Sensor 2 not connected");
+  }
+  Laderegler2.init ();
   //-------------------------------------------------------
   // Read Config File
   //-------------------------------------------------------
@@ -252,5 +273,7 @@ void loop () {
   }
 
   PowerSensor1.update (CurrentTime);
+  PowerSensor2.update (CurrentTime);
   Laderegler1.update (CurrentTime);
+  Laderegler2.update (CurrentTime);
 }
