@@ -169,7 +169,9 @@ namespace JCA {
       if (_Unit != nullptr) {
         SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
       }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
+      if (!isnan (_Value) && !isinf (_Value)) {
+        SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
+      }
       return SetupTag;
     }
 

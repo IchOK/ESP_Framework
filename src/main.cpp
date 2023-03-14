@@ -180,8 +180,8 @@ void setup () {
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
-  // DebugFlags |= FLAG_ERROR;
-  // DebugFlags |= FLAG_SETUP;
+  DebugFlags |= FLAG_ERROR;
+  DebugFlags |= FLAG_SETUP;
   // DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
@@ -229,14 +229,58 @@ void setup () {
   // Init Elements
   //-------------------------------------------------------
   Wire.begin (SDA_PIN, SCL_PIN);
-  if (!PowerSensor1.init ()) {
-    Debug.println (FLAG_SETUP, false, "main", "setup", "Power Sensor 1 not connected");
+#ifdef ESP32
+  if (Debug.println (FLAG_SETUP, false, "main", "setup", "Check PWN Pins")) {
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl1: Charge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", CHARGE1_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (CHARGE1_PIN));
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl1: Discharge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", DISCHARGE1_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (DISCHARGE1_PIN));
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl2: Charge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", CHARGE2_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (CHARGE2_PIN));
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl2: Discharge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", DISCHARGE2_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (DISCHARGE2_PIN));
   }
-  Laderegler1.init ();
-  if (!PowerSensor2.init ()) {
-    Debug.println (FLAG_SETUP, false, "main", "setup", "Power Sensor 2 not connected");
+  OutputPwm.attach (CHARGE1_PIN);
+  OutputPwm.attach (DISCHARGE1_PIN);
+  OutputPwm.attach (CHARGE2_PIN);
+  OutputPwm.attach (DISCHARGE2_PIN);
+#endif
+//  if (!PowerSensor1.init ()) {
+//    Debug.println (FLAG_ERROR, false, "main", "setup", "Power Sensor 1 not connected");
+//  }
+//  Laderegler1.init ();
+//  if (!PowerSensor2.init ()) {
+//    Debug.println (FLAG_ERROR, false, "main", "setup", "Power Sensor 2 not connected");
+//  }
+//  Laderegler2.init ();
+#ifdef ESP32
+  if (Debug.println (FLAG_SETUP, false, "main", "setup", "Check PWN Pins")) {
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl1: Charge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", CHARGE1_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (CHARGE1_PIN));
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl1: Discharge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", DISCHARGE1_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (DISCHARGE1_PIN));
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl2: Charge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", CHARGE2_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (CHARGE2_PIN));
+    Debug.print (FLAG_SETUP, false, "main", "setup", " Ctrl2: Discharge Pin=");
+    Debug.print (FLAG_SETUP, false, "main", "setup", DISCHARGE2_PIN);
+    Debug.print (FLAG_SETUP, false, "main", "setup", " / Channel=");
+    Debug.println (FLAG_SETUP, false, "main", "setup", OutputPwm.attached (DISCHARGE2_PIN));
   }
-  Laderegler2.init ();
+#endif
   //-------------------------------------------------------
   // Read Config File
   //-------------------------------------------------------

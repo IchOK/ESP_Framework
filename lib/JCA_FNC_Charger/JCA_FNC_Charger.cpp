@@ -385,10 +385,10 @@ namespace JCA {
      * @brief Init the Charger
      */
     bool Charger::init () {
-      pinMode (PinDischarge, OUTPUT);
-      pinMode (PinCharge, OUTPUT);
-      digitalWrite (PinDischarge, false);
-      digitalWrite (PinCharge, false);
+//      pinMode (PinDischarge, OUTPUT);
+//      pinMode (PinCharge, OUTPUT);
+//      digitalWrite (PinDischarge, false);
+//      digitalWrite (PinCharge, false);
 #ifdef ESP8266
       analogWriteResolution (Resolution);
       analogWriteFreq (Frequency);
@@ -419,6 +419,27 @@ namespace JCA {
       uint32_t ActMillis = millis ();
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
+
+      if (DoCharge) {
+        DoCheck = false;
+        ChargeSP = 100.0;
+      } else {
+        ChargeSP = 0.0;
+      }
+      if (DoCheck) {
+        DoCharge = false;
+        DischargeSP = 100.0;
+      } else {
+        DischargeSP = 0.0;
+      }
+#ifdef ESP8266
+      analogWrite (PinCharge, uint32_t (ChargeSP * DutyScale));
+      analogWrite (PinDischarge, uint32_t (DischargeSP * DutyScale));
+#elif ESP32
+      Output->write (PinCharge, uint32_t (ChargeSP * DutyScale));
+      Output->write (PinDischarge, uint32_t (DischargeSP * DutyScale));
+#endif
+      return;
 
       if (UpdateMillis >= UpdateInterval) {
         // Read Sensor Date
