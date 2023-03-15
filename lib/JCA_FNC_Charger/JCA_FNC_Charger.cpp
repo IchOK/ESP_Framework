@@ -400,22 +400,6 @@ namespace JCA {
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
 
-      if (DoCharge) {
-        DoCheck = false;
-        ChargeSP = 100.0;
-      } else {
-        ChargeSP = 0.0;
-      }
-      if (DoCheck) {
-        DoCharge = false;
-        DischargeSP = 100.0;
-      } else {
-        DischargeSP = 0.0;
-      }
-      Output->writePin (PinCharge, ChargeSP);
-      Output->writePin (PinDischarge, DischargeSP);
-      return;
-
       if (UpdateMillis >= UpdateInterval) {
         // Read Sensor Date
         AccuVoltage = Sensor->getVoltagePlus ();
