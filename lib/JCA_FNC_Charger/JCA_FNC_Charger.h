@@ -50,6 +50,10 @@ namespace JCA {
       static const char *AccuChargeCurrent_Text;
       static const char *AccuChargeCurrent_Unit;
       static const char *AccuChargeCurrent_Comment;
+      static const char *AccuDischargeVoltage_Name;
+      static const char *AccuDischargeVoltage_Text;
+      static const char *AccuDischargeVoltage_Unit;
+      static const char *AccuDischargeVoltage_Comment;
       static const char *AccuDischargeCurrent_Name;
       static const char *AccuDischargeCurrent_Text;
       static const char *AccuDischargeCurrent_Unit;
@@ -153,6 +157,7 @@ namespace JCA {
       float AccuVoltageMax;
       float AccuVoltageMin;
       float AccuChargeCurrent;
+      float AccuDischargeVoltage;
       float AccuDischargeCurrent;
       float ChargeEndCurrent;
       float DischargeEndCurrent;

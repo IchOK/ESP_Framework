@@ -27,6 +27,10 @@ namespace JCA {
     const char *Charger::AccuChargeCurrent_Text = "Maximaler Akku Ladestrom";
     const char *Charger::AccuChargeCurrent_Unit = "A";
     const char *Charger::AccuChargeCurrent_Comment = nullptr;
+    const char *Charger::AccuDischargeVoltage_Name = "AccuDischargeVoltage";
+    const char *Charger::AccuDischargeVoltage_Text = "Minimale Akku Entladespannung";
+    const char *Charger::AccuDischargeVoltage_Unit = "V";
+    const char *Charger::AccuDischargeVoltage_Comment = nullptr;
     const char *Charger::AccuDischargeCurrent_Name = "AccuDischargeCurrent";
     const char *Charger::AccuDischargeCurrent_Text = "Maximaler Akku Entladestrom";
     const char *Charger::AccuDischargeCurrent_Unit = "A";
@@ -129,8 +133,9 @@ namespace JCA {
 
       // Konfig
       AccuVoltageMax = 4.2;
-      AccuVoltageMin = 3.5;
+      AccuVoltageMin = 3.1;
       AccuChargeCurrent = 1.0;
+      AccuDischargeVoltage = 3.5;
       AccuDischargeCurrent = 1.0;
       ChargeEndCurrent = 0.1;
       DischargeEndCurrent = 0.2;
@@ -167,6 +172,7 @@ namespace JCA {
       _Values[AccuVoltageMax_Name] = AccuVoltageMax;
       _Values[AccuVoltageMin_Name] = AccuVoltageMin;
       _Values[AccuChargeCurrent_Name] = AccuChargeCurrent;
+      _Values[AccuDischargeVoltage_Name] = AccuDischargeVoltage;
       _Values[AccuDischargeCurrent_Name] = AccuDischargeCurrent;
       _Values[ChargeEndCurrent_Name] = ChargeEndCurrent;
       _Values[DischargeEndCurrent_Name] = DischargeEndCurrent;
@@ -246,11 +252,11 @@ namespace JCA {
             Debug.println (FLAG_CONFIG, false, Name, __func__, AccuChargeCurrent);
           }
         }
-        if (Tag[JsonTagName] == AccuDischargeCurrent_Name) {
-          AccuDischargeCurrent = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuDischargeCurrent_Name)) {
+        if (Tag[JsonTagName] == AccuDischargeVoltage_Name) {
+          AccuDischargeVoltage = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuDischargeVoltage_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, AccuDischargeCurrent);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, AccuDischargeVoltage);
           }
         }
         if (Tag[JsonTagName] == ChargeEndCurrent_Name) {
@@ -336,6 +342,7 @@ namespace JCA {
       _SetupFile.println ("{" + createSetupTag (AccuVoltageMax_Name, AccuVoltageMax_Text, AccuVoltageMax_Comment, false, AccuVoltageMax_Unit, AccuVoltageMax) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuVoltageMin_Name, AccuVoltageMin_Text, AccuVoltageMin_Comment, false, AccuVoltageMin_Unit, AccuVoltageMin) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuChargeCurrent_Name, AccuChargeCurrent_Text, AccuChargeCurrent_Comment, false, AccuChargeCurrent_Unit, AccuChargeCurrent) + "}");
+      _SetupFile.println (",{" + createSetupTag (AccuDischargeVoltage_Name, AccuDischargeVoltage_Text, AccuDischargeVoltage_Comment, false, AccuDischargeVoltage_Unit, AccuDischargeVoltage) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuDischargeCurrent_Name, AccuDischargeCurrent_Text, AccuDischargeCurrent_Comment, false, AccuDischargeCurrent_Unit, AccuDischargeCurrent) + "}");
       _SetupFile.println (",{" + createSetupTag (ChargeEndCurrent_Name, ChargeEndCurrent_Text, ChargeEndCurrent_Comment, false, ChargeEndCurrent_Unit, ChargeEndCurrent) + "}");
       _SetupFile.println (",{" + createSetupTag (DischargeEndCurrent_Name, DischargeEndCurrent_Text, DischargeEndCurrent_Comment, false, DischargeEndCurrent_Unit, DischargeEndCurrent) + "}");
@@ -585,7 +592,7 @@ namespace JCA {
             PowerStep -= POWER_AH_STEPS;
           }
 
-          if ((AccuVoltage <= AccuVoltageMin) && (Current <= DischargeEndCurrent)) {
+          if ((AccuVoltage <= AccuVoltageMin) || ((AccuVoltage <= AccuVoltageMin) && (Current <= DischargeEndCurrent))) {
             DischargeHold = true;
           }
           if (DischargeHold) {

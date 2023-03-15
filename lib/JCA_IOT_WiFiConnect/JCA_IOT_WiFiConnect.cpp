@@ -27,15 +27,15 @@ namespace JCA {
      * @param _APSubnet AP Subnet-Mask
      */
     WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet) {
-      #ifdef ESP8266
-        sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
-      #elif ESP32
-        uint32_t ESP32ChipId = 0;
-        for (int i = 0; i < 17; i = i + 8) {
-          ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
-        }
-        sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP32ChipId);
-      #endif
+#ifdef ESP8266
+      sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
+#elif ESP32
+      uint32_t ESP32ChipId = 0;
+      for (int i = 0; i < 17; i = i + 8) {
+        ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
+      }
+      sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP32ChipId);
+#endif
       strncpy (ApPassword, _Password, sizeof (ApPassword));
       ApIP.fromString (_ApIP);
       //      ApGateway.fromString (_ApGateway);
@@ -184,37 +184,26 @@ namespace JCA {
      */
     bool WiFiConnect::init (const char *_Ssid, const char *_Password, const char *_IP, const char *_Gateway, const char *_Subnet, bool _DHCP) {
       Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Started");
-      bool DataValid = true;
       if (!setSsid (_Ssid)) {
-        DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "SSID Invalid");
       }
       if (!setPassword (_Password)) {
-        DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Pasword Invalid");
       }
       if (!setIP (_IP)) {
-        DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "IP Invalid");
       }
       if (!setGateway (_Gateway)) {
-        DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Gateway Invalid");
       }
       if (!setSubnet (_Subnet)) {
-        DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Subnet Invalid");
       }
       if (!setDHCP (_DHCP)) {
-        DataValid = false;
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "DHCP Invalid");
       }
-//      if (DataValid) {
-        handle ();
-        return isConnected ();
-//      } else {
-//        return false;
-//      }
+      handle ();
+      return isConnected ();
     }
 
     /**
@@ -269,8 +258,8 @@ namespace JCA {
             State = STA;
           } else {
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
-//            BusyTimer = millis ();
-//            State = Failed;
+            //            BusyTimer = millis ();
+            //            State = Failed;
             Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
             WiFi.mode (WIFI_AP);
@@ -280,8 +269,8 @@ namespace JCA {
             ReconnectTimer = millis ();
           }
         } else {
-//          BusyTimer = millis ();
-//          State = Failed;
+          //          BusyTimer = millis ();
+          //          State = Failed;
           Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
           Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
           WiFi.mode (WIFI_AP);
@@ -399,27 +388,27 @@ namespace JCA {
         return false;
       }
       if (!DHCP) {
-        #ifdef ESP8266
-          if (!IP.isSet ()) {
-            return false;
-          }
-          if (!Gateway.isSet ()) {
-            return false;
-          }
-          if (!Subnet.isSet ()) {
-            return false;
-          }
-        #elif ESP32
-          if (IP == INADDR_NONE) {
-            return false;
-          }
-          if (Gateway == INADDR_NONE) {
-            return false;
-          }
-          if (Subnet == INADDR_NONE) {
-            return false;
-          }
-        #endif
+#ifdef ESP8266
+        if (!IP.isSet ()) {
+          return false;
+        }
+        if (!Gateway.isSet ()) {
+          return false;
+        }
+        if (!Subnet.isSet ()) {
+          return false;
+        }
+#elif ESP32
+        if (IP == INADDR_NONE) {
+          return false;
+        }
+        if (Gateway == INADDR_NONE) {
+          return false;
+        }
+        if (Subnet == INADDR_NONE) {
+          return false;
+        }
+#endif
       }
       return true;
     }
