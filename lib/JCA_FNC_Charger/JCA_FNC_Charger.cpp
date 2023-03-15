@@ -117,13 +117,8 @@ namespace JCA {
  * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
  * @param _Name Element Name inside the Communication
  */
-#ifdef ESP8266
-    Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name)
+    Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, PwmOutput *_Output)
         : Parent (_Name) {
-#elif ESP32
-    Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, Pwm *_Output)
-        : Parent (_Name) {
-#endif
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
 
       // Intern
@@ -385,23 +380,8 @@ namespace JCA {
      * @brief Init the Charger
      */
     bool Charger::init () {
-//      pinMode (PinDischarge, OUTPUT);
-//      pinMode (PinCharge, OUTPUT);
-//      digitalWrite (PinDischarge, false);
-//      digitalWrite (PinCharge, false);
-#ifdef ESP8266
-      analogWriteResolution (Resolution);
-      analogWriteFreq (Frequency);
-      analogWrite (PinCharge, 0);
-      analogWrite (PinDischarge, 0);
-#elif ESP32
-      Output->setResolution (PinCharge, Resolution);
-      Output->setResolution (PinDischarge, Resolution);
-      Output->setFrequency (PinCharge, Frequency);
-      Output->setFrequency (PinDischarge, Frequency);
-      Output->write (PinCharge, 0);
-      Output->write (PinDischarge, 0);
-#endif
+      Output->setupPin(PinCharge, Frequency, Resolution);
+      Output->setupPin (PinDischarge, Frequency, Resolution);
       Sensor->setInterval (UpdateInterval);
       LastMillis = millis ();
       UpdateMillis = 0;
@@ -432,13 +412,8 @@ namespace JCA {
       } else {
         DischargeSP = 0.0;
       }
-#ifdef ESP8266
-      analogWrite (PinCharge, uint32_t (ChargeSP * DutyScale));
-      analogWrite (PinDischarge, uint32_t (DischargeSP * DutyScale));
-#elif ESP32
-      Output->write (PinCharge, uint32_t (ChargeSP * DutyScale));
-      Output->write (PinDischarge, uint32_t (DischargeSP * DutyScale));
-#endif
+      Output->writePin (PinCharge, ChargeSP);
+      Output->writePin (PinDischarge, DischargeSP);
       return;
 
       if (UpdateMillis >= UpdateInterval) {
@@ -690,13 +665,8 @@ namespace JCA {
         } else if (DischargeSP > 100.0) {
           DischargeSP = 100.0;
         }
-#ifdef ESP8266
-        analogWrite (PinCharge, uint32_t (ChargeSP * DutyScale));
-        analogWrite (PinDischarge, uint32_t (DischargeSP * DutyScale));
-#elif ESP32
-        Output->write (PinCharge, uint32_t (ChargeSP * DutyScale));
-        Output->write (PinDischarge, uint32_t (DischargeSP * DutyScale));
-#endif
+        Output->writePin (PinCharge, ChargeSP);
+        Output->writePin (PinDischarge, DischargeSP);
         UpdateMillis = 0;
       }
     }

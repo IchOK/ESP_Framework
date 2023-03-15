@@ -15,13 +15,11 @@
 
 #include <ArduinoJson.h>
 #include <time.h>
-#ifdef ESP32
-  #include <pwmWrite.h>
-#endif
 
 #include <JCA_FNC_INA219.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_SYS_PwmOutput.h>
 
 #define CURRENT_AH_STEPS 0.001
 #define POWER_AH_STEPS 0.001
@@ -147,9 +145,7 @@ namespace JCA {
 
       // Hardware
       INA219 *Sensor;
-#ifdef ESP32
-      Pwm *Output;
-#endif
+      JCA::SYS::PwmOutput *Output;
       uint8_t PinCharge;
       uint8_t PinDischarge;
 
@@ -190,11 +186,7 @@ namespace JCA {
       float DischargeSave;
 
     public:
-      #ifdef ESP8266
-        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name);
-      #elif ESP32
-        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, Pwm *_Output);
-      #endif
+        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
       bool init ();
       void update (struct tm &_Time);
     };
