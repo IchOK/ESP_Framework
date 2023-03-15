@@ -104,8 +104,8 @@ namespace JCA {
     const char *Charger::DischargeVoltage_Unit = "V";
     const char *Charger::DischargeVoltage_Comment = nullptr;
 
-    const float Charger::CurrentHyst = 0.02;
-    const float Charger::VoltageHyst = 0.02;
+    const float Charger::CurrentHyst = 0.01;
+    const float Charger::VoltageHyst = 0.01;
     const float Charger::OutputStep = 0.1;
     const uint16_t Charger::UpdateInterval = 100;
 
@@ -399,6 +399,8 @@ namespace JCA {
       uint32_t ActMillis = millis ();
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
+      float CurrentDiff;
+      float VoltageDiff;
 
       if (UpdateMillis >= UpdateInterval) {
         // Read Sensor Date
@@ -458,10 +460,10 @@ namespace JCA {
             StepDelay = 0;
           } else {
             // controll charging current
-            float CurrentDiff = Current - AccuChargeCurrent;
+            CurrentDiff = Current - AccuChargeCurrent;
             if (CurrentDiff > CurrentHyst) {
               ChargeSP -= OutputStep;
-            } else if (CurrentDiff < CurrentHyst) {
+            } else if (CurrentDiff < -CurrentHyst) {
               ChargeSP += OutputStep;
             }
           }
@@ -493,18 +495,18 @@ namespace JCA {
             ChargeState = Charger_State_T::CHARGE_CURRENT;
           } else {
             // controll charging voltage
-            float VoltageDiff = AccuVoltage - AccuVoltageMax;
+            VoltageDiff = AccuVoltage - AccuVoltageMax;
             if (VoltageDiff > VoltageHyst) {
               ChargeSP -= OutputStep;
-            } else if (VoltageDiff < VoltageHyst) {
+            } else if (VoltageDiff < -VoltageHyst) {
               ChargeSP += OutputStep;
             }
           }
           if (Current < ChargeEndCurrent) {
             StepDelay += UpdateMillis;
             // Wait for Calculation, accu Voltage have to be stable
-            if (StepDelay >= uint32_t (WaitDischarge) * 1000) {
-              StepDelay = false;
+            if (StepDelay >= 10000) {
+              StepDelay = 0;
               ChargeSP = 0.0;
 
               if (DoCharge) {
@@ -541,33 +543,25 @@ namespace JCA {
           //----------------------------------------
           ChargeSP = 0.0;
 
-          if ((AccuVoltage <= (AccuVoltageMax - VoltageHyst)) || ((AccuVoltage <= AccuVoltageMax) && (DischargeHold || (Current < ChargeEndCurrent)))) {
-            if (!DischargeHold) {
-              DischargeHold = true;
-              DischargeSave = DischargeSP;
-              StepDelay = 0;
-            }
-            DischargeSP = 0.0;
-            // Wait for Calculation, accu Voltage have to be stable
-            StepDelay += UpdateMillis;
-            if (StepDelay >= uint32_t (WaitDischarge) * 1000) {
-              DischargeHold = false;
-              ChargeState = Charger_State_T::DISCHARGE;
-            }
+          // controll charging voltage
+          VoltageDiff = AccuVoltage - AccuVoltageMax;
+          CurrentDiff = Current - AccuDischargeCurrent;
 
-          } else {
-            if (DischargeHold) {
-              DischargeHold = false;
-              DischargeSP = DischargeSave;
-              StepDelay = 0;
-            }
+          if (CurrentDiff > CurrentHyst) {
+            DischargeSP -= OutputStep;
+          } else if (VoltageDiff < -VoltageHyst) {
+            DischargeSP -= OutputStep;
+          } else if (VoltageDiff > VoltageHyst) {
+            DischargeSP += OutputStep;
+          }
+
+          if (Current < ChargeEndCurrent) {
             StepDelay += UpdateMillis;
-            // controll discharging current
-            float CurrentDiff = Current - AccuDischargeCurrent;
-            if (CurrentDiff > CurrentHyst) {
-              DischargeSP -= OutputStep;
-            } else if ((CurrentDiff < CurrentHyst) && (StepDelay >= 2000)) {
-              DischargeSP += OutputStep;
+            // Wait for Calculation, accu Voltage have to be stable
+            if (StepDelay >= uint32_t (WaitDischarge) * 1000) {
+              StepDelay = 0;
+              DischargeSP = 0.0;
+              ChargeState = Charger_State_T::DISCHARGE;
             }
           }
 
@@ -611,10 +605,10 @@ namespace JCA {
           } else {
             StepDelay = 0;
             // controll discharging current
-            float CurrentDiff = Current - AccuDischargeCurrent;
+            CurrentDiff = Current - AccuDischargeCurrent;
             if (CurrentDiff > CurrentHyst) {
               DischargeSP -= OutputStep;
-            } else if (CurrentDiff < CurrentHyst) {
+            } else if (CurrentDiff < -CurrentHyst) {
               DischargeSP += OutputStep;
             }
           }
