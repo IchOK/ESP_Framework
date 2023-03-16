@@ -57,6 +57,11 @@ namespace JCA {
     const char *Charger::DoCharge_Comment = nullptr;
     const char *Charger::DoCharge_TextOn = nullptr;
     const char *Charger::DoCharge_TextOff = nullptr;
+    const char *Charger::Fault_Name = "Fault";
+    const char *Charger::Fault_Text = "Fehler aktiv";
+    const char *Charger::Fault_Comment = nullptr;
+    const char *Charger::Fault_TextOn = "Quittieren";
+    const char *Charger::Fault_TextOff = "";
     const char *Charger::AccuVoltage_Name = "AccuVoltage";
     const char *Charger::AccuVoltage_Text = "Akku Spannung";
     const char *Charger::AccuVoltage_Unit = "V";
@@ -99,6 +104,7 @@ namespace JCA {
     const char *Charger::ChargeState_Case_WaitCharge = "Warten-Laden";
     const char *Charger::ChargeState_Case_WaitDischarge = "Warten-Entladen";
     const char *Charger::ChargeState_Case_Discharge = "Entladen";
+    const char *Charger::ChargeState_Case_Fault = "Fehler";
     const char *Charger::DischargeEndCurrent_Name = "DischargeEndCurrent";
     const char *Charger::DischargeEndCurrent_Text = "Genzwert Akku Entladen";
     const char *Charger::DischargeEndCurrent_Unit = "A";
@@ -113,14 +119,14 @@ namespace JCA {
     const float Charger::OutputStep = 0.1;
     const uint16_t Charger::UpdateInterval = 100;
 
-/**
- * @brief Construct a new Charger::Charger object
- *
- * @param _PinEnable Pin that is connected to the Enable in on the Stepper-Driver
- * @param _PinStep Pin that is connected to the Step in on the Stepper-Driver
- * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
- * @param _Name Element Name inside the Communication
- */
+    /**
+     * @brief Construct a new Charger::Charger object
+     *
+     * @param _PinEnable Pin that is connected to the Enable in on the Stepper-Driver
+     * @param _PinStep Pin that is connected to the Step in on the Stepper-Driver
+     * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
+     * @param _Name Element Name inside the Communication
+     */
     Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, PwmOutput *_Output)
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
@@ -189,6 +195,7 @@ namespace JCA {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
       _Values[DoCheck_Name] = DoCheck;
       _Values[DoCharge_Name] = DoCharge;
+      _Values[Fault_Name] = (ChargeState == FAULT);
       _Values[AccuVoltage_Name] = AccuVoltage;
       _Values[Current_Name] = Current;
       _Values[ChargedAH_Name] = ChargedAH;
@@ -216,6 +223,9 @@ namespace JCA {
         break;
       case Charger_State_T::DISCHARGE:
         _Values[ChargeState_Name] = ChargeState_Case_Discharge;
+        break;
+      case Charger_State_T::FAULT:
+        _Values[ChargeState_Name] = ChargeState_Case_Fault;
         break;
       default:
         _Values[ChargeState_Name] = ChargeState_Case_Undef;
@@ -319,6 +329,16 @@ namespace JCA {
             DoCharge = false;
           }
         }
+
+        if (Tag[JsonTagName] == Fault_Name) {
+          if (ChargeState == FAULT) {
+            ChargeState = FaultState;
+          }
+          if (Debug.print (FLAG_LOOP, false, Name, __func__, Fault_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_LOOP, false, Name, __func__, "Ack");
+          }
+        }
       }
     }
 
@@ -359,8 +379,9 @@ namespace JCA {
     void Charger::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (DoCheck_Name, DoCheck_Text, DoCheck_Comment, false, DoCheck_TextOn, DoCheck_TextOff, DoCheck) + "}");
-      _SetupFile.println (",{" + createSetupTag (DoCharge_Name, DoCharge_Text, DoCharge_Comment, false, DoCharge_TextOn, DoCharge_TextOff, DoCharge) + "}");
+      _SetupFile.println ("{" + createSetupTag (DoCheck_Name, DoCheck_Text, DoCheck_Comment, false, DoCheck_TextOn, DoCheck_TextOff, false) + "}");
+      _SetupFile.println (",{" + createSetupTag (DoCharge_Name, DoCharge_Text, DoCharge_Comment, false, DoCharge_TextOn, DoCharge_TextOff, false) + "}");
+      _SetupFile.println (",{" + createSetupTag (Fault_Name, Fault_Text, Fault_Comment, false, Fault_TextOn, Fault_TextOff, false) + "}");
       _SetupFile.println (",{" + createSetupTag (ChargeState_Name, ChargeState_Text, ChargeState_Comment, true, "Idle") + "}");
       _SetupFile.println (",{" + createSetupTag (AccuVoltage_Name, AccuVoltage_Text, AccuVoltage_Comment, true, AccuVoltage_Unit, AccuVoltage) + "}");
       _SetupFile.println (",{" + createSetupTag (Current_Name, Current_Text, Current_Comment, true, Current_Unit, Current) + "}");
@@ -387,7 +408,7 @@ namespace JCA {
      * @brief Init the Charger
      */
     bool Charger::init () {
-      Output->setupPin(PinCharge, Frequency, Resolution);
+      Output->setupPin (PinCharge, Frequency, Resolution);
       Output->setupPin (PinDischarge, Frequency, Resolution);
       Sensor->setInterval (UpdateInterval);
       LastMillis = millis ();
@@ -416,8 +437,37 @@ namespace JCA {
         float Power = abs (Sensor->getPowerPlus ());
         float UpdateHours = float (UpdateMillis) / 3600000.0;
 
+        // Go to Idle fi Charging is deactivated
         if (!(DoCharge || DoCheck)) {
           ChargeState = Charger_State_T::IDLE;
+        }
+
+        // Go to fault state ist Sensordata not valid
+        if ((ChargeState != IDLE) && (ChargeState != FAULT)) {
+          
+          if (AccuVoltage < 1.0) {
+            FaultDelay += UpdateMillis;
+          } else if ((Current < 0.001) && ((ChargeSP > 10.0) or (DischargeSP > 10.0))) {
+            FaultDelay += UpdateMillis;
+          } else {
+            FaultDelay = 0;
+          }
+          if (FaultDelay >= 2000) {
+            if(Debug.println (FLAG_ERROR, false, Name, __func__, "Charging-Data not valid")) {
+              Debug.print (FLAG_ERROR, false, Name, __func__, " - AccuVoltage: ");
+              Debug.println (FLAG_ERROR, false, Name, __func__, AccuVoltage);
+              Debug.print (FLAG_ERROR, false, Name, __func__, " - Current: ");
+              Debug.println (FLAG_ERROR, false, Name, __func__, Current);
+              Debug.print (FLAG_ERROR, false, Name, __func__, " - ChargeSP: ");
+              Debug.println (FLAG_ERROR, false, Name, __func__, ChargeSP);
+              Debug.print (FLAG_ERROR, false, Name, __func__, " - DischargeSP: ");
+              Debug.println (FLAG_ERROR, false, Name, __func__, DischargeSP);
+            }
+            FaultState = ChargeState;
+            ChargeState = FAULT;
+          }
+        } else {
+          FaultDelay = 0;
         }
         switch (ChargeState) {
         case Charger_State_T::IDLE:
@@ -626,6 +676,15 @@ namespace JCA {
           ChargeSP = 0.0;
           DischargeSP = 0.0;
           ChargeState = Charger_State_T::IDLE;
+          break;
+
+        case Charger_State_T::FAULT:
+          //----------------------------------------
+          // Fault State have to Reset
+          //----------------------------------------
+          ChargeSP = 0.0;
+          DischargeSP = 0.0;
+
           break;
         }
         if (Debug.print (FLAG_DATA, false, Name, __func__, "State:")) {

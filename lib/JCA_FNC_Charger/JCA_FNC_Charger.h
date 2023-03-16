@@ -32,7 +32,8 @@ namespace JCA {
       CHARGE_VOLTAGE,
       WAIT_CHARGE,
       WAIT_DISCHARCH,
-      DISCHARGE
+      DISCHARGE,
+      FAULT
     } Charger_State;
 
     class Charger : public Parent {
@@ -80,6 +81,11 @@ namespace JCA {
       static const char *DoCharge_Comment;
       static const char *DoCharge_TextOn;
       static const char *DoCharge_TextOff;
+      static const char *Fault_Name;
+      static const char *Fault_Text;
+      static const char *Fault_Comment;
+      static const char *Fault_TextOn;
+      static const char *Fault_TextOff;
       static const char *AccuVoltage_Name;
       static const char *AccuVoltage_Text;
       static const char *AccuVoltage_Unit;
@@ -122,6 +128,7 @@ namespace JCA {
       static const char *ChargeState_Case_WaitCharge;
       static const char *ChargeState_Case_WaitDischarge;
       static const char *ChargeState_Case_Discharge;
+      static const char *ChargeState_Case_Fault;
       static const char *DischargeEndCurrent_Name;
       static const char *DischargeEndCurrent_Text;
       static const char *DischargeEndCurrent_Unit;
@@ -177,6 +184,8 @@ namespace JCA {
       float ChargeSP;
       float DischargeSP;
       Charger_State_T ChargeState;
+      uint32_t FaultDelay;
+      Charger_State_T FaultState;
 
       // Intern
       uint8_t Resolution;
