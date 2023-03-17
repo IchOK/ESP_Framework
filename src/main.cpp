@@ -174,7 +174,7 @@ void setup () {
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
   DebugFlags |= FLAG_ERROR;
-  // DebugFlags |= FLAG_SETUP;
+  DebugFlags |= FLAG_SETUP;
   // DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
