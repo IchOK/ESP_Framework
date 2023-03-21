@@ -16,8 +16,11 @@
 #define _JCA_IOT_WIFICONNECT_
 #include "FS.h"
 #include <Arduino.h>
-#define SPIFFS LittleFS
+#include <ArduinoJson.h>
+#include <LittleFS.h>
+
 #ifdef ESP8266
+  #define SPIFFS LittleFS
   #include <ESP8266WiFi.h>
   #include <ESP8266mDNS.h>
 #elif ESP32
@@ -34,6 +37,16 @@
 #define JCA_IOT_WIFICONNECT_AP_IP "192.168.1.1"
 #define JCA_IOT_WIFICONNECT_AP_GATEWAY "192.168.1.1"
 #define JCA_IOT_WIFICONNECT_AP_SUBNET "255.255.255.0"
+// Config File is readen on Init
+#define JCA_IOT_WIFICONNECT_CONFIGPATH "/sysConfig.json"
+// JSON Keys for WiFi Config
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI "wifi"
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SSID "ssid"
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI_PASS "pass"
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI_IP "ip"
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI_GATEWAY "gateway"
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SUBNET "subnet"
+#define JCA_IOT_WIFICONNECT_CONFKEY_WIFI_DHCP "dhcp"
 // Watchdog Timer
 #define JCA_IOT_WIFICONNECT_DELAY_FAILED 10000
 #define JCA_IOT_WIFICONNECT_DELAY_RECONNECT 300000
@@ -60,17 +73,14 @@ namespace JCA {
       char ApSsid[80];
       char ApPassword[80];
       IPAddress ApIP;
-      IPAddress ApGateway;
       IPAddress ApSubnet;
+      IPAddress ApGateway;
+      DynamicJsonDocument Config;
+      JsonArray Configs;
       // Defined by Init and Set
-      char Ssid[80];
-      char Password[80];
-      bool DHCP;
-      IPAddress IP;
-      IPAddress Gateway;
-      IPAddress Subnet;
+      uint8_t CurrentConfig;
+
       bool isConfigured ();
-      
 
     public:
       // Constuctor/Destructor
@@ -80,19 +90,13 @@ namespace JCA {
       ~WiFiConnect ();
 
       // Setter
-      bool setSsid (const char *_Ssid);
-      bool setPassword (const char *_Password);
-      bool setIP (const char *_IP);
-      bool setGateway (const char *_Gateway);
-      bool setSubnet (const char *_Subnet);
-      bool setDHCP (bool _DHCP);
-      bool init (const char *_Ssid, const char *_Password, const char *_IP, const char *_Gateway, const char *_Subnet, bool _DHCP);
-      bool init ();
+      bool readConfig ();
 
       // Handling
+      uint8_t init ();
       bool doConnect ();
       bool handle ();
-      bool isConnected ();
+      uint8_t isConnected ();
       String replaceWildcards (const String &var);
     };
   }

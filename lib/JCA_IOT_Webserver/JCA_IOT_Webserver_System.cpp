@@ -120,85 +120,7 @@ namespace JCA {
      */
     bool Webserver::readConfig () {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Read");
-      DynamicJsonDocument JsonDoc (1000);
-      // Get Wifi-Config from File5
-      File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
-      if (ConfigFile) {
-        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
-        DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
-        if (!Error) {
-          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Deserialize Done");
-          JsonObject Config = JsonDoc.as<JsonObject> ();
-          //------------------------------------------------------
-          // Read WiFi Config
-          //------------------------------------------------------
-          if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WiFi");
-            JsonObject WiFiConfig = Config[JCA_IOT_WEBSERVER_CONFKEY_WIFI].as<JsonObject> ();
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_SSID)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found SSID");
-              if (!Connector.setSsid (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_SSID].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] SSID invalid");
-              }
-            }
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_PASS)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Password");
-              if (!Connector.setPassword (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_PASS].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Password invalid");
-              }
-            }
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found DHCP");
-              if (!Connector.setDHCP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP].as<bool> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] DHCP invalid");
-              }
-            }
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found IP");
-              if (!Connector.setIP (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] IP invalid");
-              }
-            }
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Gateway");
-              if (!Connector.setGateway (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Gateway invalid");
-              }
-            }
-            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET)) {
-              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Subnet");
-              if (!Connector.setSubnet (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET].as<const char *> ())) {
-                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Subnet invalid");
-              }
-            }
-          }
-          //------------------------------------------------------
-          // Read Server Config
-          //------------------------------------------------------
-          if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Hostname");
-            strncpy (Hostname, Config[JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME].as<const char *> (), sizeof (Hostname));
-          }
-          if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_PORT)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Serverport");
-            Port = Config[JCA_IOT_WEBSERVER_CONFKEY_PORT].as<uint16_t> ();
-          }
-          if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_SOCKETUPDATE)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebSocket Update");
-            WsUpdateCycle = Config[JCA_IOT_WEBSERVER_CONFKEY_SOCKETUPDATE].as<uint32_t> ();
-          }
-
-        } else {
-          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "deserializeJson() failed: ");
-          Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
-          return false;
-        }
-        ConfigFile.close ();
-      } else {
-        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
-        return false;
-      }
-      return true;
+      return Connector.readConfig();
     }
 
     /**
@@ -341,7 +263,9 @@ namespace JCA {
 
       // Webserver - WiFi Config
       Server.on (JCA_IOT_WEBSERVER_PATH_CONNECT, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectGet (_Request); });
-      Server.on (JCA_IOT_WEBSERVER_PATH_CONNECT, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectPost (_Request); });
+      Server.on (
+          JCA_IOT_WEBSERVER_PATH_CONNECT, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectPost (_Request); },
+          [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) { this->onWebSystemUploadData (_Request, _Filename, _Index, _Data, _Len, _Final); });
 
       // Webserver - System Config
       Server.on (JCA_IOT_WEBSERVER_PATH_SYS, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemGet (_Request); });

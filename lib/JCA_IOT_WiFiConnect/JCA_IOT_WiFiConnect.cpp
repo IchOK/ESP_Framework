@@ -26,7 +26,7 @@ namespace JCA {
      * @param _ApGateway AP Gateway-Adress
      * @param _APSubnet AP Subnet-Mask
      */
-    WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet) {
+    WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet) : Config (10000) {
 #ifdef ESP8266
       sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
 #elif ESP32
@@ -38,11 +38,9 @@ namespace JCA {
 #endif
       strncpy (ApPassword, _Password, sizeof (ApPassword));
       ApIP.fromString (_ApIP);
-      //      ApGateway.fromString (_ApGateway);
-      //      ApGateway.fromString ("0.0.0.0");
       ApSubnet.fromString (_ApSubnet);
       State = Init;
-      DHCP = true;
+      CurrentConfig = 0;
     }
 
     /**
@@ -70,152 +68,49 @@ namespace JCA {
     }
 
     /**
-     * @brief Set the Station SSID
+     * @brief Read the WiFi Config-File and store the Date in Config-Array
      *
-     * @param _Ssid SSID auf the Ap to connect to
-     * @return true SSID is valid
-     * @return false SSID is invalid
+     * @return true file and config found
+     * @return false any fault
      */
-    bool WiFiConnect::setSsid (const char *_Ssid) {
-      if (_Ssid == nullptr) {
-        return false;
-      } else if (strlen (_Ssid) > sizeof (Ssid)) {
-        strncpy (Ssid, _Ssid, sizeof (Ssid));
-        return false;
+    bool WiFiConnect::readConfig () {
+      Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Start");
+      //-------------------------------------------------------
+      // Read Config File
+      //-------------------------------------------------------
+      File ConfigFile = LittleFS.open (JCA_IOT_WIFICONNECT_CONFIGPATH, "r");
+      if (ConfigFile) {
+        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
+        DeserializationError Error = deserializeJson (Config, ConfigFile);
+        if (!Error) {
+          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Deserialize Done");
+          JsonObject InConfig = Config.as<JsonObject> ();
+          if (InConfig.containsKey (JCA_IOT_WIFICONNECT_CONFKEY_WIFI)) {
+            Configs = InConfig[JCA_IOT_WIFICONNECT_CONFKEY_WIFI].as<JsonArray> ();
+            return true;
+          }
+        } else {
+          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "deserializeJson() failed: ");
+          Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
+        }
+        ConfigFile.close ();
       } else {
-        strcpy (Ssid, _Ssid);
-        return true;
+        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
       }
-    }
 
-    /**
-     * @brief Set the Station Password
-     *
-     * @param _Password Password auf the Ap to connect to
-     * @return true Password is valid
-     * @return false Password is invalid
-     */
-    bool WiFiConnect::setPassword (const char *_Password) {
-      if (_Password == nullptr) {
-        return false;
-      } else if (strlen (_Password) > sizeof (Password)) {
-        strncpy (Password, _Password, sizeof (Password));
-        return false;
-      } else {
-        strcpy (Password, _Password);
-        return true;
-      }
-    }
-
-    /**
-     * @brief Set the Station IP
-     *
-     * @param _IP IP-Address if Station use fix Address
-     * @return true IP is valid
-     * @return false IP is invalid
-     */
-    bool WiFiConnect::setIP (const char *_IP) {
-      if (_IP == nullptr) {
-        return false;
-      } else if (IP.fromString (_IP)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    /**
-     * @brief Set the Station Gateway
-     *
-     * @param _Gateway Gateway-Address if Station use fix Address
-     * @return true Gateway is valid
-     * @return false Dateway is invalid
-     */
-    bool WiFiConnect::setGateway (const char *_Gateway) {
-      if (_Gateway == nullptr) {
-        return false;
-      } else if (Gateway.fromString (_Gateway)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    /**
-     * @brief Set the Station Subnet-Mask
-     *
-     * @param _Subnet Subnet-Mask if Station use fix Address
-     * @return true Subnet-Mask is valid
-     * @return false Subnet-Mask is invalid
-     */
-    bool WiFiConnect::setSubnet (const char *_Subnet) {
-      if (_Subnet == nullptr) {
-        return false;
-      } else if (Subnet.fromString (_Subnet)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    /**
-     * @brief Set the Station DHCP mode
-     *
-     * @param _DHCP use DHCP or fix Address
-     * @return true always
-     * @return false never
-     */
-    bool WiFiConnect::setDHCP (bool _DHCP) {
-      DHCP = _DHCP;
-      return true;
+      Configs.clear ();
+      Config.clear ();
+      return false;
     }
 
     /**
      * @brief initialize the WiFi Connection and pass the data for Station mode
      *
-     * @param _Ssid SSID of remote AP
-     * @param _Password Password of remote AP
-     * @param _IP IP if use fix Address
-     * @param _Gateway Gateway if use fix Address
-     * @param _Subnet Subnet if use fix Address
-     * @param _DHCP use DHCP or fix Address
-     * @return true Data is valid and Station ist connected to AP
-     * @return false Data is invalid or can't connect to AP
+     * @return Index of connected WiFi, Zero when not connected
      */
-    bool WiFiConnect::init (const char *_Ssid, const char *_Password, const char *_IP, const char *_Gateway, const char *_Subnet, bool _DHCP) {
-      Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Started");
-      if (!setSsid (_Ssid)) {
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "SSID Invalid");
-      }
-      if (!setPassword (_Password)) {
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Pasword Invalid");
-      }
-      if (!setIP (_IP)) {
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "IP Invalid");
-      }
-      if (!setGateway (_Gateway)) {
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Gateway Invalid");
-      }
-      if (!setSubnet (_Subnet)) {
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Subnet Invalid");
-      }
-      if (!setDHCP (_DHCP)) {
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "DHCP Invalid");
-      }
+    uint8_t WiFiConnect::init () {
       handle ();
       return isConnected ();
-    }
-
-    /**
-     * @brief WiFi Connection data unknown, not connection to AP
-     * Connection Data has to bee passed later.
-     * @return true always
-     * @return false never
-     */
-    bool WiFiConnect::init () {
-      Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Not initialized");
-      handle ();
-      return false;
     }
 
     /**
@@ -225,6 +120,12 @@ namespace JCA {
      * @return false if in AP-Mode or trying to connect to AP
      */
     bool WiFiConnect::handle () {
+      bool DHCP;
+      IPAddress IP;
+      IPAddress Gateway;
+      IPAddress Subnet;
+      JsonObject Config;
+
       switch (State) {
       case Init:
         //-----------------------------
@@ -232,45 +133,50 @@ namespace JCA {
         //-----------------------------
         WiFi.persistent (true);
         Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Init] Started");
+
         if (isConfigured ()) {
-          int ConnectCounter = 0;
-          // Set static IP
-          if (!DHCP) {
-            Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Init] Set static IP");
-            if (!WiFi.config (IP, Gateway, Subnet)) {
-              Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Init] Static IP failed");
+          for (uint8_t ConfIndex = 0; ConfIndex < Configs.size (); ConfIndex++) {
+            int ConnectCounter = 0;
+            Config = Configs[ConfIndex].as<JsonObject> ();
+
+            // Check IP Settings
+            if (Config.containsKey ("dhcp")) {
+              DHCP = Config["dhcp"].as<bool> ();
+            } else {
+              DHCP = false;
+            }
+            if (!DHCP) {
+              Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Init] Set static IP");
+              IP.fromString (Config["ip"].as<const char *> ());
+              Gateway.fromString (Config["gateway"].as<const char *> ());
+              Subnet.fromString (Config["subnet"].as<const char *> ());
+              if (!WiFi.config (IP, Gateway, Subnet)) {
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Init] Static IP failed");
+              }
+            }
+
+            // Connect to Network
+            Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Connect ");
+            WiFi.mode (WIFI_STA);
+            WiFi.begin (Config["ssid"].as<const char *> (), Config["password"].as<const char *> ());
+            while (WiFi.status () != WL_CONNECTED && ConnectCounter < 10) {
+              Debug.print (FLAG_SETUP, true, ObjectName, __func__, "0");
+              delay (500);
+              ConnectCounter++;
+            }
+
+            if (WiFi.status () == WL_CONNECTED) {
+              Debug.print (FLAG_SETUP, true, ObjectName, __func__, " DONE : ");
+              Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP ().toString ());
+              CurrentConfig = ConfIndex;
+              State = STA;
+              break;
+            } else {
+              Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
             }
           }
-
-          // Connect to Network
-          Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Connect ");
-          WiFi.mode (WIFI_STA);
-          WiFi.begin (Ssid, Password);
-          while (WiFi.status () != WL_CONNECTED && ConnectCounter < 10) {
-            Debug.print (FLAG_SETUP, true, ObjectName, __func__, "0");
-            delay (500);
-            ConnectCounter++;
-          }
-
-          if (WiFi.status () == WL_CONNECTED) {
-            Debug.print (FLAG_SETUP, true, ObjectName, __func__, " DONE : ");
-            Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP ().toString ());
-            State = STA;
-          } else {
-            Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
-            //            BusyTimer = millis ();
-            //            State = Failed;
-            Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
-            Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
-            WiFi.mode (WIFI_AP);
-            WiFi.softAPConfig (ApIP, ApGateway, ApSubnet);
-            WiFi.softAP (ApSsid, ApPassword);
-            State = AP;
-            ReconnectTimer = millis ();
-          }
-        } else {
-          //          BusyTimer = millis ();
-          //          State = Failed;
+        }
+        if (isConnected () == 0) {
           Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
           Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
           WiFi.mode (WIFI_AP);
@@ -285,23 +191,28 @@ namespace JCA {
         //-----------------------------
         // Connect to new SSID
         //-----------------------------
-        // Disable AP to change to Station
-        WiFi.softAPdisconnect (true);
-        WiFi.disconnect ();
-        delay (1000);
+        Config = Configs[CurrentConfig].as<JsonObject> ();
 
-        // Set static IP
+        // Check IP Settings
+        if (Config.containsKey ("dhcp")) {
+          DHCP = Config["dhcp"].as<bool> ();
+        } else {
+          DHCP = false;
+        }
         if (!DHCP) {
           Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Set static IP");
+          IP.fromString (Config["ip"].as<const char *> ());
+          Gateway.fromString (Config["gateway"].as<const char *> ());
+          Subnet.fromString (Config["subnet"].as<const char *> ());
           if (!WiFi.config (IP, Gateway, Subnet)) {
             Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Connect] Static IP failed");
           }
         }
 
         // Connect to Network
-        Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect ");
+        Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect ");
         WiFi.mode (WIFI_STA);
-        WiFi.begin (Ssid, Password);
+        WiFi.begin (Config["ssid"].as<const char *> (), Config["password"].as<const char *> ());
         BusyTimer = millis ();
         State = Busy;
         break;
@@ -318,7 +229,12 @@ namespace JCA {
           digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN));
           if (millis () - BusyTimer > JCA_IOT_WIFICONNECT_DELAY_FAILED) {
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect FAILED");
-            State = Failed;
+            if (CurrentConfig >= Configs.size () - 1) {
+              State = Failed;
+            } else {
+              CurrentConfig++;
+              State = Connect;
+            }
           }
         }
         break;
@@ -351,7 +267,13 @@ namespace JCA {
         if (WiFi.softAPgetStationNum () > 0) {
           ReconnectTimer = millis ();
         } else if (millis () - ReconnectTimer > JCA_IOT_WIFICONNECT_DELAY_RECONNECT) {
+          // Disable AP to change to Station
+          WiFi.softAPdisconnect (true);
+          WiFi.disconnect ();
+          delay (1000);
+          // Try to Connect
           BusyTimer = millis ();
+          CurrentConfig = 0;
           State = Connect;
         }
         break;
@@ -375,52 +297,16 @@ namespace JCA {
     }
 
     /**
-     * @brief Check if the Station Config is valid
-     *
-     * @return true valid
-     * @return false invalid
-     */
-    bool WiFiConnect::isConfigured () {
-      if (Ssid == nullptr) {
-        return false;
-      }
-      if (Password == nullptr) {
-        return false;
-      }
-      if (!DHCP) {
-#ifdef ESP8266
-        if (!IP.isSet ()) {
-          return false;
-        }
-        if (!Gateway.isSet ()) {
-          return false;
-        }
-        if (!Subnet.isSet ()) {
-          return false;
-        }
-#elif ESP32
-        if (IP == INADDR_NONE) {
-          return false;
-        }
-        if (Gateway == INADDR_NONE) {
-          return false;
-        }
-        if (Subnet == INADDR_NONE) {
-          return false;
-        }
-#endif
-      }
-      return true;
-    }
-
-    /**
      * @brief Check if the Controller is connected to AP
      *
-     * @return true connected
-     * @return false disconnected
+     * @return Index of connected WiFi, Zero when not connected
      */
-    bool WiFiConnect::isConnected () {
-      return State == STA;
+    uint8_t WiFiConnect::isConnected () {
+      if (State == STA) {
+        return CurrentConfig + 1;
+      } else {
+        return 0;
+      }
     }
 
     /**
@@ -433,26 +319,14 @@ namespace JCA {
       if (var == "NAME") {
         return F ("WiFi Connect");
       }
-      if (var == "SSID") {
-        return String (Ssid);
-      }
-      if (var == "DHCP" && DHCP) {
-        return "checked";
-      }
-      if (var == "IP") {
-        return IP.toString ();
-      }
-      if (var == "GATEWAY") {
-        return Gateway.toString ();
-      }
-      if (var == "SUBNET") {
-        return Gateway.toString ();
-      }
       if (var == "STYLE") {
         return F (":root{--ColorWiFi:var(--contrast)}");
       }
       return String ();
     }
 
+    bool WiFiConnect::isConfigured () {
+      return Configs.size () > 0;
+    }
   } // namespace IOT
 } // namespace JCA

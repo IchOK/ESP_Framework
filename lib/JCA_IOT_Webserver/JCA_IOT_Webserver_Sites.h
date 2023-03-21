@@ -57,15 +57,7 @@ const char PageFrame[] PROGMEM = R"rawliteral(
  */
 const char SectionConnect[] PROGMEM = R"rawliteral(
 <article>
-<form action="/connect" method="POST">
-<label for="ssid">SSID<input type="text" id ="ssid" name="ssid" value="%SSID%"></label>
-<label for="pass">Password<input type="password" id ="pass" name="pass"></label>
-<label for="dhcp"><input type="checkbox" id ="dhcp" name="dhcp" %DHCP%>DHCP</label>
-<label for="ip">IP Address<input type="text" id ="ip" name="ip" value="%IP%"></label>
-<label for="gateway">Gateway Address<input type="text" id ="gateway" name="gateway" value="%GATEWAY%"></label>
-<label for="subnet">Subnet Address<input type="text" id ="subnet" name="subnet" value="%SUBNET%"></label>
-<button type ="submit">Connect</button>
-</form>
+WiFi Config-Site ist missing, pleas upload %WIFIPATH%
 </article>
 )rawliteral";
 

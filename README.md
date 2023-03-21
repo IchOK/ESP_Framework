@@ -17,14 +17,16 @@ Alle Einstellungen können über die integrierte Webseite erfolgen.
 Das Netzwerk lässt sich über eine eigene Webseite konfigurieren werden oder durch [hochladen der System-Konfiguration](#dateien-hochladen) als **sysConfig.json**.
 ```json
 {
-  "wifi": {
-    "ssid":"your_ssid",
-    "pass":"your_password",
-    "dhcp":true,
-    "ip":"x.x.x.x",
-    "gateway":"x.x.x.x",
-    "subnet":"x.x.x.x"
-  }
+  "wifi": [
+    {
+      "ssid":"your_ssid",
+      "pass":"your_password",
+      "dhcp":true,
+      "ip":"x.x.x.x",
+      "gateway":"x.x.x.x",
+      "subnet":"x.x.x.x"
+    }
+  ]
 }
 ```
 Die Konfiguration kann jedoch nicht zurück gelesen werden. Auf der WiFi-Webseite werden alle konfigurierten Informationen ausser das Passwort angezeigt.

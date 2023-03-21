@@ -29,66 +29,9 @@ namespace JCA {
      * @param _Request Request data from Web-Client
      */
     void Webserver::onWebConnectPost (AsyncWebServerRequest *_Request) {
-      DynamicJsonDocument JsonDoc (1000);
-      JsonObject Config;
-      JsonObject WiFiConfig;
-
-      File ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "r");
-      if (ConfigFile) {
-        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
-        DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
-        if (!Error) {
-          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Deserialize Done");
-          Config = JsonDoc.as<JsonObject> ();
-          if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI)) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config Node Found");
-            WiFiConfig = Config[JCA_IOT_WEBSERVER_CONFKEY_WIFI].as<JsonObject> ();
-          } else {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config Node Created");
-            WiFiConfig = JsonDoc.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
-          }
-        } else {
-          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "deserializeJson() failed: ");
-          Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
-          Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Create new Konfig");
-          JsonDoc.clear ();
-          WiFiConfig = Config.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
-        }
-        ConfigFile.close ();
-      } else {
-        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
-        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Create new Konfig");
-        JsonDoc.clear ();
-        WiFiConfig = JsonDoc.createNestedObject (JCA_IOT_WEBSERVER_CONFKEY_WIFI);
-      }
-
-      // Write Data to Config-Object
-      int params = _Request->params ();
-      for (int i = 0; i < params; i++) {
-        AsyncWebParameter *p = _Request->getParam (i);
-        if (p->isPost ()) {
-          if (p->name () == JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP) {
-            if (p->value () == "on") {
-              WiFiConfig[p->name ()] = true;
-            } else {
-              WiFiConfig[p->name ()] = false;
-            }
-          } else {
-            WiFiConfig[p->name ()] = p->value ().c_str ();
-          }
-        }
-      }
-
-      // Save Config Object
-      ConfigFile = LittleFS.open (JCA_IOT_WEBSERVER_CONFIGPATH, "w");
-      size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
-      ConfigFile.close ();
-      Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "Write Config File [");
-      Debug.print (FLAG_CONFIG, true, ObjectName, __func__, WrittenBytes);
-      Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "]");
-
+      Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Start");
       // Read back Config-File
-      readConfig ();
+      Connector.readConfig ();
 
       // Connect and Answer to the Client
       if (Connector.doConnect ()) {
@@ -107,7 +50,11 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
+      if (LittleFS.exists (JCA_IOT_WEBSERVER_PATH_WIFI)) {
+        _Request->send (LittleFS, JCA_IOT_WEBSERVER_PATH_WIFI, String (), false, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
+      } else {
+        _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
+      }
     }
 
     /**
@@ -365,7 +312,7 @@ namespace JCA {
         return String (BOARD_MCU);
       }
       if (var == "CONFIGFILE") {
-        return String (JCA_IOT_WEBSERVER_CONFIGPATH);
+        return String (JCA_IOT_WIFICONNECT_CONFIGPATH);
       }
       return String ();
     }
@@ -388,9 +335,9 @@ namespace JCA {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Replace from Default Function");
         return RetVal;
       }
-      if (var == "SECTION") {
+      if (var == "WIFIPATH") {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, var);
-        return String (SectionConnect);
+        return String (JCA_IOT_WEBSERVER_PATH_WIFI);
       }
       return String ();
     }
