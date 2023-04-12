@@ -138,18 +138,27 @@ namespace JCA {
           for (uint8_t ConfIndex = 0; ConfIndex < Configs.size (); ConfIndex++) {
             int ConnectCounter = 0;
             Config = Configs[ConfIndex].as<JsonObject> ();
+            if (Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "[Init] Loop : ")) {
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, ConfIndex);
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SSID].as<const char *> ());
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_PASS].as<const char *> ());
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_DHCP].as<int> ());
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_IP].as<const char *> ());
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_GATEWAY].as<const char *> ());
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SUBNET].as<const char *> ());
+            }
 
             // Check IP Settings
-            if (Config.containsKey ("dhcp")) {
-              DHCP = Config["dhcp"].as<bool> ();
+            if (Config.containsKey (JCA_IOT_WIFICONNECT_CONFKEY_WIFI_DHCP)) {
+              DHCP = Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_DHCP].as<bool> ();
             } else {
               DHCP = false;
             }
             if (!DHCP) {
               Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Init] Set static IP");
-              IP.fromString (Config["ip"].as<const char *> ());
-              Gateway.fromString (Config["gateway"].as<const char *> ());
-              Subnet.fromString (Config["subnet"].as<const char *> ());
+              IP.fromString (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_IP].as<const char *> ());
+              Gateway.fromString (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_GATEWAY].as<const char *> ());
+              Subnet.fromString (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SUBNET].as<const char *> ());
               if (!WiFi.config (IP, Gateway, Subnet)) {
                 Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Init] Static IP failed");
               }
@@ -158,7 +167,7 @@ namespace JCA {
             // Connect to Network
             Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Connect ");
             WiFi.mode (WIFI_STA);
-            WiFi.begin (Config["ssid"].as<const char *> (), Config["password"].as<const char *> ());
+            WiFi.begin (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SSID].as<const char *> (), Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_PASS].as<const char *> ());
             while (WiFi.status () != WL_CONNECTED && ConnectCounter < 10) {
               Debug.print (FLAG_SETUP, true, ObjectName, __func__, "0");
               delay (500);
@@ -194,16 +203,16 @@ namespace JCA {
         Config = Configs[CurrentConfig].as<JsonObject> ();
 
         // Check IP Settings
-        if (Config.containsKey ("dhcp")) {
-          DHCP = Config["dhcp"].as<bool> ();
+        if (Config.containsKey (JCA_IOT_WIFICONNECT_CONFKEY_WIFI_DHCP)) {
+          DHCP = Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_DHCP].as<bool> ();
         } else {
           DHCP = false;
         }
         if (!DHCP) {
           Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Set static IP");
-          IP.fromString (Config["ip"].as<const char *> ());
-          Gateway.fromString (Config["gateway"].as<const char *> ());
-          Subnet.fromString (Config["subnet"].as<const char *> ());
+          IP.fromString (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_IP].as<const char *> ());
+          Gateway.fromString (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_GATEWAY].as<const char *> ());
+          Subnet.fromString (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SUBNET].as<const char *> ());
           if (!WiFi.config (IP, Gateway, Subnet)) {
             Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[Connect] Static IP failed");
           }
@@ -212,7 +221,7 @@ namespace JCA {
         // Connect to Network
         Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect ");
         WiFi.mode (WIFI_STA);
-        WiFi.begin (Config["ssid"].as<const char *> (), Config["password"].as<const char *> ());
+        WiFi.begin (Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_SSID].as<const char *> (), Config[JCA_IOT_WIFICONNECT_CONFKEY_WIFI_PASS].as<const char *> ());
         BusyTimer = millis ();
         State = Busy;
         break;
