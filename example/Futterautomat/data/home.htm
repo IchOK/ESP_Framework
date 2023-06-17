@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>%TITLE%</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="stylesheet" type="text/css" href="/style/style.css">
+  <link rel="stylesheet" type="text/css" href="/style/styleMobile.css">
+  <link rel="stylesheet" type="text/css" href="/style/styleAddon.css">
+  <style>
+    :root {
+      --ColorHome: var(--contrast);
+      --ColorConfig: var(--secondary);
+      --ColorWiFi: var(--secondary);
+      --ColorSystem: var(--secondary)
+    }
+  </style>
+  <script src="/view.js"></script>
+  <script type="text/javascript">
+    function handleWsMsg(msg) {
+      let DataObject = JSON.parse(msg.data);
+      updateView(DataObject.elements, "data");
+    }
+    function onChange(ValueInput) {
+      let OutData = getOnChangeObject(ValueInput);
+      ws.send(JSON.stringify(OutData));
+    }
+    function onClick(ValueInput) {
+      let OutData = getOnClickObject(ValueInput);
+      ws.send(JSON.stringify(OutData));
+    }
+
+    fetch("http://" + location.host + "/usrConfig.json")
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        createView(data.elements, "data");
+      });
+    var ws = new WebSocket("ws://" + location.host + "/ws");
+    ws.onmessage = function (_msg) {
+      handleWsMsg(_msg);
+    };
+  </script>
+</head>
+
+<body>
+  <nav class="container-fluid">
+    <ul>
+      <li>%SVG_LOGO%</li>
+      <li>Online Daten</li>
+    </ul>
+    <ul>
+      <li><a href="/home.htm">%SVG_HOME%</a></li>
+      <li><a href="/config.htm">%SVG_CONFIG%</a></li>
+      <li><a href="/connect">%SVG_WIFI%</a></li>
+      <li><a href="/sys">%SVG_SYSTEM%</a></li>
+    </ul>
+  </nav>
+  <main class="container">
+    <section id="elements">
+
+    </section>
+  </main>
+</body>
+
+</html>

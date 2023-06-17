@@ -1,0 +1,60 @@
+[data-theme=light],
+:root:not([data-theme=dark]) {
+  --attention: #C30F42;
+  --attention-hover: #9C0932;
+  --attention-focus: rgba(195, 15, 66, 0.125);
+  --attention-inverse: #fff;
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme=light]) {
+    --attention: #C30F42;
+    --attention-hover: #E51952;
+    --attention-focus: rgba(195, 15, 66, 0.25);
+    --attention-inverse: #fff;
+  }
+}
+
+[data-theme=dark] {
+  --attention: #C30F42;
+  --attention-hover: #E51952;
+  --attention-focus: rgba(195, 15, 66, 0.25);
+  --attention-inverse: #fff;
+}
+
+button.attention,
+input[type=submit].attention,
+input[type=button].attention,
+input[type=reset],
+[role=button].attention {
+  --background-color: var(--attention);
+  --border-color: var(--attention);
+  --color: var(--attention-inverse);
+  cursor: pointer;
+}
+button.attention:hover, button.attention:active, button.attention:focus,
+input[type=submit].attention:hover,
+input[type=submit].attention:active,
+input[type=submit].attention:focus,
+input[type=button].attention:hover,
+input[type=button].attention:active,
+input[type=button].attention:focus,
+input[type=reset]:hover,
+input[type=reset]:active,
+input[type=reset]:focus,
+[role=button].attention:hover,
+[role=button].attention:active,
+[role=button].attention:focus {
+  --background-color: var(--attention-hover);
+  --border-color: var(--attention-hover);
+  --color: var(--attention-inverse);
+}
+button.attention:focus,
+input[type=submit].attention:focus,
+input[type=button].attention:focus,
+input[type=reset]:focus,
+[role=button].attention:focus {
+  --box-shadow: var(--button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)),
+    0 0 0 var(--outline-width) var(--attention-focus);
+}
+

@@ -113,15 +113,11 @@ function createViewTagInputNumber(ViewTagValue, DataTag, IsCommand) {
   ViewTagValue.appendChild(ValueInput);
   // create Unit Field
   if ("unit" in DataTag) {
-    if (DataTag.unit == "COLOR") {
-      ValueInput.type = "color";
-    } else {
-      let ValueUnit = document.createElement("span");
-      ValueUnit.setAttribute("name", "unit");
-      ValueUnit.setAttribute("style", "margin-left:-50px;text-align:left;");
-      ValueUnit.innerText = DataTag.unit;
-      ViewTagValue.appendChild(ValueUnit);
-    }
+    let ValueUnit = document.createElement("span");
+    ValueUnit.setAttribute("name", "unit");
+    ValueUnit.setAttribute("style", "margin-left:-50px;text-align:left;");
+    ValueUnit.innerText = DataTag.unit;
+    ViewTagValue.appendChild(ValueUnit);
   }
 }
 
@@ -175,22 +171,13 @@ function updateViewTag(ViewTag, DataTagValue) {
     }
   } else {
     if (ValueInput !== document.activeElement) {
-      if (ValueInput.type == "color") {
-        ValueInput.value = intToRgb(DataTagValue);
-      } else {
         ValueInput.value = DataTagValue;
-      }
     }
   }
 }
 
 function getOnChangeObject (ValueInput) {
-  var Value;
-  if (ValueInput.type == "color") {
-    Value = rgbToInt(ValueInput.value);
-  } else {
-    Value = ValueInput.value;
-  }
+  let Value = ValueInput.value;
   let ViewTag = ValueInput.parentElement.parentElement;
   let TagGrp = ViewTag.getAttribute("tagGroup");
   if (TagGrp == "cmdInfo") {
@@ -229,17 +216,4 @@ function getOnClickObject(ValueInput) {
   let DataElements = { "elements": [] };
   DataElements.elements.push(DataElement);
   return DataElements;
-}
-
-function intToRgb(ValueInt) {
-  let ValueRgbSwap = "#" + ('000000' + ((ValueInt) >>> 0).toString(16)).slice(-6);
-  let ValueRgb = ValueRgbSwap.substring(0, 3) + ValueRgbSwap.substring(5, 7) + ValueRgbSwap.substring(3, 5);
-  return ValueRgb;
-}
-
-function rgbToInt(ValueRgb) {
-  let ValueRgbBlank = ValueRgb.replace("#","0x");
-  let ValueRgbSwap = ValueRgbBlank.substring(0, 4) + ValueRgbBlank.substring(6, 8) + ValueRgbBlank.substring(4, 6);
-  let ValueInt = parseInt(ValueRgbSwap)
-  return ValueInt;
 }

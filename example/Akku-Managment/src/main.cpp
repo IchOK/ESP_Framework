@@ -1,11 +1,11 @@
 /**
  * @file main.cpp
  * @author JCA (https://github.com/ichok)
- * @brief Ceiling Light with WS2812 Stripe and LED Spot
+ * @brief Akku Manager charging and discharging with Capacity calculation
  * @version 0.1
- * @date 2023-06.11
+ * @date 2023-03-07
  *
- * Copyright Jochen Cabrera 2023
+ * Copyright Jochen Cabrera 2022
  * Apache License
  *
  */
@@ -30,8 +30,11 @@
 #include <JCA_SYS_PwmOutput.h>
 
 // Project function
-#include <JCA_FNC_DigitalOut.h>
-#include <JCA_FNC_LedStrip.h>
+#include <JCA_FNC_Charger.h>
+#include <JCA_FNC_DS18B20.h>
+#include <JCA_FNC_Feeder.h>
+#include <JCA_FNC_INA219.h>
+#include <JCA_FNC_Level.h>
 #include <JCA_FNC_Parent.h>
 
 using namespace JCA::IOT;
@@ -44,19 +47,33 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
 //-------------------------------------------------------
-// WS2812
+// INA291 Sensor
 //-------------------------------------------------------
-#define WS2812_PIN 13      // Output-Pin WS2812 [D7]
-#define WS2812_CNT 72
+#define SDA_PIN 21
+#define SCL_PIN 22
+#define SENSOR1_ADR 0x40 // Modul 1 INA219-Address (A0=0 / A1=0)
+#define SENSOR2_ADR 0x41 // Modul 2 INA219-Address (A0=1 / A1=0)
+#define SENSOR3_ADR 0x44 // Modul 3 INA219-Address (A0=0 / A1=1)
+#define SENSOR4_ADR 0x45 // Modul 4 INA219-Address (A0=1 / A1=1)
 
-LedStrip Strip (WS2812_PIN, WS2812_CNT, NEO_GRB + NEO_KHZ800, "LED-Strip");
+INA219 PowerSensor1 (SENSOR1_ADR, "PowerSensor1");
+INA219 PowerSensor2 (SENSOR2_ADR, "PowerSensor2");
 
 //-------------------------------------------------------
 // Charger
 //-------------------------------------------------------
-#define SPOT_DO 16        // Output-Pin AC-Switch [D0]
+#define CHARGE1_PIN 18    // Modul 1 Charging-PWM
+#define CHARGE2_PIN 26    // Modul 2 Charging-PWM
+#define CHARGE3_PIN 33    // Modul 3 Charging-PWM
+#define CHARGE4_PIN 13    // Modul 4 Charging-PWM
+#define DISCHARGE1_PIN 27 // Modul 1 Discharge-PWM
+#define DISCHARGE2_PIN 25 // Modul 2 Discharge-PWM
+#define DISCHARGE3_PIN 32 // Modul 3 Discharge-PWM
+#define DISCHARGE4_PIN 4  // Modul 4 Discharge-PWM
 
-DigitalOut Spot (SPOT_DO, "LED-Spot");
+PwmOutput OutputPwm;
+Charger Laderegler1 (&PowerSensor1, CHARGE1_PIN, DISCHARGE1_PIN, "Laderegler1", &OutputPwm);
+Charger Laderegler2 (&PowerSensor2, CHARGE2_PIN, DISCHARGE2_PIN, "Laderegler2", &OutputPwm);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -73,8 +90,10 @@ void cbSaveConfig () {
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
   Server.writeSetup (ConfigFile, ElementInit);
-  Spot.writeSetup (ConfigFile, ElementInit);
-  Strip.writeSetup (ConfigFile, ElementInit);
+  Laderegler1.writeSetup (ConfigFile, ElementInit);
+  Laderegler2.writeSetup (ConfigFile, ElementInit);
+  PowerSensor1.writeSetup (ConfigFile, ElementInit);
+  PowerSensor2.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -82,16 +101,20 @@ void cbSaveConfig () {
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
-  Spot.getValues (Elements);
-  Strip.getValues (Elements);
+  Laderegler1.getValues (Elements);
+  Laderegler2.getValues (Elements);
+  PowerSensor1.getValues (Elements);
+  PowerSensor2.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In.containsKey (Parent::JsonTagElements)) {
     JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
-    Spot.set (Elements);
-    Strip.set (Elements);
+    Laderegler1.set (Elements);
+    Laderegler2.set (Elements);
+    PowerSensor1.set (Elements);
+    PowerSensor2.set (Elements);
   }
 }
 //-------------------------------------------------------
@@ -152,8 +175,8 @@ void setup () {
   uint16_t DebugFlags = FLAG_NONE;
   DebugFlags |= FLAG_ERROR;
   DebugFlags |= FLAG_SETUP;
-  DebugFlags |= FLAG_CONFIG;
-  DebugFlags |= FLAG_TRAFFIC;
+  // DebugFlags |= FLAG_CONFIG;
+  // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
@@ -198,8 +221,15 @@ void setup () {
   //-------------------------------------------------------
   // Init Elements
   //-------------------------------------------------------
-  Strip.init();
-
+  Wire.begin (SDA_PIN, SCL_PIN);
+  if (!PowerSensor1.init ()) {
+    Debug.println (FLAG_ERROR, false, "main", "setup", "Power Sensor 1 not connected");
+  }
+  Laderegler1.init ();
+  if (!PowerSensor2.init ()) {
+    Debug.println (FLAG_ERROR, false, "main", "setup", "Power Sensor 2 not connected");
+  }
+  Laderegler2.init ();
   //-------------------------------------------------------
   // Read Config File
   //-------------------------------------------------------
@@ -235,6 +265,8 @@ void loop () {
     LastSeconds = CurrentTime.tm_sec;
   }
 
-  Spot.update (CurrentTime);
-  Strip.update (CurrentTime);
+  PowerSensor1.update (CurrentTime);
+  PowerSensor2.update (CurrentTime);
+  Laderegler1.update (CurrentTime);
+  Laderegler2.update (CurrentTime);
 }

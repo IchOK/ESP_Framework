@@ -1,0 +1,207 @@
+{
+  "elements": [
+    {
+      "name": "System",
+      "config": [
+        {
+          "name": "hostname",
+          "text": "Hostname",
+          "comment": "Hostname wirde erst nache dem Reboot aktiv",
+          "readOnly": 0,
+          "value": "Akku-Management"
+        },
+        {
+          "name": "wsUpdate",
+          "text": "Websocket Updatezyklus",
+          "readOnly": 0,
+          "unit": "ms",
+          "value": 1000
+        }
+      ],
+      "data": [
+        {
+          "name": "time",
+          "text": "Systemzeit",
+          "readOnly": 1,
+          "value": "01:03:51"
+        }
+      ],
+      "cmdInfo": [
+        {
+          "name": "timeSync",
+          "text": "Uhrzeit syncronisieren",
+          "readOnly": 0,
+          "type": "uint32"
+        },
+        {
+          "name": "saveConfig",
+          "text": "Konfiguration speichern",
+          "comment": "Save the current Config to ConfigFile",
+          "readOnly": 0,
+          "off": "SAVE",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "Laderegler1",
+      "config": [
+        {
+          "name": "AccuVoltageMax",
+          "text": "Maximale Akku Ladespannung",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 4.20
+        },
+        {
+          "name": "AccuVoltageMin",
+          "text": "Grenzwert Akku Entladen",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 3.10
+        },
+        {
+          "name": "AccuChargeCurrent",
+          "text": "Maximaler Akku Ladestrom",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 2.00
+        },
+        {
+          "name": "AccuDischargeVoltage",
+          "text": "Minimale Akku Entladespannung",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 3.50
+        },
+        {
+          "name": "AccuDischargeCurrent",
+          "text": "Maximaler Akku Entladestrom",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 1.00
+        },
+        {
+          "name": "ChargeEndCurrent",
+          "text": "Laden Beendet Strom",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 0.15
+        },
+        {
+          "name": "DischargeEndCurrent",
+          "text": "Genzwert Akku Entladen",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 0.15
+        },
+        {
+          "name": "WaitDischarge",
+          "text": "Wartezeit für Entlade",
+          "readOnly": 0,
+          "unit": "s",
+          "value": 60
+        },
+        {
+          "name": "RechargeVoltage",
+          "text": "Spannungs Nachladen",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 4.00
+        }
+      ]
+    },
+    {
+      "name": "Laderegler2",
+      "config": [
+        {
+          "name": "AccuVoltageMax",
+          "text": "Maximale Akku Ladespannung",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 4.20
+        },
+        {
+          "name": "AccuVoltageMin",
+          "text": "Grenzwert Akku Entladen",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 3.10
+        },
+        {
+          "name": "AccuChargeCurrent",
+          "text": "Maximaler Akku Ladestrom",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 2.00
+        },
+        {
+          "name": "AccuDischargeVoltage",
+          "text": "Minimale Akku Entladespannung",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 3.50
+        },
+        {
+          "name": "AccuDischargeCurrent",
+          "text": "Maximaler Akku Entladestrom",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 1.00
+        },
+        {
+          "name": "ChargeEndCurrent",
+          "text": "Laden Beendet Strom",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 0.15
+        },
+        {
+          "name": "DischargeEndCurrent",
+          "text": "Genzwert Akku Entladen",
+          "readOnly": 0,
+          "unit": "A",
+          "value": 0.15
+        },
+        {
+          "name": "WaitDischarge",
+          "text": "Wartezeit für Entlade",
+          "readOnly": 0,
+          "unit": "s",
+          "value": 60
+        },
+        {
+          "name": "RechargeVoltage",
+          "text": "Spannungs Nachladen",
+          "readOnly": 0,
+          "unit": "V",
+          "value": 4.00
+        }
+      ]
+    },
+    {
+      "name": "PowerSensor1",
+      "config": [
+        {
+          "name": "ReadInterval",
+          "text": "Leseintervall",
+          "readOnly": 0,
+          "unit": "s",
+          "value": 100
+        }
+      ]
+    },
+    {
+      "name": "PowerSensor2",
+      "config": [
+        {
+          "name": "ReadInterval",
+          "text": "Leseintervall",
+          "readOnly": 0,
+          "unit": "s",
+          "value": 100
+        }
+      ]
+    }
+  ]
+}
