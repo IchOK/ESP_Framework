@@ -13,7 +13,6 @@
 #ifndef _JCA_FNC_LEVEL_
 #define _JCA_FNC_LEVEL_
 
-#include <AccelStepper.h>
 #include <ArduinoJson.h>
 #include <time.h>
 

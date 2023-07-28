@@ -55,7 +55,11 @@ namespace JCA {
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       RawEmpty = 0;
-      RawFull = 1024;
+      #ifdef ESP32
+      RawFull = 4095;
+      #else
+      RawFull = 1023;
+      #endif
       Pin = _Pin;
       ReadInterval = 1;
       Value = 50.0;

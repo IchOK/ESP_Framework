@@ -408,6 +408,7 @@ namespace JCA {
      * @brief Init the Charger
      */
     bool Charger::init () {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Setup");
       Output->setupPin (PinCharge, Frequency, Resolution);
       Output->setupPin (PinDischarge, Frequency, Resolution);
       Sensor->setInterval (UpdateInterval);
