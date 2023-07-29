@@ -23,7 +23,7 @@ namespace JCA {
   namespace FNC {
     class Level : public Parent {
     private:
-      // Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *RawEmpty_Name;
       static const char *RawEmpty_Text;
       static const char *RawEmpty_Unit;
@@ -53,6 +53,7 @@ namespace JCA {
       static const char *RawValue_Text;
       static const char *RawValue_Unit;
       static const char *RawValue_Comment;
+      /* #endregion */
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);

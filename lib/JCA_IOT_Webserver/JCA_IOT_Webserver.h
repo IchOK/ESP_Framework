@@ -44,8 +44,8 @@
   #include <ESPmDNS.h>
   #include <FS.h>
   #include <SPIFFS.h>
-  #include <WiFi.h>
   #include <Update.h>
+  #include <WiFi.h>
 #endif
 #include <ESPAsyncWebServer.h>
 
@@ -105,6 +105,7 @@ namespace JCA {
     class Webserver : public JCA::FNC::Parent {
     private:
       // ...Webserver_System.cpp
+      /* #region(collapsed) Datapoint description */
       static const char *ElementName;
       static const char *Hostname_Name;
       static const char *Hostname_Text;
@@ -125,6 +126,8 @@ namespace JCA {
       static const char *Time_Name;
       static const char *Time_Text;
       static const char *Time_Comment;
+      /* #endregion */
+
       char Hostname[80];
       char ConfUser[80];
       char ConfPassword[80];

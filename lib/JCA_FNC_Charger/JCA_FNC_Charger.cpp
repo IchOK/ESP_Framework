@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *Charger::AccuVoltageMax_Name = "AccuVoltageMax";
     const char *Charger::AccuVoltageMax_Text = "Maximale Akku Ladespannung";
     const char *Charger::AccuVoltageMax_Unit = "V";
@@ -113,6 +114,7 @@ namespace JCA {
     const char *Charger::DischargeVoltage_Text = "Entladespannung";
     const char *Charger::DischargeVoltage_Unit = "V";
     const char *Charger::DischargeVoltage_Comment = nullptr;
+    /* #endregion */
 
     const float Charger::CurrentHyst = 0.01;
     const float Charger::VoltageHyst = 0.01;
@@ -445,7 +447,7 @@ namespace JCA {
 
         // Go to fault state ist Sensordata not valid
         if ((ChargeState != IDLE) && (ChargeState != FAULT)) {
-          
+
           if (AccuVoltage < 1.0) {
             FaultDelay += UpdateMillis;
           } else if ((Current < 0.001) && ((ChargeSP > 10.0) or (DischargeSP > 10.0))) {
@@ -454,7 +456,7 @@ namespace JCA {
             FaultDelay = 0;
           }
           if (FaultDelay >= 2000) {
-            if(Debug.println (FLAG_ERROR, false, Name, __func__, "Charging-Data not valid")) {
+            if (Debug.println (FLAG_ERROR, false, Name, __func__, "Charging-Data not valid")) {
               Debug.print (FLAG_ERROR, false, Name, __func__, " - AccuVoltage: ");
               Debug.println (FLAG_ERROR, false, Name, __func__, AccuVoltage);
               Debug.print (FLAG_ERROR, false, Name, __func__, " - Current: ");

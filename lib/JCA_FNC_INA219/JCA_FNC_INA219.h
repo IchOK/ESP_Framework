@@ -48,6 +48,7 @@ namespace JCA {
       static const char *Current_Text;
       static const char *Current_Unit;
       static const char *Current_Comment;
+      /* #endregion */
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
@@ -84,7 +85,7 @@ namespace JCA {
       INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name);
       INA219 (const uint8_t _Addr, const char *_Name);
       INA219 (const char *_Name);
-      bool init();
+      bool init ();
       void update (struct tm &_Time);
       void setInterval (uint16_t _ReadInterval);
       float getPowerPlus ();

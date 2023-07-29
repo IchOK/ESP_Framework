@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *Feeder::FeedingHour_Name = "FeedingHour";
     const char *Feeder::FeedingHour_Text = "Fütterung Stunde";
     const char *Feeder::FeedingHour_Unit = "h";
@@ -66,6 +67,7 @@ namespace JCA {
     const char *Feeder::CmdDoFeed_Comment = nullptr;
     const char *Feeder::CmdDoFeed_Type = "bool";
     const char *Feeder::CmdDoFeed_BtnText = "GO";
+    /* #endregion */
 
     /**
      * @brief Construct a new Feeder::Feeder object

@@ -37,7 +37,7 @@ namespace JCA {
 
     class SolarCharger : public Parent {
     private:
-      // Parent Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *AccuVoltageMax_Name;
       static const char *AccuVoltageMax_Text;
       static const char *AccuVoltageMax_Unit;
@@ -66,6 +66,18 @@ namespace JCA {
       static const char *AccuPower_Text;
       static const char *AccuPower_Unit;
       static const char *AccuPower_Comment;
+      static const char *AccuEnergie15m_Name;
+      static const char *AccuEnergie15m_Text;
+      static const char *AccuEnergie15m_Unit;
+      static const char *AccuEnergie15m_Comment;
+      static const char *AccuEnergie1h_Name;
+      static const char *AccuEnergie1h_Text;
+      static const char *AccuEnergie1h_Unit;
+      static const char *AccuEnergie1h_Comment;
+      static const char *AccuEnergie1d_Name;
+      static const char *AccuEnergie1d_Text;
+      static const char *AccuEnergie1d_Unit;
+      static const char *AccuEnergie1d_Comment;
       static const char *SolarVoltageMin_Name;
       static const char *SolarVoltageMin_Text;
       static const char *SolarVoltageMin_Unit;
@@ -86,6 +98,18 @@ namespace JCA {
       static const char *SolarPower_Text;
       static const char *SolarPower_Unit;
       static const char *SolarPower_Comment;
+      static const char *SolarEnergie15m_Name;
+      static const char *SolarEnergie15m_Text;
+      static const char *SolarEnergie15m_Unit;
+      static const char *SolarEnergie15m_Comment;
+      static const char *SolarEnergie1h_Name;
+      static const char *SolarEnergie1h_Text;
+      static const char *SolarEnergie1h_Unit;
+      static const char *SolarEnergie1h_Comment;
+      static const char *SolarEnergie1d_Name;
+      static const char *SolarEnergie1d_Text;
+      static const char *SolarEnergie1d_Unit;
+      static const char *SolarEnergie1d_Comment;
       static const char *Fault_Name;
       static const char *Fault_Text;
       static const char *Fault_Comment;
@@ -101,6 +125,7 @@ namespace JCA {
       static const char *ChargeState_Case_ChargeVoltage;
       static const char *ChargeState_Case_TrackMppt;
       static const char *ChargeState_Case_Fault;
+      /* #endregion */
 
       static const float CurrentHyst;
       static const float VoltageHyst;

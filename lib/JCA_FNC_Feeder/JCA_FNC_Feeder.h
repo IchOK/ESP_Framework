@@ -24,7 +24,7 @@ namespace JCA {
   namespace FNC {
     class Feeder : public Parent {
     private:
-      // Parent Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *FeedingHour_Name;
       static const char *FeedingHour_Text;
       static const char *FeedingHour_Unit;
@@ -76,6 +76,7 @@ namespace JCA {
       static const char *CmdDoFeed_Comment;
       static const char *CmdDoFeed_Type;
       static const char *CmdDoFeed_BtnText;
+      /* #endregion */
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);

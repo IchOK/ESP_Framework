@@ -22,7 +22,7 @@ namespace JCA {
   namespace FNC {
     class AnalogScale : public Parent {
     private:
-      // Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *ScaledMin_Name;
       static const char *ScaledMin_Text;
       static const char *ScaledMin_Unit;
@@ -39,6 +39,7 @@ namespace JCA {
       static const char *Value_Text;
       static const char *Value_Unit;
       static const char *Value_Comment;
+      /* #endregion */
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
@@ -69,7 +70,7 @@ namespace JCA {
 
     public:
       AnalogScale (uint8_t _Pin, const char *_Name);
-      bool init();
+      bool init ();
       void update (struct tm &_Time);
       float getValue ();
     };

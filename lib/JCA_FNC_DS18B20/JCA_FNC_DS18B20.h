@@ -38,7 +38,7 @@ namespace JCA {
 
     class DS18B20 : public Parent {
     private:
-      // Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *Filter_Name;
       static const char *Filter_Text;
       static const char *Filter_Unit;
@@ -55,6 +55,7 @@ namespace JCA {
       static const char *Temp_Text;
       static const char *Temp_Unit;
       static const char *Temp_Comment;
+      /* #endregion */
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);

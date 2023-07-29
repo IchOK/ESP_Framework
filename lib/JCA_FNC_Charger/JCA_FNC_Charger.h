@@ -38,7 +38,7 @@ namespace JCA {
 
     class Charger : public Parent {
     private:
-      // Parent Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *AccuVoltageMax_Name;
       static const char *AccuVoltageMax_Text;
       static const char *AccuVoltageMax_Unit;
@@ -137,6 +137,7 @@ namespace JCA {
       static const char *DischargeVoltage_Text;
       static const char *DischargeVoltage_Unit;
       static const char *DischargeVoltage_Comment;
+      /* #endregion */
 
       static const float CurrentHyst;
       static const float VoltageHyst;
@@ -200,7 +201,7 @@ namespace JCA {
       float DischargeSave;
 
     public:
-        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
+      Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
       bool init ();
       void update (struct tm &_Time);
     };

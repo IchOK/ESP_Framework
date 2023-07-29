@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) JSON Tags */
     const char *Parent::JsonTagElements = "elements";
     const char *Parent::JsonTagConfig = "config";
     const char *Parent::JsonTagData = "data";
@@ -32,6 +33,7 @@ namespace JCA {
     const char *Parent::BtnOnDefault = "ON";
     const char *Parent::BtnOffDefault = "OFF";
     const char *Parent::DebugSeparator = " - ";
+    /* #endregion */
 
     /**
      * @brief Construct a new Parent::Parent object

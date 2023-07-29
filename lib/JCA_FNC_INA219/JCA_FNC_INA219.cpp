@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *INA219::ReadInterval_Name = "ReadInterval";
     const char *INA219::ReadInterval_Text = "Leseintervall";
     const char *INA219::ReadInterval_Unit = "s";
@@ -39,6 +40,7 @@ namespace JCA {
     const char *INA219::Current_Text = "Strom";
     const char *INA219::Current_Unit = "A";
     const char *INA219::Current_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new INA219::INA219 object
@@ -179,7 +181,7 @@ namespace JCA {
       LastMillis = millis ();
       UpdateMillis = 0;
       if (Sensor.init ()) {
-        Sensor.setADCMode(SAMPLE_MODE_64);
+        Sensor.setADCMode (SAMPLE_MODE_64);
         return true;
       } else {
         return false;
@@ -235,7 +237,7 @@ namespace JCA {
 
     /**
      * @brief Set the Update Interval to sync with other Elements
-     * 
+     *
      * @param _ReadInterval new Update Interval
      */
     void INA219::setInterval (uint16_t _ReadInterval) {

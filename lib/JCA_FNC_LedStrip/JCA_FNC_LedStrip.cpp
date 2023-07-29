@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *LedStrip::DelayAutoOff_Name = "DelayAutoOff";
     const char *LedStrip::DelayAutoOff_Text = "Verzögerung Auto-OFF";
     const char *LedStrip::DelayAutoOff_Unit = "Min";
@@ -32,6 +33,7 @@ namespace JCA {
     const char *LedStrip::Value_Text = "Farbwert";
     const char *LedStrip::Value_Unit = "COLOR";
     const char *LedStrip::Value_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new LedStrip::LedStrip object
@@ -146,7 +148,7 @@ namespace JCA {
     void LedStrip::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag ( OnOff_Name, OnOff_Text, OnOff_Comment, false, OnOff_TextOn, OnOff_TextOff, OnOff) + "}");
+      _SetupFile.println ("{" + createSetupTag (OnOff_Name, OnOff_Text, OnOff_Comment, false, OnOff_TextOn, OnOff_TextOff, OnOff) + "}");
       _SetupFile.println (",{" + createSetupTag (Value_Name, Value_Text, Value_Comment, false, Value_Unit, Value) + "}");
       _SetupFile.println (",{" + createSetupTag (DelayCounter_Name, DelayCounter_Text, DelayCounter_Comment, true, DelayCounter_Unit, DelayCounter) + "}");
       _SetupFile.println ("]");
@@ -166,7 +168,7 @@ namespace JCA {
      */
     bool LedStrip::init () {
       Strip.begin ();
-      Strip.show();
+      Strip.show ();
       return true;
     }
 

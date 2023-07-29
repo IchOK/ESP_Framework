@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *Level::RawEmpty_Name = "RawEmpty";
     const char *Level::RawEmpty_Text = "Rohwert Leer";
     const char *Level::RawEmpty_Unit = "#";
@@ -44,6 +45,7 @@ namespace JCA {
     const char *Level::RawValue_Text = "Rohwert";
     const char *Level::RawValue_Unit = "#";
     const char *Level::RawValue_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new Level::Level object
@@ -55,11 +57,11 @@ namespace JCA {
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       RawEmpty = 0;
-      #ifdef ESP32
+#ifdef ESP32
       RawFull = 4095;
-      #else
+#else
       RawFull = 1023;
-      #endif
+#endif
       Pin = _Pin;
       ReadInterval = 1;
       Value = 50.0;

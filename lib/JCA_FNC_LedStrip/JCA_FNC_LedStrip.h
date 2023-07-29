@@ -24,7 +24,7 @@ namespace JCA {
   namespace FNC {
     class LedStrip : public Parent {
     private:
-      // Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *DelayAutoOff_Name;
       static const char *DelayAutoOff_Text;
       static const char *DelayAutoOff_Unit;
@@ -42,7 +42,8 @@ namespace JCA {
       static const char *Value_Text;
       static const char *Value_Unit;
       static const char *Value_Comment;
-
+      /* #endregion */
+      
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
       void createDataValues (JsonObject &_Values);

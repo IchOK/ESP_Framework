@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *DigitalOut::DelayAutoOff_Name = "DelayAutoOff";
     const char *DigitalOut::DelayAutoOff_Text = "Verzögerung Auto-OFF";
     const char *DigitalOut::DelayAutoOff_Unit = "Min";
@@ -28,6 +29,7 @@ namespace JCA {
     const char *DigitalOut::DelayCounter_Text = "Verzögerung Zähler";
     const char *DigitalOut::DelayCounter_Unit = "Min";
     const char *DigitalOut::DelayCounter_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new DigitalOut::DigitalOut object
@@ -40,7 +42,7 @@ namespace JCA {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       DelayAutoOff = 0;
       Pin = _Pin;
-      pinMode(Pin, OUTPUT);
+      pinMode (Pin, OUTPUT);
       Value = false;
       DelayCounter = 0;
       LastMillis = millis ();
@@ -133,7 +135,7 @@ namespace JCA {
     void DigitalOut::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag ( Value_Name, Value_Text, Value_Comment, false, Value_TextOn, Value_TextOff, Value) + "}");
+      _SetupFile.println ("{" + createSetupTag (Value_Name, Value_Text, Value_Comment, false, Value_TextOn, Value_TextOff, Value) + "}");
       _SetupFile.println (",{" + createSetupTag (DelayCounter_Name, DelayCounter_Text, DelayCounter_Comment, true, DelayCounter_Unit, DelayCounter) + "}");
       _SetupFile.println ("]");
     }
@@ -169,12 +171,12 @@ namespace JCA {
           }
         }
       } else {
-        LastMillis = millis();
+        LastMillis = millis ();
         DelayCounter = 0;
         DelayMillis = 0;
       }
 
-      digitalWrite(Pin, Value);
+      digitalWrite (Pin, Value);
     }
 
     /**

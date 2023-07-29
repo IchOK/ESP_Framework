@@ -67,7 +67,7 @@ namespace JCA {
       String ByteArrayToHexString (uint8_t *_ByteArray, uint8_t _Length);
 
     public:
-      // Json Tags
+      /* #region(collapsed) JSON Tags */
       static const char *JsonTagElements;
       static const char *JsonTagConfig;
       static const char *JsonTagData;
@@ -82,6 +82,7 @@ namespace JCA {
       static const char *JsonTagOff;
       static const char *JsonTagType;
       static const char *JsonTagReadOnly;
+      /* #endregion */
 
       // external Functions
       Parent (String _Name, String _Comment);

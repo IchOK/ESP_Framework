@@ -15,6 +15,7 @@ using namespace JCA::FNC;
 
 namespace JCA {
   namespace IOT {
+    /* #region(collapsed) Datapoint description */
     const char *Webserver::ElementName = "System";
     const char *Webserver::Hostname_Name = "hostname";
     const char *Webserver::Hostname_Text = "Hostname";
@@ -35,6 +36,7 @@ namespace JCA {
     const char *Webserver::Time_Name = "time";
     const char *Webserver::Time_Text = "Systemzeit";
     const char *Webserver::Time_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new Webserver::Webserver object
@@ -48,15 +50,15 @@ namespace JCA {
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
         : Parent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
-      #ifdef ESP8266
-        sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
-      #elif ESP32
-        uint32_t ESP32ChipId = 0;
-        for (int i = 0; i < 17; i = i + 8) {
-          ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
-        }
-        sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP32ChipId);
-      #endif
+#ifdef ESP8266
+      sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
+#elif ESP32
+      uint32_t ESP32ChipId = 0;
+      for (int i = 0; i < 17; i = i + 8) {
+        ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
+      }
+      sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP32ChipId);
+#endif
       Port = _Port;
       Reboot = false;
       strncpy (ConfUser, _ConfUser, sizeof (ConfUser));

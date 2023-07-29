@@ -23,7 +23,7 @@ namespace JCA {
   namespace FNC {
     class DigitalOut : public Parent {
     private:
-      // Datapoint description
+      /* #region(collapsed) Datapoint description */
       static const char *DelayAutoOff_Name;
       static const char *DelayAutoOff_Text;
       static const char *DelayAutoOff_Unit;
@@ -37,6 +37,7 @@ namespace JCA {
       static const char *DelayCounter_Text;
       static const char *DelayCounter_Unit;
       static const char *DelayCounter_Comment;
+      /* #endregion */
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);

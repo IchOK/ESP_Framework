@@ -70,7 +70,6 @@ namespace JCA {
       IPAddress Gateway;
       IPAddress Subnet;
       bool isConfigured ();
-      
 
     public:
       // Constuctor/Destructor

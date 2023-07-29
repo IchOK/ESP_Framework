@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *SolarCharger::AccuVoltageMax_Name = "AccuVoltageMax";
     const char *SolarCharger::AccuVoltageMax_Text = "Maximale Akku Ladespannung";
     const char *SolarCharger::AccuVoltageMax_Unit = "V";
@@ -23,11 +24,11 @@ namespace JCA {
     const char *SolarCharger::AccuCurrentMax_Text = "Maximaler Akku Ladestrom";
     const char *SolarCharger::AccuCurrentMax_Unit = "A";
     const char *SolarCharger::AccuCurrentMax_Comment = nullptr;
-    const char *SolarCharger::AccuChargeEndCurrent_Name = "ChargeEndCurrent";
+    const char *SolarCharger::AccuChargeEndCurrent_Name = "AccuChargeEndCurrent";
     const char *SolarCharger::AccuChargeEndCurrent_Text = "Laden Beendet Strom";
     const char *SolarCharger::AccuChargeEndCurrent_Unit = "A";
     const char *SolarCharger::AccuChargeEndCurrent_Comment = nullptr;
-    const char *SolarCharger::AccuRechargeVoltage_Name = "RechargeVoltage";
+    const char *SolarCharger::AccuRechargeVoltage_Name = "AccuRechargeVoltage";
     const char *SolarCharger::AccuRechargeVoltage_Text = "Spannungs Nachladen";
     const char *SolarCharger::AccuRechargeVoltage_Unit = "V";
     const char *SolarCharger::AccuRechargeVoltage_Comment = nullptr;
@@ -35,34 +36,58 @@ namespace JCA {
     const char *SolarCharger::AccuVoltage_Text = "Akku Spannung";
     const char *SolarCharger::AccuVoltage_Unit = "V";
     const char *SolarCharger::AccuVoltage_Comment = nullptr;
-    const char *SolarCharger::AccuCurrent_Name = "Current";
+    const char *SolarCharger::AccuCurrent_Name = "AccuCurrent";
     const char *SolarCharger::AccuCurrent_Text = "Akku Strom";
     const char *SolarCharger::AccuCurrent_Unit = "A";
     const char *SolarCharger::AccuCurrent_Comment = nullptr;
     const char *SolarCharger::AccuPower_Name = "AccuPower";
-    const char *SolarCharger::AccuPower_Text = "Entladespannung";
-    const char *SolarCharger::AccuPower_Unit = "V";
+    const char *SolarCharger::AccuPower_Text = "Akku Leistung";
+    const char *SolarCharger::AccuPower_Unit = "W";
     const char *SolarCharger::AccuPower_Comment = nullptr;
+    const char *SolarCharger::AccuEnergie15m_Name = "AccuEnergie15m";
+    const char *SolarCharger::AccuEnergie15m_Text = "geladene Energie 15 Min";
+    const char *SolarCharger::AccuEnergie15m_Unit = "Wh";
+    const char *SolarCharger::AccuEnergie15m_Comment = nullptr;
+    const char *SolarCharger::AccuEnergie1h_Name = "AccuEnergie1h";
+    const char *SolarCharger::AccuEnergie1h_Text = "geladene Energie 1 H";
+    const char *SolarCharger::AccuEnergie1h_Unit = "Wh";
+    const char *SolarCharger::AccuEnergie1h_Comment = nullptr;
+    const char *SolarCharger::AccuEnergie1d_Name = "AccuEnergie1d";
+    const char *SolarCharger::AccuEnergie1d_Text = "geladene Energie 1 Tag";
+    const char *SolarCharger::AccuEnergie1d_Unit = "Wh";
+    const char *SolarCharger::AccuEnergie1d_Comment = nullptr;
     const char *SolarCharger::SolarVoltageMin_Name = "SolarVoltageMin";
-    const char *SolarCharger::SolarVoltageMin_Text = "Geladene Leistung";
-    const char *SolarCharger::SolarVoltageMin_Unit = "WH";
+    const char *SolarCharger::SolarVoltageMin_Text = "Solar einschalt Spannung";
+    const char *SolarCharger::SolarVoltageMin_Unit = "V";
     const char *SolarCharger::SolarVoltageMin_Comment = nullptr;
     const char *SolarCharger::MpptInterval_Name = "MpptInterval";
-    const char *SolarCharger::MpptInterval_Text = "Entladener Strom";
-    const char *SolarCharger::MpptInterval_Unit = "AH";
+    const char *SolarCharger::MpptInterval_Text = "MPPT Prüfinterval";
+    const char *SolarCharger::MpptInterval_Unit = "ms";
     const char *SolarCharger::MpptInterval_Comment = nullptr;
     const char *SolarCharger::SolarVoltage_Name = "SolarVoltage";
-    const char *SolarCharger::SolarVoltage_Text = "Entledene Leistung";
-    const char *SolarCharger::SolarVoltage_Unit = "WH";
+    const char *SolarCharger::SolarVoltage_Text = "Solar Spannung";
+    const char *SolarCharger::SolarVoltage_Unit = "V";
     const char *SolarCharger::SolarVoltage_Comment = nullptr;
     const char *SolarCharger::SolarCurrent_Name = "SolarCurrent";
-    const char *SolarCharger::SolarCurrent_Text = "PWM Laden";
-    const char *SolarCharger::SolarCurrent_Unit = "%";
+    const char *SolarCharger::SolarCurrent_Text = "Solar Strom";
+    const char *SolarCharger::SolarCurrent_Unit = "A";
     const char *SolarCharger::SolarCurrent_Comment = nullptr;
     const char *SolarCharger::SolarPower_Name = "SolarPower";
-    const char *SolarCharger::SolarPower_Text = "Genzwert Akku Entladen";
-    const char *SolarCharger::SolarPower_Unit = "A";
+    const char *SolarCharger::SolarPower_Text = "Solar Leistung";
+    const char *SolarCharger::SolarPower_Unit = "W";
     const char *SolarCharger::SolarPower_Comment = nullptr;
+    const char *SolarCharger::SolarEnergie15m_Name = "SolarEnergie15m";
+    const char *SolarCharger::SolarEnergie15m_Text = "bezogene Energie 15 Min";
+    const char *SolarCharger::SolarEnergie15m_Unit = "Wh";
+    const char *SolarCharger::SolarEnergie15m_Comment = nullptr;
+    const char *SolarCharger::SolarEnergie1h_Name = "SolarEnergie1h";
+    const char *SolarCharger::SolarEnergie1h_Text = "bezogene Energie 1 H";
+    const char *SolarCharger::SolarEnergie1h_Unit = "Wh";
+    const char *SolarCharger::SolarEnergie1h_Comment = nullptr;
+    const char *SolarCharger::SolarEnergie1d_Name = "SolarEnergie1d";
+    const char *SolarCharger::SolarEnergie1d_Text = "bezogene Energie 1 Tag";
+    const char *SolarCharger::SolarEnergie1d_Unit = "Wh";
+    const char *SolarCharger::SolarEnergie1d_Comment = nullptr;
     const char *SolarCharger::Fault_Name = "Fault";
     const char *SolarCharger::Fault_Text = "Fehler aktiv";
     const char *SolarCharger::Fault_Comment = nullptr;
@@ -78,6 +103,7 @@ namespace JCA {
     const char *SolarCharger::ChargeState_Case_ChargeVoltage = "Laden-Spannung";
     const char *SolarCharger::ChargeState_Case_TrackMppt = "Check-MPPT";
     const char *SolarCharger::ChargeState_Case_Fault = "Fehler";
+    // #endregion
 
     const float SolarCharger::CurrentHyst = 0.01;
     const float SolarCharger::VoltageHyst = 0.01;
@@ -335,8 +361,8 @@ namespace JCA {
 
       if (UpdateMillis >= UpdateInterval) {
         // Read Sensor Date
-        AccuVoltage = getAccuVoltageCB();
-        AccuCurrent = getAccuCurrentCB();
+        AccuVoltage = getAccuVoltageCB ();
+        AccuCurrent = getAccuCurrentCB ();
         AccuPower = AccuVoltage * AccuCurrent;
         SolarVoltage = getSolarVoltageCB ();
         SolarCurrent = getSolarCurrentCB ();

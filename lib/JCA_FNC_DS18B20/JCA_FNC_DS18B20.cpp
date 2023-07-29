@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *DS18B20::Filter_Name = "Filter";
     const char *DS18B20::Filter_Text = "Filterkonstante";
     const char *DS18B20::Filter_Unit = "s";
@@ -31,6 +32,7 @@ namespace JCA {
     const char *DS18B20::Temp_Text = "Temperatur";
     const char *DS18B20::Temp_Unit = "°C";
     const char *DS18B20::Temp_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new DS18B20::DS18B20 object

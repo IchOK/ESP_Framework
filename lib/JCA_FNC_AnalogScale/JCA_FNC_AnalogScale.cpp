@@ -15,6 +15,7 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
+    /* #region(collapsed) Datapoint description */
     const char *AnalogScale::ScaledMin_Name = "ScaledMin";
     const char *AnalogScale::ScaledMin_Text = "Rohwert Leer";
     const char *AnalogScale::ScaledMin_Unit = "#";
@@ -31,6 +32,7 @@ namespace JCA {
     const char *AnalogScale::Value_Text = "Niveau";
     const char *AnalogScale::Value_Unit = "%";
     const char *AnalogScale::Value_Comment = nullptr;
+    /* #endregion */
 
     /**
      * @brief Construct a new AnalogScale::AnalogScale object
@@ -43,11 +45,13 @@ namespace JCA {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       ScaledMin = 0.0;
       ScaledMax = 100.0;
-      #ifdef ESP32
-        RawMax = 4095.0;
-      #else
-        RawMax = 1023.0;
-      #endif
+#ifdef ESP32
+      RawMax = 4095.0;
+#elif ESP8266
+      RawMax = 1023.0;
+#else
+      RawMax = 1023.0;
+#endif
       Pin = _Pin;
       Value = 0.0;
       Filter = 0.0;
@@ -163,13 +167,19 @@ namespace JCA {
 
     /**
      * @brief Attahs the pin to ADC
-     * 
+     *
      * @return true configuration successfull
      * @return false configuration failed
      */
     bool AnalogScale::init () {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Setup");
+#ifdef ESP32
       InitDone = adcAttachPin (Pin);
+#elif ESP8266
+      InitDone = Pin == A0;
+#else
+      InitDone = true;
+#endif
       if (ScaledMax == ScaledMin) {
         Debug.println (FLAG_ERROR, false, Name, __func__, "Scale-Data not valid");
         InitDone = false;
@@ -186,8 +196,8 @@ namespace JCA {
     void AnalogScale::update (struct tm &time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       if (InitDone) {
-        float RawValue = (float)analogRead(Pin);
-        uint32_t ActMillis = millis();
+        float RawValue = (float)analogRead (Pin);
+        uint32_t ActMillis = millis ();
         float Scaled = RawValue / RawMax * (ScaledMax - ScaledMin) + ScaledMin;
         float FilterFactor = Filter / ((float)(ActMillis - LastMillis) / 1000.0);
         Value = ((Value * FilterFactor) + Scaled) / (FilterFactor + 1.0);
