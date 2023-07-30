@@ -32,7 +32,7 @@ namespace JCA {
       CHARGE_CURRENT,
       CHARGE_VOLTAGE,
       TRACK_MPPT,
-      FAULT
+      FULL
     } SolarCharger_State;
 
     class SolarCharger : public Parent {
@@ -82,10 +82,6 @@ namespace JCA {
       static const char *SolarVoltageMin_Text;
       static const char *SolarVoltageMin_Unit;
       static const char *SolarVoltageMin_Comment;
-      static const char *MpptInterval_Name;
-      static const char *MpptInterval_Text;
-      static const char *MpptInterval_Unit;
-      static const char *MpptInterval_Comment;
       static const char *SolarVoltage_Name;
       static const char *SolarVoltage_Text;
       static const char *SolarVoltage_Unit;
@@ -110,11 +106,24 @@ namespace JCA {
       static const char *SolarEnergie1d_Text;
       static const char *SolarEnergie1d_Unit;
       static const char *SolarEnergie1d_Comment;
-      static const char *Fault_Name;
-      static const char *Fault_Text;
-      static const char *Fault_Comment;
-      static const char *Fault_TextOn;
-      static const char *Fault_TextOff;
+      static const char *AutoStart_Name;
+      static const char *AutoStart_Text;
+      static const char *AutoStart_Comment;
+      static const char *AutoStart_TextOn;
+      static const char *AutoStart_TextOff;
+      static const char *Charging_Name;
+      static const char *Charging_Text;
+      static const char *Charging_Comment;
+      static const char *Charging_TextOn;
+      static const char *Charging_TextOff;
+      static const char *MpptStep_Name;
+      static const char *MpptStep_Text;
+      static const char *MpptStep_Unit;
+      static const char *MpptStep_Comment;
+      static const char *DutyCycle_Name;
+      static const char *DutyCycle_Text;
+      static const char *DutyCycle_Unit;
+      static const char *DutyCycle_Comment;
       static const char *ChargeState_Name;
       static const char *ChargeState_Text;
       static const char *ChargeState_Comment;
@@ -127,10 +136,10 @@ namespace JCA {
       static const char *ChargeState_Case_Fault;
       /* #endregion */
 
-      static const float CurrentHyst;
-      static const float VoltageHyst;
-      static const float OutputStep;
-      static const uint16_t UpdateInterval;
+      static const float MaxOutputDutyCycle; // X < 100.0%
+      static const float MinDutyCycle; // 0.05 < X < 1.0
+      static const float MaxDutyCycle; // 1.0 < X < 2.0
+      static const uint32_t WaitStart; // Start Delay in Milliseconds
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
@@ -151,6 +160,12 @@ namespace JCA {
       ValueCallback getAccuCurrentCB;
       ValueCallback getSolarVoltageCB;
       ValueCallback getSolarCurrentCB;
+      float CurrentHyst;
+      float VoltageHyst;
+      float OutputStep;
+      uint16_t UpdateInterval;
+      float MaxMeanCurrent;
+      float MaxPeakCurrent;
 
       // Konfig
       float AccuVoltageMax;
@@ -158,36 +173,53 @@ namespace JCA {
       float AccuChargeEndCurrent;
       float AccuRechargeVoltage;
       float SolarVoltageMin;
-      uint32_t MpptInterval;
-
+      float MpptStep;
+      bool AutoStart;
+      
       // Daten
       float AccuVoltage;
       float AccuCurrent;
       float AccuPower;
+      float AccuEnergie15m;
+      float AccuEnergie1h;
+      float AccuEnergie1d;
       float SolarVoltage;
       float SolarCurrent;
       float SolarPower;
+      float SolarEnergie15m;
+      float SolarEnergie1h;
+      float SolarEnergie1d;
+      bool Charging;
       SolarCharger_State_T ChargeState;
 
       // Intern
-      uint32_t MpptDelay;
-      uint32_t FaultDelay;
-      SolarCharger_State_T FaultState;
+      float SolarVoltageStartOffset;
       uint8_t Resolution;
       uint32_t Frequency;
-      float DutyScale;
+      float MpptLastPower;
+      bool MpptIncrease;
       uint32_t LastMillis;
       uint32_t UpdateMillis;
       uint32_t StepDelay;
-      float CurrentStep;
-      float PowerStep;
-      float BoostDuty;
-      float BuckDuty;
-      bool BoostMode;
+      uint32_t MpptDelay;
+      uint32_t StartDelay;
+      uint32_t WaitFull;
+      uint32_t WaitMppt;
+      float DutyCycle;
+      bool InitDone;
+      float SumAccuEnergie15m;
+      float SumAccuEnergie1h;
+      float SumAccuEnergie1d;
+      float SumSolarEnergie15m;
+      float SumSolarEnergie1h;
+      float SumSolarEnergie1d;
+      int Last15m;
+      int Last1h;
+      int Last1d;
 
     public:
-      SolarCharger (uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
-      bool init ();
+      SolarCharger (uint8_t _PinBoost, uint8_t _PinBuck, const char *_Name, JCA::SYS::PwmOutput *_Output, float _MaxMeanCurrent, float _MaxPeakCurrent, float _CurrentHyst = 0.01, float _VoltageHyst = 0.01, float _OutputStep = 0.0001, uint16_t _UpdateInterval = 100);
+      bool init (ValueCallback _GetSolarVoltageCB, ValueCallback _GetSolarCurrentCB, ValueCallback _GetAccuVoltageCB, ValueCallback _GetAccuCurrentCB, struct tm &_Time);
       void update (struct tm &_Time);
     };
   }

@@ -124,10 +124,11 @@ namespace JCA {
     /**
      * @brief Construct a new Charger::Charger object
      *
-     * @param _PinEnable Pin that is connected to the Enable in on the Stepper-Driver
-     * @param _PinStep Pin that is connected to the Step in on the Stepper-Driver
-     * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
+     * @param _Sensor Pointer to the INA219-Object connected to the Charger
+     * @param _PinCharge Output Pin that ist Connected to the Charging-Driver
+     * @param _PinDischarge Output Pin that ist Connected to the Discharging-Driver
      * @param _Name Element Name inside the Communication
+     * @param _Output Pointer to the PWM-Handling-Object
      */
     Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, PwmOutput *_Output)
         : Parent (_Name) {
@@ -421,8 +422,8 @@ namespace JCA {
 
     /**
      * @brief Handling the Charger
-     * Handling the Stepper-Functions and check if DoCheck is requested
-     * @param _Time Current Time to check automated feeding
+     * Handling the Charge-Discharge-Function and check if DoCheck is requested
+     * @param _Time Current Time
      */
     void Charger::update (struct tm &_Time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");

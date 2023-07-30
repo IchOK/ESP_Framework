@@ -17,22 +17,24 @@ namespace JCA {
   namespace FNC {
     /* #region(collapsed) Datapoint description */
     const char *AnalogScale::ScaledMin_Name = "ScaledMin";
-    const char *AnalogScale::ScaledMin_Text = "Rohwert Leer";
-    const char *AnalogScale::ScaledMin_Unit = "#";
+    const char *AnalogScale::ScaledMin_Text = "Messbereich Min";
     const char *AnalogScale::ScaledMin_Comment = nullptr;
     const char *AnalogScale::ScaledMax_Name = "ScaledMax";
-    const char *AnalogScale::ScaledMax_Text = "Rohwert Voll";
-    const char *AnalogScale::ScaledMax_Unit = "#";
+    const char *AnalogScale::ScaledMax_Text = "Messbereich Max";
     const char *AnalogScale::ScaledMax_Comment = nullptr;
     const char *AnalogScale::Filter_Name = "Filter";
-    const char *AnalogScale::Filter_Text = "Alarm Grenzwert";
-    const char *AnalogScale::Filter_Unit = "%";
+    const char *AnalogScale::Filter_Text = "Filterkonstante";
+    const char *AnalogScale::Filter_Unit = "s";
     const char *AnalogScale::Filter_Comment = nullptr;
     const char *AnalogScale::Value_Name = "AnalogScale";
-    const char *AnalogScale::Value_Text = "Niveau";
-    const char *AnalogScale::Value_Unit = "%";
+    const char *AnalogScale::Value_Text = "Messwert";
     const char *AnalogScale::Value_Comment = nullptr;
+    const char *AnalogScale::Unit_Name = "Unit";
+    const char *AnalogScale::Unit_Text = "Einheit";
+    const char *AnalogScale::Unit_Comment = nullptr;
     /* #endregion */
+
+    const uint16_t AnalogScale::UpdateInterval = 10;
 
     /**
      * @brief Construct a new AnalogScale::AnalogScale object
@@ -55,6 +57,7 @@ namespace JCA {
       Pin = _Pin;
       Value = 0.0;
       Filter = 0.0;
+      strcpy(Unit, "?");
       InitDone = false;
     }
 
@@ -68,6 +71,7 @@ namespace JCA {
       _Values[ScaledMin_Name] = ScaledMin;
       _Values[ScaledMax_Name] = ScaledMax;
       _Values[Filter_Name] = Filter;
+      _Values[Unit_Name] = Unit;
     }
 
     /**
@@ -109,6 +113,13 @@ namespace JCA {
             Debug.println (FLAG_CONFIG, false, Name, __func__, Filter);
           }
         }
+        if (Tag[JsonTagName] == Unit_Name) {
+          strncpy (Unit, Tag[JsonTagValue].as<const char *> (), sizeof (Unit));
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, Unit_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, Unit);
+          }
+        }
       }
     }
 
@@ -138,9 +149,10 @@ namespace JCA {
     void AnalogScale::writeSetupConfig (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (ScaledMin_Name, ScaledMin_Text, ScaledMin_Comment, false, ScaledMin_Unit, ScaledMin) + "}");
-      _SetupFile.println (",{" + createSetupTag (ScaledMax_Name, ScaledMax_Text, ScaledMax_Comment, false, ScaledMax_Unit, ScaledMax) + "}");
+      _SetupFile.println ("{" + createSetupTag (ScaledMin_Name, ScaledMin_Text, ScaledMin_Comment, false, Unit, ScaledMin) + "}");
+      _SetupFile.println (",{" + createSetupTag (ScaledMax_Name, ScaledMax_Text, ScaledMax_Comment, false, Unit, ScaledMax) + "}");
       _SetupFile.println (",{" + createSetupTag (Filter_Name, Filter_Text, Filter_Comment, false, Filter_Unit, Filter) + "}");
+      _SetupFile.println (",{" + createSetupTag (Unit_Name, Unit_Text, Unit_Comment, false, Unit) + "}");
       _SetupFile.println ("]");
     }
 
@@ -152,7 +164,7 @@ namespace JCA {
     void AnalogScale::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (Value_Name, Value_Text, Value_Comment, true, Value_Unit, Value) + "}");
+      _SetupFile.println ("{" + createSetupTag (Value_Name, Value_Text, Value_Comment, true, Unit, Value) + "}");
       _SetupFile.println ("]");
     }
 
@@ -191,17 +203,21 @@ namespace JCA {
     /**
      * @brief Handling AnalogScale-Sensor
      * Read and scale the AnalogScale and check if the Alarm value is reached
-     * @param time Current Time to check the Samplerate
+     * @param time Current Time
      */
-    void AnalogScale::update (struct tm &time) {
+    void AnalogScale::update (struct tm &_Time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
-      if (InitDone) {
+      // Get Update Intervall
+      uint32_t ActMillis = millis ();
+      UpdateMillis += (ActMillis - LastMillis);
+      LastMillis = ActMillis;
+
+      if (InitDone && UpdateMillis >= UpdateInterval) {
         float RawValue = (float)analogRead (Pin);
-        uint32_t ActMillis = millis ();
         float Scaled = RawValue / RawMax * (ScaledMax - ScaledMin) + ScaledMin;
-        float FilterFactor = Filter / ((float)(ActMillis - LastMillis) / 1000.0);
+        float FilterFactor = Filter / ((float)UpdateMillis / 1000.0);
         Value = ((Value * FilterFactor) + Scaled) / (FilterFactor + 1.0);
-        LastMillis = ActMillis;
+        UpdateMillis = 0;
       }
     }
 

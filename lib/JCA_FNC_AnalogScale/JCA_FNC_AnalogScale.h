@@ -25,11 +25,9 @@ namespace JCA {
       /* #region(collapsed) Datapoint description */
       static const char *ScaledMin_Name;
       static const char *ScaledMin_Text;
-      static const char *ScaledMin_Unit;
       static const char *ScaledMin_Comment;
       static const char *ScaledMax_Name;
       static const char *ScaledMax_Text;
-      static const char *ScaledMax_Unit;
       static const char *ScaledMax_Comment;
       static const char *Filter_Name;
       static const char *Filter_Text;
@@ -37,9 +35,13 @@ namespace JCA {
       static const char *Filter_Comment;
       static const char *Value_Name;
       static const char *Value_Text;
-      static const char *Value_Unit;
       static const char *Value_Comment;
+      static const char *Unit_Name;
+      static const char *Unit_Text;
+      static const char *Unit_Comment;
       /* #endregion */
+
+      static const uint16_t UpdateInterval;
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
@@ -60,6 +62,7 @@ namespace JCA {
       float ScaledMin;
       float ScaledMax;
       float Filter;
+      char Unit[10];
 
       // Daten
       float Value;
@@ -67,6 +70,7 @@ namespace JCA {
 
       // Intern
       uint32_t LastMillis;
+      uint32_t UpdateMillis;
 
     public:
       AnalogScale (uint8_t _Pin, const char *_Name);
