@@ -57,10 +57,14 @@ namespace JCA {
     const char *SolarCharger::AccuEnergie1d_Text = "geladene Energie 1 Tag";
     const char *SolarCharger::AccuEnergie1d_Unit = "Wh";
     const char *SolarCharger::AccuEnergie1d_Comment = nullptr;
-    const char *SolarCharger::SolarVoltageMin_Name = "SolarVoltageMin";
-    const char *SolarCharger::SolarVoltageMin_Text = "Solar einschalt Spannung";
-    const char *SolarCharger::SolarVoltageMin_Unit = "V";
-    const char *SolarCharger::SolarVoltageMin_Comment = nullptr;
+    const char *SolarCharger::SolarVoltageOn_Name = "SolarVoltageOn";
+    const char *SolarCharger::SolarVoltageOn_Text = "Solar einschalt Spannung";
+    const char *SolarCharger::SolarVoltageOn_Unit = "V";
+    const char *SolarCharger::SolarVoltageOn_Comment = nullptr;
+    const char *SolarCharger::SolarVoltageOff_Name = "SolarVoltageOff";
+    const char *SolarCharger::SolarVoltageOff_Text = "Solar ausschalt Spannung";
+    const char *SolarCharger::SolarVoltageOff_Unit = "V";
+    const char *SolarCharger::SolarVoltageOff_Comment = nullptr;
     const char *SolarCharger::SolarVoltage_Name = "SolarVoltage";
     const char *SolarCharger::SolarVoltage_Text = "Solar Spannung";
     const char *SolarCharger::SolarVoltage_Unit = "V";
@@ -95,10 +99,26 @@ namespace JCA {
     const char *SolarCharger::Charging_Comment = nullptr;
     const char *SolarCharger::Charging_TextOn = nullptr;
     const char *SolarCharger::Charging_TextOff = nullptr;
-    const char *SolarCharger::MpptStep_Name = "MpptStep";
-    const char *SolarCharger::MpptStep_Text = "Schrittweite MPPT";
-    const char *SolarCharger::MpptStep_Unit = "%";
-    const char *SolarCharger::MpptStep_Comment = nullptr;
+    const char *SolarCharger::MpptVoltageMin_Name = "MpptVoltageMin";
+    const char *SolarCharger::MpptVoltageMin_Text = "MPPT Spannung Start";
+    const char *SolarCharger::MpptVoltageMin_Unit = "V";
+    const char *SolarCharger::MpptVoltageMin_Comment = nullptr;
+    const char *SolarCharger::MpptVoltageMax_Name = "MpptVoltageMax";
+    const char *SolarCharger::MpptVoltageMax_Text = "MPPT Spannung Ende";
+    const char *SolarCharger::MpptVoltageMax_Unit = "V";
+    const char *SolarCharger::MpptVoltageMax_Comment = nullptr;
+    const char *SolarCharger::MpptStepVoltage_Name = "MpptStepVoltage";
+    const char *SolarCharger::MpptStepVoltage_Text = "MPPT Schritt-Spannung";
+    const char *SolarCharger::MpptStepVoltage_Unit = "V";
+    const char *SolarCharger::MpptStepVoltage_Comment = nullptr;
+    const char *SolarCharger::MpptStepTime_Name = "MpptStepTime";
+    const char *SolarCharger::MpptStepTime_Text = "MPPT Schritt-Zeit";
+    const char *SolarCharger::MpptStepTime_Unit = "ms";
+    const char *SolarCharger::MpptStepTime_Comment = nullptr;
+    const char *SolarCharger::MpptCheckDelay_Name = "MpptCheckDelay";
+    const char *SolarCharger::MpptCheckDelay_Text = "MPPT Prüfintervall";
+    const char *SolarCharger::MpptCheckDelay_Unit = "s";
+    const char *SolarCharger::MpptCheckDelay_Comment = nullptr;
     const char *SolarCharger::DutyCycle_Name = "DutyCycle";
     const char *SolarCharger::DutyCycle_Text = "Verstärungsfaktor";
     const char *SolarCharger::DutyCycle_Unit = "";
@@ -150,9 +170,12 @@ namespace JCA {
       MaxPeakCurrent = _MaxPeakCurrent;
 
       // Intern
-      ChargeState = SolarCharger_State_T::IDLE;
       Resolution = 10;
       Frequency = 78000;
+      StartDelay = 0;
+      MpptDelay = 0;
+      StartDelay = 0;
+      WaitFull = 10000;
       InitDone = false;
       SumAccuEnergie15m = 0;
       SumAccuEnergie1h = 0;
@@ -160,34 +183,41 @@ namespace JCA {
       SumSolarEnergie15m = 0;
       SumSolarEnergie1h = 0;
       SumSolarEnergie1d = 0;
-      SolarVoltageStartOffset = 2.0;
-      WaitFull = 10000;
-      WaitMppt = UpdateInterval * 10;
-      StartDelay = 0;
+      MpptMaxPower = 0;
+      MpptCheckSum = 0.0;
+      MpptCheckCnt = 0;
+      MpptVoltage = 0.0;
 
       // Konfig
       AccuVoltageMax = 14.4;
       AccuCurrentMax = 10.0;
       AccuChargeEndCurrent = 0.4;
       AccuRechargeVoltage = 13.5;
-      SolarVoltageMin = 10.0;
-      MpptStep = 0.1;
+      SolarVoltageOn = 12.0;
+      SolarVoltageOff = 10.0;
+      MpptVoltageMin = 12.0;
+      MpptVoltageMax = 18.0;
+      MpptStepVoltage = 0.1;
+      MpptStepTime = 200;
+      MpptCheckDelay = 600;
       AutoStart = false;
 
       // Daten
       AccuVoltage = 0.0;
       AccuCurrent = 0.0;
       AccuPower = 0.0;
-      SolarVoltage = 0.0;
-      SolarCurrent = 0.0;
-      SolarPower = 0.0;
       AccuEnergie15m = 0.0;
       AccuEnergie1h = 0.0;
       AccuEnergie1d = 0.0;
+      SolarVoltage = 0.0;
+      SolarCurrent = 0.0;
+      SolarPower = 0.0;
       SolarEnergie15m = 0.0;
       SolarEnergie1h = 0.0;
       SolarEnergie1d = 0.0;
+      DutyCycle = 0.0;
       Charging = false;
+      ChargeState = SolarCharger_State_T::IDLE;
     }
 
     /**
@@ -201,8 +231,13 @@ namespace JCA {
       _Values[AccuCurrentMax_Name] = AccuCurrentMax;
       _Values[AccuChargeEndCurrent_Name] = AccuChargeEndCurrent;
       _Values[AccuRechargeVoltage_Name] = AccuRechargeVoltage;
-      _Values[SolarVoltageMin_Name] = SolarVoltageMin;
-      _Values[MpptStep_Name] = MpptStep;
+      _Values[SolarVoltageOn_Name] = SolarVoltageOn;
+      _Values[SolarVoltageOff_Name] = SolarVoltageOff;
+      _Values[MpptVoltageMin_Name] = MpptVoltageMin;
+      _Values[MpptVoltageMax_Name] = MpptVoltageMax;
+      _Values[MpptStepVoltage_Name] = MpptStepVoltage;
+      _Values[MpptStepTime_Name] = MpptStepTime;
+      _Values[MpptCheckDelay_Name] = MpptCheckDelay;
       _Values[AutoStart_Name] = AutoStart;
     }
 
@@ -291,21 +326,53 @@ namespace JCA {
             Debug.println (FLAG_CONFIG, false, Name, __func__, AccuRechargeVoltage);
           }
         }
-        if (Tag[JsonTagName] == SolarVoltageMin_Name) {
-          SolarVoltageMin = Tag[JsonTagValue].as<float> ();
-          if (SolarVoltageMin < AccuVoltageMax / 2.0) {
-            SolarVoltageMin = AccuVoltageMax / 2.0;
-          }
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, SolarVoltageMin_Name)) {
+        if (Tag[JsonTagName] == SolarVoltageOn_Name) {
+          SolarVoltageOn = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, SolarVoltageOn_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, SolarVoltageMin);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, SolarVoltageOn);
           }
         }
-        if (Tag[JsonTagName] == MpptStep_Name) {
-          MpptStep = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptStep_Name)) {
+        if (Tag[JsonTagName] == SolarVoltageOff_Name) {
+          SolarVoltageOff = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, SolarVoltageOff_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, MpptStep);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, SolarVoltageOff);
+          }
+        }
+        if (Tag[JsonTagName] == MpptVoltageMin_Name) {
+          MpptVoltageMin = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptVoltageMin_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, MpptVoltageMin);
+          }
+        }
+        if (Tag[JsonTagName] == MpptVoltageMax_Name) {
+          MpptVoltageMax = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptVoltageMax_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, MpptVoltageMax);
+          }
+        }
+        if (Tag[JsonTagName] == MpptStepVoltage_Name) {
+          MpptStepVoltage = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptStepVoltage_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, MpptStepVoltage);
+          }
+        }
+        if (Tag[JsonTagName] == MpptStepTime_Name) {
+          MpptStepTime = Tag[JsonTagValue].as<uint16_t> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptStepTime_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, MpptStepTime);
+          }
+        }
+        if (Tag[JsonTagName] == MpptCheckDelay_Name) {
+          MpptCheckDelay = Tag[JsonTagValue].as<uint32_t> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptCheckDelay_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, MpptCheckDelay);
           }
         }
         if (Tag[JsonTagName] == AutoStart_Name) {
@@ -357,8 +424,13 @@ namespace JCA {
       _SetupFile.println (",{" + createSetupTag (AccuCurrentMax_Name, AccuCurrentMax_Text, AccuCurrentMax_Comment, false, AccuCurrentMax_Unit, AccuCurrentMax) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuChargeEndCurrent_Name, AccuChargeEndCurrent_Text, AccuChargeEndCurrent_Comment, false, AccuChargeEndCurrent_Unit, AccuChargeEndCurrent) + "}");
       _SetupFile.println (",{" + createSetupTag (AccuRechargeVoltage_Name, AccuRechargeVoltage_Text, AccuRechargeVoltage_Comment, false, AccuRechargeVoltage_Unit, AccuRechargeVoltage) + "}");
-      _SetupFile.println (",{" + createSetupTag (SolarVoltageMin_Name, SolarVoltageMin_Text, SolarVoltageMin_Comment, true, SolarVoltageMin_Unit, SolarVoltageMin) + "}");
-      _SetupFile.println (",{" + createSetupTag (MpptStep_Name, MpptStep_Text, MpptStep_Comment, false, MpptStep_Unit, MpptStep) + "}");
+      _SetupFile.println (",{" + createSetupTag (SolarVoltageOn_Name, SolarVoltageOn_Text, SolarVoltageOn_Comment, false, SolarVoltageOn_Unit, SolarVoltageOn) + "}");
+      _SetupFile.println (",{" + createSetupTag (SolarVoltageOff_Name, SolarVoltageOff_Text, SolarVoltageOff_Comment, false, SolarVoltageOff_Unit, SolarVoltageOff) + "}");
+      _SetupFile.println (",{" + createSetupTag (MpptVoltageMin_Name, MpptVoltageMin_Text, MpptVoltageMin_Comment, false, MpptVoltageMin_Unit, MpptVoltageMin) + "}");
+      _SetupFile.println (",{" + createSetupTag (MpptVoltageMax_Name, MpptVoltageMax_Text, MpptVoltageMax_Comment, false, MpptVoltageMax_Unit, MpptVoltageMax) + "}");
+      _SetupFile.println (",{" + createSetupTag (MpptStepVoltage_Name, MpptStepVoltage_Text, MpptStepVoltage_Comment, false, MpptStepVoltage_Unit, MpptStepVoltage) + "}");
+      _SetupFile.println (",{" + createSetupTag (MpptStepTime_Name, MpptStepTime_Text, MpptStepTime_Comment, false, MpptStepTime_Unit, MpptStepTime) + "}");
+      _SetupFile.println (",{" + createSetupTag (MpptCheckDelay_Name, MpptCheckDelay_Text, MpptCheckDelay_Comment, false, MpptCheckDelay_Unit, MpptCheckDelay) + "}");
       _SetupFile.println (",{" + createSetupTag (AutoStart_Name, AutoStart_Text, AutoStart_Comment, false, AutoStart_TextOn, AutoStart_TextOff, false) + "}");
       _SetupFile.println ("]");
     }
@@ -379,13 +451,13 @@ namespace JCA {
       _SetupFile.println (",{" + createSetupTag (AccuEnergie1d_Name, AccuEnergie1d_Text, AccuEnergie1d_Comment, true, AccuEnergie1d_Unit, AccuEnergie1d) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarVoltage_Name, SolarVoltage_Text, SolarVoltage_Comment, true, SolarVoltage_Unit, SolarVoltage) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarCurrent_Name, SolarCurrent_Text, SolarCurrent_Comment, true, SolarCurrent_Unit, SolarCurrent) + "}");
-      _SetupFile.println (",{" + createSetupTag (SolarPower_Name, SolarPower_Text, SolarPower_Comment, false, SolarPower_Unit, SolarPower) + "}");
+      _SetupFile.println (",{" + createSetupTag (SolarPower_Name, SolarPower_Text, SolarPower_Comment, true, SolarPower_Unit, SolarPower) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarEnergie15m_Name, SolarEnergie15m_Text, SolarEnergie15m_Comment, true, SolarEnergie15m_Unit, SolarEnergie15m) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarEnergie1h_Name, SolarEnergie1h_Text, SolarEnergie1h_Comment, true, SolarEnergie1h_Unit, SolarEnergie1h) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarEnergie1d_Name, SolarEnergie1d_Text, SolarEnergie1d_Comment, true, SolarEnergie1d_Unit, SolarEnergie1d) + "}");
       _SetupFile.println (",{" + createSetupTag (DutyCycle_Name, DutyCycle_Text, DutyCycle_Comment, true, DutyCycle_Unit, DutyCycle) + "}");
-      _SetupFile.println (",{" + createSetupTag (ChargeState_Name, ChargeState_Text, ChargeState_Comment, true, "Idle") + "}");
       _SetupFile.println (",{" + createSetupTag (Charging_Name, Charging_Text, Charging_Comment, false, Charging_TextOn, Charging_TextOff, false) + "}");
+      _SetupFile.println (",{" + createSetupTag (ChargeState_Name, ChargeState_Text, ChargeState_Comment, true, "Idle") + "}");
       _SetupFile.println ("]");
     }
 
@@ -490,7 +562,7 @@ namespace JCA {
         }
 
         if (ChargeState != SolarCharger_State_T::IDLE) {
-          if (SolarVoltage > SolarVoltageMin) {
+          if (SolarVoltage < SolarVoltageOff) {
             ChargeState = SolarCharger_State_T::IDLE;
           }
         }
@@ -504,16 +576,16 @@ namespace JCA {
           }
         }
 
-        bool EnableOutput = false;
         if (Charging) {
           switch (ChargeState) {
           case SolarCharger_State_T::IDLE:
             //----------------------------------------
             // Idle, waiting for Requests
             //----------------------------------------
-            if (SolarVoltage > SolarVoltageMin + SolarVoltageStartOffset) {
+            if (SolarVoltage > SolarVoltageOn) {
               // Select DC-DC Mode and calculat initial DutyCycle
               DutyCycle = AccuVoltageMax / SolarVoltage;
+              MpptVoltage = SolarVoltage;
               ChargeState = SolarCharger_State_T::CHARGE_MPPT;
             }
             break;
@@ -522,26 +594,25 @@ namespace JCA {
             //----------------------------------------
             // Charging the accu by MPPT
             //----------------------------------------
-            EnableOutput = true;
-            MpptDelay = 0;
+            WaitMppt += UpdateMillis;
             if (AccuCurrent > AccuCurrentMax) {
               // Change to Const-Current charging if maximum Current is reached
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_CURRENT;
+              StepDelay = 0;
             } else if (AccuVoltage > AccuVoltageMax) {
               // Change to Const-Voltage charging if maximum Voltage is reached
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_VOLTAGE;
+            } else if (WaitMppt >= MpptCheckDelay) {
+              ChargeState = SolarCharger_State_T::TRACK_MPPT;
             } else {
-              // continius change the DutyCycle to find the Maximum Power Point
-              if (MpptLastPower > AccuPower) {
-                MpptIncrease = !MpptIncrease;
-              }
-              MpptLastPower = AccuPower;
-              if (MpptIncrease) {
-                DutyCycle += MpptStep / 100.0;
-              } else {
-                DutyCycle -= MpptStep / 100.0;
+              // controll Solar Voltage
+              float VoltageDiff = SolarVoltage - MpptVoltage;
+              if (VoltageDiff >= VoltageHyst) {
+                DutyCycle -= OutputStep;
+              } else if (VoltageDiff <= -VoltageHyst) {
+                DutyCycle += OutputStep;
               }
             }
             break;
@@ -550,26 +621,20 @@ namespace JCA {
             //----------------------------------------
             // Charging the accu by constant current
             //----------------------------------------
-            EnableOutput = true;
+            WaitMppt += UpdateMillis;
             if (AccuVoltage >= AccuVoltageMax + VoltageHyst) {
               // Check Voltage to change to constant Voltage Mode
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_VOLTAGE;
-              MpptDelay = 0;
+            } else if (WaitMppt >= MpptCheckDelay) {
+              ChargeState = SolarCharger_State_T::TRACK_MPPT;
             } else {
               // controll charging current
               float CurrentDiff = AccuCurrent - AccuCurrentMax;
-              if (CurrentDiff > CurrentHyst) {
+              if (CurrentDiff >= CurrentHyst) {
                 DutyCycle -= OutputStep;
-              }
-              if (CurrentDiff < -CurrentHyst) {
+              } else if (CurrentDiff <= -CurrentHyst) {
                 DutyCycle += OutputStep;
-                MpptDelay += UpdateMillis;
-                if (MpptDelay >= WaitMppt) {
-                  ChargeState = SolarCharger_State_T::CHARGE_MPPT;
-                }
-              } else {
-                MpptDelay = 0;
               }
             }
             break;
@@ -578,25 +643,20 @@ namespace JCA {
             //----------------------------------------
             // Charging the accu by constant voltage
             //----------------------------------------
-            EnableOutput = true;
             if (AccuCurrent >= AccuCurrentMax + CurrentHyst) {
               // Check Current to change to constant Current Mode
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_CURRENT;
               MpptDelay = 0;
+            } else if (WaitMppt >= MpptCheckDelay) {
+              ChargeState = SolarCharger_State_T::TRACK_MPPT;
             } else {
               // controll charging voltage
               float VoltageDiff = AccuVoltage - AccuVoltageMax;
-              if (VoltageDiff > VoltageHyst) {
+              if (VoltageDiff >= VoltageHyst) {
                 DutyCycle -= OutputStep;
-              } else if (VoltageDiff < -VoltageHyst) {
+              } else if (VoltageDiff <= -VoltageHyst) {
                 DutyCycle += OutputStep;
-                MpptDelay += UpdateMillis;
-                if (MpptDelay >= WaitMppt) {
-                  ChargeState = SolarCharger_State_T::CHARGE_MPPT;
-                }
-              } else {
-                MpptDelay = 0;
               }
             }
             if (AccuCurrent < AccuChargeEndCurrent) {
@@ -627,9 +687,10 @@ namespace JCA {
               // calculat initial DutyCycle
 
               if (StepDelay >= WaitFull) {
+                // Select DC-DC Mode and calculat initial DutyCycle
                 DutyCycle = AccuVoltageMax / SolarVoltage;
+                MpptVoltage = SolarVoltage;
                 ChargeState = SolarCharger_State_T::CHARGE_MPPT;
-                StepDelay = 0;
               }
             } else {
               StepDelay = 0;
@@ -658,6 +719,9 @@ namespace JCA {
         // Write Output
         float BoostDuty;
         float BuckDuty;
+        bool EnableOutput = ChargeState == SolarCharger_State_T::CHARGE_MPPT
+                            || ChargeState == SolarCharger_State_T::CHARGE_CURRENT
+                            || ChargeState == SolarCharger_State_T::CHARGE_VOLTAGE;
 
         if (EnableOutput) {
           if (DutyCycle < MinDutyCycle) {
@@ -680,8 +744,8 @@ namespace JCA {
           BuckDuty = 0.0;
         }
 
-        Output->writePin (PinBoost, BoostDuty);
-        Output->writePin (PinBuck, BuckDuty);
+        bool WriteBoost = Output->writePin (PinBoost, BoostDuty);
+        bool WriteBuck = Output->writePin (PinBuck, BuckDuty);
         UpdateMillis = 0;
       }
     }

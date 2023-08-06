@@ -35,7 +35,8 @@ namespace JCA {
       FLAG_TRAFFIC = 0x8,   ///< Informations about Network traffic or data
       FLAG_LOOP = 0x10,     ///< Loop Informations, like readen Values or Counter (not recomended)
       FLAG_PROTOCOL = 0x20, ///< Protocoll Informations from Parent Element (not recomended)
-      FLAG_DATA = 0x40      ///< Data, readen from Sensors or calculated
+      FLAG_DATA = 0x40,     ///< Data, readen from Sensors or calculated
+      FLAG_DEBUG = 0x8000   ///< Use for Debuging new Functions
     };
     /**
      * @brief

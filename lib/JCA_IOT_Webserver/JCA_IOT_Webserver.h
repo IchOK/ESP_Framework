@@ -57,6 +57,7 @@
 #include <JCA_IOT_Webserver_Sites.h>
 #include <JCA_IOT_WiFiConnect.h>
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_SYS_Functions.h>
 
 // Manual setting Firmware withpout Git
 #ifndef AUTO_VERSION
@@ -97,12 +98,12 @@
 #define JCA_IOT_WEBSERVER_TIME_TIMEFORMAT "%d.%m.%G %H:%M:%S"
 #define JCA_IOT_WEBSERVER_TIME_DATEFORMAT "%d.%m.%G"
 
+using namespace JCA::SYS;
 namespace JCA {
   namespace IOT {
-    typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
-    typedef std::function<void (void)> SimpleCallback;
 
     class Webserver : public JCA::FNC::Parent {
+
     private:
       // ...Webserver_System.cpp
       /* #region(collapsed) Datapoint description */

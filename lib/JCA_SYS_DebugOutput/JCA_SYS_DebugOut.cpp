@@ -64,6 +64,10 @@ namespace JCA {
           RetVal += "[DATA] ";
           break;
 
+        case FLAG_DEBUG:
+          RetVal += "[DEBUG] ";
+          break;
+
         default:
           RetVal += "[---] ";
           break;
