@@ -64,6 +64,10 @@ AnalogScale AccuCurrent (ACCU_A_PIN, "Batterie-Strom");
 
 PwmOutput OutputPwm;
 SolarCharger Charger (BOOST_PIN, BUCK_PIN, "Laderegler", &OutputPwm, 50.0, 100.0);
+ValueCallback GetSolarVoltageCB;
+ValueCallback GetSolarCurrentCB;
+ValueCallback GetAccuVoltageCB;
+ValueCallback GetAccuCurrentCB;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -222,12 +226,11 @@ void setup () {
   //-------------------------------------------------------
   if (SolarVoltage.init () && SolarCurrent.init () && AccuVoltage.init () && AccuCurrent.init ()) {
     tm CurrentTime = Server.getTimeStruct ();
-    Charger.init (
-        std::bind (&AnalogScale::getValue, SolarVoltage),
-        std::bind (&AnalogScale::getValue, SolarCurrent),
-        std::bind (&AnalogScale::getValue, AccuVoltage),
-        std::bind (&AnalogScale::getValue, AccuCurrent),
-        CurrentTime);
+    GetSolarVoltageCB = std::bind (&AnalogScale::getValue, &SolarVoltage),
+    GetSolarCurrentCB = std::bind (&AnalogScale::getValue, &SolarCurrent),
+    GetAccuVoltageCB = std::bind (&AnalogScale::getValue, &AccuVoltage),
+    GetAccuCurrentCB = std::bind (&AnalogScale::getValue, &AccuCurrent),
+    Charger.init (GetSolarVoltageCB, GetSolarCurrentCB, GetAccuVoltageCB, GetAccuCurrentCB, CurrentTime);
   }
 
   //-------------------------------------------------------
