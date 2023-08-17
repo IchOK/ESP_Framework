@@ -736,14 +736,15 @@ namespace JCA {
               StepDelay += UpdateMillis;
               MpptSumPower += AccuPower * (float)UpdateMillis;
               if (StepDelay >= MpptStepTime) {
-                float ActPower = MpptSumPower / StepDelay;
-                if (ActPower > MpptSumPower) {
-                  MpptSumPower = ActPower;
-                  MpptVoltageMax = MpptVoltage;
+                float ActPower = MpptSumPower / (float)StepDelay;
+                if (ActPower > MpptMaxPower) {
+                  MpptMaxPower = ActPower;
+                  MpptMaxVoltage = MpptVoltage;
                 }
                 MpptVoltage += MpptStepVoltage;
                 if (MpptVoltage > MpptVoltageMax) {
                   ChargeState = SolarCharger_State_T::CHARGE_MPPT;
+                  MpptVoltage = MpptMaxVoltage;
                 } else {
                   MpptInRange = false;
                   MpptSumPower = 0.0;
@@ -836,8 +837,8 @@ namespace JCA {
           BuckDuty = 0.0;
         }
 
-        bool WriteBoost = Output->writePin (PinBoost, BoostDuty);
-        bool WriteBuck = Output->writePin (PinBuck, BuckDuty);
+        Output->writePin (PinBoost, BoostDuty);
+        Output->writePin (PinBuck, BuckDuty);
         UpdateMillis = 0;
       }
     }
