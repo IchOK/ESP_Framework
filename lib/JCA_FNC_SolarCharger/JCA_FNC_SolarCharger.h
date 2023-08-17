@@ -173,6 +173,11 @@ namespace JCA {
       void writeSetupData (File _SetupFile);
       void writeSetupCmdInfo (File _SetupFile);
 
+      // Internal Functions
+      bool controlSolarVoltage(float _SetPoint);
+      bool controlAccuVoltage(float _SetPoint);
+      bool controlAccuCurrent(float _SetPoint);
+
       // Hardware
       PwmOutput *Output;
       uint8_t PinBoost;
@@ -222,10 +227,7 @@ namespace JCA {
       // Intern
       uint8_t Resolution;
       uint32_t Frequency;
-      uint32_t StepDelay;
-      uint32_t MpptDelay;
       uint32_t StartDelay;
-      uint32_t WaitMppt;
       uint32_t WaitFull;
       bool InitDone;
       float SumAccuEnergie15m;
@@ -234,10 +236,16 @@ namespace JCA {
       float SumSolarEnergie15m;
       float SumSolarEnergie1h;
       float SumSolarEnergie1d;
+      // ... MPPT-Data
       float MpptMaxPower;
-      float MpptCheckSum;
-      uint16_t MpptCheckCnt;
+      float MpptMaxVoltage;
+      float MpptSumPower;
       float MpptVoltage;
+      bool MpptInRange;
+      // ... Step Data
+      SolarCharger_State_T LastState;
+      uint32_t StepDelay;
+      uint32_t MpptDelay;
       // ... Init
       int Last15m;
       int Last1h;

@@ -184,8 +184,7 @@ namespace JCA {
       SumSolarEnergie1h = 0;
       SumSolarEnergie1d = 0;
       MpptMaxPower = 0;
-      MpptCheckSum = 0.0;
-      MpptCheckCnt = 0;
+      MpptSumPower = 0.0;
       MpptVoltage = 0.0;
 
       // Konfig
@@ -471,6 +470,66 @@ namespace JCA {
     }
 
     /**
+     * @brief Control SolarVoltage on DutyCycle
+     * 
+     * @param _SetPoint Setpoint for solar input Voltage
+     * @return true DutyCycle changed
+     * @return false DutyCycle not changed
+     */
+    bool SolarCharger::controlSolarVoltage (float _SetPoint) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Control");
+      float VoltageDiff = SolarVoltage - _SetPoint;
+      if (VoltageDiff >= VoltageHyst) {
+        DutyCycle -= OutputStep;
+        return true;
+      } else if (VoltageDiff <= -VoltageHyst) {
+        DutyCycle += OutputStep;
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * @brief Control AccuVoltage on DutyCycle
+     *
+     * @param _SetPoint Setpoint for accu output Voltage
+     * @return true DutyCycle changed
+     * @return false DutyCycle not changed
+     */
+    bool SolarCharger::controlAccuVoltage (float _SetPoint) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Control");
+      float VoltageDiff = AccuVoltage - _SetPoint;
+      if (VoltageDiff >= VoltageHyst) {
+        DutyCycle -= OutputStep;
+        return true;
+      } else if (VoltageDiff <= -VoltageHyst) {
+        DutyCycle += OutputStep;
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * @brief Control SolarVoltage on DutyCycle
+     *
+     * @param _SetPoint Setpoint for accu output current
+     * @return true DutyCycle changed
+     * @return false DutyCycle not changed
+     */
+    bool SolarCharger::controlAccuCurrent (float _SetPoint) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Control");
+      float CurrentDiff = AccuCurrent - _SetPoint;
+      if (CurrentDiff >= CurrentHyst) {
+        DutyCycle -= OutputStep;
+        return true;
+      } else if (CurrentDiff <= -CurrentHyst) {
+        DutyCycle += OutputStep;
+        return true;
+      }
+      return false;
+    }
+
+    /**
      * @brief Init the SolarCharger
      */
     bool SolarCharger::init (ValueCallback _GetSolarVoltageCB, ValueCallback _GetSolarCurrentCB, ValueCallback _GetAccuVoltageCB, ValueCallback _GetAccuCurrentCB, struct tm &_Time) {
@@ -577,6 +636,12 @@ namespace JCA {
         }
 
         if (Charging) {
+          // New State, reset Step-Data
+          bool StepInit = ChargeState != LastState;
+          if (StepInit) {
+            StepDelay = 0;
+            LastState = ChargeState;
+          }
           switch (ChargeState) {
           case SolarCharger_State_T::IDLE:
             //----------------------------------------
@@ -594,26 +659,20 @@ namespace JCA {
             //----------------------------------------
             // Charging the accu by MPPT
             //----------------------------------------
-            WaitMppt += UpdateMillis;
+            MpptDelay += UpdateMillis;
             if (AccuCurrent > AccuCurrentMax) {
               // Change to Const-Current charging if maximum Current is reached
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_CURRENT;
-              StepDelay = 0;
             } else if (AccuVoltage > AccuVoltageMax) {
               // Change to Const-Voltage charging if maximum Voltage is reached
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_VOLTAGE;
-            } else if (WaitMppt >= MpptCheckDelay) {
+            } else if (MpptDelay >= MpptCheckDelay) {
               ChargeState = SolarCharger_State_T::TRACK_MPPT;
             } else {
               // controll Solar Voltage
-              float VoltageDiff = SolarVoltage - MpptVoltage;
-              if (VoltageDiff >= VoltageHyst) {
-                DutyCycle -= OutputStep;
-              } else if (VoltageDiff <= -VoltageHyst) {
-                DutyCycle += OutputStep;
-              }
+              controlSolarVoltage(MpptVoltage);
             }
             break;
 
@@ -621,21 +680,13 @@ namespace JCA {
             //----------------------------------------
             // Charging the accu by constant current
             //----------------------------------------
-            WaitMppt += UpdateMillis;
             if (AccuVoltage >= AccuVoltageMax + VoltageHyst) {
               // Check Voltage to change to constant Voltage Mode
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_VOLTAGE;
-            } else if (WaitMppt >= MpptCheckDelay) {
-              ChargeState = SolarCharger_State_T::TRACK_MPPT;
             } else {
               // controll charging current
-              float CurrentDiff = AccuCurrent - AccuCurrentMax;
-              if (CurrentDiff >= CurrentHyst) {
-                DutyCycle -= OutputStep;
-              } else if (CurrentDiff <= -CurrentHyst) {
-                DutyCycle += OutputStep;
-              }
+              controlAccuCurrent (AccuCurrentMax);
             }
             break;
 
@@ -643,28 +694,24 @@ namespace JCA {
             //----------------------------------------
             // Charging the accu by constant voltage
             //----------------------------------------
+            MpptDelay += UpdateMillis;
             if (AccuCurrent >= AccuCurrentMax + CurrentHyst) {
               // Check Current to change to constant Current Mode
               DutyCycle -= OutputStep;
               ChargeState = SolarCharger_State_T::CHARGE_CURRENT;
-              MpptDelay = 0;
-            } else if (WaitMppt >= MpptCheckDelay) {
+            }
+            else if (MpptDelay >= MpptCheckDelay) {
               ChargeState = SolarCharger_State_T::TRACK_MPPT;
-            } else {
+            }
+            else {
               // controll charging voltage
-              float VoltageDiff = AccuVoltage - AccuVoltageMax;
-              if (VoltageDiff >= VoltageHyst) {
-                DutyCycle -= OutputStep;
-              } else if (VoltageDiff <= -VoltageHyst) {
-                DutyCycle += OutputStep;
-              }
+              controlAccuVoltage (AccuVoltageMax);
             }
             if (AccuCurrent < AccuChargeEndCurrent) {
               StepDelay += UpdateMillis;
               // Wait for Accu Voltage have to be stable
               if (StepDelay >= WaitFull) {
                 ChargeState = SolarCharger_State_T::FULL;
-                StepDelay = 0;
               }
             } else {
               StepDelay = 0;
@@ -676,6 +723,51 @@ namespace JCA {
             // Check MPPT
             // not used, working with continuous tracking
             //----------------------------------------
+            // Start with minimum MpptVoltage
+            if (StepInit) {
+              MpptVoltage = MpptVoltageMin;
+              MpptInRange = false;
+              MpptSumPower = 0.0;
+              MpptMaxPower = 0.0;
+            }
+
+            // Check im Solar-Voltage is in range
+            if (MpptInRange) {
+              StepDelay += UpdateMillis;
+              MpptSumPower += AccuPower * (float)UpdateMillis;
+              if (StepDelay >= MpptStepTime) {
+                float ActPower = MpptSumPower / StepDelay;
+                if (ActPower > MpptSumPower) {
+                  MpptSumPower = ActPower;
+                  MpptVoltageMax = MpptVoltage;
+                }
+                MpptVoltage += MpptStepVoltage;
+                if (MpptVoltage > MpptVoltageMax) {
+                  ChargeState = SolarCharger_State_T::CHARGE_MPPT;
+                } else {
+                  MpptInRange = false;
+                  MpptSumPower = 0.0;
+                  MpptMaxPower = 0.0;
+                }
+              }
+            } else if (abs(SolarVoltage - MpptVoltage) < VoltageHyst) {
+              MpptInRange = true;
+            }
+
+            if (AccuCurrent > AccuCurrentMax) {
+              // Change to Const-Current charging if maximum Current is reached
+              DutyCycle -= OutputStep;
+              ChargeState = SolarCharger_State_T::CHARGE_CURRENT;
+            } else if (AccuVoltage > AccuVoltageMax) {
+              // Change to Const-Voltage charging if maximum Voltage is reached
+              DutyCycle -= OutputStep;
+              ChargeState = SolarCharger_State_T::CHARGE_VOLTAGE;
+            } else {
+              // controll Solar Voltage
+              controlSolarVoltage(MpptVoltage);
+            }
+
+            MpptDelay = 0;
             break;
 
           case SolarCharger_State_T::FULL:
