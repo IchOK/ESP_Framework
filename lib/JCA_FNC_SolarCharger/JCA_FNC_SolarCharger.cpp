@@ -99,6 +99,10 @@ namespace JCA {
     const char *SolarCharger::Charging_Comment = nullptr;
     const char *SolarCharger::Charging_TextOn = nullptr;
     const char *SolarCharger::Charging_TextOff = nullptr;
+    const char *SolarCharger::MpptVoltage_Name = "MpptVoltage";
+    const char *SolarCharger::MpptVoltage_Text = "MPPT Spannung";
+    const char *SolarCharger::MpptVoltage_Unit = "V";
+    const char *SolarCharger::MpptVoltage_Comment = nullptr;
     const char *SolarCharger::MpptVoltageMin_Name = "MpptVoltageMin";
     const char *SolarCharger::MpptVoltageMin_Text = "MPPT Spannung Start";
     const char *SolarCharger::MpptVoltageMin_Unit = "V";
@@ -259,6 +263,7 @@ namespace JCA {
       _Values[SolarEnergie15m_Name] = SolarEnergie15m;
       _Values[SolarEnergie1h_Name] = SolarEnergie1h;
       _Values[SolarEnergie1d_Name] = SolarEnergie1d;
+      _Values[MpptVoltage_Name] = MpptVoltage;
       _Values[DutyCycle_Name] = DutyCycle;
       _Values[Charging_Name] = Charging;
       switch (ChargeState) {
@@ -399,6 +404,22 @@ namespace JCA {
             Debug.println (FLAG_LOOP, false, Name, __func__, Charging);
           }
         }
+        if (Tag[JsonTagName] == MpptVoltage_Name) {
+          if (ChargeState == SolarCharger_State_T::CHARGE_MPPT) {
+            float SetVoltage = Tag[JsonTagValue].as<float> ();
+            if (SetVoltage > MpptVoltageMax) {
+              SetVoltage = MpptVoltageMax;
+            }
+            if (SetVoltage > MpptVoltageMin) {
+              SetVoltage = MpptVoltageMin;
+            }
+            MpptVoltage = SetVoltage;
+            if (Debug.print (FLAG_CONFIG, false, Name, __func__, MpptVoltage_Name)) {
+              Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+              Debug.println (FLAG_CONFIG, false, Name, __func__, MpptVoltage);
+            }
+          }
+        }
       }
     }
 
@@ -454,6 +475,7 @@ namespace JCA {
       _SetupFile.println (",{" + createSetupTag (SolarEnergie15m_Name, SolarEnergie15m_Text, SolarEnergie15m_Comment, true, SolarEnergie15m_Unit, SolarEnergie15m) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarEnergie1h_Name, SolarEnergie1h_Text, SolarEnergie1h_Comment, true, SolarEnergie1h_Unit, SolarEnergie1h) + "}");
       _SetupFile.println (",{" + createSetupTag (SolarEnergie1d_Name, SolarEnergie1d_Text, SolarEnergie1d_Comment, true, SolarEnergie1d_Unit, SolarEnergie1d) + "}");
+      _SetupFile.println (",{" + createSetupTag (MpptVoltage_Name, MpptVoltage_Text, MpptVoltage_Comment, false, MpptVoltage_Unit, MpptVoltage) + "}");
       _SetupFile.println (",{" + createSetupTag (DutyCycle_Name, DutyCycle_Text, DutyCycle_Comment, true, DutyCycle_Unit, DutyCycle) + "}");
       _SetupFile.println (",{" + createSetupTag (Charging_Name, Charging_Text, Charging_Comment, false, Charging_TextOn, Charging_TextOff, false) + "}");
       _SetupFile.println (",{" + createSetupTag (ChargeState_Name, ChargeState_Text, ChargeState_Comment, true, "Idle") + "}");

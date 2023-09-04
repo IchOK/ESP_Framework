@@ -121,6 +121,10 @@ namespace JCA {
       static const char *Charging_Comment;
       static const char *Charging_TextOn;
       static const char *Charging_TextOff;
+      static const char *MpptVoltage_Name;
+      static const char *MpptVoltage_Text;
+      static const char *MpptVoltage_Unit;
+      static const char *MpptVoltage_Comment;
       static const char *MpptVoltageMin_Name;
       static const char *MpptVoltageMin_Text;
       static const char *MpptVoltageMin_Unit;
