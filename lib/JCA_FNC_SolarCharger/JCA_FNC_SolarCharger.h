@@ -246,6 +246,7 @@ namespace JCA {
       float MpptSumPower;
       float MpptVoltage;
       bool MpptInRange;
+      float MpptEndDutyCycle;
       // ... Step Data
       SolarCharger_State_T LastState;
       uint32_t StepDelay;

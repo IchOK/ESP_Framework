@@ -71,6 +71,8 @@ namespace JCA {
       // Intern
       uint32_t LastMillis;
       uint32_t UpdateMillis;
+      uint32_t OversampleValue;
+      uint32_t OversampleCount;
 
     public:
       AnalogScale (uint8_t _Pin, const char *_Name);

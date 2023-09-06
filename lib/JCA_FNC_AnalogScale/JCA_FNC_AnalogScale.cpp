@@ -59,6 +59,8 @@ namespace JCA {
       Filter = 0.0;
       strcpy(Unit, "?");
       InitDone = false;
+      OversampleCount = 0;
+      OversampleValue = 0;
     }
 
     /**
@@ -211,9 +213,13 @@ namespace JCA {
       uint32_t ActMillis = millis ();
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
+      OversampleValue += analogRead (Pin);
+      OversampleCount ++;
 
       if (InitDone && UpdateMillis >= UpdateInterval) {
-        float RawValue = (float)analogRead (Pin);
+        float RawValue = (float)(OversampleValue / OversampleCount);
+        OversampleValue = 0;
+        OversampleCount = 0;
         float Scaled = RawValue / RawMax * (ScaledMax - ScaledMin) + ScaledMin;
         float FilterFactor = Filter / ((float)UpdateMillis / 1000.0);
         Value = ((Value * FilterFactor) + Scaled) / (FilterFactor + 1.0);
