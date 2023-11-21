@@ -30,9 +30,9 @@
 #include <JCA_SYS_PwmOutput.h>
 
 // Project function
-#include <JCA_FNC_AnalogScale.h>
+#include <JCA_FNC_MAX6675.h>
 #include <JCA_FNC_Parent.h>
-#include <JCA_FNC_SolarCharger.h>
+#include <JCA_FNC_PID.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -44,30 +44,24 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
 //-------------------------------------------------------
-// Analog Input
+// Temp input
 //-------------------------------------------------------
-#define SOLAR_V_PIN 34 // Solarpannel-Spannung
-#define SOLAR_A_PIN 33 // Solarpannel-Strom
-#define ACCU_V_PIN 32  // Batterie-Spannung
-#define ACCU_A_PIN 36  // Batterie-Strom
+#define SPI_CS_PIN_TEMP_IN 34   // Chip-Select für Zuluftsensor
+#define SPI_CS_PIN_TEMP_CASE 33 // Chip-Select für Garaum
+#define SPI_SCLK_PIN 32         // SPI Clock PIN
+#define SPI_MISO_PIN 36         // SPI Daten Empfang PIN
 
-AnalogScale SolarVoltage (SOLAR_V_PIN, "Solarpannel-Spannung");
-AnalogScale SolarCurrent (SOLAR_A_PIN, "Solarpannel-Strom");
-AnalogScale AccuVoltage (ACCU_V_PIN, "Batterie-Spannung");
-AnalogScale AccuCurrent (ACCU_A_PIN, "Batterie-Strom");
+JCA::FNC::MAX6675 TempIn (SPI_SCLK_PIN, SPI_CS_PIN_TEMP_IN, SPI_MISO_PIN, "Temp.-Zuluft");
+JCA::FNC::MAX6675 TempCase (SPI_SCLK_PIN, SPI_CS_PIN_TEMP_CASE, SPI_MISO_PIN, "Temp.-Garaum");
 
 //-------------------------------------------------------
-// Charger
+// Control
 //-------------------------------------------------------
-#define BOOST_PIN 16 // Output-Pin Boost-Converter Teil
-#define BUCK_PIN 23  // Output-Pin Boost-Converter Teil
+#define FAN_PIN 16 // Output-Pin Ventilator
 
 PwmOutput OutputPwm;
-SolarCharger Charger (BOOST_PIN, BUCK_PIN, "Laderegler", &OutputPwm, 50.0, 100.0);
-ValueCallback GetSolarVoltageCB;
-ValueCallback GetSolarCurrentCB;
-ValueCallback GetAccuVoltageCB;
-ValueCallback GetAccuCurrentCB;
+PID TempControl(FAN_PIN, "Temp.-Regler", &OutputPwm);
+ValueCallback GetCurrentTempCB;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -84,11 +78,9 @@ void cbSaveConfig () {
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
   Server.writeSetup (ConfigFile, ElementInit);
-  Charger.writeSetup (ConfigFile, ElementInit);
-  SolarVoltage.writeSetup (ConfigFile, ElementInit);
-  SolarCurrent.writeSetup (ConfigFile, ElementInit);
-  AccuVoltage.writeSetup (ConfigFile, ElementInit);
-  AccuCurrent.writeSetup (ConfigFile, ElementInit);
+  TempControl.writeSetup (ConfigFile, ElementInit);
+  TempCase.writeSetup (ConfigFile, ElementInit);
+  TempIn.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -96,22 +88,18 @@ void cbSaveConfig () {
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
-  Charger.getValues (Elements);
-  SolarVoltage.getValues (Elements);
-  SolarCurrent.getValues (Elements);
-  AccuVoltage.getValues (Elements);
-  AccuCurrent.getValues (Elements);
+  TempControl.getValues (Elements);
+  TempIn.getValues (Elements);
+  TempCase.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In.containsKey (Parent::JsonTagElements)) {
     JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
-    Charger.set (Elements);
-    SolarVoltage.set (Elements);
-    SolarCurrent.set (Elements);
-    AccuVoltage.set (Elements);
-    AccuCurrent.set (Elements);
+    TempControl.set (Elements);
+    TempIn.set (Elements);
+    TempCase.set (Elements);
   }
 }
 /* #endregion */
@@ -224,13 +212,10 @@ void setup () {
   //-------------------------------------------------------
   // Init Elements
   //-------------------------------------------------------
-  if (SolarVoltage.init () && SolarCurrent.init () && AccuVoltage.init () && AccuCurrent.init ()) {
-    tm CurrentTime = Server.getTimeStruct ();
-    GetSolarVoltageCB = std::bind (&AnalogScale::getValue, &SolarVoltage),
-    GetSolarCurrentCB = std::bind (&AnalogScale::getValue, &SolarCurrent),
-    GetAccuVoltageCB = std::bind (&AnalogScale::getValue, &AccuVoltage),
-    GetAccuCurrentCB = std::bind (&AnalogScale::getValue, &AccuCurrent),
-    Charger.init (GetSolarVoltageCB, GetSolarCurrentCB, GetAccuVoltageCB, GetAccuCurrentCB, CurrentTime);
+  TempCase.init();
+  if (TempCase.init ()) {
+    GetCurrentTempCB = std::bind (&JCA::FNC::MAX6675::getValue, &TempCase),
+    TempControl.init(GetCurrentTempCB);
   }
 
   //-------------------------------------------------------
@@ -270,10 +255,8 @@ void loop () {
     LastSeconds = CurrentTime.tm_sec;
   }
 
-  Charger.update (CurrentTime);
-  SolarVoltage.update (CurrentTime);
-  SolarCurrent.update (CurrentTime);
-  AccuVoltage.update (CurrentTime);
-  AccuCurrent.update (CurrentTime);
+  TempIn.update (CurrentTime);
+  TempCase.update (CurrentTime);
+  TempControl.update (CurrentTime);
 }
 /* #endregion */

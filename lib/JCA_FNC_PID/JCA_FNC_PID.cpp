@@ -72,6 +72,9 @@ namespace JCA {
     const char *PID::CurrentValue_Comment = nullptr;
     /* #endregion */
 
+    const float PID::OutputMin = 0.0;
+    const float PID::OutputMax = 100.0;
+
     /**
      * @brief Construct a new PID::PID object
      *
@@ -91,7 +94,7 @@ namespace JCA {
       OutputP = 0.0;
       OutputI = 0.0;
       OutputD = 0.0;
-      OldValue = 0.0;
+      OldValueD = 0.0;
 
       // Konfig
       Gain = 0.8;
@@ -100,6 +103,7 @@ namespace JCA {
       UpdateInterval = 1000;
       ValueMin = 0.0;
       ValueMax = 150.0;
+      OnlyValueForD = false;
 
       // Daten
       SetpointAuto = 0.0;
@@ -215,7 +219,14 @@ namespace JCA {
           }
         }
         if (Tag[JsonTagName] == OutputManual_Name) {
-          OutputManual = Tag[JsonTagValue].as<float> ();
+          float Value = Tag[JsonTagValue].as<float> ();
+          if (Value > OutputMax) {
+            OutputManual = OutputMax;
+          } else if (Value < OutputMin) {
+            OutputManual = OutputMin;
+          } else {
+            OutputManual = Value;
+          }
           if (Debug.print (FLAG_CONFIG, false, Name, __func__, OutputManual_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_CONFIG, false, Name, __func__, OutputManual);
@@ -318,13 +329,13 @@ namespace JCA {
       uint32_t ActMillis = millis ();
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
-      float CurrentDiff;
-      float VoltageDiff;
 
       if (UpdateMillis >= UpdateInterval) {
         if (InitDone) {
           float ActSetpoint;
-          float ActOutput;
+          float ActValue = getCurrentValueCB ();
+          float DeltaT = float(UpdateMillis) / 1000.0;
+          bool ReverseI = false;
 
           // Select Setpoint
           if (ManualSetpoint) {
@@ -335,13 +346,60 @@ namespace JCA {
           }
 
           // Calculation PID
-          // TODO
+          // Calculate error and normalize
+          float Error = (ActSetpoint - ActValue) / (ValueMax - ValueMin) * 100.0;
 
-          // Reverse calc PID
-          // TODO
+          // Proportional term
+          OutputP = Gain * Error;
 
+          // Integral term
+          if (IntergalTime <= 0.0) {
+            OutputI = 0.0;
+          } else {
+            OutputI += Error * DeltaT / IntergalTime;
+          }
+
+          // Derivative term
+          double ValueD;
+          if (OnlyValueForD) {
+            ValueD = (ActSetpoint - ValueMin) / (ValueMax - ValueMin) * 100.0;
+          } else {
+            ValueD = Error;
+          }
+          if (DerivativeTime <= 0.0) {
+            OutputD = 0.0;
+          } else {
+            OutputD = (ValueD - OldValueD) / DeltaT * DerivativeTime;
+          }
+          OldValueD = ValueD;
+
+          // Calculate total output
+          OutputAuto = OutputP + OutputI + OutputD;
+
+          // Use manual output-value
+          if (ManualOutput) {
+            OutputAuto = OutputManual;
+            ReverseI = true;
+          } else {
+            OutputManual = OutputAuto;
+          }
+
+          // check min/max for output-value
+          if (OutputAuto > OutputMax) {
+            OutputAuto = OutputMax;
+            ReverseI = true;
+          } else if (OutputAuto < OutputMin) {
+            OutputAuto = OutputMin;
+            ReverseI = true;
+          }
+
+          // Reverse calc integral output
+          if (ReverseI) {
+            OutputI = OutputAuto - OutputP - OutputD;
+          }
+          
           // Output
-          Output->writePin (PinOutput, ActOutput);
+          Output->writePin (PinOutput, OutputAuto);
         }
         UpdateMillis = 0;
       }

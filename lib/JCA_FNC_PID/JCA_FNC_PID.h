@@ -21,6 +21,7 @@
 #include <JCA_SYS_Functions.h>
 #include <JCA_SYS_PwmOutput.h>
 
+using namespace JCA::SYS;
 namespace JCA {
   namespace FNC {
     class PID : public Parent {
@@ -82,6 +83,9 @@ namespace JCA {
       static const char *CurrentValue_Comment;
       /* #endregion */
 
+      static const float OutputMax;
+      static const float OutputMin;
+
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
       void createDataValues (JsonObject &_Values);
@@ -105,6 +109,7 @@ namespace JCA {
       uint16_t UpdateInterval;
       float ValueMin;
       float ValueMax;
+      bool OnlyValueForD;
 
       // Daten
       float SetpointAuto;
@@ -125,7 +130,7 @@ namespace JCA {
       float OutputP;
       float OutputI;
       float OutputD;
-      float OldValue;
+      float OldValueD;
 
     public:
       PID (uint8_t _PinOutput, const char *_Name, JCA::SYS::PwmOutput *_Output);
