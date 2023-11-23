@@ -93,6 +93,7 @@ namespace JCA {
       float getPowerMinus ();
       float getVoltageMinus ();
       float getCurrent ();
+      float getValue() { return (getPowerPlus() + getPowerMinus()) / 2.0; };
     };
   }
 }

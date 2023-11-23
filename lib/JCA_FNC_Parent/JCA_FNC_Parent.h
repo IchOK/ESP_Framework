@@ -17,6 +17,7 @@
 #include <ArduinoJson.h>
 
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_SYS_Functions.h>
 
 namespace JCA {
   namespace FNC {
@@ -92,6 +93,11 @@ namespace JCA {
 
       void getValues (JsonObject &_Elements);
       void writeSetup (File _SetupFile, bool &_ElementInit);
+      
+      virtual float getValue () { return 0.0; };
+      virtual bool getState () { return false; };
+      virtual void setValue (float _Value) { ; };
+      virtual void setState (bool _Value) { ; };
     };
   }
 }

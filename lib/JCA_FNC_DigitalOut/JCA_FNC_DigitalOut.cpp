@@ -184,8 +184,17 @@ namespace JCA {
      * just return the last Value
      * @return boot On/Off
      */
-    bool DigitalOut::getValue () {
+    bool DigitalOut::getState () {
       return Value;
+    }
+
+    /**
+     * @brief Set the current output Value
+     * 
+     * @param _Value Value to set
+     */
+    void DigitalOut::setState (bool _Value) {
+      Value = _Value;
     }
   }
 }

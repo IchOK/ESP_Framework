@@ -67,7 +67,8 @@ namespace JCA {
     public:
       DigitalOut (uint8_t _Pin, const char *_Name);
       void update (struct tm &_Time);
-      bool getValue ();
+      bool getState ();
+      void setState (bool _Value);
     };
   }
 }

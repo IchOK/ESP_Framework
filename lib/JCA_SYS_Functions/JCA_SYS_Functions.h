@@ -19,6 +19,9 @@
 namespace JCA {
   namespace SYS {
     typedef std::function<float (void)> ValueCallback;
+    typedef std::function<bool (void)> StateCallback;
+    typedef std::function<void (float)> SetpointCallback;
+    typedef std::function<void (bool)> CommandCallback;
     typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
   }
