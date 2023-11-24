@@ -620,6 +620,10 @@ namespace JCA {
       }
     }
 
-    DebugOut Debug (Serial);
+    #if ARDUINO_USB_CDC_ON_BOOT
+      DebugOut Debug (Serial0);
+    #else
+      DebugOut Debug (Serial);
+    #endif
   }
 }
