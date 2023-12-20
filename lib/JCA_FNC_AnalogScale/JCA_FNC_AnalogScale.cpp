@@ -186,7 +186,7 @@ namespace JCA {
      * @return false configuration failed
      */
     bool AnalogScale::init () {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Setup");
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Setup");
 #ifdef ESP32
       InitDone = adcAttachPin (Pin);
 #elif ESP8266

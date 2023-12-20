@@ -33,6 +33,7 @@
 #include <JCA_FNC_MAX6675.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_FNC_PID.h>
+#include <JCA_FNC_Feeder.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -46,10 +47,10 @@ using namespace JCA::FNC;
 //-------------------------------------------------------
 // Temp input
 //-------------------------------------------------------
-#define SPI_CS_PIN_TEMP_IN 34   // Chip-Select für Zuluftsensor
-#define SPI_CS_PIN_TEMP_CASE 33 // Chip-Select für Garaum
-#define SPI_SCLK_PIN 32         // SPI Clock PIN
-#define SPI_MISO_PIN 36         // SPI Daten Empfang PIN
+#define SPI_CS_PIN_TEMP_IN 13   // Chip-Select für Zuluftsensor
+#define SPI_CS_PIN_TEMP_CASE 5  // Chip-Select für Garaum
+#define SPI_SCLK_PIN 18         // SPI Clock PIN
+#define SPI_MISO_PIN 19         // SPI Daten Empfang PIN
 
 JCA::FNC::MAX6675 TempIn (SPI_SCLK_PIN, SPI_CS_PIN_TEMP_IN, SPI_MISO_PIN, "Temp.-Zuluft");
 JCA::FNC::MAX6675 TempCase (SPI_SCLK_PIN, SPI_CS_PIN_TEMP_CASE, SPI_MISO_PIN, "Temp.-Garaum");
@@ -57,11 +58,27 @@ JCA::FNC::MAX6675 TempCase (SPI_SCLK_PIN, SPI_CS_PIN_TEMP_CASE, SPI_MISO_PIN, "T
 //-------------------------------------------------------
 // Control
 //-------------------------------------------------------
-#define FAN_PIN 16 // Output-Pin Ventilator
+#define FAN_PIN 22 // Output-Pin Ventilator
 
 PwmOutput OutputPwm;
 PID TempControl(FAN_PIN, "Temp.-Regler", &OutputPwm);
 ValueCallback GetCurrentTempCB;
+
+//-------------------------------------------------------
+// Stepper
+//-------------------------------------------------------
+#define TMC_EN 27 // Treiber Freigabe
+#define TMC_DIR 2 // Treiber Drehrichtung
+#define TMC_STEP 4 // Treiber Schritt-Impuls
+#define TMC_MS1 25 // Treiber Konfig
+#define TMC_MS2 32 // Treiber Konfig
+      // MS2 MS1 Step
+      //  0   1   1/2
+      //  1   0   1/4
+      //  0   0   1/8
+      //  1   1   1/16
+
+Feeder Spindel (TMC_EN, TMC_STEP, TMC_DIR, "Spindel");
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -81,6 +98,7 @@ void cbSaveConfig () {
   TempControl.writeSetup (ConfigFile, ElementInit);
   TempCase.writeSetup (ConfigFile, ElementInit);
   TempIn.writeSetup (ConfigFile, ElementInit);
+  Spindel.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -91,6 +109,7 @@ void getAllValues (JsonVariant &_Out) {
   TempControl.getValues (Elements);
   TempIn.getValues (Elements);
   TempCase.getValues (Elements);
+  Spindel.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
@@ -100,6 +119,7 @@ void setAll (JsonVariant &_In) {
     TempControl.set (Elements);
     TempIn.set (Elements);
     TempCase.set (Elements);
+    Spindel.set (Elements);
   }
 }
 /* #endregion */
@@ -212,17 +232,16 @@ void setup () {
   //-------------------------------------------------------
   // Init Elements
   //-------------------------------------------------------
-  TempCase.init();
+  TempIn.init();
   if (TempCase.init ()) {
-    GetCurrentTempCB = std::bind (&JCA::FNC::MAX6675::getValue, &TempCase),
+    GetCurrentTempCB = std::bind (&JCA::FNC::MAX6675::getValue, &TempCase);
     TempControl.init(GetCurrentTempCB);
   }
-
+  
   //-------------------------------------------------------
   // Read Config File
   //-------------------------------------------------------
-  File ConfigFile
-      = LittleFS.open (CONFIGPATH, "r");
+  File ConfigFile = LittleFS.open (CONFIGPATH, "r");
   if (ConfigFile) {
     Debug.println (FLAG_CONFIG, false, "main", "setup", "Config File Found");
     DeserializationError Error = deserializeJson (JDoc, ConfigFile);
@@ -258,5 +277,6 @@ void loop () {
   TempIn.update (CurrentTime);
   TempCase.update (CurrentTime);
   TempControl.update (CurrentTime);
+  Spindel.update (CurrentTime);
 }
 /* #endregion */

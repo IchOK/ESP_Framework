@@ -234,16 +234,16 @@ namespace JCA {
         }
         if (Tag[JsonTagName] == ManualSetpoint_Name) {
           ManualSetpoint = Tag[JsonTagValue].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, Name, __func__, ManualSetpoint_Name)) {
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, ManualSetpoint_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_LOOP, false, Name, __func__, ManualSetpoint);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, ManualSetpoint);
           }
         }
         if (Tag[JsonTagName] == ManualOutput_Name) {
           ManualOutput = Tag[JsonTagValue].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, Name, __func__, ManualOutput_Name)) {
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, ManualOutput_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_LOOP, false, Name, __func__, ManualOutput);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, ManualOutput);
           }
         }
       }
@@ -306,11 +306,12 @@ namespace JCA {
      * @brief Init the PID
      */
     bool PID::init (ValueCallback _GetCurrentValueCB) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Setup");
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Init");
       InitDone = Output->setupPin (PinOutput, Frequency, Resolution);
       if (_GetCurrentValueCB) {
         getCurrentValueCB = _GetCurrentValueCB;
       } else {
+        Debug.println (FLAG_ERROR, false, Name, __func__, "Callback not valid");
         InitDone = false;
       }
       LastMillis = millis ();
@@ -333,7 +334,7 @@ namespace JCA {
       if (UpdateMillis >= UpdateInterval) {
         if (InitDone) {
           float ActSetpoint;
-          float ActValue = getCurrentValueCB ();
+          CurrentValue = getCurrentValueCB ();
           float DeltaT = float(UpdateMillis) / 1000.0;
           bool ReverseI = false;
 
@@ -347,7 +348,7 @@ namespace JCA {
 
           // Calculation PID
           // Calculate error and normalize
-          float Error = (ActSetpoint - ActValue) / (ValueMax - ValueMin) * 100.0;
+          float Error = (ActSetpoint - CurrentValue) / (ValueMax - ValueMin) * 100.0;
 
           // Proportional term
           OutputP = Gain * Error;

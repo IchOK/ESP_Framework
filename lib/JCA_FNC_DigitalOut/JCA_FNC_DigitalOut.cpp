@@ -99,7 +99,7 @@ namespace JCA {
         if (Tag[JsonTagName] == Value_Name) {
           Value = Tag[JsonTagValue].as<bool> ();
           if (Debug.print (FLAG_LOOP, false, Name, __func__, Value_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.print (FLAG_LOOP, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_LOOP, false, Name, __func__, Value);
           }
         }

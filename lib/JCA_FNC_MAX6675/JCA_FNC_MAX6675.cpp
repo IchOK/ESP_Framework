@@ -18,7 +18,7 @@ namespace JCA {
     /* #region(collapsed) Datapoint description */
     const char *MAX6675::ReadInterval_Name = "ReadInterval";
     const char *MAX6675::ReadInterval_Text = "Leseintervall";
-    const char *MAX6675::ReadInterval_Unit = "s";
+    const char *MAX6675::ReadInterval_Unit = "ms";
     const char *MAX6675::ReadInterval_Comment = nullptr;
     const char *MAX6675::Value_Name = "Value";
     const char *MAX6675::Value_Text = "Temperatur";
@@ -43,6 +43,7 @@ namespace JCA {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       Value = 0.0;
       Filter = 0.0;
+      ReadInterval = 1000;
     }
     /**
      * @brief Add Config-Tags to a JSON-Object, containing the current Value
@@ -146,6 +147,8 @@ namespace JCA {
      * @brief Init the Sensor
      */
     bool MAX6675::init () {
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Init");
+      LastMillis = millis ();
       return true;
     }
 

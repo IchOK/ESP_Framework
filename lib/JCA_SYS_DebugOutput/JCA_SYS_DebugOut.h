@@ -20,8 +20,13 @@
  * Default Baud rate if not defined on init.
  */
 #define JCA_SYS_DebugOut_DEFAULT_BAUD 74880
+#if ARDUINO_USB_CDC_ON_BOOT
+  #define DebugSerialType USBCDC
+#else
+  #define DebugSerialType HardwareSerial
+#endif
 
-namespace JCA {
+    namespace JCA {
   namespace SYS {
     /**
      * @brief

@@ -314,7 +314,7 @@ namespace JCA {
         if (Tag[JsonTagName] == DoCharge_Name) {
           DoCharge = Tag[JsonTagValue].as<bool> ();
           if (Debug.print (FLAG_LOOP, false, Name, __func__, DoCharge_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.print (FLAG_LOOP, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_LOOP, false, Name, __func__, DoCharge);
           }
           if (DoCharge) {
@@ -325,7 +325,7 @@ namespace JCA {
         if (Tag[JsonTagName] == DoCheck_Name) {
           DoCheck = Tag[JsonTagValue].as<bool> ();
           if (Debug.print (FLAG_LOOP, false, Name, __func__, DoCheck_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.print (FLAG_LOOP, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_LOOP, false, Name, __func__, DoCheck);
           }
           if (DoCheck) {
@@ -338,7 +338,7 @@ namespace JCA {
             ChargeState = FaultState;
           }
           if (Debug.print (FLAG_LOOP, false, Name, __func__, Fault_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.print (FLAG_LOOP, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_LOOP, false, Name, __func__, "Ack");
           }
         }
@@ -411,7 +411,7 @@ namespace JCA {
      * @brief Init the Charger
      */
     bool Charger::init () {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Setup");
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Setup");
       Output->setupPin (PinCharge, Frequency, Resolution);
       Output->setupPin (PinDischarge, Frequency, Resolution);
       Sensor->setInterval (UpdateInterval);

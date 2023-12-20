@@ -226,8 +226,8 @@ namespace JCA {
             }
             Value = (float)raw / 16.0;
             if (Debug.print (FLAG_LOOP, false, Name, __func__, Temp_Name)) {
-              Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-              Debug.println (FLAG_CONFIG, false, Name, __func__, Value);
+              Debug.print (FLAG_LOOP, false, Name, __func__, DebugSeparator);
+              Debug.println (FLAG_LOOP, false, Name, __func__, Value);
             }
             this->ReadData = false;
           }
