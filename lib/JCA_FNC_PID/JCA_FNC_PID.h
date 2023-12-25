@@ -67,6 +67,19 @@ namespace JCA {
       static const char *OutputManual_Text;
       static const char *OutputManual_Unit;
       static const char *OutputManual_Comment;
+      static const char *OutputMin_Name;
+      static const char *OutputMin_Text;
+      static const char *OutputMin_Unit;
+      static const char *OutputMin_Comment;
+      static const char *OutputMax_Name;
+      static const char *OutputMax_Text;
+      static const char *OutputMax_Unit;
+      static const char *OutputMax_Comment;
+      static const char *OutputInvert_Name;
+      static const char *OutputInvert_Text;
+      static const char *OutputInvert_Comment;
+      static const char *OutputInvert_TextOn;
+      static const char *OutputInvert_TextOff;
       static const char *ManualSetpoint_Name;
       static const char *ManualSetpoint_Text;
       static const char *ManualSetpoint_Comment;
@@ -82,9 +95,6 @@ namespace JCA {
       static const char *CurrentValue_Unit;
       static const char *CurrentValue_Comment;
       /* #endregion */
-
-      static const float OutputMax;
-      static const float OutputMin;
 
       // Parent Functions
       void createConfigValues (JsonObject &_Values);
@@ -110,6 +120,9 @@ namespace JCA {
       float ValueMin;
       float ValueMax;
       bool OnlyValueForD;
+      float OutputMax;
+      float OutputMin;
+      bool OutputInvert;
 
       // Daten
       float SetpointAuto;

@@ -56,6 +56,19 @@ namespace JCA {
     const char *PID::OutputManual_Text = "Stellwert Hand";
     const char *PID::OutputManual_Unit = "%";
     const char *PID::OutputManual_Comment = nullptr;
+    const char *PID::OutputMin_Name = "OutputMin";
+    const char *PID::OutputMin_Text = "Stellwert Minimum";
+    const char *PID::OutputMin_Unit = "%";
+    const char *PID::OutputMin_Comment = nullptr;
+    const char *PID::OutputMax_Name = "OutputMax";
+    const char *PID::OutputMax_Text = "Stellwert Maximum";
+    const char *PID::OutputMax_Unit = "%";
+    const char *PID::OutputMax_Comment = nullptr;
+    const char *PID::OutputInvert_Name = "OutputInvert";
+    const char *PID::OutputInvert_Text = "Stellwert Invertieren";
+    const char *PID::OutputInvert_Comment = nullptr;
+    const char *PID::OutputInvert_TextOn = nullptr;
+    const char *PID::OutputInvert_TextOff = nullptr;
     const char *PID::ManualSetpoint_Name = "ManualSetpoint";
     const char *PID::ManualSetpoint_Text = "Hand-Sollwert aktiv";
     const char *PID::ManualSetpoint_Comment = nullptr;
@@ -72,9 +85,6 @@ namespace JCA {
     const char *PID::CurrentValue_Comment = nullptr;
     /* #endregion */
 
-    const float PID::OutputMin = 0.0;
-    const float PID::OutputMax = 100.0;
-
     /**
      * @brief Construct a new PID::PID object
      *
@@ -89,7 +99,7 @@ namespace JCA {
       // Intern
       Resolution = 10;
       DutyScale = (pow (2.0, float (Resolution)) - 1.0) / 100.0;
-      Frequency = 3000;
+      Frequency = 1000;
       InitDone = false;
       OutputP = 0.0;
       OutputI = 0.0;
@@ -104,6 +114,9 @@ namespace JCA {
       ValueMin = 0.0;
       ValueMax = 150.0;
       OnlyValueForD = false;
+      OutputMax = 100.0;
+      OutputMin = 0.0;
+      OutputInvert = false;
 
       // Daten
       SetpointAuto = 0.0;
@@ -132,6 +145,9 @@ namespace JCA {
       _Values[UpdateInterval_Name] = UpdateInterval;
       _Values[ValueMin_Name] = ValueMin;
       _Values[ValueMax_Name] = ValueMax;
+      _Values[OutputMin_Name] = OutputMin;
+      _Values[OutputMax_Name] = OutputMax;
+      _Values[OutputInvert_Name] = OutputInvert;
     }
 
     /**
@@ -198,6 +214,27 @@ namespace JCA {
           if (Debug.print (FLAG_CONFIG, false, Name, __func__, ValueMax_Name)) {
             Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
             Debug.println (FLAG_CONFIG, false, Name, __func__, ValueMax);
+          }
+        }
+        if (Tag[JsonTagName] == OutputMin_Name) {
+          OutputMin = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, OutputMin_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, OutputMin);
+          }
+        }
+        if (Tag[JsonTagName] == OutputMax_Name) {
+          OutputMax = Tag[JsonTagValue].as<float> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, OutputMax_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, OutputMax);
+          }
+        }
+        if (Tag[JsonTagName] == OutputInvert_Name) {
+          OutputInvert = Tag[JsonTagValue].as<bool> ();
+          if (Debug.print (FLAG_CONFIG, false, Name, __func__, OutputInvert_Name)) {
+            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
+            Debug.println (FLAG_CONFIG, false, Name, __func__, OutputInvert);
           }
         }
       }
@@ -270,8 +307,11 @@ namespace JCA {
       _SetupFile.println (",{" + createSetupTag (IntergalTime_Name, IntergalTime_Text, IntergalTime_Comment, false, IntergalTime_Unit, IntergalTime) + "}");
       _SetupFile.println (",{" + createSetupTag (DerivativeTime_Name, DerivativeTime_Text, DerivativeTime_Comment, false, DerivativeTime_Unit, DerivativeTime) + "}");
       _SetupFile.println (",{" + createSetupTag (UpdateInterval_Name, UpdateInterval_Text, UpdateInterval_Comment, false, UpdateInterval_Unit, UpdateInterval) + "}");
-      _SetupFile.println (",{" + createSetupTag (ValueMin_Name, ValueMin_Text, ValueMin_Comment, true, ValueMin_Unit, ValueMin) + "}");
-      _SetupFile.println (",{" + createSetupTag (ValueMax_Name, ValueMax_Text, ValueMax_Comment, true, ValueMax_Unit, ValueMax) + "}");
+      _SetupFile.println (",{" + createSetupTag (ValueMin_Name, ValueMin_Text, ValueMin_Comment, false, ValueMin_Unit, ValueMin) + "}");
+      _SetupFile.println (",{" + createSetupTag (ValueMax_Name, ValueMax_Text, ValueMax_Comment, false, ValueMax_Unit, ValueMax) + "}");
+      _SetupFile.println (",{" + createSetupTag (OutputMin_Name, OutputMin_Text, OutputMin_Comment, false, OutputMin_Unit, OutputMin) + "}");
+      _SetupFile.println (",{" + createSetupTag (OutputMax_Name, OutputMax_Text, OutputMax_Comment, false, OutputMax_Unit, OutputMax) + "}");
+      _SetupFile.println (",{" + createSetupTag (OutputInvert_Name, OutputInvert_Text, OutputInvert_Comment, false, OutputInvert_TextOn, OutputInvert_TextOff, false) + "}");
       _SetupFile.println ("]");
     }
 
@@ -283,9 +323,9 @@ namespace JCA {
     void PID::writeSetupData (File _SetupFile) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (SetpointAuto_Name, SetpointAuto_Text, SetpointAuto_Comment, false, SetpointAuto_Unit, SetpointAuto) + "}");
+      _SetupFile.println ("{" + createSetupTag (SetpointAuto_Name, SetpointAuto_Text, SetpointAuto_Comment, true, SetpointAuto_Unit, SetpointAuto) + "}");
       _SetupFile.println (",{" + createSetupTag (SetpointManual_Name, SetpointManual_Text, SetpointManual_Comment, false, SetpointManual_Unit, SetpointManual) + "}");
-      _SetupFile.println (",{" + createSetupTag (OutputAuto_Name, OutputAuto_Text, OutputAuto_Comment, false, OutputAuto_Unit, OutputAuto) + "}");
+      _SetupFile.println (",{" + createSetupTag (OutputAuto_Name, OutputAuto_Text, OutputAuto_Comment, true, OutputAuto_Unit, OutputAuto) + "}");
       _SetupFile.println (",{" + createSetupTag (OutputManual_Name, OutputManual_Text, OutputManual_Comment, false, OutputManual_Unit, OutputManual) + "}");
       _SetupFile.println (",{" + createSetupTag (ManualSetpoint_Name, ManualSetpoint_Text, ManualSetpoint_Comment, false, ManualSetpoint_TextOn, ManualSetpoint_TextOff, false) + "}");
       _SetupFile.println (",{" + createSetupTag (ManualOutput_Name, ManualOutput_Text, ManualOutput_Comment, false, ManualOutput_TextOn, ManualOutput_TextOff, false) + "}");
@@ -400,7 +440,11 @@ namespace JCA {
           }
           
           // Output
-          Output->writePin (PinOutput, OutputAuto);
+          if (OutputInvert) {
+            Output->writePin (PinOutput, 100.0 - OutputAuto);
+          } else {
+            Output->writePin (PinOutput, OutputAuto);
+          }
         }
         UpdateMillis = 0;
       }
