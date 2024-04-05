@@ -15,11 +15,24 @@
 
 #include "FS.h"
 #include <ArduinoJson.h>
+#include <variant>
+#include <vector>
 
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
+    struct Tag_Config_T {
+
+      String Name;
+      String Text;
+      String Unit;
+      String Comment;
+      String TextOn;
+      String TextOff;
+      std::variant<bool, int16_t, int32_t, int64_t, float, double, String> Value{ 0 };
+    };
+
     class Parent {
     protected:
       // Element Strings for Parent and Debug-Output
@@ -30,6 +43,9 @@ namespace JCA {
       // Intern
       String Name;
       String Comment;
+
+      // Dataconfig
+      std::vector<Tag_Config_T> Config;
 
       // Prototypes for Child Elements
       virtual void createConfigValues (JsonObject &_Values) = 0;
@@ -86,11 +102,18 @@ namespace JCA {
       // external Functions
       Parent (String _Name, String _Comment);
       Parent (String _Name);
-      virtual void update (struct tm &_Time) = 0;
       void set (JsonArray &_Elements);
 
       void getValues (JsonObject &_Elements);
       void writeSetup (File _SetupFile, bool &_ElementInit);
+
+      virtual void update (struct tm &_Time) {; };
+      virtual uint8_t getValueIndexByName(String _Name) {return 0; };
+      virtual uint8_t getStateIndexByName(String _Name) {return 0; };
+      virtual float getValueByIndex(uint8_t _Index) {return 0.0; };
+      virtual bool getStateByindex(uint8_t _Index) {return false; };
+      virtual bool setValueByIndex(uint8_t _Index, float _Value) {return false;};
+      virtual bool setValueByIndex (uint8_t _Index, bool _Value) { return false; };
     };
   }
 }

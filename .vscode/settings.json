@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "*.tcc": "cpp"
+      "*.tcc": "cpp",
+      "variant": "cpp",
+      "vector": "cpp"
     },
     "cmake.configureOnOpen": false
 }
