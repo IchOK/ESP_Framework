@@ -55,13 +55,18 @@ void setupConfig () {
   Config.push_back (new ElementTagFloat ("Name", "Text", "", false, &ValueFloat, ""));
 }
 void loopConfig () {
+  DynamicJsonDocument doc (1024);
+  JsonObject Data;
+  String Output;
   ValueFloat += 1;
   ValueBool = !ValueBool;
 
-  Debug.println (FLAG_LOOP, false, "main", "type-Bool", ((ElementTagBool *)(Config[0]))->createSetupTag ());
-  Debug.println (FLAG_LOOP, false, "main", "ptr-Bool", Config[0]->createSetupTag ());
-  Debug.println (FLAG_LOOP, false, "main", "type-Float", ((ElementTagFloat *)(Config[1]))->createSetupTag ());
-  Debug.println (FLAG_LOOP, false, "main", "ptr-Float", Config[1]->createSetupTag ());
+  Data = doc.createNestedObject("BOOL");
+  Config[0]->getJsonObject (Data);
+  Data = doc.createNestedObject ("FLOAT");
+  Config[1]->getJsonObject (Data);
+  serializeJsonPretty(doc, Output);
+  Debug.println (FLAG_SETUP, false, "main", "loop", Output);
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -152,8 +157,8 @@ void setup () {
   DebugFlags |= FLAG_ERROR;
   DebugFlags |= FLAG_SETUP;
   DebugFlags |= FLAG_CONFIG;
-  DebugFlags |= FLAG_TRAFFIC;
-  DebugFlags |= FLAG_LOOP;
+  // DebugFlags |= FLAG_TRAFFIC;
+  // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);

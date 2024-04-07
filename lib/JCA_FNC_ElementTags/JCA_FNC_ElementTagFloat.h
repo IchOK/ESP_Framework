@@ -25,7 +25,7 @@ namespace JCA {
 
         ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, float *_Value, String _Unit);
         String createSetupTag ();
-        JsonObject getJsonObject ();
+        void getJsonObject (JsonObject &_Data);
         void addJsonTag (JsonObject &_Tags);
     };
   }

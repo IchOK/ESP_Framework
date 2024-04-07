@@ -28,11 +28,10 @@ namespace JCA {
       return SetupTag;
     }
 
-    JsonObject ElementTagFloat::getJsonObject () {
-      JsonObject Data = getJsonObjectBase ();
-      Data[JCA_FNC_ELEMENTTAGS_JsonValue] = *Value;
-      Data[JCA_FNC_ELEMENTTAGS_JsonUnit] = Unit;
-      return Data;
+    void ElementTagFloat::getJsonObject (JsonObject &_Data) {
+      getJsonObjectBase (_Data);
+      _Data[JCA_FNC_ELEMENTTAGS_JsonValue] = *Value;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonUnit] = Unit;
     }
 
     void ElementTagFloat::addJsonTag (JsonObject &_Tags) {

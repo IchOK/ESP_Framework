@@ -44,7 +44,7 @@ namespace JCA {
     class ElementTag {
       protected:
         String createSetupTagBase ();
-        JsonObject getJsonObjectBase ();
+        void getJsonObjectBase (JsonObject &_Data);
 
       public:
         // Default Informations
@@ -56,7 +56,7 @@ namespace JCA {
 
         ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagTypes_T _Type);
         virtual String createSetupTag () = 0;
-        virtual JsonObject getJsonObject () = 0;
+        virtual void getJsonObject (JsonObject &_Data) = 0;
         virtual void addJsonTag (JsonObject &_Tags) = 0;
     };
   }

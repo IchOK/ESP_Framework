@@ -26,7 +26,7 @@ namespace JCA {
 
         ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, bool *_Value, String _BtnOnText, String _BtnOffText);
         String createSetupTag ();
-        JsonObject getJsonObject ();
+        void getJsonObject (JsonObject &_Data);
         void addJsonTag (JsonObject &_Tags);
     };
   }

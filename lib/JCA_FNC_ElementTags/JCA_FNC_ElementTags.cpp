@@ -35,14 +35,12 @@ namespace JCA {
       return SetupTag;
     }
 
-    JsonObject ElementTag::getJsonObjectBase () {
-      JsonObject Data;
-      Data[JCA_FNC_ELEMENTTAGS_JsonName] = Name;
-      Data[JCA_FNC_ELEMENTTAGS_JsonText] = Text;
-      Data[JCA_FNC_ELEMENTTAGS_JsonType] = Type;
-      Data[JCA_FNC_ELEMENTTAGS_JsonReadOnly] = ReadOnly;
-      Data[JCA_FNC_ELEMENTTAGS_JsonComment] = Comment;
-      return Data;
+    void ElementTag::getJsonObjectBase (JsonObject &_Data) {
+      _Data[JCA_FNC_ELEMENTTAGS_JsonName] = Name;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonText] = Text;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonType] = Type;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonReadOnly] = ReadOnly;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonComment] = Comment;
     }
   }
 }

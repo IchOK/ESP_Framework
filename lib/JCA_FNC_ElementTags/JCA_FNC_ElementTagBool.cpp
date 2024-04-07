@@ -30,12 +30,11 @@ namespace JCA {
       return SetupTag;
     }
 
-    JsonObject ElementTagBool::getJsonObject () {
-      JsonObject Data = getJsonObjectBase ();
-      Data[JCA_FNC_ELEMENTTAGS_JsonValue] = *Value;
-      Data[JCA_FNC_ELEMENTTAGS_JsonOn] = BtnOnText;
-      Data[JCA_FNC_ELEMENTTAGS_JsonOff] = BtnOffText;
-      return Data;
+    void ElementTagBool::getJsonObject (JsonObject &_Data) {
+      getJsonObjectBase (_Data);
+      _Data[JCA_FNC_ELEMENTTAGS_JsonValue] = *Value;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonOn] = BtnOnText;
+      _Data[JCA_FNC_ELEMENTTAGS_JsonOff] = BtnOffText;
     }
 
     void ElementTagBool::addJsonTag (JsonObject &_Tags) {
