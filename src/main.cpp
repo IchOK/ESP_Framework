@@ -43,21 +43,26 @@ using namespace JCA::FNC;
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
-//-------------------------------------------------------
-// WS2812
-//-------------------------------------------------------
-#define WS2812_PIN 13      // Output-Pin WS2812 [D7]
-#define WS2812_CNT 72
+#include <JCA_FNC_ElementTagBool.h>
+#include <JCA_FNC_ElementTagFloat.h>
+#include <vector>
+std::vector<ElementTag *> Config;
 
-LedStrip Strip (WS2812_PIN, WS2812_CNT, NEO_GRB + NEO_KHZ800, "LED-Strip");
+bool ValueBool;
+float ValueFloat;
+void setupConfig () {
+  Config.push_back (new ElementTagBool ("Name", "Text", "", false, &ValueBool, "", ""));
+  Config.push_back (new ElementTagFloat ("Name", "Text", "", false, &ValueFloat, ""));
+}
+void loopConfig () {
+  ValueFloat += 1;
+  ValueBool = !ValueBool;
 
-//-------------------------------------------------------
-// Charger
-//-------------------------------------------------------
-#define SPOT_DO 16        // Output-Pin AC-Switch [D0]
-
-DigitalOut Spot (SPOT_DO, "LED-Spot");
-
+  Debug.println (FLAG_LOOP, false, "main", "type-Bool", ((ElementTagBool *)(Config[0]))->createSetupTag ());
+  Debug.println (FLAG_LOOP, false, "main", "ptr-Bool", Config[0]->createSetupTag ());
+  Debug.println (FLAG_LOOP, false, "main", "type-Float", ((ElementTagFloat *)(Config[1]))->createSetupTag ());
+  Debug.println (FLAG_LOOP, false, "main", "ptr-Float", Config[1]->createSetupTag ());
+}
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -73,8 +78,6 @@ void cbSaveConfig () {
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
   Server.writeSetup (ConfigFile, ElementInit);
-  Spot.writeSetup (ConfigFile, ElementInit);
-  Strip.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
 }
@@ -82,16 +85,12 @@ void cbSaveConfig () {
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
   Server.getValues (Elements);
-  Spot.getValues (Elements);
-  Strip.getValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In.containsKey (Parent::JsonTagElements)) {
     JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
     Server.set (Elements);
-    Spot.set (Elements);
-    Strip.set (Elements);
   }
 }
 //-------------------------------------------------------
@@ -154,7 +153,7 @@ void setup () {
   DebugFlags |= FLAG_SETUP;
   DebugFlags |= FLAG_CONFIG;
   DebugFlags |= FLAG_TRAFFIC;
-  // DebugFlags |= FLAG_LOOP;
+  DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
@@ -198,7 +197,6 @@ void setup () {
   //-------------------------------------------------------
   // Init Elements
   //-------------------------------------------------------
-  Strip.init();
 
   //-------------------------------------------------------
   // Read Config File
@@ -219,6 +217,8 @@ void setup () {
   } else {
     Debug.println (FLAG_ERROR, false, "main", "setup", "Config File NOT found");
   }
+
+  setupConfig();
 }
 
 // #######################################################
@@ -233,8 +233,7 @@ void loop () {
       Debug.println (FLAG_LOOP, false, "main", "loop", Server.getTimeString (""));
     }
     LastSeconds = CurrentTime.tm_sec;
-  }
 
-  Spot.update (CurrentTime);
-  Strip.update (CurrentTime);
+    loopConfig();
+  }
 }

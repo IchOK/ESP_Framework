@@ -15,24 +15,13 @@
 
 #include "FS.h"
 #include <ArduinoJson.h>
-#include <variant>
 #include <vector>
 
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_FNC_ElementTags.h>
 
 namespace JCA {
   namespace FNC {
-    struct Tag_Config_T {
-
-      String Name;
-      String Text;
-      String Unit;
-      String Comment;
-      String TextOn;
-      String TextOff;
-      std::variant<bool, int16_t, int32_t, int64_t, float, double, String> Value{ 0 };
-    };
-
     class Parent {
     protected:
       // Element Strings for Parent and Debug-Output
@@ -45,7 +34,7 @@ namespace JCA {
       String Comment;
 
       // Dataconfig
-      std::vector<Tag_Config_T> Config;
+      std::vector<ElementTag*> Config;
 
       // Prototypes for Child Elements
       virtual void createConfigValues (JsonObject &_Values) = 0;
