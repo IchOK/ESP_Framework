@@ -15,105 +15,6 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    const char *Charger::AccuVoltageMax_Name = "AccuVoltageMax";
-    const char *Charger::AccuVoltageMax_Text = "Maximale Akku Ladespannung";
-    const char *Charger::AccuVoltageMax_Unit = "V";
-    const char *Charger::AccuVoltageMax_Comment = nullptr;
-    const char *Charger::AccuVoltageMin_Name = "AccuVoltageMin";
-    const char *Charger::AccuVoltageMin_Text = "Grenzwert Akku Entladen";
-    const char *Charger::AccuVoltageMin_Unit = "V";
-    const char *Charger::AccuVoltageMin_Comment = nullptr;
-    const char *Charger::AccuChargeCurrent_Name = "AccuChargeCurrent";
-    const char *Charger::AccuChargeCurrent_Text = "Maximaler Akku Ladestrom";
-    const char *Charger::AccuChargeCurrent_Unit = "A";
-    const char *Charger::AccuChargeCurrent_Comment = nullptr;
-    const char *Charger::AccuDischargeVoltage_Name = "AccuDischargeVoltage";
-    const char *Charger::AccuDischargeVoltage_Text = "Minimale Akku Entladespannung";
-    const char *Charger::AccuDischargeVoltage_Unit = "V";
-    const char *Charger::AccuDischargeVoltage_Comment = nullptr;
-    const char *Charger::AccuDischargeCurrent_Name = "AccuDischargeCurrent";
-    const char *Charger::AccuDischargeCurrent_Text = "Maximaler Akku Entladestrom";
-    const char *Charger::AccuDischargeCurrent_Unit = "A";
-    const char *Charger::AccuDischargeCurrent_Comment = nullptr;
-    const char *Charger::ChargeEndCurrent_Name = "ChargeEndCurrent";
-    const char *Charger::ChargeEndCurrent_Text = "Laden Beendet Strom";
-    const char *Charger::ChargeEndCurrent_Unit = "A";
-    const char *Charger::ChargeEndCurrent_Comment = nullptr;
-    const char *Charger::WaitDischarge_Name = "WaitDischarge";
-    const char *Charger::WaitDischarge_Text = "Wartezeit für Entlade";
-    const char *Charger::WaitDischarge_Unit = "s";
-    const char *Charger::WaitDischarge_Comment = nullptr;
-    const char *Charger::RechargeVoltage_Name = "RechargeVoltage";
-    const char *Charger::RechargeVoltage_Text = "Spannungs Nachladen";
-    const char *Charger::RechargeVoltage_Unit = "V";
-    const char *Charger::RechargeVoltage_Comment = nullptr;
-    const char *Charger::DoCheck_Name = "DoCheck";
-    const char *Charger::DoCheck_Text = "Akku Prüfung aktiv";
-    const char *Charger::DoCheck_Comment = nullptr;
-    const char *Charger::DoCheck_TextOn = nullptr;
-    const char *Charger::DoCheck_TextOff = nullptr;
-    const char *Charger::DoCharge_Name = "DoCharge";
-    const char *Charger::DoCharge_Text = "Akku Laden aktiv";
-    const char *Charger::DoCharge_Comment = nullptr;
-    const char *Charger::DoCharge_TextOn = nullptr;
-    const char *Charger::DoCharge_TextOff = nullptr;
-    const char *Charger::Fault_Name = "Fault";
-    const char *Charger::Fault_Text = "Fehler aktiv";
-    const char *Charger::Fault_Comment = nullptr;
-    const char *Charger::Fault_TextOn = "Quittieren";
-    const char *Charger::Fault_TextOff = "";
-    const char *Charger::AccuVoltage_Name = "AccuVoltage";
-    const char *Charger::AccuVoltage_Text = "Akku Spannung";
-    const char *Charger::AccuVoltage_Unit = "V";
-    const char *Charger::AccuVoltage_Comment = nullptr;
-    const char *Charger::Current_Name = "Current";
-    const char *Charger::Current_Text = "Akku Strom";
-    const char *Charger::Current_Unit = "A";
-    const char *Charger::Current_Comment = nullptr;
-    const char *Charger::ChargedAH_Name = "ChargedAH";
-    const char *Charger::ChargedAH_Text = "Geladener Strom";
-    const char *Charger::ChargedAH_Unit = "AH";
-    const char *Charger::ChargedAH_Comment = nullptr;
-    const char *Charger::ChargedWH_Name = "ChargedWH";
-    const char *Charger::ChargedWH_Text = "Geladene Leistung";
-    const char *Charger::ChargedWH_Unit = "WH";
-    const char *Charger::ChargedWH_Comment = nullptr;
-    const char *Charger::DischargedAH_Name = "DischargedAH";
-    const char *Charger::DischargedAH_Text = "Entladener Strom";
-    const char *Charger::DischargedAH_Unit = "AH";
-    const char *Charger::DischargedAH_Comment = nullptr;
-    const char *Charger::DischargedWH_Name = "DischargedWH";
-    const char *Charger::DischargedWH_Text = "Entledene Leistung";
-    const char *Charger::DischargedWH_Unit = "WH";
-    const char *Charger::DischargedWH_Comment = nullptr;
-    const char *Charger::DischargeSP_Name = "DischargeSP";
-    const char *Charger::DischargeSP_Text = "PWM Entladen";
-    const char *Charger::DischargeSP_Unit = "%";
-    const char *Charger::DischargeSP_Comment = nullptr;
-    const char *Charger::ChargeSP_Name = "ChargeSP";
-    const char *Charger::ChargeSP_Text = "PWM Laden";
-    const char *Charger::ChargeSP_Unit = "%";
-    const char *Charger::ChargeSP_Comment = nullptr;
-    const char *Charger::ChargeState_Name = "ChargeState";
-    const char *Charger::ChargeState_Text = "Status";
-    const char *Charger::ChargeState_Comment = nullptr;
-    const char *Charger::ChargeState_Case_Undef = "Undefiniert";
-    const char *Charger::ChargeState_Case_Idle = "Inaktiv";
-    const char *Charger::ChargeState_Case_ChargeCurrent = "Laden-Strom";
-    const char *Charger::ChargeState_Case_ChargeVoltage = "Laden-Spannung";
-    const char *Charger::ChargeState_Case_WaitCharge = "Warten-Laden";
-    const char *Charger::ChargeState_Case_WaitDischarge = "Warten-Entladen";
-    const char *Charger::ChargeState_Case_Discharge = "Entladen";
-    const char *Charger::ChargeState_Case_Fault = "Fehler";
-    const char *Charger::DischargeEndCurrent_Name = "DischargeEndCurrent";
-    const char *Charger::DischargeEndCurrent_Text = "Genzwert Akku Entladen";
-    const char *Charger::DischargeEndCurrent_Unit = "A";
-    const char *Charger::DischargeEndCurrent_Comment = nullptr;
-    const char *Charger::DischargeVoltage_Name = "DischargeVoltage";
-    const char *Charger::DischargeVoltage_Text = "Entladespannung";
-    const char *Charger::DischargeVoltage_Unit = "V";
-    const char *Charger::DischargeVoltage_Comment = nullptr;
-
     const float Charger::CurrentHyst = 0.01;
     const float Charger::VoltageHyst = 0.01;
     const float Charger::OutputStep = 0.1;
@@ -130,6 +31,39 @@ namespace JCA {
     Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, PwmOutput *_Output)
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      // Create Tag-List
+      Tags.push_back (new ElementTagFloat ("AccuVoltageMax", "Maximale Akku Ladespannung", "", false, ElementTagUsage_T::UseConfig, &AccuVoltageMax, "V"));
+      Tags.push_back (new ElementTagFloat ("AccuVoltageMin", "Grenzwert Akku Entladen", "", false, ElementTagUsage_T::UseConfig, &AccuVoltageMin, "V"));
+      Tags.push_back (new ElementTagFloat ("AccuChargeCurrent", "Maximaler Akku Ladestrom", "", false, ElementTagUsage_T::UseConfig, &AccuChargeCurrent, "A"));
+      Tags.push_back (new ElementTagFloat ("AccuDischargeVoltage", "Minimale Akku Entladespannung", "", false, ElementTagUsage_T::UseConfig, &AccuDischargeVoltage, "V"));
+      Tags.push_back (new ElementTagFloat ("AccuDischargeCurrent", "Maximaler Akku Entladestrom", "", false, ElementTagUsage_T::UseConfig, &AccuDischargeCurrent, "A"));
+      Tags.push_back (new ElementTagFloat ("ChargeEndCurrent", "", "Laden Beendet Strom", false, ElementTagUsage_T::UseConfig, &ChargeEndCurrent, "A"));
+      Tags.push_back (new ElementTagFloat ("DischargeEndCurrent", "Genzwert Akku Entladen", "", false, ElementTagUsage_T::UseConfig, &DischargeEndCurrent, "A"));
+      Tags.push_back (new ElementTagUInt16 ("WaitDischarge", "Wartezeit für Entlade", "", false, ElementTagUsage_T::UseConfig, &WaitDischarge, "s"));
+      Tags.push_back (new ElementTagFloat ("RechargeVoltage", "Spannungs Nachladen", "", false, ElementTagUsage_T::UseConfig, &RechargeVoltage, "V"));
+
+      Tags.push_back (new ElementTagBool ("DoCheck", "Akku Prüfung aktiv", "", false, ElementTagUsage_T::UseData, &DoCheck, "EIN", "AUS"));
+      Tags.push_back (new ElementTagBool ("DoCharge", "Akku Laden aktiv", "", false, ElementTagUsage_T::UseData, &DoCharge, "EIN", "AUS"));
+      Tags.push_back (new ElementTagBool ("Fault", "Fehler aktiv", "", true, ElementTagUsage_T::UseData, &Fault, "EIN", "AUS"));
+      Tags.push_back (new ElementTagFloat ("AccuVoltage", "Akku Spannung", "", true, ElementTagUsage_T::UseData, &AccuVoltage, "V"));
+      Tags.push_back (new ElementTagFloat ("Current", "Akku Strom", "", true, ElementTagUsage_T::UseData, &Current, "A"));
+      Tags.push_back (new ElementTagFloat ("ChargedAH", "Geladener Strom", "", true, ElementTagUsage_T::UseData, &ChargedAH, "AH"));
+      Tags.push_back (new ElementTagFloat ("ChargedWH", "Geladene Leistung", "", true, ElementTagUsage_T::UseData, &ChargedWH, "WH"));
+      Tags.push_back (new ElementTagFloat ("DischargedAH", "Entladener Strom", "", true, ElementTagUsage_T::UseData, &DischargedAH, "AH"));
+      Tags.push_back (new ElementTagFloat ("DischargedWH", "Entledene Leistung", "", true, ElementTagUsage_T::UseData, &DischargedWH, "WH"));
+      Tags.push_back (new ElementTagFloat ("DischargeVoltage", "Entladespannung", "", true, ElementTagUsage_T::UseData, &DischargeVoltage, "V"));
+      Tags.push_back (new ElementTagFloat ("ChargeSP", "PWM Laden", "", true, ElementTagUsage_T::UseData, &ChargeSP, "%"));
+      Tags.push_back (new ElementTagFloat ("DischargeSP", "PWM Entladen", "", true, ElementTagUsage_T::UseData, &DischargeSP, "%"));
+
+      Tags.push_back (new ElementTagListUInt8 ("ChargeState", "Status", "", true, ElementTagUsage_T::UseData, (uint8_t *)&ChargeState), "Undefinert");
+      ElementTagListUInt8 *ChargeStateElement = static_cast<ElementTagListUInt8 *> (Tags[Tags.size () - 1]);
+      ChargeStateElement->List.insert ({Charger_State_T::IDLE, "Inaktiv"});
+      ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_CURRENT, "Inaktiv" });
+      ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_VOLTAGE, "Inaktiv" });
+      ChargeStateElement->List.insert ({ Charger_State_T::WAIT_CHARGE, "Inaktiv" });
+      ChargeStateElement->List.insert ({ Charger_State_T::WAIT_DISCHARCH, "Inaktiv" });
+      ChargeStateElement->List.insert ({ Charger_State_T::DISCHARGE, "Inaktiv" });
+      ChargeStateElement->List.insert ({ Charger_State_T::FAULT, "Inaktiv" });
 
       // Intern
       ChargeState = Charger_State_T::IDLE;
@@ -151,6 +85,7 @@ namespace JCA {
       // Daten
       DoCharge = false;
       DoCheck = false;
+      Fault = false;
       AccuVoltage = 0.0;
       Current = 0.0;
       ChargedAH = 0.0;
@@ -166,242 +101,6 @@ namespace JCA {
       PinCharge = _PinCharge;
       PinDischarge = _PinDischarge;
       Sensor = _Sensor;
-    }
-
-    /**
-     * @brief Add Config-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Config-Tags ("config": {})
-     */
-    void Charger::createConfigValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[AccuVoltageMax_Name] = AccuVoltageMax;
-      _Values[AccuVoltageMin_Name] = AccuVoltageMin;
-      _Values[AccuChargeCurrent_Name] = AccuChargeCurrent;
-      _Values[AccuDischargeVoltage_Name] = AccuDischargeVoltage;
-      _Values[AccuDischargeCurrent_Name] = AccuDischargeCurrent;
-      _Values[ChargeEndCurrent_Name] = ChargeEndCurrent;
-      _Values[DischargeEndCurrent_Name] = DischargeEndCurrent;
-      _Values[WaitDischarge_Name] = WaitDischarge;
-      _Values[RechargeVoltage_Name] = RechargeVoltage;
-    }
-
-    /**
-     * @brief Add Data-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Data-Tags ("data": {})
-     */
-    void Charger::createDataValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[DoCheck_Name] = DoCheck;
-      _Values[DoCharge_Name] = DoCharge;
-      _Values[Fault_Name] = (ChargeState == FAULT);
-      _Values[AccuVoltage_Name] = AccuVoltage;
-      _Values[Current_Name] = Current;
-      _Values[ChargedAH_Name] = ChargedAH;
-      _Values[ChargedWH_Name] = ChargedWH;
-      _Values[DischargedAH_Name] = DischargedAH;
-      _Values[DischargedWH_Name] = DischargedWH;
-      _Values[DischargeVoltage_Name] = DischargeVoltage;
-      _Values[ChargeSP_Name] = ChargeSP;
-      _Values[DischargeSP_Name] = DischargeSP;
-      switch (ChargeState) {
-      case Charger_State_T::IDLE:
-        _Values[ChargeState_Name] = ChargeState_Case_Idle;
-        break;
-      case Charger_State_T::CHARGE_CURRENT:
-        _Values[ChargeState_Name] = ChargeState_Case_ChargeCurrent;
-        break;
-      case Charger_State_T::CHARGE_VOLTAGE:
-        _Values[ChargeState_Name] = ChargeState_Case_ChargeVoltage;
-        break;
-      case Charger_State_T::WAIT_CHARGE:
-        _Values[ChargeState_Name] = ChargeState_Case_WaitCharge;
-        break;
-      case Charger_State_T::WAIT_DISCHARCH:
-        _Values[ChargeState_Name] = ChargeState_Case_WaitDischarge;
-        break;
-      case Charger_State_T::DISCHARGE:
-        _Values[ChargeState_Name] = ChargeState_Case_Discharge;
-        break;
-      case Charger_State_T::FAULT:
-        _Values[ChargeState_Name] = ChargeState_Case_Fault;
-        break;
-      default:
-        _Values[ChargeState_Name] = ChargeState_Case_Undef;
-        break;
-      }
-    }
-
-    /**
-     * @brief Set the Element Config
-     * Only existing Tags will be updated
-     * @param _Tags Array of Config-Tags ("config": [])
-     */
-    void Charger::setConfig (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == AccuVoltageMax_Name) {
-          AccuVoltageMax = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuVoltageMax_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, AccuVoltageMax);
-          }
-        }
-        if (Tag[JsonTagName] == AccuVoltageMin_Name) {
-          AccuVoltageMin = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuVoltageMin_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, AccuVoltageMin);
-          }
-        }
-        if (Tag[JsonTagName] == AccuChargeCurrent_Name) {
-          AccuChargeCurrent = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuChargeCurrent_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, AccuChargeCurrent);
-          }
-        }
-        if (Tag[JsonTagName] == AccuDischargeVoltage_Name) {
-          AccuDischargeVoltage = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, AccuDischargeVoltage_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, AccuDischargeVoltage);
-          }
-        }
-        if (Tag[JsonTagName] == ChargeEndCurrent_Name) {
-          ChargeEndCurrent = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, ChargeEndCurrent_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, ChargeEndCurrent);
-          }
-        }
-        if (Tag[JsonTagName] == DischargeEndCurrent_Name) {
-          DischargeEndCurrent = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, DischargeEndCurrent_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, DischargeEndCurrent);
-          }
-        }
-        if (Tag[JsonTagName] == WaitDischarge_Name) {
-          WaitDischarge = Tag[JsonTagValue].as<uint16_t> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, WaitDischarge_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, WaitDischarge);
-          }
-        }
-        if (Tag[JsonTagName] == RechargeVoltage_Name) {
-          RechargeVoltage = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, RechargeVoltage_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, RechargeVoltage);
-          }
-        }
-      }
-    }
-
-    /**
-     * @brief Set the Element Data
-     * currently not used
-     * @param _Tags Array of Data-Tags ("data": [])
-     */
-    void Charger::setData (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == DoCharge_Name) {
-          DoCharge = Tag[JsonTagValue].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, Name, __func__, DoCharge_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_LOOP, false, Name, __func__, DoCharge);
-          }
-          if (DoCharge) {
-            DoCheck = false;
-          }
-        }
-
-        if (Tag[JsonTagName] == DoCheck_Name) {
-          DoCheck = Tag[JsonTagValue].as<bool> ();
-          if (Debug.print (FLAG_LOOP, false, Name, __func__, DoCheck_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_LOOP, false, Name, __func__, DoCheck);
-          }
-          if (DoCheck) {
-            DoCharge = false;
-          }
-        }
-
-        if (Tag[JsonTagName] == Fault_Name) {
-          if (ChargeState == FAULT) {
-            ChargeState = FaultState;
-          }
-          if (Debug.print (FLAG_LOOP, false, Name, __func__, Fault_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_LOOP, false, Name, __func__, "Ack");
-          }
-        }
-      }
-    }
-
-    /**
-     * @brief Execute the Commands
-     *
-     * @param _Tags Array of Commands ("cmd": [])
-     */
-    void Charger::setCmd (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-    }
-
-    /**
-     * @brief Write the Config-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void Charger::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (AccuVoltageMax_Name, AccuVoltageMax_Text, AccuVoltageMax_Comment, false, AccuVoltageMax_Unit, AccuVoltageMax) + "}");
-      _SetupFile.println (",{" + createSetupTag (AccuVoltageMin_Name, AccuVoltageMin_Text, AccuVoltageMin_Comment, false, AccuVoltageMin_Unit, AccuVoltageMin) + "}");
-      _SetupFile.println (",{" + createSetupTag (AccuChargeCurrent_Name, AccuChargeCurrent_Text, AccuChargeCurrent_Comment, false, AccuChargeCurrent_Unit, AccuChargeCurrent) + "}");
-      _SetupFile.println (",{" + createSetupTag (AccuDischargeVoltage_Name, AccuDischargeVoltage_Text, AccuDischargeVoltage_Comment, false, AccuDischargeVoltage_Unit, AccuDischargeVoltage) + "}");
-      _SetupFile.println (",{" + createSetupTag (AccuDischargeCurrent_Name, AccuDischargeCurrent_Text, AccuDischargeCurrent_Comment, false, AccuDischargeCurrent_Unit, AccuDischargeCurrent) + "}");
-      _SetupFile.println (",{" + createSetupTag (ChargeEndCurrent_Name, ChargeEndCurrent_Text, ChargeEndCurrent_Comment, false, ChargeEndCurrent_Unit, ChargeEndCurrent) + "}");
-      _SetupFile.println (",{" + createSetupTag (DischargeEndCurrent_Name, DischargeEndCurrent_Text, DischargeEndCurrent_Comment, false, DischargeEndCurrent_Unit, DischargeEndCurrent) + "}");
-      _SetupFile.println (",{" + createSetupTag (WaitDischarge_Name, WaitDischarge_Text, WaitDischarge_Comment, false, WaitDischarge_Unit, WaitDischarge) + "}");
-      _SetupFile.println (",{" + createSetupTag (RechargeVoltage_Name, RechargeVoltage_Text, RechargeVoltage_Comment, false, RechargeVoltage_Unit, RechargeVoltage) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Data-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void Charger::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (DoCheck_Name, DoCheck_Text, DoCheck_Comment, false, DoCheck_TextOn, DoCheck_TextOff, false) + "}");
-      _SetupFile.println (",{" + createSetupTag (DoCharge_Name, DoCharge_Text, DoCharge_Comment, false, DoCharge_TextOn, DoCharge_TextOff, false) + "}");
-      _SetupFile.println (",{" + createSetupTag (Fault_Name, Fault_Text, Fault_Comment, false, Fault_TextOn, Fault_TextOff, false) + "}");
-      _SetupFile.println (",{" + createSetupTag (ChargeState_Name, ChargeState_Text, ChargeState_Comment, true, "Idle") + "}");
-      _SetupFile.println (",{" + createSetupTag (AccuVoltage_Name, AccuVoltage_Text, AccuVoltage_Comment, true, AccuVoltage_Unit, AccuVoltage) + "}");
-      _SetupFile.println (",{" + createSetupTag (Current_Name, Current_Text, Current_Comment, true, Current_Unit, Current) + "}");
-      _SetupFile.println (",{" + createSetupTag (ChargedAH_Name, ChargedAH_Text, ChargedAH_Comment, true, ChargedAH_Unit, ChargedAH) + "}");
-      _SetupFile.println (",{" + createSetupTag (ChargedWH_Name, ChargedWH_Text, ChargedWH_Comment, true, ChargedWH_Unit, ChargedWH) + "}");
-      _SetupFile.println (",{" + createSetupTag (DischargedAH_Name, DischargedAH_Text, DischargedAH_Comment, true, DischargedAH_Unit, DischargedAH) + "}");
-      _SetupFile.println (",{" + createSetupTag (DischargedWH_Name, DischargedWH_Text, DischargedWH_Comment, true, DischargedWH_Unit, DischargedWH) + "}");
-      _SetupFile.println (",{" + createSetupTag (DischargeVoltage_Name, DischargeVoltage_Text, DischargeVoltage_Comment, true, DischargeVoltage_Unit, DischargeVoltage) + "}");
-      _SetupFile.println (",{" + createSetupTag (ChargeSP_Name, ChargeSP_Text, ChargeSP_Comment, true, ChargeSP_Unit, ChargeSP) + "}");
-      _SetupFile.println (",{" + createSetupTag (DischargeSP_Name, DischargeSP_Text, DischargeSP_Comment, true, DischargeSP_Unit, DischargeSP) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Command-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void Charger::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**
@@ -465,6 +164,7 @@ namespace JCA {
             }
             FaultState = ChargeState;
             ChargeState = FAULT;
+            Fault = true;
           }
         } else {
           FaultDelay = 0;
@@ -684,6 +384,9 @@ namespace JCA {
           //----------------------------------------
           ChargeSP = 0.0;
           DischargeSP = 0.0;
+          if (!Fault) {
+            ChargeState = FaultState;
+          }
 
           break;
         }

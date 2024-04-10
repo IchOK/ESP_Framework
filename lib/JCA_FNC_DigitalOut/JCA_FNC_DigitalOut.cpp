@@ -25,9 +25,10 @@ namespace JCA {
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back(new ElementTagBool("Value", "Eingeschaltet", "", false, ElementTagUsage_T::UseData, &Value, "EIN", "AUS"));
-      Tags.push_back(new ElementTagUInt16("DelayCounter", "Verzögerung Zähler", "", true, ElementTagUsage_T::UseData, &DelayCounter, "Min"));
       Tags.push_back (new ElementTagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, ElementTagUsage_T::UseConfig, &DelayAutoOff, "Min"));
+
+      Tags.push_back (new ElementTagBool ("Value", "Eingeschaltet", "", false, ElementTagUsage_T::UseData, &Value, "EIN", "AUS"));
+      Tags.push_back(new ElementTagUInt16("DelayCounter", "Verzögerung Zähler", "", true, ElementTagUsage_T::UseData, &DelayCounter, "Min"));
       // Init Data
       DelayAutoOff = 0;
       Pin = _Pin;
