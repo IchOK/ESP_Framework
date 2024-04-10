@@ -31,8 +31,6 @@
 
 // Project function
 #include <JCA_FNC_DigitalOut.h>
-#include <JCA_FNC_LedStrip.h>
-#include <JCA_FNC_Parent.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -43,30 +41,13 @@ using namespace JCA::FNC;
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
-#include <JCA_FNC_ElementTagBool.h>
-#include <JCA_FNC_ElementTagFloat.h>
-#include <vector>
-std::vector<ElementTag *> Config;
+DigitalOut TestDQ(STAT_PIN, "Status LED");
 
-bool ValueBool;
-float ValueFloat;
 void setupConfig () {
-  Config.push_back (new ElementTagBool ("Name", "Text", "", false, &ValueBool, "", ""));
-  Config.push_back (new ElementTagFloat ("Name", "Text", "", false, &ValueFloat, ""));
+  ;
 }
 void loopConfig () {
-  DynamicJsonDocument doc (1024);
-  JsonObject Data;
-  String Output;
-  ValueFloat += 1;
-  ValueBool = !ValueBool;
-
-  Data = doc.createNestedObject("BOOL");
-  Config[0]->getJsonObject (Data);
-  Data = doc.createNestedObject ("FLOAT");
-  Config[1]->getJsonObject (Data);
-  serializeJsonPretty(doc, Output);
-  Debug.println (FLAG_SETUP, false, "main", "loop", Output);
+  ;
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions

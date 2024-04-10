@@ -34,18 +34,7 @@ namespace JCA {
       String Comment;
 
       // Dataconfig
-      std::vector<ElementTag*> Config;
-
-      // Prototypes for Child Elements
-      virtual void createConfigValues (JsonObject &_Values) = 0;
-      virtual void createDataValues (JsonObject &_Values) = 0;
-      virtual void setConfig (JsonArray _Tags) = 0;
-      virtual void setData (JsonArray _Tags) = 0;
-      virtual void setCmd (JsonArray _Tags) = 0;
-
-      virtual void writeSetupConfig (File _SetupFile) = 0;
-      virtual void writeSetupData (File _SetupFile) = 0;
-      virtual void writeSetupCmdInfo (File _SetupFile) = 0;
+      std::vector<ElementTag*> Tags;
 
       // Get Element-Data by Name
       JsonVariant findConfig (JsonArray &_Elements);
@@ -66,6 +55,14 @@ namespace JCA {
       String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type);
       String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText);
 
+      // Functions Get/Set Data from/to Tag-Vector
+      void createTagValueObject (JsonObject &_Values, ElementTagUsage_T _FilterUsage);
+      void setTagValues (JsonArray _Tags, ElementTagUsage_T _FilterUsage);
+      void writeSetupTags (File _SetupFile, ElementTagUsage_T _FilterUsage);
+      bool setTagValueByName (String _Name, JsonVariant _Value, ElementTagUsage_T _FilterUsage = ElementTagUsage_T::UseIgnor);
+      bool setTagValueByIndex (int16_t _Index, JsonVariant _Value);
+      int16_t getTagIndex (String _Name, ElementTagUsage_T _FilterUsage = ElementTagUsage_T::UseIgnor);
+
       // Conversion Functions
       void HexStringToByteArray (String _HexString, uint8_t *_ByteArray, uint8_t _Length);
       uint8_t HexCharToInt (char _HexChar);
@@ -76,6 +73,7 @@ namespace JCA {
       static const char *JsonTagElements;
       static const char *JsonTagConfig;
       static const char *JsonTagData;
+      static const char *JsonTagAll;
       static const char *JsonTagCmdInfo;
       static const char *JsonTagCmd;
       static const char *JsonTagName;
@@ -97,12 +95,6 @@ namespace JCA {
       void writeSetup (File _SetupFile, bool &_ElementInit);
 
       virtual void update (struct tm &_Time) {; };
-      virtual uint8_t getValueIndexByName(String _Name) {return 0; };
-      virtual uint8_t getStateIndexByName(String _Name) {return 0; };
-      virtual float getValueByIndex(uint8_t _Index) {return 0.0; };
-      virtual bool getStateByindex(uint8_t _Index) {return false; };
-      virtual bool setValueByIndex(uint8_t _Index, float _Value) {return false;};
-      virtual bool setValueByIndex (uint8_t _Index, bool _Value) { return false; };
     };
   }
 }

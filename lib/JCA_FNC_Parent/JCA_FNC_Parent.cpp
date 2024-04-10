@@ -19,6 +19,7 @@ namespace JCA {
     const char *Parent::JsonTagConfig = "config";
     const char *Parent::JsonTagData = "data";
     const char *Parent::JsonTagCmdInfo = "cmdInfo";
+    const char *Parent::JsonTagAll = "all";
     const char *Parent::JsonTagCmd = "cmd";
     const char *Parent::JsonTagName = "name";
     const char *Parent::JsonTagText = "text";
@@ -356,6 +357,112 @@ namespace JCA {
       }
     }
 
+    void Parent::createTagValueObject (JsonObject &_Values, ElementTagUsage_T _FilterUsage) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
+        for (int16_t i = 0; i < Tags.size (); i++) {
+          Tags[i]->addTagValue (_Values);
+        }
+      } else {
+        for (int16_t i = 0; i < Tags.size (); i++) {
+          if (Tags[i]->Usage == _FilterUsage) {
+            Tags[i]->addTagValue (_Values);
+          }
+        }
+      }
+    }
+
+    void Parent::setTagValues (JsonArray _Tags, ElementTagUsage_T _FilterUsage) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
+      for (JsonObject Tag : _Tags) {
+        setTagValueByName (Tag[JCA_FNC_ELEMENTTAGS_JsonName].as<String> (), Tag[JCA_FNC_ELEMENTTAGS_JsonValue], _FilterUsage);
+      }
+    }
+
+    void Parent::writeSetupTags (File _SetupFile, ElementTagUsage_T _FilterUsage) {
+      int16_t Counter = 0;
+      String ObjectKey;
+      switch (_FilterUsage)
+      {
+      case ElementTagUsage_T::UseData:
+        ObjectKey = String (JsonTagData);
+        break;
+      case ElementTagUsage_T::UseConfig:
+        ObjectKey = String (JsonTagConfig);
+        break;
+      case ElementTagUsage_T::UseIgnor:
+        ObjectKey = String (JsonTagAll);
+        break;
+
+      default:
+        ObjectKey = "";
+        break;
+      }
+
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
+        for (int16_t i = 0; i < Tags.size (); i++) {
+          if (Counter == 0) {
+            _SetupFile.println (",\"" + ObjectKey + "\":[");
+            _SetupFile.println ("{" + Tags[i]->createSetupTag() + "}");
+          } else {
+            _SetupFile.println (",{" + Tags[i]->createSetupTag () + "}");
+          }
+          Counter++;
+        }
+      } else if (ObjectKey.length() > 0) {
+        for (int16_t i = 0; i < Tags.size (); i++) {
+          if (Tags[i]->Usage == _FilterUsage) {
+            if (Counter == 0) {
+              _SetupFile.println (",\"" + ObjectKey + "\":[");
+              _SetupFile.println ("{" + Tags[i]->createSetupTag () + "}");
+            } else {
+              _SetupFile.println (",{" + Tags[i]->createSetupTag () + "}");
+            }
+            Counter++;
+          }
+        }
+      }
+      if (Counter > 0) {
+        _SetupFile.println ("]");
+      }
+    }
+
+    bool Parent::setTagValueByName (String _Name, JsonVariant _Value, ElementTagUsage_T _FilterUsage){
+      int16_t Index = getTagIndex (_Name, _FilterUsage);
+      if (Index < 0) {
+        return false;
+      } else {
+        return setTagValueByIndex(Index, _Value);
+      }
+    }
+
+    bool Parent::setTagValueByIndex (int16_t _Index, JsonVariant _Value){
+      if (Tags[_Index]->ReadOnly) {
+        return false;
+      } else {
+        return Tags[_Index]->setValue(_Value);
+      }
+    }
+
+    int16_t Parent::getTagIndex (String _Name, ElementTagUsage_T _FilterUsage) {
+      if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
+        for (int16_t i = 0; i < Tags.size (); i++) {
+          if (Tags[i]->Name == _Name) {
+            return i;
+          }
+        }
+      } else {
+        for (int16_t i = 0; i < Tags.size (); i++) {
+          if (Tags[i]->Name == _Name && Tags[i]->Usage == _FilterUsage) {
+            return i;
+          }
+        }
+      }
+      // Tag was not found
+      return -1;
+    }
+
     /**
      * @brief Convert a single HEX-Char to Integer
      *
@@ -402,15 +509,18 @@ namespace JCA {
       JsonVariant _Tags;
       _Tags = findConfig (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        setConfig (_Tags.as<JsonArray> ());
+        //setConfig (_Tags.as<JsonArray> ());
+        setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseConfig);
       }
       _Tags = findData (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        setData (_Tags.as<JsonArray> ());
+        //setData (_Tags.as<JsonArray> ());
+        setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseData);
       }
       _Tags = findCmd (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        setCmd (_Tags.as<JsonArray> ());
+        //setCmd (_Tags.as<JsonArray> ());
+        setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseCmd);
       }
     }
 
@@ -423,9 +533,11 @@ namespace JCA {
       JsonObject Element = _Elements.createNestedObject (Name);
       JsonObject Values;
       Values = Element.createNestedObject (JsonTagData);
-      createDataValues (Values);
+      //createDataValues (Values);
+      createTagValueObject (Values, ElementTagUsage_T::UseData);
       Values = Element.createNestedObject (JsonTagConfig);
-      createConfigValues (Values);
+      //createConfigValues (Values);
+      createTagValueObject (Values, ElementTagUsage_T::UseConfig);
     }
 
     /**
@@ -445,9 +557,12 @@ namespace JCA {
       if (Comment.length () > 0) {
         _SetupFile.println (",\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
       }
-      writeSetupConfig (_SetupFile);
-      writeSetupData (_SetupFile);
-      writeSetupCmdInfo (_SetupFile);
+      //writeSetupConfig (_SetupFile);
+      writeSetupTags (_SetupFile, ElementTagUsage_T::UseConfig);
+      //writeSetupData (_SetupFile);
+      writeSetupTags (_SetupFile, ElementTagUsage_T::UseData);
+      //writeSetupCmdInfo (_SetupFile);
+      writeSetupTags (_SetupFile, ElementTagUsage_T::UseCmd);
       _SetupFile.println ("}");
     }
   }

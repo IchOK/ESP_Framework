@@ -15,27 +15,26 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    ElementTagFloat::ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, float *_Value, String _Unit)
-        : ElementTag (_Name, _Text, _Comment, _ReadOnly, ElementTagTypes_T::TagFloat) {
-      Value = _Value;
+    ElementTagFloat::ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, float *_Value, String _Unit)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage) {
       Unit = _Unit;
     }
 
     String ElementTagFloat::createSetupTag () {
       String SetupTag = createSetupTagBase ();
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*Value) + "\"";
+      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*(static_cast<float *> (Value))) + "\"";
       SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonUnit) + "\":\"" + Unit + "\"";
       return SetupTag;
     }
 
-    void ElementTagFloat::getJsonObject (JsonObject &_Data) {
-      getJsonObjectBase (_Data);
-      _Data[JCA_FNC_ELEMENTTAGS_JsonValue] = *Value;
-      _Data[JCA_FNC_ELEMENTTAGS_JsonUnit] = Unit;
+    void ElementTagFloat::getTagObject (JsonObject &_Tag) {
+      getBaseObject (_Tag);
+      _Tag[JCA_FNC_ELEMENTTAGS_JsonValue] = *(static_cast<float *> (Value));
+      _Tag[JCA_FNC_ELEMENTTAGS_JsonUnit] = Unit;
     }
 
-    void ElementTagFloat::addJsonTag (JsonObject &_Tags) {
-      _Tags[Name] = *Value;
+    void ElementTagFloat::addTagValue (JsonObject &_Values) {
+      _Values[Name] = *(static_cast<float *> (Value));
     }
   }
 }

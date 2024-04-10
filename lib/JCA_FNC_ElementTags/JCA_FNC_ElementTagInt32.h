@@ -1,5 +1,5 @@
 /**
- * @file JCA_FNC_ElementTagBool.h
+ * @file JCA_FNC_ElementTagInt32.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
  * @version 1.0
@@ -10,20 +10,19 @@
  *
  */
 
-#ifndef _JCA_FNC_ELEMENTTAGBOOL_
-#define _JCA_FNC_ELEMENTTAGBOOL_
+#ifndef _JCA_FNC_ELEMENTTAGINT32_
+#define _JCA_FNC_ELEMENTTAGINT32_
 
 #include <JCA_FNC_ElementTags.h>
 
 namespace JCA {
   namespace FNC {
-    class ElementTagBool : public ElementTag {
+    class ElementTagInt32 : public ElementTag {
       public:
         // Type Informations
-        String BtnOnText;
-        String BtnOffText;
+        String Unit;
 
-        ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText);
+        ElementTagInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, int32_t *_Value, String _Unit);
         String createSetupTag ();
         void getTagObject (JsonObject &_Tag);
         void addTagValue (JsonObject &_Values);

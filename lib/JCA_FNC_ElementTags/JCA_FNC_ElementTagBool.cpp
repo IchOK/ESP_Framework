@@ -15,30 +15,29 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    ElementTagBool::ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, bool *_Value, String _BtnOnText, String _BtnOffText)
-        : ElementTag (_Name, _Text, _Comment, _ReadOnly, ElementTagTypes_T::TagBool) {
-      Value = _Value;
+    ElementTagBool::ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagBool, _Usage) {
       BtnOnText = _BtnOnText;
       BtnOffText = _BtnOffText;
     }
 
     String ElementTagBool::createSetupTag () {
       String SetupTag = createSetupTagBase();
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*Value) + "\"";
+      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*(static_cast<bool *>(Value))) + "\"";
       SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonOn) + "\":\"" + BtnOnText + "\"";
       SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonOff) + "\":\"" + BtnOffText + "\"";
       return SetupTag;
     }
 
-    void ElementTagBool::getJsonObject (JsonObject &_Data) {
-      getJsonObjectBase (_Data);
-      _Data[JCA_FNC_ELEMENTTAGS_JsonValue] = *Value;
-      _Data[JCA_FNC_ELEMENTTAGS_JsonOn] = BtnOnText;
-      _Data[JCA_FNC_ELEMENTTAGS_JsonOff] = BtnOffText;
+    void ElementTagBool::getTagObject (JsonObject &_Tag) {
+      getBaseObject (_Tag);
+      _Tag[JCA_FNC_ELEMENTTAGS_JsonValue] = *(static_cast<bool *> (Value));
+      _Tag[JCA_FNC_ELEMENTTAGS_JsonOn] = BtnOnText;
+      _Tag[JCA_FNC_ELEMENTTAGS_JsonOff] = BtnOffText;
     }
 
-    void ElementTagBool::addJsonTag (JsonObject &_Tags) {
-      _Tags[Name] = *Value;
+    void ElementTagBool::addTagValue (JsonObject &_Values) {
+      _Values[Name] = *(static_cast<bool *> (Value));
     }
   }
 }

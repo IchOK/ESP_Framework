@@ -20,13 +20,12 @@ namespace JCA {
     class ElementTagFloat : public ElementTag {
       public:
         // Type Informations
-        float *Value;
         String Unit;
 
-        ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, float *_Value, String _Unit);
+        ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, float *_Value, String _Unit);
         String createSetupTag ();
-        void getJsonObject (JsonObject &_Data);
-        void addJsonTag (JsonObject &_Tags);
+        void getTagObject (JsonObject &_Tag);
+        void addTagValue (JsonObject &_Values);
     };
   }
 }
