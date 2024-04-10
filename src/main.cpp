@@ -31,6 +31,7 @@
 
 // Project function
 #include <JCA_FNC_DigitalOut.h>
+#include <JCA_FNC_Charger.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -42,7 +43,6 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
 DigitalOut TestDQ(STAT_PIN, "Status LED");
-
 void setupConfig () {
   ;
 }
