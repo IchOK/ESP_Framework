@@ -1,30 +1,30 @@
 /**
- * @file JCA_FNC_ElementTagUInt32.h
+ * @file JCA_FNC_ElementTagArrayUInt8.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
  * @version 1.0
- * @date 2024-04-07
+ * @date 2024-04-14
  *
  * Copyright Jochen Cabrera 2024
  * Apache License
  *
  */
 
-#ifndef _JCA_FNC_ELEMENTTAGUINT32_
-#define _JCA_FNC_ELEMENTTAGUINT32_
+#ifndef _JCA_FNC_ELEMENTTAGARRAYUINT8_
+#define _JCA_FNC_ELEMENTTAGARRAYUINT8_
 
 #include <JCA_FNC_ElementTags.h>
 
 namespace JCA {
   namespace FNC {
-    class ElementTagUInt32 : public ElementTag {
+    class ElementTagArrayUInt8 : public ElementTag {
       public:
         // Type Informations
-        String Unit;
-
-        ElementTagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint32_t *_Value, String _Unit);
+        uint8_t Length;
+        
+        ElementTagArrayUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, uint8_t _Length);
         bool getValue (JsonVariant _Value);
-        bool setValue (JsonVariant _Value);
+        bool setValue(JsonVariant _Value);
         String createSetupTag ();
         void getTagObject (JsonObject &_Tag);
         void addTagValue (JsonObject &_Values);

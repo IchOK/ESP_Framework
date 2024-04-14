@@ -22,6 +22,8 @@ namespace JCA {
         // Type Informations
 
         ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value);
+        bool getValue (JsonVariant _Value);
+        bool setValue (JsonVariant _Value);
         String createSetupTag ();
         void getTagObject (JsonObject &_Tag);
         void addTagValue (JsonObject &_Values);

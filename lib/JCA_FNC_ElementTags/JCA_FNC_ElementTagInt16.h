@@ -23,6 +23,8 @@ namespace JCA {
         String Unit;
 
         ElementTagInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, int16_t *_Value, String _Unit);
+        bool getValue (JsonVariant _Value);
+        bool setValue(JsonVariant _Value);
         String createSetupTag ();
         void getTagObject (JsonObject &_Tag);
         void addTagValue (JsonObject &_Values);

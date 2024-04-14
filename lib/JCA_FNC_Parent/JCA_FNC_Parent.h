@@ -63,11 +63,6 @@ namespace JCA {
       bool setTagValueByIndex (int16_t _Index, JsonVariant _Value);
       int16_t getTagIndex (String _Name, ElementTagUsage_T _FilterUsage = ElementTagUsage_T::UseIgnor);
 
-      // Conversion Functions
-      void HexStringToByteArray (String _HexString, uint8_t *_ByteArray, uint8_t _Length);
-      uint8_t HexCharToInt (char _HexChar);
-      String ByteArrayToHexString (uint8_t *_ByteArray, uint8_t _Length);
-
     public:
       // Json Tags
       static const char *JsonTagElements;

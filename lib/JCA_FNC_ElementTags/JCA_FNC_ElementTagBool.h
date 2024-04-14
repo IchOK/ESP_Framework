@@ -24,6 +24,8 @@ namespace JCA {
         String BtnOffText;
 
         ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText);
+        bool getValue (JsonVariant _Value);
+        bool setValue(JsonVariant _Value);
         String createSetupTag ();
         void getTagObject (JsonObject &_Tag);
         void addTagValue (JsonObject &_Values);

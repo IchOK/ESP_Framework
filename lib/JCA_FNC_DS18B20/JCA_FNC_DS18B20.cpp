@@ -15,23 +15,6 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    const char *DS18B20::Filter_Name = "Filter";
-    const char *DS18B20::Filter_Text = "Filterkonstante";
-    const char *DS18B20::Filter_Unit = "s";
-    const char *DS18B20::Filter_Comment = nullptr;
-    const char *DS18B20::Addr_Name = "Addr";
-    const char *DS18B20::Addr_Text = "Sensoradresse";
-    const char *DS18B20::Addr_Unit = "X";
-    const char *DS18B20::Addr_Comment = "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung";
-    const char *DS18B20::ReadInterval_Name = "ReadInterval";
-    const char *DS18B20::ReadInterval_Text = "Leseintervall";
-    const char *DS18B20::ReadInterval_Unit = "s";
-    const char *DS18B20::ReadInterval_Comment = nullptr;
-    const char *DS18B20::Temp_Name = "Temp";
-    const char *DS18B20::Temp_Text = "Temperatur";
-    const char *DS18B20::Temp_Unit = "°C";
-    const char *DS18B20::Temp_Comment = nullptr;
-
     /**
      * @brief Construct a new DS18B20::DS18B20 object
      *
@@ -41,6 +24,13 @@ namespace JCA {
     DS18B20::DS18B20 (OneWire *_Wire, const char *_Name)
         : Parent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      // Create Tag-List
+      Tags.push_back (new ElementTagFloat ("Filter", "Filterkonstante", "", false, ElementTagUsage_T::UseConfig, &Filter, "s"));
+      Tags.push_back (new ElementTagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", false, ElementTagUsage_T::UseConfig, &Addr[0], 8));
+      Tags.push_back (new ElementTagUInt16 ("ReadInterval", "Leseintervall", "", false, ElementTagUsage_T::UseConfig, &ReadInterval, "s"));
+
+      Tags.push_back (new ElementTagFloat ("Temp", "Temperatur", "", true, ElementTagUsage_T::UseData, &Value, "°C"));
+      // Init Data
       Wire = _Wire;
       Addr[0] = 0;
       Addr[1] = 0;
@@ -56,115 +46,6 @@ namespace JCA {
       Resend = 0;
       ReadData = false;
       LastMillis = millis ();
-    }
-
-    /**
-     * @brief Add Config-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Config-Tags ("config": {})
-     */
-    void DS18B20::createConfigValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[Filter_Name] = Filter;
-      _Values[Addr_Name] = ByteArrayToHexString (Addr, 8);
-      _Values[ReadInterval_Name] = ReadInterval;
-    }
-
-    /**
-     * @brief Add Data-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Data-Tags ("data": {})
-     */
-    void DS18B20::createDataValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[Temp_Name] = Value;
-    }
-
-    /**
-     * @brief Set the Element Config
-     * Only existing Tags will be updated
-     * @param _Tags Array of Config-Tags ("config": [])
-     */
-    void DS18B20::setConfig (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == Filter_Name) {
-          Filter = Tag[JsonTagValue].as<float> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, Filter_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, Filter);
-          }
-        }
-        if (Tag[JsonTagName] == Addr_Name) {
-          String AddrHex = Tag[JsonTagValue].as<String> ();
-          // Convert HEX-String to Byte-Array
-          HexStringToByteArray (AddrHex, Addr, 8);
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, Addr_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, AddrHex);
-          }
-        }
-        if (Tag[JsonTagName] == ReadInterval_Name) {
-          ReadInterval = Tag[JsonTagValue].as<uint16_t> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, ReadInterval_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, ReadInterval);
-          }
-        }
-      }
-    }
-
-    /**
-     * @brief Set the Element Data
-     * currently not used
-     * @param _Tags Array of Data-Tags ("data": [])
-     */
-    void DS18B20::setData (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-    }
-
-    /**
-     * @brief Execute the Commands
-     * currently not used
-     * @param _Tags Array of Commands ("cmd": [])
-     */
-    void DS18B20::setCmd (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-    }
-
-    /**
-     * @brief Write the Config-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void DS18B20::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (Filter_Name, Filter_Text, Filter_Comment, false, Filter_Unit, Filter) + "}");
-      _SetupFile.println (",{" + createSetupTag (Addr_Name, Addr_Text, Addr_Comment, false, ByteArrayToHexString (Addr, 8)) + "}");
-      _SetupFile.println (",{" + createSetupTag (ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Data-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void DS18B20::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (Temp_Name, Temp_Text, Temp_Comment, true, Temp_Unit, Value) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Command-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void DS18B20::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
     }
 
     /**

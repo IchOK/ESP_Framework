@@ -17,6 +17,9 @@
 #include <OneWire.h>
 #include <time.h>
 
+#include <JCA_FNC_ElementTagUInt16.h>
+#include <JCA_FNC_ElementTagFloat.h>
+#include <JCA_FNC_ElementTagArrayUInt8.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
@@ -38,35 +41,6 @@ namespace JCA {
 
     class DS18B20 : public Parent {
     private:
-      // Datapoint description
-      static const char *Filter_Name;
-      static const char *Filter_Text;
-      static const char *Filter_Unit;
-      static const char *Filter_Comment;
-      static const char *Addr_Name;
-      static const char *Addr_Text;
-      static const char *Addr_Unit;
-      static const char *Addr_Comment;
-      static const char *ReadInterval_Name;
-      static const char *ReadInterval_Text;
-      static const char *ReadInterval_Unit;
-      static const char *ReadInterval_Comment;
-      static const char *Temp_Name;
-      static const char *Temp_Text;
-      static const char *Temp_Unit;
-      static const char *Temp_Comment;
-
-      // Parent Functions
-      void createConfigValues (JsonObject &_Values);
-      void createDataValues (JsonObject &_Values);
-      void setConfig (JsonArray _Tags);
-      void setData (JsonArray _Tags);
-      void setCmd (JsonArray _Tags);
-
-      void writeSetupConfig (File _SetupFile);
-      void writeSetupData (File _SetupFile);
-      void writeSetupCmdInfo (File _SetupFile);
-
       // Hardware
       OneWire *Wire;
 

@@ -19,6 +19,11 @@
 
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_FNC_ElementTagInt16.h>
+#include <JCA_FNC_ElementTagFloat.h>
+#include <JCA_FNC_ElementTagBool.h>
+#include <JCA_FNC_ElementTagInt32.h>
+
 
 namespace JCA {
   namespace FNC {

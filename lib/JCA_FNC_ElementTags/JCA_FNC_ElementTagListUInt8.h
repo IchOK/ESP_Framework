@@ -21,10 +21,11 @@ namespace JCA {
     class ElementTagListUInt8 : public ElementTag {
       public:
         // Type Informations
-        String Default;
         std::map<uint8_t, String> List;
 
-        ElementTagListUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, String _Default);
+        ElementTagListUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value);
+        bool getValue (JsonVariant _Value);
+        bool setValue (JsonVariant _Value);
         String createSetupTag ();
         void getTagObject (JsonObject &_Tag);
         void addTagValue (JsonObject &_Values);

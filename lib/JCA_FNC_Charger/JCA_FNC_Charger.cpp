@@ -55,15 +55,15 @@ namespace JCA {
       Tags.push_back (new ElementTagFloat ("ChargeSP", "PWM Laden", "", true, ElementTagUsage_T::UseData, &ChargeSP, "%"));
       Tags.push_back (new ElementTagFloat ("DischargeSP", "PWM Entladen", "", true, ElementTagUsage_T::UseData, &DischargeSP, "%"));
 
-      Tags.push_back (new ElementTagListUInt8 ("ChargeState", "Status", "", true, ElementTagUsage_T::UseData, (uint8_t *)&ChargeState, "Undefinert"));
+      Tags.push_back (new ElementTagListUInt8 ("ChargeState", "Status", "", true, ElementTagUsage_T::UseData, (uint8_t *)&ChargeState));
       ElementTagListUInt8 *ChargeStateElement = static_cast<ElementTagListUInt8 *> (Tags[Tags.size () - 1]);
       ChargeStateElement->List.insert ({Charger_State_T::IDLE, "Inaktiv"});
-      ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_CURRENT, "Inaktiv" });
-      ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_VOLTAGE, "Inaktiv" });
-      ChargeStateElement->List.insert ({ Charger_State_T::WAIT_CHARGE, "Inaktiv" });
-      ChargeStateElement->List.insert ({ Charger_State_T::WAIT_DISCHARCH, "Inaktiv" });
-      ChargeStateElement->List.insert ({ Charger_State_T::DISCHARGE, "Inaktiv" });
-      ChargeStateElement->List.insert ({ Charger_State_T::FAULT, "Inaktiv" });
+      ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_CURRENT, "Laden Strom" });
+      ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_VOLTAGE, "Laden Spannung" });
+      ChargeStateElement->List.insert ({ Charger_State_T::WAIT_CHARGE, "Warten Laden" });
+      ChargeStateElement->List.insert ({ Charger_State_T::WAIT_DISCHARCH, "Warten Entladen" });
+      ChargeStateElement->List.insert ({ Charger_State_T::DISCHARGE, "Entlade" });
+      ChargeStateElement->List.insert ({ Charger_State_T::FAULT, "Fehler" });
 
       // Intern
       ChargeState = Charger_State_T::IDLE;
