@@ -25,7 +25,12 @@ namespace JCA {
      * @param _Usage Usage-Type to sort the Tag on teh website
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
      * @param _Unit Unit of the Tag, showen on the website
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
+    ElementTagListUInt8::ElementTagListUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, SetCallback _CB)
+    : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagListUInt8, _Usage, _CB) {
+    }
+
     ElementTagListUInt8::ElementTagListUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value)
     : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagListUInt8, _Usage) {
     }
@@ -49,19 +54,23 @@ namespace JCA {
      * @return false something failed
      */
     bool ElementTagListUInt8::setValue (JsonVariant _Value) {
+      bool RetValue = false;
       if (_Value.is<const char *> ()) {
         String ValueSet = _Value.as<String>();
         for (const auto &[Index, Text] : List) {
           if (Text == ValueSet) {
             *(static_cast<uint8_t *> (Value)) = Index;
-            return true;
+            RetValue = true;
           }
         }
-        return false;
       } else {
         *(static_cast<uint8_t *> (Value)) = _Value.as<uint8_t> ();
-        return true;
+        RetValue = true;
       }
+      if (afterSetCB && RetValue) {
+        afterSetCB ();
+      }
+      return RetValue;
     }
 
     /**

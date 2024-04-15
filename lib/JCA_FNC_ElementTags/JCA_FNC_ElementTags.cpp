@@ -15,7 +15,18 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    ElementTag::ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, void* _Value, ElementTagTypes_T _Type, ElementTagUsage_T _Usage) {
+    ElementTag::ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, void *_Value, ElementTagTypes_T _Type, ElementTagUsage_T _Usage, SetCallback _CB) {
+      Type = _Type;
+      Usage = _Usage;
+      Name = _Name;
+      Text = _Text;
+      Comment = _Comment;
+      ReadOnly = _ReadOnly;
+      Value = _Value;
+      afterSetCB = _CB;
+    }
+
+    ElementTag::ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, void *_Value, ElementTagTypes_T _Type, ElementTagUsage_T _Usage) {
       Type = _Type;
       Usage = _Usage;
       Name = _Name;

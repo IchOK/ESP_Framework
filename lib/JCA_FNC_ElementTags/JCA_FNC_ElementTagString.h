@@ -21,6 +21,7 @@ namespace JCA {
       public:
         // Type Informations
 
+        ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value, SetCallback _CB);
         ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value);
         bool getValue (JsonVariant _Value);
         bool setValue (JsonVariant _Value);

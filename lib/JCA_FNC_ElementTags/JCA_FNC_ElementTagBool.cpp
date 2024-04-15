@@ -26,7 +26,14 @@ namespace JCA {
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
      * @param _BtnOnText Button-Text if the tag is true
      * @param _BtnOffText Button-Text ift the tag is false
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
+    ElementTagBool::ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText, SetCallback _CB)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagBool, _Usage, _CB) {
+      BtnOnText = _BtnOnText;
+      BtnOffText = _BtnOffText;
+    }
+
     ElementTagBool::ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText)
         : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagBool, _Usage) {
       BtnOnText = _BtnOnText;
@@ -53,6 +60,9 @@ namespace JCA {
      */
     bool ElementTagBool::setValue (JsonVariant _Value) {
       *(static_cast<bool *> (Value)) = _Value.as<bool> ();
+      if (afterSetCB) {
+        afterSetCB ();
+      }
       return true;
     }
 

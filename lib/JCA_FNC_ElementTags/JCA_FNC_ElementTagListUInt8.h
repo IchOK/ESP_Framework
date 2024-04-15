@@ -23,6 +23,7 @@ namespace JCA {
         // Type Informations
         std::map<uint8_t, String> List;
 
+        ElementTagListUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, SetCallback _CB);
         ElementTagListUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value);
         bool getValue (JsonVariant _Value);
         bool setValue (JsonVariant _Value);

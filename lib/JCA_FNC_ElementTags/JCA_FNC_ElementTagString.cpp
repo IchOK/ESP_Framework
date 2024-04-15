@@ -24,7 +24,12 @@ namespace JCA {
      * @param _ReadOnly set the Tag to read only, can only write by the Function-Object
      * @param _Usage Usage-Type to sort the Tag on teh website
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
+    ElementTagString::ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value, SetCallback _CB)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage, _CB) {
+    }
+
     ElementTagString::ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value)
         : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage) {
     }
@@ -48,6 +53,9 @@ namespace JCA {
      */
     bool ElementTagString::setValue (JsonVariant _Value) {
       *(static_cast<String *> (Value)) = _Value.as<String> ();
+      if (afterSetCB) {
+        afterSetCB ();
+      }
       return true;
     }
 

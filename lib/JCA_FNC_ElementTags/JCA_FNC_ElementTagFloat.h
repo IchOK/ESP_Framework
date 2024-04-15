@@ -22,6 +22,7 @@ namespace JCA {
         // Type Informations
         String Unit;
 
+        ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, float *_Value, String _Unit, SetCallback _CB);
         ElementTagFloat (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, float *_Value, String _Unit);
         bool getValue (JsonVariant _Value);
         bool setValue(JsonVariant _Value);

@@ -56,8 +56,11 @@ namespace JCA {
       UseCmd = 0x04,
       UseIgnor = 0xff
     };
+
+    typedef std::function<void (void)> SetCallback;
     class ElementTag {
       protected:
+        SetCallback afterSetCB;
         String createSetupTagBase ();
         void getBaseObject (JsonObject &_Tag);
 
@@ -71,7 +74,8 @@ namespace JCA {
         bool ReadOnly;
         void* Value;
 
-        ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, void* _Value, ElementTagTypes_T _Type, ElementTagUsage_T _Usage);
+        ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, void* _Value, ElementTagTypes_T _Type, ElementTagUsage_T _Usage, SetCallback _CB);
+        ElementTag (String _Name, String _Text, String _Comment, bool _ReadOnly, void *_Value, ElementTagTypes_T _Type, ElementTagUsage_T _Usage);
         virtual bool getValue (JsonVariant _Value) { return false; };
         virtual bool setValue(JsonVariant _Value) {return false; };
         virtual String createSetupTag () { return ""; };

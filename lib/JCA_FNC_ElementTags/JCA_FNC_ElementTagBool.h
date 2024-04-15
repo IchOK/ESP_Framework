@@ -23,6 +23,7 @@ namespace JCA {
         String BtnOnText;
         String BtnOffText;
 
+        ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText, SetCallback _CB);
         ElementTagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText);
         bool getValue (JsonVariant _Value);
         bool setValue(JsonVariant _Value);

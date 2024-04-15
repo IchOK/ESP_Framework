@@ -24,9 +24,15 @@ namespace JCA {
      * @param _Usage Usage-Type to sort the Tag on teh website
      * @param _Value Pointer to the Value-Array inside the Function-Object
      * @param _Length Length of the Value-Array
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
+    ElementTagArrayUInt8::ElementTagArrayUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, uint8_t _Length, SetCallback _CB)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagArrayUInt8, _Usage, _CB) {
+      Length = _Length;
+    }
+
     ElementTagArrayUInt8::ElementTagArrayUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, uint8_t _Length)
-    : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagArrayUInt8, _Usage) {
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagArrayUInt8, _Usage) {
       Length = _Length;
     }
 
@@ -49,6 +55,7 @@ namespace JCA {
      * @return false something failed
      */
     bool ElementTagArrayUInt8::setValue (JsonVariant _Value) {
+      bool RetValue = false;
       if (_Value.is<JsonArray> ()) {
         JsonArray ValueArray = _Value.as<JsonArray>();
         if (ValueArray.size() >= Length) {
@@ -56,15 +63,15 @@ namespace JCA {
           for (uint8_t i=0; i<Length; i++) {
             OutValue[i] = ValueArray[i].as<uint8_t>();
           }
-          return true;
-        } else {
-          return false;
+          RetValue = true;
         }
       } else if (_Value.is<const char *> ()) {
-        return JCA::SYS::HexStringToByteArray (_Value.as<String> (), static_cast<uint8_t *> (Value), Length);
-      } else {
-        return false;
+        RetValue = JCA::SYS::HexStringToByteArray (_Value.as<String> (), static_cast<uint8_t *> (Value), Length);
       }
+      if (afterSetCB && RetValue) {
+        afterSetCB ();
+      }
+      return RetValue;
     }
 
     /**

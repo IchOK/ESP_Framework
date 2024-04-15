@@ -25,7 +25,13 @@ namespace JCA {
      * @param _Usage Usage-Type to sort the Tag on teh website
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
      * @param _Unit Unit of the Tag, showen on the website
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
+    ElementTagInt16::ElementTagInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, int16_t *_Value, String _Unit, SetCallback _CB)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagInt16, _Usage, _CB) {
+      Unit = _Unit;
+    }
+
     ElementTagInt16::ElementTagInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, int16_t *_Value, String _Unit)
         : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagInt16, _Usage) {
       Unit = _Unit;
@@ -51,6 +57,9 @@ namespace JCA {
      */
     bool ElementTagInt16::setValue (JsonVariant _Value) {
       *(static_cast<int16_t *> (Value)) = _Value.as<int16_t> ();
+      if (afterSetCB) {
+        afterSetCB ();
+      }
       return true;
     }
 

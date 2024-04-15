@@ -25,12 +25,17 @@ namespace JCA {
      * @param _Usage Usage-Type to sort the Tag on teh website
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
      * @param _Unit Unit of the Tag, showen on the website
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
+    ElementTagUInt32::ElementTagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint32_t *_Value, String _Unit, SetCallback _CB)
+        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage, _CB) {
+      Unit = _Unit;
+    }
+
     ElementTagUInt32::ElementTagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint32_t *_Value, String _Unit)
         : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage) {
       Unit = _Unit;
     }
-
     /**
      * @brief Get the Value into an JsonVariant
      *
@@ -51,6 +56,9 @@ namespace JCA {
      */
     bool ElementTagUInt32::setValue (JsonVariant _Value) {
       *(static_cast<uint32_t *> (Value)) = _Value.as<uint32_t> ();
+      if (afterSetCB) {
+        afterSetCB ();
+      }
       return true;
     }
 

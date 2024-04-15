@@ -22,6 +22,7 @@ namespace JCA {
         // Type Informations
         uint8_t Length;
         
+        ElementTagArrayUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, uint8_t _Length, SetCallback _CB);
         ElementTagArrayUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint8_t *_Value, uint8_t _Length);
         bool getValue (JsonVariant _Value);
         bool setValue(JsonVariant _Value);
