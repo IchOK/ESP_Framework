@@ -70,7 +70,7 @@ namespace JCA {
      */
     String ElementTagInt32::createSetupTag () {
       String SetupTag = createSetupTagBase ();
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*(static_cast<int32_t *> (Value))) + "\"";
+      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":" + String (*(static_cast<int32_t *> (Value)));
       SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonUnit) + "\":\"" + Unit + "\"";
       return SetupTag;
     }

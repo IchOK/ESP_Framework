@@ -16,25 +16,6 @@ using namespace JCA::FNC;
 namespace JCA {
   namespace IOT {
     const char *Webserver::ElementName = "System";
-    const char *Webserver::Hostname_Name = "hostname";
-    const char *Webserver::Hostname_Text = "Hostname";
-    const char *Webserver::Hostname_Comment = "Hostname wirde erst nache dem Reboot aktiv";
-    const char *Webserver::WsUpdateCycle_Name = "wsUpdate";
-    const char *Webserver::WsUpdateCycle_Text = "Websocket Updatezyklus";
-    const char *Webserver::WsUpdateCycle_Unit = "ms";
-    const char *Webserver::WsUpdateCycle_Comment = nullptr;
-    const char *Webserver::TimeSync_Name = "timeSync";
-    const char *Webserver::TimeSync_Text = "Uhrzeit syncronisieren";
-    const char *Webserver::TimeSync_Type = "uint32";
-    const char *Webserver::TimeSync_Comment = nullptr;
-    const char *Webserver::SaveConfig_Name = "saveConfig";
-    const char *Webserver::SaveConfig_Text = "Konfiguration speichern";
-    const char *Webserver::SaveConfig_Type = "bool";
-    const char *Webserver::SaveConfig_Comment = "Save the current Config to ConfigFile";
-    const char *Webserver::SaveConfig_BtnText = "SAVE";
-    const char *Webserver::Time_Name = "time";
-    const char *Webserver::Time_Text = "Systemzeit";
-    const char *Webserver::Time_Comment = nullptr;
 
     /**
      * @brief Construct a new Webserver::Webserver object
@@ -48,15 +29,28 @@ namespace JCA {
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
         : Parent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
+      Tags.push_back (new ElementTagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, ElementTagUsage_T::UseConfig, &Hostname));
+      Tags.push_back (new ElementTagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, ElementTagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
+      Tags.push_back (new ElementTagUInt32 ("TimeSync", "Websocket Updatezyklus", "", false, ElementTagUsage_T::UseConfig, &TimeSync, "s", std::bind (&Webserver::setTimeCB, this)));
+
+      Tags.push_back (new ElementTagString ("Time", "Systemzeit", "", false, ElementTagUsage_T::UseData, &Time));
+
+      String ChipID;
       #ifdef ESP8266
-        sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP.getChipId ());
+        ChipID = String (ESP.getChipId (), 16);
       #elif ESP32
         uint32_t ESP32ChipId = 0;
         for (int i = 0; i < 17; i = i + 8) {
           ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
         }
-        sprintf (Hostname, "%s_%08X", _HostnamePrefix, ESP32ChipId);
+        ChipID = String (ESP32ChipId, 16);
       #endif
+      Hostname = String(_HostnamePrefix) + "_";
+
+      for (int i = ChipID.length(); i < 8; i++ ){
+        Hostname += "0";
+      }
+      Hostname += ChipID;
       Port = _Port;
       Reboot = false;
       strncpy (ConfUser, _ConfUser, sizeof (ConfUser));
@@ -177,7 +171,7 @@ namespace JCA {
           //------------------------------------------------------
           if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME)) {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Hostname");
-            strncpy (Hostname, Config[JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME].as<const char *> (), sizeof (Hostname));
+            Hostname = Config[JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME].as<String> ();
           }
           if (Config.containsKey (JCA_IOT_WEBSERVER_CONFKEY_PORT)) {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Serverport");
@@ -201,124 +195,9 @@ namespace JCA {
       return true;
     }
 
-    /**
-     * @brief Add Config-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Config-Tags ("config": {})
-     */
-    void Webserver::createConfigValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[Hostname_Name] = Hostname;
-      _Values[WsUpdateCycle_Name] = WsUpdateCycle;
-    }
-
-    /**
-     * @brief Add Data-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Data-Tags ("data": {})
-     */
-    void Webserver::createDataValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[Time_Name] = getTime ();
-    }
-
-    /**
-     * @brief Set the Element Config
-     * Only existing Tags will be updated
-     * @param _Tags Array of Config-Tags ("config": [])
-     */
-    void Webserver::setConfig (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == Hostname_Name) {
-          strncpy (Hostname, Tag[JsonTagValue].as<const char *> (), sizeof (Hostname));
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, Hostname_Name)) {
-            Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, Hostname);
-          }
-        }
-        if (Tag[JsonTagName] == WsUpdateCycle_Name) {
-          WsUpdateCycle = Tag[JsonTagValue].as<uint32_t> ();
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, WsUpdateCycle_Name)) {
-            Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, WsUpdateCycle);
-          }
-        }
-      }
-    }
-
-    /**
-     * @brief Set the Element Data
-     * currently not used
-     * @param _Tags Array of Data-Tags ("data": [])
-     */
-    void Webserver::setData (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
-    }
-
-    /**
-     * @brief Execute the Commands
-     *
-     * @param _Tags Array of Commands ("cmd": [])
-     */
-    void Webserver::setCmd (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == TimeSync_Name) {
-          setTime (Tag[JsonTagValue].as<uint32_t> ());
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, TimeSync_Name)) {
-            Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, getTime ());
-          }
-        }
-        if (Tag[JsonTagName] == SaveConfig_Name) {
-          if (Tag[JsonTagValue].as<bool> ()) {
-            onSaveConfigCB ();
-          }
-          if (Debug.print (FLAG_CONFIG, false, ObjectName, __func__, SaveConfig_Name)) {
-            Debug.print (FLAG_CONFIG, false, ObjectName, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, ObjectName, __func__, Tag[JsonTagValue].as<bool> ());
-          }
-        }
-      }
-    }
-
-    /**
-     * @brief Write the Config-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void Webserver::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (Hostname_Name, Hostname_Text, Hostname_Comment, false, Hostname) + "}");
-      _SetupFile.println (",{" + createSetupTag (WsUpdateCycle_Name, WsUpdateCycle_Text, WsUpdateCycle_Comment, false, WsUpdateCycle_Unit, WsUpdateCycle) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Data-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void Webserver::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (Time_Name, Time_Text, Time_Comment, true, getTime ()) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Command-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void Webserver::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagCmdInfo) + "\":[");
-      _SetupFile.println ("{" + createSetupCmdInfo (TimeSync_Name, TimeSync_Text, TimeSync_Comment, TimeSync_Type) + "}");
-      _SetupFile.println (",{" + createSetupCmdInfo (SaveConfig_Name, SaveConfig_Text, SaveConfig_Comment, SaveConfig_Type, SaveConfig_BtnText) + "}");
-      _SetupFile.println ("]");
+    void Webserver::setTimeCB() {
+      setTime(TimeSync);
+      TimeSync = 0;
     }
 
     /**
@@ -357,6 +236,9 @@ namespace JCA {
       Server.on ("/", HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
       Server.on (JCA_IOT_WEBSERVER_PATH_HOME, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
       Server.on (JCA_IOT_WEBSERVER_PATH_CONFIG, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConfigGet (_Request); });
+
+      // Save WebConfig
+      Server.on (JCA_IOT_WEBSERVER_PATH_CONFIGSAVE, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSaveConfigCB(); this->onWebConfigGet (_Request); });
 
       // RestAPI
       Server.on (
@@ -413,6 +295,7 @@ namespace JCA {
       uint32_t ActMillis = millis ();
       // Update Cycle WebSocket
       if (ActMillis - WsLastUpdate >= WsUpdateCycle && WsUpdateCycle > 0) {
+        Time = getTime ();
         doWsUpdate (nullptr);
         WsLastUpdate = ActMillis;
       }
@@ -422,6 +305,7 @@ namespace JCA {
     }
 
     void Webserver::update (struct tm &_Time) {
+      Time = getTime();
     }
 
     void Webserver::onSystemReset (SimpleCallback _CB) {

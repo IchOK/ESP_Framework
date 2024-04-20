@@ -32,8 +32,7 @@
       ws.send(JSON.stringify(OutData));
     }
     function onSaveConfig() {
-      let OutData = { "elements": [{ "name": "System", "cmd": [{ "name": "saveConfig", "value": true }] }] };
-      ws.send(JSON.stringify(OutData));
+      location.href = '/configSave';
     }
 
     fetch("http://" + location.host + "/usrConfig.json")

@@ -81,7 +81,7 @@ namespace JCA {
     String ElementTagListUInt8::createSetupTag () {
       String SetupTag = createSetupTagBase ();
       int16_t Counter = 0;
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*(static_cast<uint8_t *> (Value))) + "\"";
+      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":" + String (*(static_cast<uint8_t *> (Value)));
       // for each Listmap
       for (const auto &[Index, Text] : List) {
         if (Counter == 0) {

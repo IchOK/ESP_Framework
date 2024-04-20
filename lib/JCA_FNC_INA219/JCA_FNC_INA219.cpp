@@ -15,31 +15,6 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    const char *INA219::ReadInterval_Name = "ReadInterval";
-    const char *INA219::ReadInterval_Text = "Leseintervall";
-    const char *INA219::ReadInterval_Unit = "s";
-    const char *INA219::ReadInterval_Comment = nullptr;
-    const char *INA219::PowerPlus_Name = "PowerPlus";
-    const char *INA219::PowerPlus_Text = "Leistung Eingang";
-    const char *INA219::PowerPlus_Unit = "W";
-    const char *INA219::PowerPlus_Comment = nullptr;
-    const char *INA219::VoltagePlus_Name = "VoltagePlus";
-    const char *INA219::VoltagePlus_Text = "Spannung Eingang";
-    const char *INA219::VoltagePlus_Unit = "V";
-    const char *INA219::VoltagePlus_Comment = nullptr;
-    const char *INA219::PowerMinus_Name = "PowerMinus";
-    const char *INA219::PowerMinus_Text = "Leistung Ausgang";
-    const char *INA219::PowerMinus_Unit = "W";
-    const char *INA219::PowerMinus_Comment = nullptr;
-    const char *INA219::VoltageMinus_Name = "VoltageMinus";
-    const char *INA219::VoltageMinus_Text = "Spannung Ausgang";
-    const char *INA219::VoltageMinus_Unit = "C";
-    const char *INA219::VoltageMinus_Comment = nullptr;
-    const char *INA219::Current_Name = "Current";
-    const char *INA219::Current_Text = "Strom";
-    const char *INA219::Current_Unit = "A";
-    const char *INA219::Current_Comment = nullptr;
-
     /**
      * @brief Construct a new INA219::INA219 object
      *
@@ -50,6 +25,8 @@ namespace JCA {
     INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name)
         : Parent (_Name), Sensor (_Wire, _Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      createTags();
+
       ReadInterval = 1;
     }
     /**
@@ -61,6 +38,8 @@ namespace JCA {
     INA219::INA219 (const uint8_t _Addr, const char *_Name)
         : Parent (_Name), Sensor (_Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      createTags();
+
       ReadInterval = 1;
     }
     /**
@@ -72,104 +51,20 @@ namespace JCA {
     INA219::INA219 (const char *_Name)
         : Parent (_Name), Sensor () {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      createTags();
+
       ReadInterval = 1;
     }
 
-    /**
-     * @brief Add Config-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Config-Tags ("config": {})
-     */
-    void INA219::createConfigValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[ReadInterval_Name] = ReadInterval;
-    }
+    void INA219::createTags() {
+      // Create Tag-List
+      Tags.push_back (new ElementTagUInt16 ("ReadInterval", "Leseintervall", "", false, ElementTagUsage_T::UseConfig, &ReadInterval, "s"));
 
-    /**
-     * @brief Add Data-Tags to a JSON-Object, containing the current Value
-     *
-     * @param _Values Object to add the Data-Tags ("data": {})
-     */
-    void INA219::createDataValues (JsonObject &_Values) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      _Values[PowerPlus_Name] = PowerPlus;
-      _Values[VoltagePlus_Name] = VoltagePlus;
-      _Values[PowerMinus_Name] = PowerMinus;
-      _Values[VoltageMinus_Name] = VoltageMinus;
-      _Values[Current_Name] = Current;
-    }
-
-    /**
-     * @brief Set the Element Config
-     * Only existing Tags will be updated
-     * @param _Tags Array of Config-Tags ("config": [])
-     */
-    void INA219::setConfig (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        if (Tag[JsonTagName] == ReadInterval_Name) {
-          ReadInterval = Tag[JsonTagValue].as<uint16_t> ();
-          if (Debug.print (FLAG_CONFIG, false, Name, __func__, ReadInterval_Name)) {
-            Debug.print (FLAG_CONFIG, false, Name, __func__, DebugSeparator);
-            Debug.println (FLAG_CONFIG, false, Name, __func__, ReadInterval);
-          }
-        }
-      }
-    }
-
-    /**
-     * @brief Set the Element Data
-     * currently not used
-     * @param _Tags Array of Data-Tags ("data": [])
-     */
-    void INA219::setData (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-    }
-
-    /**
-     * @brief Execute the Commands
-     * currently not used
-     * @param _Tags Array of Commands ("cmd": [])
-     */
-    void INA219::setCmd (JsonArray _Tags) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-    }
-
-    /**
-     * @brief Write the Config-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void INA219::writeSetupConfig (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagConfig) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (ReadInterval_Name, ReadInterval_Text, ReadInterval_Comment, false, ReadInterval_Unit, ReadInterval) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Data-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void INA219::writeSetupData (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      _SetupFile.println (",\"" + String (JsonTagData) + "\":[");
-      _SetupFile.println ("{" + createSetupTag (PowerPlus_Name, PowerPlus_Text, PowerPlus_Comment, true, PowerPlus_Unit, PowerPlus) + "}");
-      _SetupFile.println (",{" + createSetupTag (VoltagePlus_Name, VoltagePlus_Text, VoltagePlus_Comment, true, VoltagePlus_Unit, VoltagePlus) + "}");
-      _SetupFile.println (",{" + createSetupTag (PowerMinus_Name, PowerMinus_Text, PowerMinus_Comment, true, PowerMinus_Unit, PowerMinus) + "}");
-      _SetupFile.println (",{" + createSetupTag (VoltageMinus_Name, VoltageMinus_Text, VoltageMinus_Comment, true, VoltageMinus_Unit, VoltageMinus) + "}");
-      _SetupFile.println (",{" + createSetupTag (Current_Name, Current_Text, Current_Comment, true, Current_Unit, Current) + "}");
-      _SetupFile.println ("]");
-    }
-
-    /**
-     * @brief Write the Command-Tags to Setup-File
-     *
-     * @param _SetupFile File to write
-     */
-    void INA219::writeSetupCmdInfo (File _SetupFile) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
+      Tags.push_back (new ElementTagFloat ("PowerPlus", "Leistung Eingang", "", true, ElementTagUsage_T::UseConfig, &PowerPlus, "W"));
+      Tags.push_back (new ElementTagFloat ("VoltagePlus", "Spannung Eingang", "", true, ElementTagUsage_T::UseConfig, &VoltagePlus, "V"));
+      Tags.push_back (new ElementTagFloat ("PowerMinus", "Leistung Ausgang", "", true, ElementTagUsage_T::UseConfig, &PowerMinus, "W"));
+      Tags.push_back (new ElementTagFloat ("VoltageMinus", "Spannung Ausgang", "", true, ElementTagUsage_T::UseConfig, &VoltageMinus, "V"));
+      Tags.push_back (new ElementTagFloat ("Current", "Strom", "", true, ElementTagUsage_T::UseConfig, &Current, "A"));
     }
 
     /**

@@ -17,6 +17,10 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
+#include <JCA_FNC_ElementTagBool.h>
+#include <JCA_FNC_ElementTagFloat.h>
+#include <JCA_FNC_ElementTagInt16.h>
+#include <JCA_FNC_ElementTagUInt16.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
@@ -24,61 +28,19 @@ namespace JCA {
   namespace FNC {
     class Level : public Parent {
     private:
-      // Datapoint description
-      static const char *RawEmpty_Name;
-      static const char *RawEmpty_Text;
-      static const char *RawEmpty_Unit;
-      static const char *RawEmpty_Comment;
-      static const char *RawFull_Name;
-      static const char *RawFull_Text;
-      static const char *RawFull_Unit;
-      static const char *RawFull_Comment;
-      static const char *AlarmLevel_Name;
-      static const char *AlarmLevel_Text;
-      static const char *AlarmLevel_Unit;
-      static const char *AlarmLevel_Comment;
-      static const char *ReadInterval_Name;
-      static const char *ReadInterval_Text;
-      static const char *ReadInterval_Unit;
-      static const char *ReadInterval_Comment;
-      static const char *Level_Name;
-      static const char *Level_Text;
-      static const char *Level_Unit;
-      static const char *Level_Comment;
-      static const char *Alarm_Name;
-      static const char *Alarm_Text;
-      static const char *Alarm_Comment;
-      static const char *Alarm_TextOn;
-      static const char *Alarm_TextOff;
-      static const char *RawValue_Name;
-      static const char *RawValue_Text;
-      static const char *RawValue_Unit;
-      static const char *RawValue_Comment;
-
-      // Parent Functions
-      void createConfigValues (JsonObject &_Values);
-      void createDataValues (JsonObject &_Values);
-      void setConfig (JsonArray _Tags);
-      void setData (JsonArray _Tags);
-      void setCmd (JsonArray _Tags);
-
-      void writeSetupConfig (File _SetupFile);
-      void writeSetupData (File _SetupFile);
-      void writeSetupCmdInfo (File _SetupFile);
-
       // Hardware
       uint8_t Pin;
 
       // Konfig
-      int RawEmpty;
-      int RawFull;
+      int16_t RawEmpty;
+      int16_t RawFull;
       uint16_t ReadInterval;
       float AlarmLevel;
 
       // Daten
       float Value;
       bool Alarm;
-      int RawValue;
+      int16_t RawValue;
 
       // Intern
       int8_t LastSeconds;

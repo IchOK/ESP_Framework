@@ -17,6 +17,9 @@
 #include <Adafruit_NeoPixel.h>
 #include <time.h>
 
+#include <JCA_FNC_ElementTagBool.h>
+#include <JCA_FNC_ElementTagUInt32.h>
+#include <JCA_FNC_ElementTagUInt16.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
@@ -24,36 +27,6 @@ namespace JCA {
   namespace FNC {
     class LedStrip : public Parent {
     private:
-      // Datapoint description
-      static const char *DelayAutoOff_Name;
-      static const char *DelayAutoOff_Text;
-      static const char *DelayAutoOff_Unit;
-      static const char *DelayAutoOff_Comment;
-      static const char *OnOff_Name;
-      static const char *OnOff_Text;
-      static const char *OnOff_Comment;
-      static const char *OnOff_TextOn;
-      static const char *OnOff_TextOff;
-      static const char *DelayCounter_Name;
-      static const char *DelayCounter_Text;
-      static const char *DelayCounter_Unit;
-      static const char *DelayCounter_Comment;
-      static const char *Value_Name;
-      static const char *Value_Text;
-      static const char *Value_Unit;
-      static const char *Value_Comment;
-
-      // Parent Functions
-      void createConfigValues (JsonObject &_Values);
-      void createDataValues (JsonObject &_Values);
-      void setConfig (JsonArray _Tags);
-      void setData (JsonArray _Tags);
-      void setCmd (JsonArray _Tags);
-
-      void writeSetupConfig (File _SetupFile);
-      void writeSetupData (File _SetupFile);
-      void writeSetupCmdInfo (File _SetupFile);
-
       // Hardware
       Adafruit_NeoPixel Strip;
 
@@ -69,6 +42,7 @@ namespace JCA {
       uint32_t LastMillis;
       uint16_t UpdateMillis;
       uint16_t DelayMillis;
+      void updateColorCB ();
 
     public:
       LedStrip (uint8_t _Pin, uint8_t _NumLeds, neoPixelType _Type, const char *_Name);

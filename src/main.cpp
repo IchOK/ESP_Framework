@@ -61,11 +61,14 @@ void cbSystemReset () {
 }
 void cbSaveConfig () {
   File ConfigFile = LittleFS.open (CONFIGPATH, "w");
+  Debug.print (FLAG_CONFIG, false, "main", __func__, "File: ");
+  Debug.println (FLAG_CONFIG, false, "main", __func__, ConfigFile.name());
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
   Server.writeSetup (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
+  Debug.println (FLAG_CONFIG, false, "main", __func__, "File closed");
 }
 
 void getAllValues (JsonVariant &_Out) {
@@ -140,7 +143,7 @@ void setup () {
   DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
-  // DebugFlags |= FLAG_PROTOCOL;
+  DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 

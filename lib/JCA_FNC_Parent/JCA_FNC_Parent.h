@@ -42,19 +42,6 @@ namespace JCA {
       JsonVariant findCmd (JsonArray &_Elements);
 
       // Create Parent-Structure
-      String createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value);
-      String createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value);
-      String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type);
-      String createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText);
-
       // Functions Get/Set Data from/to Tag-Vector
       void createTagValueObject (JsonObject &_Values, ElementTagUsage_T _FilterUsage);
       void setTagValues (JsonArray _Tags, ElementTagUsage_T _FilterUsage);

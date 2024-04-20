@@ -51,6 +51,9 @@
 
 #include <ESP32Time.h>
 
+#include <JCA_FNC_ElementTagUInt32.h>
+#include <JCA_FNC_ElementTagString.h>
+#include <JCA_FNC_ElementTagBool.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
 #include <JCA_IOT_Webserver_SVGs.h>
@@ -91,6 +94,7 @@
 #define JCA_IOT_WEBSERVER_PATH_SYS_RESET "/reset"
 #define JCA_IOT_WEBSERVER_PATH_HOME "/home.htm"
 #define JCA_IOT_WEBSERVER_PATH_CONFIG "/config.htm"
+#define JCA_IOT_WEBSERVER_PATH_CONFIGSAVE "/configSave"
 // Time settings
 #define JCA_IOT_WEBSERVER_TIME_OFFSET 3600
 #define JCA_IOT_WEBSERVER_TIME_VALID 1609459200
@@ -106,26 +110,7 @@ namespace JCA {
     private:
       // ...Webserver_System.cpp
       static const char *ElementName;
-      static const char *Hostname_Name;
-      static const char *Hostname_Text;
-      static const char *Hostname_Comment;
-      static const char *WsUpdateCycle_Name;
-      static const char *WsUpdateCycle_Text;
-      static const char *WsUpdateCycle_Unit;
-      static const char *WsUpdateCycle_Comment;
-      static const char *TimeSync_Name;
-      static const char *TimeSync_Text;
-      static const char *TimeSync_Type;
-      static const char *TimeSync_Comment;
-      static const char *SaveConfig_Name;
-      static const char *SaveConfig_Text;
-      static const char *SaveConfig_Type;
-      static const char *SaveConfig_Comment;
-      static const char *SaveConfig_BtnText;
-      static const char *Time_Name;
-      static const char *Time_Text;
-      static const char *Time_Comment;
-      char Hostname[80];
+      String Hostname;
       char ConfUser[80];
       char ConfPassword[80];
       char Firmware[80];
@@ -141,15 +126,9 @@ namespace JCA {
       bool readConfig ();
 
       // Protocol Functions
-      void createConfigValues (JsonObject &_Values);
-      void createDataValues (JsonObject &_Values);
-      void setConfig (JsonArray _Tags);
-      void setData (JsonArray _Tags);
-      void setCmd (JsonArray _Tags);
-
-      void writeSetupConfig (File _SetupFile);
-      void writeSetupData (File _SetupFile);
-      void writeSetupCmdInfo (File _SetupFile);
+      String Time;
+      uint32_t TimeSync;
+      void setTimeCB();
 
       // ...Webserver_Web.cpp
       AwsTemplateProcessor replaceHomeWildcardsCB;

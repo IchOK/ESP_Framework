@@ -110,238 +110,6 @@ namespace JCA {
       return JsonVariant ();
     }
 
-    String Parent::createDefaultTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly) {
-      String SetupTag;
-      SetupTag += "\"" + String (JsonTagName) + "\":\"" + String (_Name) + "\"";
-      SetupTag += ",\"" + String (JsonTagText) + "\":\"" + String (_Text) + "\"";
-      if (_Comment != nullptr) {
-        SetupTag += ",\"" + String (JsonTagComment) + "\":\"" + String (_Comment) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagReadOnly) + "\":" + String (_ReadOnly);
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a bool-/Button-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Button-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _BtnOnText Buttontext if Value is True, if not defined (nullptr) set to "ON"
-     * @param _BntOffText Buttontext if Value is False, if not defined (nullptr) set to "OFF"
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_BtnOnText, const char *_BtnOffText, bool _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_BtnOnText != nullptr) {
-        SetupTag += ",\"" + String (JsonTagOn) + "\":\"" + String (_BtnOnText) + "\"";
-      } else {
-        SetupTag += ",\"" + String (JsonTagOn) + "\":\"" + String (BtnOnDefault) + "\"";
-      }
-      if (_BtnOffText != nullptr) {
-        SetupTag += ",\"" + String (JsonTagOff) + "\":\"" + String (_BtnOffText) + "\"";
-      } else {
-        SetupTag += ",\"" + String (JsonTagOff) + "\":\"" + String (BtnOffDefault) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":";
-      if (_Value) {
-        SetupTag += "true";
-      } else {
-        SetupTag += "false";
-      }
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Value-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Value-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Unit Unit, if not used set nullptr
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, float _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_Unit != nullptr) {
-        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
-      }
-      if (!isnan (_Value) && !isinf (_Value)) {
-        SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
-      }
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Value-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Value-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Unit Unit, if not used set nullptr
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int16_t _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_Unit != nullptr) {
-        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Value-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Value-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Unit Unit, if not used set nullptr
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint16_t _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_Unit != nullptr) {
-        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Value-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Value-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Unit Unit, if not used set nullptr
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, int32_t _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_Unit != nullptr) {
-        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Value-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Value-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Unit Unit, if not used set nullptr
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, uint32_t _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_Unit != nullptr) {
-        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Value-Tag to the Array
-     * use createEmptyTag to create the Body and attach the Value-Information
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Unit Unit, if not used set nullptr
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Unit, long _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      if (_Unit != nullptr) {
-        SetupTag += ",\"" + String (JsonTagUnit) + "\":\"" + String (_Unit) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagValue) + "\":" + String (_Value);
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a String-Tag to the Array
-     * use createEmptyTag to create the Body and attach the String
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, String _Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      SetupTag += ",\"" + String (JsonTagValue) + "\":\"" + _Value + "\"";
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a String-Tag to the Array
-     * use createEmptyTag to create the Body and attach the String
-     * @param _Tags Array of Tags like Data ("data": []) or Config
-     * @param _Name Name of the Tag to add
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _ReadOnly Disable Input on Website
-     * @param _Value Current value of the Tag
-     */
-    String Parent::createSetupTag (const char *_Name, const char *_Text, const char *_Comment, bool _ReadOnly, const char *_Value) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, _ReadOnly);
-      SetupTag += ",\"" + String (JsonTagValue) + "\":\"" + String (_Value) + "\"";
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Command-Info-Tag to the Array
-     * use createEmptyTag to create the Body and attach the String
-     * @param _Tags Array of Command-Inormations ("cmdInfo": [])
-     * @param _Name Name of the Command
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _Type Type for the HMI to know what ist requested (boot, in16, string, ...)
-     */
-    String Parent::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
-      SetupTag += ",\"" + String (JsonTagType) + "\":\"" + String (_Type) + "\"";
-      return SetupTag;
-    }
-
-    /**
-     * @brief Add a Button-Command-Info to the Array
-     * contains additional Information for Button dynamic
-     * @param _Tags Array of Command-Inormations ("cmdInfo": [])
-     * @param _Name Name of the Command
-     * @param _Text Text for Website Lable
-     * @param _Comment Comment, if not used set nullptr
-     * @param _Type sould be bool
-     * @param _BtnText Buttontext, if not defined (nullptr) set to "ON"
-     */
-    String Parent::createSetupCmdInfo (const char *_Name, const char *_Text, const char *_Comment, const char *_Type, const char *_BtnText) {
-      String SetupTag = createDefaultTag (_Name, _Text, _Comment, false);
-      if (_BtnText != nullptr) {
-        SetupTag += ",\"" + String (JsonTagOff) + "\":\"" + String (_BtnText) + "\"";
-      }
-      SetupTag += ",\"" + String (JsonTagType) + "\":\"" + String (_Type) + "\"";
-      return SetupTag;
-    }
-
     void Parent::createTagValueObject (JsonObject &_Values, ElementTagUsage_T _FilterUsage) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
       if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
@@ -458,17 +226,14 @@ namespace JCA {
       JsonVariant _Tags;
       _Tags = findConfig (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        //setConfig (_Tags.as<JsonArray> ());
         setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseConfig);
       }
       _Tags = findData (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        //setData (_Tags.as<JsonArray> ());
         setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseData);
       }
       _Tags = findCmd (_Elements);
       if (_Tags.is<JsonArray> ()) {
-        //setCmd (_Tags.as<JsonArray> ());
         setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseCmd);
       }
     }
@@ -482,10 +247,8 @@ namespace JCA {
       JsonObject Element = _Elements.createNestedObject (Name);
       JsonObject Values;
       Values = Element.createNestedObject (JsonTagData);
-      //createDataValues (Values);
       createTagValueObject (Values, ElementTagUsage_T::UseData);
       Values = Element.createNestedObject (JsonTagConfig);
-      //createConfigValues (Values);
       createTagValueObject (Values, ElementTagUsage_T::UseConfig);
     }
 
@@ -506,11 +269,8 @@ namespace JCA {
       if (Comment.length () > 0) {
         _SetupFile.println (",\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
       }
-      //writeSetupConfig (_SetupFile);
       writeSetupTags (_SetupFile, ElementTagUsage_T::UseConfig);
-      //writeSetupData (_SetupFile);
       writeSetupTags (_SetupFile, ElementTagUsage_T::UseData);
-      //writeSetupCmdInfo (_SetupFile);
       writeSetupTags (_SetupFile, ElementTagUsage_T::UseCmd);
       _SetupFile.println ("}");
     }

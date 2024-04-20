@@ -40,8 +40,8 @@ namespace JCA {
       String SetupTag;
       SetupTag += "\"" + String (JCA_FNC_ELEMENTTAGS_JsonName) + "\":\"" + Name + "\"";
       SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonText) + "\":\"" + Text + "\"";
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonType) + "\":\"" + String(Type) + "\"";
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonReadOnly) + "\":\"" + String(ReadOnly) + "\"";
+      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonType) + "\":" + String(Type);
+      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonReadOnly) + "\":" + String(ReadOnly);
       if (Comment.length() > 0) {
         SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonComment) + "\":\"" + String (Comment) + "\"";
       }
