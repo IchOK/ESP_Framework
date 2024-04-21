@@ -1,5 +1,5 @@
 /**
- * @file JCA_FNC_ElementTagUInt16.h
+ * @file JCA_TAG_TAGUInt16.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
  * @version 1.0
@@ -10,13 +10,13 @@
  *
  */
 
-#include <JCA_FNC_ElementTagUInt16.h>
+#include <JCA_TAG_TagUInt16.h>
 using namespace JCA::SYS;
 
 namespace JCA {
-  namespace FNC {
+  namespace TAG {
     /**
-     * @brief Construct a new ElementTagUInt16::ElementTagUInt16 object
+     * @brief Construct a new TagUInt16::TagUInt16 object
      *
      * @param _Name Name of the Element (in JSON)
      * @param _Text Text showen on the website
@@ -27,14 +27,25 @@ namespace JCA {
      * @param _Unit Unit of the Tag, showen on the website
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
-    ElementTagUInt16::ElementTagUInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint16_t *_Value, String _Unit, SetCallback _CB)
-        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage, _CB) {
+    TagUInt16::TagUInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint16_t *_Value, String _Unit, SetCallback _CB)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage, _CB) {
       Unit = _Unit;
     }
 
-    ElementTagUInt16::ElementTagUInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, uint16_t *_Value, String _Unit)
-        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage) {
+    TagUInt16::TagUInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint16_t *_Value, String _Unit)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage) {
       Unit = _Unit;
+    }
+
+    /**
+     * @brief Create the complete Json-String of the Tag-Data
+     *
+     * @return String Json-String
+     */
+    String TagUInt16::writeTag () {
+      String SetupTag = writeTagBase ();
+      SetupTag += ",\"" + String (JCA_TAG_TAGS_JsonUnit) + "\":\"" + Unit + "\"";
+      return SetupTag;
     }
 
     /**
@@ -44,7 +55,7 @@ namespace JCA {
      * @return true Value was successfully written to _Value
      * @return false something failed
      */
-    bool ElementTagUInt16::getValue (JsonVariant _Value) {
+    bool TagUInt16::getValue (JsonVariant _Value) {
       return _Value.set (*(static_cast<uint16_t *> (Value)));
     }
 
@@ -55,7 +66,7 @@ namespace JCA {
      * @return true Tag-Value was successfully set
      * @return false something failed
      */
-    bool ElementTagUInt16::setValue (JsonVariant _Value) {
+    bool TagUInt16::setValue (JsonVariant _Value) {
       *(static_cast<uint16_t *> (Value)) = _Value.as<uint16_t> ();
       if (afterSetCB) {
         afterSetCB ();
@@ -64,34 +75,11 @@ namespace JCA {
     }
 
     /**
-     * @brief Create the complete Json-String of the Tag-Data
-     *
-     * @return String Json-String
-     */
-    String ElementTagUInt16::createSetupTag () {
-      String SetupTag = createSetupTagBase ();
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":" + String (*(static_cast<uint16_t *> (Value)));
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonUnit) + "\":\"" + Unit + "\"";
-      return SetupTag;
-    }
-
-    /**
-     * @brief Create JsonObject with all Tag informations
-     *
-     * @param _Tag Reference to tha JsonObject
-     */
-    void ElementTagUInt16::getTagObject (JsonObject &_Tag) {
-      getBaseObject (_Tag);
-      _Tag[JCA_FNC_ELEMENTTAGS_JsonValue] = *(static_cast<uint16_t *> (Value));
-      _Tag[JCA_FNC_ELEMENTTAGS_JsonUnit] = Unit;
-    }
-
-    /**
      * @brief Create a key-value-pair of the Tag inside an JsonObject
      *
      * @param _Values Reference to tha JsonObject
      */
-    void ElementTagUInt16::addTagValue (JsonObject &_Values) {
+    void TagUInt16::addValue (JsonObject &_Values) {
       _Values[Name] = *(static_cast<uint16_t *> (Value));
     }
   }

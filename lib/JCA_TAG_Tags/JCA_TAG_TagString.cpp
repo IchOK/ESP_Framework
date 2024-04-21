@@ -1,5 +1,5 @@
 /**
- * @file JCA_FNC_ElementTagString.h
+ * @file JCA_TAG_TAGString.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
  * @version 1.0
@@ -10,13 +10,13 @@
  *
  */
 
-#include <JCA_FNC_ElementTagString.h>
+#include <JCA_TAG_TagString.h>
 using namespace JCA::SYS;
 
 namespace JCA {
-  namespace FNC {
+  namespace TAG {
     /**
-     * @brief Construct a new ElementTagString::ElementTagString object
+     * @brief Construct a new TagString::TagString object
      *
      * @param _Name Name of the Element (in JSON)
      * @param _Text Text showen on the website
@@ -26,13 +26,23 @@ namespace JCA {
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
-    ElementTagString::ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value, SetCallback _CB)
-        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage, _CB) {
+    TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value, SetCallback _CB)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage, _CB) {
     }
 
-    ElementTagString::ElementTagString (String _Name, String _Text, String _Comment, bool _ReadOnly, ElementTagUsage_T _Usage, String *_Value)
-        : ElementTag (_Name, _Text, _Comment, _ReadOnly, _Value, ElementTagTypes_T::TagFloat, _Usage) {
+    TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage) {
     }
+
+    /**
+     * @brief Create the complete Json-String of the Tag-Data
+     *
+     * @return String Json-String
+     */
+    String TagString::writeTag () {
+      return writeTagBase ();
+    }
+
     /**
      * @brief Get the Value into an JsonVariant
      *
@@ -40,7 +50,7 @@ namespace JCA {
      * @return true Value was successfully written to _Value
      * @return false something failed
      */
-    bool ElementTagString::getValue (JsonVariant _Value) {
+    bool TagString::getValue (JsonVariant _Value) {
       return _Value.set (*(static_cast<String *> (Value)));
     }
 
@@ -51,7 +61,7 @@ namespace JCA {
      * @return true Tag-Value was successfully set
      * @return false something failed
      */
-    bool ElementTagString::setValue (JsonVariant _Value) {
+    bool TagString::setValue (JsonVariant _Value) {
       *(static_cast<String *> (Value)) = _Value.as<String> ();
       if (afterSetCB) {
         afterSetCB ();
@@ -60,32 +70,11 @@ namespace JCA {
     }
 
     /**
-     * @brief Create the complete Json-String of the Tag-Data
-     *
-     * @return String Json-String
-     */
-    String ElementTagString::createSetupTag () {
-      String SetupTag = createSetupTagBase ();
-      SetupTag += ",\"" + String (JCA_FNC_ELEMENTTAGS_JsonValue) + "\":\"" + String (*(static_cast<String *> (Value))) + "\"";
-      return SetupTag;
-    }
-
-    /**
-     * @brief Create JsonObject with all Tag informations
-     *
-     * @param _Tag Reference to tha JsonObject
-     */
-    void ElementTagString::getTagObject (JsonObject &_Tag) {
-      getBaseObject (_Tag);
-      _Tag[JCA_FNC_ELEMENTTAGS_JsonValue] = *(static_cast<String *> (Value));
-    }
-
-    /**
      * @brief Create a key-value-pair of the Tag inside an JsonObject
      *
      * @param _Values Reference to tha JsonObject
      */
-    void ElementTagString::addTagValue (JsonObject &_Values) {
+    void TagString::addValue (JsonObject &_Values) {
       _Values[Name] = *(static_cast<String *> (Value));
     }
   }

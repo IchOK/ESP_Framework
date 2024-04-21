@@ -12,6 +12,7 @@
 
 #include <JCA_FNC_LedStrip.h>
 using namespace JCA::SYS;
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
@@ -22,14 +23,14 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     LedStrip::LedStrip (uint8_t _Pin, uint8_t _NumLeds, neoPixelType _Type, const char *_Name)
-        : Parent (_Name), Strip (_NumLeds, _Pin, _Type) {
+        : FuncParent (_Name), Strip (_NumLeds, _Pin, _Type) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new ElementTagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, ElementTagUsage_T::UseConfig, &DelayAutoOff, "Min"));
+      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, TagUsage_T::UseConfig, &DelayAutoOff, "Min"));
 
-      Tags.push_back (new ElementTagBool ("OnOff", "Einschalten", "", false, ElementTagUsage_T::UseData, &OnOff, "EIN", "AUS", std::bind (&LedStrip::updateColorCB, this)));
-      Tags.push_back (new ElementTagUInt32 ("Value", "Farbwert", "", false, ElementTagUsage_T::UseData, &Value, "COLOR", std::bind (&LedStrip::updateColorCB, this)));
-      Tags.push_back (new ElementTagUInt16 ("DelayCounter", "Verzögerung bis AUS", "", false, ElementTagUsage_T::UseData, &DelayCounter, "Min"));
+      Tags.push_back (new TagBool ("OnOff", "Einschalten", "", false, TagUsage_T::UseData, &OnOff, "EIN", "AUS", std::bind (&LedStrip::updateColorCB, this)));
+      Tags.push_back (new TagUInt32 ("Value", "Farbwert", "", false, TagUsage_T::UseData, &Value, "COLOR", std::bind (&LedStrip::updateColorCB, this)));
+      Tags.push_back (new TagUInt16 ("DelayCounter", "Verzögerung bis AUS", "", false, TagUsage_T::UseData, &DelayCounter, "Min"));
 
       DelayAutoOff = 0;
       OnOff = true;

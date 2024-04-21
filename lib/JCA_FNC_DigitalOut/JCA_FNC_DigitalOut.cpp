@@ -12,6 +12,7 @@
 
 #include <JCA_FNC_DigitalOut.h>
 using namespace JCA::SYS;
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
@@ -22,13 +23,13 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     DigitalOut::DigitalOut (uint8_t _Pin, const char *_Name)
-        : Parent (_Name) {
+        : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new ElementTagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, ElementTagUsage_T::UseConfig, &DelayAutoOff, "Min", nullptr));
+      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, TagUsage_T::UseConfig, &DelayAutoOff, "Min", nullptr));
 
-      Tags.push_back (new ElementTagBool ("Value", "Eingeschaltet", "", false, ElementTagUsage_T::UseData, &Value, "EIN", "AUS"));
-      Tags.push_back(new ElementTagUInt16("DelayCounter", "Verzögerung Zähler", "", true, ElementTagUsage_T::UseData, &DelayCounter, "Min"));
+      Tags.push_back (new TagBool ("Value", "Eingeschaltet", "", false, TagUsage_T::UseData, &Value, "EIN", "AUS"));
+      Tags.push_back(new TagUInt16("DelayCounter", "Verzögerung Zähler", "", true, TagUsage_T::UseData, &DelayCounter, "Min"));
       // Init Data
       DelayAutoOff = 0;
       Pin = _Pin;

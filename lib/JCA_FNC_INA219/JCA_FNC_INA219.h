@@ -16,14 +16,14 @@
 #include <ArduinoJson.h>
 #include <INA219_WE.h>
 
-#include <JCA_FNC_ElementTagFloat.h>
-#include <JCA_FNC_ElementTagUInt16.h>
+#include <JCA_TAG_TagFloat.h>
+#include <JCA_TAG_TagUInt16.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
-    class INA219 : public Parent {
+    class INA219 : public FuncParent {
     private:
       // Hardware
       INA219_WE Sensor;

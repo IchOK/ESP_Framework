@@ -16,10 +16,10 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_FNC_ElementTagBool.h>
-#include <JCA_FNC_ElementTagFloat.h>
-#include <JCA_FNC_ElementTagUInt16.h>
-#include <JCA_FNC_ElementTagListUInt8.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagFloat.h>
+#include <JCA_TAG_TagUInt16.h>
+#include <JCA_TAG_TagListUInt8.h>
 #include <JCA_FNC_INA219.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
@@ -40,7 +40,7 @@ namespace JCA {
       FAULT
     };
 
-    class Charger : public Parent {
+    class Charger : public FuncParent {
     private:
       static const float CurrentHyst;
       static const float VoltageHyst;
@@ -94,9 +94,10 @@ namespace JCA {
       float DischargeSave;
 
     public:
-        Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
+      Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
       bool init ();
       void update (struct tm &_Time);
+      static bool create(JsonObject _Config, std::vector<FuncParent*>& _Functions);
     };
   }
 }

@@ -17,15 +17,15 @@
 #include <Adafruit_NeoPixel.h>
 #include <time.h>
 
-#include <JCA_FNC_ElementTagBool.h>
-#include <JCA_FNC_ElementTagUInt32.h>
-#include <JCA_FNC_ElementTagUInt16.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagUInt32.h>
+#include <JCA_TAG_TagUInt16.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
-    class LedStrip : public Parent {
+    class LedStrip : public FuncParent {
     private:
       // Hardware
       Adafruit_NeoPixel Strip;

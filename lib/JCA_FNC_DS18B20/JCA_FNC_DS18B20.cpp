@@ -12,6 +12,7 @@
 
 #include <JCA_FNC_DS18B20.h>
 using namespace JCA::SYS;
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
@@ -22,14 +23,14 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     DS18B20::DS18B20 (OneWire *_Wire, const char *_Name)
-        : Parent (_Name) {
+        : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new ElementTagFloat ("Filter", "Filterkonstante", "", false, ElementTagUsage_T::UseConfig, &Filter, "s"));
-      Tags.push_back (new ElementTagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", false, ElementTagUsage_T::UseConfig, &Addr[0], 8));
-      Tags.push_back (new ElementTagUInt16 ("ReadInterval", "Leseintervall", "", false, ElementTagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagFloat ("Filter", "Filterkonstante", "", false, TagUsage_T::UseConfig, &Filter, "s"));
+      Tags.push_back (new TagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", false, TagUsage_T::UseConfig, &Addr[0], 8));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new ElementTagFloat ("Temp", "Temperatur", "", true, ElementTagUsage_T::UseData, &Value, "°C"));
+      Tags.push_back (new TagFloat ("Temp", "Temperatur", "", true, TagUsage_T::UseData, &Value, "°C"));
       // Init Data
       Wire = _Wire;
       Addr[0] = 0;

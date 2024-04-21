@@ -12,6 +12,7 @@
 
 #include <JCA_FNC_INA219.h>
 using namespace JCA::SYS;
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
@@ -23,7 +24,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name)
-        : Parent (_Name), Sensor (_Wire, _Addr) {
+        : FuncParent (_Name), Sensor (_Wire, _Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       createTags();
 
@@ -36,7 +37,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     INA219::INA219 (const uint8_t _Addr, const char *_Name)
-        : Parent (_Name), Sensor (_Addr) {
+        : FuncParent (_Name), Sensor (_Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       createTags();
 
@@ -49,7 +50,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     INA219::INA219 (const char *_Name)
-        : Parent (_Name), Sensor () {
+        : FuncParent (_Name), Sensor () {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       createTags();
 
@@ -58,13 +59,13 @@ namespace JCA {
 
     void INA219::createTags() {
       // Create Tag-List
-      Tags.push_back (new ElementTagUInt16 ("ReadInterval", "Leseintervall", "", false, ElementTagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new ElementTagFloat ("PowerPlus", "Leistung Eingang", "", true, ElementTagUsage_T::UseConfig, &PowerPlus, "W"));
-      Tags.push_back (new ElementTagFloat ("VoltagePlus", "Spannung Eingang", "", true, ElementTagUsage_T::UseConfig, &VoltagePlus, "V"));
-      Tags.push_back (new ElementTagFloat ("PowerMinus", "Leistung Ausgang", "", true, ElementTagUsage_T::UseConfig, &PowerMinus, "W"));
-      Tags.push_back (new ElementTagFloat ("VoltageMinus", "Spannung Ausgang", "", true, ElementTagUsage_T::UseConfig, &VoltageMinus, "V"));
-      Tags.push_back (new ElementTagFloat ("Current", "Strom", "", true, ElementTagUsage_T::UseConfig, &Current, "A"));
+      Tags.push_back (new TagFloat ("PowerPlus", "Leistung Eingang", "", true, TagUsage_T::UseConfig, &PowerPlus, "W"));
+      Tags.push_back (new TagFloat ("VoltagePlus", "Spannung Eingang", "", true, TagUsage_T::UseConfig, &VoltagePlus, "V"));
+      Tags.push_back (new TagFloat ("PowerMinus", "Leistung Ausgang", "", true, TagUsage_T::UseConfig, &PowerMinus, "W"));
+      Tags.push_back (new TagFloat ("VoltageMinus", "Spannung Ausgang", "", true, TagUsage_T::UseConfig, &VoltageMinus, "V"));
+      Tags.push_back (new TagFloat ("Current", "Strom", "", true, TagUsage_T::UseConfig, &Current, "A"));
     }
 
     /**

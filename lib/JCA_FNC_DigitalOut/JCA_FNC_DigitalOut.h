@@ -18,12 +18,12 @@
 
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
-#include <JCA_FNC_ElementTagBool.h>
-#include <JCA_FNC_ElementTagUInt16.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagUInt16.h>
 
 namespace JCA {
   namespace FNC {
-    class DigitalOut : public Parent {
+    class DigitalOut : public FuncParent {
     private:
       // Hardware
       uint8_t Pin;

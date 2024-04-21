@@ -51,9 +51,9 @@
 
 #include <ESP32Time.h>
 
-#include <JCA_FNC_ElementTagUInt32.h>
-#include <JCA_FNC_ElementTagString.h>
-#include <JCA_FNC_ElementTagBool.h>
+#include <JCA_TAG_TagUInt32.h>
+#include <JCA_TAG_TagString.h>
+#include <JCA_TAG_TagBool.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
 #include <JCA_IOT_Webserver_SVGs.h>
@@ -106,7 +106,7 @@ namespace JCA {
     typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
-    class Webserver : public JCA::FNC::Parent {
+    class Webserver : public JCA::FNC::FuncParent {
     private:
       // ...Webserver_System.cpp
       static const char *ElementName;

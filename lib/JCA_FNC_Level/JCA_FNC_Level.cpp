@@ -12,6 +12,7 @@
 
 #include <JCA_FNC_Level.h>
 using namespace JCA::SYS;
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
@@ -22,17 +23,17 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     Level::Level (uint8_t _Pin, const char *_Name)
-        : Parent (_Name) {
+        : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new ElementTagInt16 ("RawEmpty", "Rohwert Leer", "", false, ElementTagUsage_T::UseConfig, &RawEmpty, "#"));
-      Tags.push_back (new ElementTagInt16 ("RawFull", "Rohwert Voll", "", false, ElementTagUsage_T::UseConfig, &RawFull, "#"));
-      Tags.push_back (new ElementTagFloat ("AlarmLevel", "Alarm Grenzwer", "", false, ElementTagUsage_T::UseConfig, &AlarmLevel, "%"));
-      Tags.push_back (new ElementTagUInt16 ("ReadInterval", "Leseintervall", "", false, ElementTagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagInt16 ("RawEmpty", "Rohwert Leer", "", false, TagUsage_T::UseConfig, &RawEmpty, "#"));
+      Tags.push_back (new TagInt16 ("RawFull", "Rohwert Voll", "", false, TagUsage_T::UseConfig, &RawFull, "#"));
+      Tags.push_back (new TagFloat ("AlarmLevel", "Alarm Grenzwer", "", false, TagUsage_T::UseConfig, &AlarmLevel, "%"));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new ElementTagFloat ("Value", "Niveau", "", true, ElementTagUsage_T::UseData, &Value, "%"));
-      Tags.push_back (new ElementTagBool ("Alarm", "Alarm", "", true, ElementTagUsage_T::UseData, &Alarm, "EIN", "AUS"));
-      Tags.push_back (new ElementTagInt16 ("RawValue", "Rohwert", "", true, ElementTagUsage_T::UseData, &RawValue, "#"));
+      Tags.push_back (new TagFloat ("Value", "Niveau", "", true, TagUsage_T::UseData, &Value, "%"));
+      Tags.push_back (new TagBool ("Alarm", "Alarm", "", true, TagUsage_T::UseData, &Alarm, "EIN", "AUS"));
+      Tags.push_back (new TagInt16 ("RawValue", "Rohwert", "", true, TagUsage_T::UseData, &RawValue, "#"));
 
       RawEmpty = 0;
       RawFull = 1024;

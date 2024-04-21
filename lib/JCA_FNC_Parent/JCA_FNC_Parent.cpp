@@ -15,24 +15,22 @@ using namespace JCA::SYS;
 
 namespace JCA {
   namespace FNC {
-    const char *Parent::JsonTagElements = "elements";
-    const char *Parent::JsonTagConfig = "config";
-    const char *Parent::JsonTagData = "data";
-    const char *Parent::JsonTagCmdInfo = "cmdInfo";
-    const char *Parent::JsonTagAll = "all";
-    const char *Parent::JsonTagCmd = "cmd";
-    const char *Parent::JsonTagName = "name";
-    const char *Parent::JsonTagText = "text";
-    const char *Parent::JsonTagComment = "comment";
-    const char *Parent::JsonTagValue = "value";
-    const char *Parent::JsonTagUnit = "unit";
-    const char *Parent::JsonTagOn = "on";
-    const char *Parent::JsonTagOff = "off";
-    const char *Parent::JsonTagType = "type";
-    const char *Parent::JsonTagReadOnly = "readOnly";
-    const char *Parent::BtnOnDefault = "ON";
-    const char *Parent::BtnOffDefault = "OFF";
-    const char *Parent::DebugSeparator = " - ";
+    const char *FuncParent::JsonTagElements = "elements";
+    const char *FuncParent::JsonTagConfig = "config";
+    const char *FuncParent::JsonTagData = "data";
+    const char *FuncParent::JsonTagCmdInfo = "cmdInfo";
+    const char *FuncParent::JsonTagAll = "all";
+    const char *FuncParent::JsonTagCmd = "cmd";
+    const char *FuncParent::JsonTagName = "name";
+    const char *FuncParent::JsonTagText = "text";
+    const char *FuncParent::JsonTagComment = "comment";
+    const char *FuncParent::JsonTagValue = "value";
+    const char *FuncParent::JsonTagUnit = "unit";
+    const char *FuncParent::JsonTagOn = "on";
+    const char *FuncParent::JsonTagOff = "off";
+    const char *FuncParent::JsonTagType = "type";
+    const char *FuncParent::JsonTagReadOnly = "readOnly";
+    const char *FuncParent::DebugSeparator = " - ";
 
     /**
      * @brief Construct a new Parent::Parent object
@@ -40,7 +38,7 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      * @param _Comment Comment if requested
      */
-    Parent::Parent (String _Name, String _Comment) {
+    FuncParent::FuncParent (String _Name, String _Comment) {
       Name = _Name;
       Comment = _Comment;
     }
@@ -50,101 +48,26 @@ namespace JCA {
      *
      * @param _Name Element Name inside the Communication
      */
-    Parent::Parent (String _Name) : Parent (_Name, "") {
+    FuncParent::FuncParent (String _Name) : FuncParent (_Name, "") {
     }
 
     /**
-     * @brief Search the Config-Block ("config": []) of the Element
-     * The Functions first search the Element inside the Elements-Array by Name,
-     * Then returns the Config-Tags Array if extist
-     * @param _Elements Array of Elements ("elements": [])
-     * @return JsonVariant if not found returns an empty Variant
+     * @brief 
+     * 
+     * @param _FuncFile 
+     * @param _FilterUsage 
      */
-    JsonVariant Parent::findConfig (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      for (JsonObject Element : _Elements) {
-        if (Element[JsonTagName] == Name) {
-          if (Element.containsKey (JsonTagConfig)) {
-            return Element[JsonTagConfig];
-          }
-        }
-      }
-      return JsonVariant ();
-    }
-
-    /**
-     * @brief Search the Data-Block ("data": []) of the Element
-     * The Functions first search the Element inside the Elements-Array by Name,
-     * Then returns the Data-Tags Array if extist
-     * @param _Elements Array of Elements ("elements": [])
-     * @return JsonVariant if not found returns an empty Variant
-     */
-    JsonVariant Parent::findData (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      for (JsonObject Element : _Elements) {
-        if (Element[JsonTagName] == Name) {
-          if (Element.containsKey (JsonTagData)) {
-            return Element[JsonTagData];
-          }
-        }
-      }
-      return JsonVariant ();
-    }
-
-    /**
-     * @brief Search the Command-Block ("cmd": []) of the Element
-     * The Functions first search the Element inside the Elements-Array by Name,
-     * Then returns the Command-Tags Array if extist
-     * @param _Elements Array of Elements ("elements": [])
-     * @return JsonVariant if not found returns an empty Variant
-     */
-    JsonVariant Parent::findCmd (JsonArray &_Elements) {
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      for (JsonObject Element : _Elements) {
-        if (Element[JsonTagName] == Name) {
-          if (Element.containsKey (JsonTagCmd)) {
-            return Element[JsonTagCmd];
-          }
-        }
-      }
-      return JsonVariant ();
-    }
-
-    void Parent::createTagValueObject (JsonObject &_Values, ElementTagUsage_T _FilterUsage) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
-        for (int16_t i = 0; i < Tags.size (); i++) {
-          Tags[i]->addTagValue (_Values);
-        }
-      } else {
-        for (int16_t i = 0; i < Tags.size (); i++) {
-          if (Tags[i]->Usage == _FilterUsage) {
-            Tags[i]->addTagValue (_Values);
-          }
-        }
-      }
-    }
-
-    void Parent::setTagValues (JsonArray _Tags, ElementTagUsage_T _FilterUsage) {
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Set");
-      for (JsonObject Tag : _Tags) {
-        setTagValueByName (Tag[JCA_FNC_ELEMENTTAGS_JsonName].as<String> (), Tag[JCA_FNC_ELEMENTTAGS_JsonValue], _FilterUsage);
-      }
-    }
-
-    void Parent::writeSetupTags (File _SetupFile, ElementTagUsage_T _FilterUsage) {
+    void FuncParent::writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage) {
+      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       int16_t Counter = 0;
       String ObjectKey;
       switch (_FilterUsage)
       {
-      case ElementTagUsage_T::UseData:
+      case TagUsage_T::GetWebData:
         ObjectKey = String (JsonTagData);
         break;
-      case ElementTagUsage_T::UseConfig:
+      case TagUsage_T::GetWebConfig:
         ObjectKey = String (JsonTagConfig);
-        break;
-      case ElementTagUsage_T::UseIgnor:
-        ObjectKey = String (JsonTagAll);
         break;
 
       default:
@@ -152,68 +75,43 @@ namespace JCA {
         break;
       }
 
-      Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
-      if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
+      if (ObjectKey.length () > 0) {
         for (int16_t i = 0; i < Tags.size (); i++) {
-          if (Counter == 0) {
-            _SetupFile.println (",\"" + ObjectKey + "\":[");
-            _SetupFile.println ("{" + Tags[i]->createSetupTag() + "}");
-          } else {
-            _SetupFile.println (",{" + Tags[i]->createSetupTag () + "}");
-          }
-          Counter++;
-        }
-      } else if (ObjectKey.length() > 0) {
-        for (int16_t i = 0; i < Tags.size (); i++) {
-          if (Tags[i]->Usage == _FilterUsage) {
+          if (Tags[i]->Usage & _FilterUsage) {
             if (Counter == 0) {
-              _SetupFile.println (",\"" + ObjectKey + "\":[");
-              _SetupFile.println ("{" + Tags[i]->createSetupTag () + "}");
+              _FuncFile.println (",\"" + ObjectKey + "\":[");
+              _FuncFile.println ("{" + Tags[i]->writeTag () + "}");
             } else {
-              _SetupFile.println (",{" + Tags[i]->createSetupTag () + "}");
+              _FuncFile.println (",{" + Tags[i]->writeTag () + "}");
             }
             Counter++;
           }
         }
       }
       if (Counter > 0) {
-        _SetupFile.println ("]");
+        _FuncFile.println ("]");
       }
     }
 
-    bool Parent::setTagValueByName (String _Name, JsonVariant _Value, ElementTagUsage_T _FilterUsage){
-      int16_t Index = getTagIndex (_Name, _FilterUsage);
-      if (Index < 0) {
-        return false;
+    /**
+     * @brief Write Element-Tags to the Functions-File
+     *
+     * @param _SetupFile File to Write
+     * @param _ElementInit First Element added
+     */
+    void FuncParent::writeFunction (File _FuncFile, bool &_Init) {
+      if (_Init) {
+        _FuncFile.print (",");
       } else {
-        return setTagValueByIndex(Index, _Value);
+        _Init = true;
       }
-    }
-
-    bool Parent::setTagValueByIndex (int16_t _Index, JsonVariant _Value){
-      if (Tags[_Index]->ReadOnly) {
-        return false;
-      } else {
-        return Tags[_Index]->setValue(_Value);
+      _FuncFile.println ("\"" + Name + "\":{");
+      if (Comment.length () > 0) {
+        _FuncFile.println ("\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
       }
-    }
-
-    int16_t Parent::getTagIndex (String _Name, ElementTagUsage_T _FilterUsage) {
-      if (_FilterUsage == ElementTagUsage_T::UseIgnor) {
-        for (int16_t i = 0; i < Tags.size (); i++) {
-          if (Tags[i]->Name == _Name) {
-            return i;
-          }
-        }
-      } else {
-        for (int16_t i = 0; i < Tags.size (); i++) {
-          if (Tags[i]->Name == _Name && Tags[i]->Usage == _FilterUsage) {
-            return i;
-          }
-        }
-      }
-      // Tag was not found
-      return -1;
+      writeFunctionTags (_FuncFile, TagUsage_T::GetWebConfig);
+      writeFunctionTags (_FuncFile, TagUsage_T::GetWebData);
+      _FuncFile.println ("}");
     }
 
     /**
@@ -221,58 +119,71 @@ namespace JCA {
      * Check if the Element in the Array and pass the Tag-Arrays to the Element Data
      * @param _Elements Array of Elements that maybe const Tags for the Element
      */
-    void Parent::set (JsonArray &_Elements) {
+    void FuncParent::setValues (JsonObject &_Function) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
-      JsonVariant _Tags;
-      _Tags = findConfig (_Elements);
-      if (_Tags.is<JsonArray> ()) {
-        setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseConfig);
-      }
-      _Tags = findData (_Elements);
-      if (_Tags.is<JsonArray> ()) {
-        setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseData);
-      }
-      _Tags = findCmd (_Elements);
-      if (_Tags.is<JsonArray> ()) {
-        setTagValues (_Tags.as<JsonArray> (), ElementTagUsage_T::UseCmd);
+      for (JsonPair JsonTag : _Function) {
+        setTagValueByIndex(getTagIndex(JsonTag.key().c_str()), JsonTag.value());
       }
     }
 
     /**
-     * @brief Create an Element-Object with Data- and Config-Values
-     *
-     * @param _Elements Object of Elements to add the Element
+     * @brief Add key-value-pairs for all tags to a JsonObject
+     * @param _Values Object the to add the tags
      */
-    void Parent::getValues (JsonObject &_Elements) {
-      JsonObject Element = _Elements.createNestedObject (Name);
-      JsonObject Values;
-      Values = Element.createNestedObject (JsonTagData);
-      createTagValueObject (Values, ElementTagUsage_T::UseData);
-      Values = Element.createNestedObject (JsonTagConfig);
-      createTagValueObject (Values, ElementTagUsage_T::UseConfig);
+    void FuncParent::addValues (JsonObject &_Function) {
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      for (int16_t i = 0; i < Tags.size (); i++) {
+        Tags[i]->addValue (_Function);
+      }
     }
 
     /**
-     * @brief Write Element-Tags to Setup-File
+     * @brief Returns the position of a tag inside the Tags-Vector
      *
-     * @param _SetupFile File to Write
-     * @param _ElementInit First Element added
+     * @param _Name Name of the searched tag
+     * @return int16_t position of the tag or -1 if not found
      */
-    void Parent::writeSetup (File _SetupFile, bool &_ElementInit) {
-      if (_ElementInit) {
-        _SetupFile.println (",{");
-      } else {
-        _SetupFile.println ("{");
-        _ElementInit = true;
+    int16_t FuncParent::getTagIndex (String _Name) {
+      for (int16_t i = 0; i < Tags.size (); i++) {
+        if (Tags[i]->Name == _Name) {
+          return i;
+        }
       }
-      _SetupFile.println ("\"" + String (JsonTagName) + "\":\"" + Name + "\"");
-      if (Comment.length () > 0) {
-        _SetupFile.println (",\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
+      // Tag was not found
+      return -1;
+    }
+
+    /**
+     * @brief Get the value of a tag inside the Tags-Vector
+     *
+     * @param _Index Position of the tag
+     * @param _Value datapoint to write the value
+     * @return true tag get successful
+     * @return false something failed
+     */
+    bool FuncParent::getTagValueByIndex (int16_t _Index, JsonVariant _Value) {
+      if (_Index < 0) {
+        return false;
       }
-      writeSetupTags (_SetupFile, ElementTagUsage_T::UseConfig);
-      writeSetupTags (_SetupFile, ElementTagUsage_T::UseData);
-      writeSetupTags (_SetupFile, ElementTagUsage_T::UseCmd);
-      _SetupFile.println ("}");
+      return Tags[_Index]->getValue (_Value);
+    }
+
+    /**
+     * @brief Set the value of a tag inside the Tags-Vector
+     * 
+     * @param _Index Position of the tag
+     * @param _Value value that should be set
+     * @return true tag set successful
+     * @return false something failed
+     */
+    bool FuncParent::setTagValueByIndex (int16_t _Index, JsonVariant _Value) {
+      if (_Index < 0) {
+        return false;
+      }
+      if (Tags[_Index]->ReadOnly) {
+        return false;
+      }
+      return Tags[_Index]->setValue (_Value);
     }
   }
 }

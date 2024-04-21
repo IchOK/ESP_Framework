@@ -18,15 +18,15 @@
 #include <vector>
 
 #include <JCA_SYS_DebugOut.h>
-#include <JCA_FNC_ElementTags.h>
+#include <JCA_TAG_Parent.h>
+
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
-    class Parent {
+    class FuncParent {
     protected:
       // Element Strings for Parent and Debug-Output
-      static const char *BtnOnDefault;
-      static const char *BtnOffDefault;
       static const char *DebugSeparator;
 
       // Intern
@@ -34,21 +34,11 @@ namespace JCA {
       String Comment;
 
       // Dataconfig
-      std::vector<ElementTag*> Tags;
-
-      // Get Element-Data by Name
-      JsonVariant findConfig (JsonArray &_Elements);
-      JsonVariant findData (JsonArray &_Elements);
-      JsonVariant findCmd (JsonArray &_Elements);
+      std::vector<TagParent*> Tags;
 
       // Create Parent-Structure
       // Functions Get/Set Data from/to Tag-Vector
-      void createTagValueObject (JsonObject &_Values, ElementTagUsage_T _FilterUsage);
-      void setTagValues (JsonArray _Tags, ElementTagUsage_T _FilterUsage);
-      void writeSetupTags (File _SetupFile, ElementTagUsage_T _FilterUsage);
-      bool setTagValueByName (String _Name, JsonVariant _Value, ElementTagUsage_T _FilterUsage = ElementTagUsage_T::UseIgnor);
-      bool setTagValueByIndex (int16_t _Index, JsonVariant _Value);
-      int16_t getTagIndex (String _Name, ElementTagUsage_T _FilterUsage = ElementTagUsage_T::UseIgnor);
+      void writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage);
 
     public:
       // Json Tags
@@ -69,14 +59,15 @@ namespace JCA {
       static const char *JsonTagReadOnly;
 
       // external Functions
-      Parent (String _Name, String _Comment);
-      Parent (String _Name);
-      void set (JsonArray &_Elements);
-
-      void getValues (JsonObject &_Elements);
-      void writeSetup (File _SetupFile, bool &_ElementInit);
-
-      virtual void update (struct tm &_Time) {; };
+      FuncParent (String _Name, String _Comment);
+      FuncParent (String _Name);
+      void writeFunction (File _FuncFile, bool &_Init);
+      void setValues (JsonObject &_Function);
+      void addValues (JsonObject &_Function);
+      int16_t getTagIndex (String _Name);
+      bool setTagValueByIndex (int16_t _Index, JsonVariant _Value);
+      bool getTagValueByIndex (int16_t _Index, JsonVariant _Value);
+      virtual void update (struct tm &_Time) { ; };
     };
   }
 }

@@ -12,6 +12,7 @@
 
 #include <JCA_FNC_Feeder.h>
 using namespace JCA::SYS;
+using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
@@ -24,22 +25,22 @@ namespace JCA {
      * @param _Name Element Name inside the Communication
      */
     Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name)
-        : Parent (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
+        : FuncParent (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
-      Tags.push_back (new ElementTagInt16 ("FeedingHour", "Fütterung Stunde", "", false, ElementTagUsage_T::UseConfig, &FeedingHour, "h"));
-      Tags.push_back (new ElementTagInt16 ("FeedingMinute", "Fütterung Minute", "", false, ElementTagUsage_T::UseConfig, &FeedingMinute, "m"));
-      Tags.push_back (new ElementTagFloat ("SteppsPerRotation", "Schritte pro Umdrehung", "", false, ElementTagUsage_T::UseConfig, &SteppsPerRotation, "st/rot"));
-      Tags.push_back (new ElementTagFloat ("FeedingRotations", "Umdrehungen je Fütterung", "", false, ElementTagUsage_T::UseConfig, &FeedingRotations, "rot"));
-      Tags.push_back (new ElementTagFloat ("Acceleration", "Beschleuningung", "", false, ElementTagUsage_T::UseConfig, &Acceleration, "st/s2"));
-      Tags.push_back (new ElementTagFloat ("MaxSpeed", "Maximale Geschwindigkeit", "", false, ElementTagUsage_T::UseConfig, &MaxSpeed, "st/s"));
-      Tags.push_back (new ElementTagFloat ("ConstSpeed", "Konstant Geschwindigkeit", "", false, ElementTagUsage_T::UseConfig, &ConstSpeed, "st/s"));
+      Tags.push_back (new TagInt16 ("FeedingHour", "Fütterung Stunde", "", false, TagUsage_T::UseConfig, &FeedingHour, "h"));
+      Tags.push_back (new TagInt16 ("FeedingMinute", "Fütterung Minute", "", false, TagUsage_T::UseConfig, &FeedingMinute, "m"));
+      Tags.push_back (new TagFloat ("SteppsPerRotation", "Schritte pro Umdrehung", "", false, TagUsage_T::UseConfig, &SteppsPerRotation, "st/rot"));
+      Tags.push_back (new TagFloat ("FeedingRotations", "Umdrehungen je Fütterung", "", false, TagUsage_T::UseConfig, &FeedingRotations, "rot"));
+      Tags.push_back (new TagFloat ("Acceleration", "Beschleuningung", "", false, TagUsage_T::UseConfig, &Acceleration, "st/s2"));
+      Tags.push_back (new TagFloat ("MaxSpeed", "Maximale Geschwindigkeit", "", false, TagUsage_T::UseConfig, &MaxSpeed, "st/s"));
+      Tags.push_back (new TagFloat ("ConstSpeed", "Konstant Geschwindigkeit", "", false, TagUsage_T::UseConfig, &ConstSpeed, "st/s"));
 
-      Tags.push_back (new ElementTagBool ("Feeding", "Fütterung aktiv", "", false, ElementTagUsage_T::UseData, &Feeding, "EIN", "AUS"));
-      Tags.push_back (new ElementTagInt32 ("DistanceToGo", "Verbleibende Schritte", "", true, ElementTagUsage_T::UseData, &DistanceToGo, "st"));
-      Tags.push_back (new ElementTagBool ("RunConst", "Konstante Drehung aktiv", "", false, ElementTagUsage_T::UseData, &RunConst, "EIN", "AUS"));
-      Tags.push_back (new ElementTagFloat ("Speed", "aktuelle Geschwindigkeit", "", true, ElementTagUsage_T::UseData, &Speed, "st/s"));
+      Tags.push_back (new TagBool ("Feeding", "Fütterung aktiv", "", false, TagUsage_T::UseData, &Feeding, "EIN", "AUS"));
+      Tags.push_back (new TagInt32 ("DistanceToGo", "Verbleibende Schritte", "", true, TagUsage_T::UseData, &DistanceToGo, "st"));
+      Tags.push_back (new TagBool ("RunConst", "Konstante Drehung aktiv", "", false, TagUsage_T::UseData, &RunConst, "EIN", "AUS"));
+      Tags.push_back (new TagFloat ("Speed", "aktuelle Geschwindigkeit", "", true, TagUsage_T::UseData, &Speed, "st/s"));
 
-      Tags.push_back (new ElementTagBool ("CmdDoFeed", "Jetzt Füttern", "", false, ElementTagUsage_T::UseData, &DoFeed, "Aktiv", "Start", std::bind (&Feeder::doFeedCB, this)));
+      Tags.push_back (new TagBool ("CmdDoFeed", "Jetzt Füttern", "", false, TagUsage_T::UseData, &DoFeed, "Aktiv", "Start", std::bind (&Feeder::doFeedCB, this)));
 
       // Intern
       DoFeed = false;

@@ -65,21 +65,21 @@ void cbSaveConfig () {
   Debug.println (FLAG_CONFIG, false, "main", __func__, ConfigFile.name());
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
-  Server.writeSetup (ConfigFile, ElementInit);
+  Server.writeFunction (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
   Debug.println (FLAG_CONFIG, false, "main", __func__, "File closed");
 }
 
 void getAllValues (JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
-  Server.getValues (Elements);
+  JsonObject Elements = _Out.createNestedObject (FuncParent::JsonTagElements);
+  Server.addValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {
-  if (_In.containsKey (Parent::JsonTagElements)) {
-    JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
-    Server.set (Elements);
+  if (_In.containsKey (FuncParent::JsonTagElements)) {
+    JsonArray Elements = (_In.as<JsonObject> ())[FuncParent::JsonTagElements].as<JsonArray> ();
+//    Server.setValues (Elements);
   }
 }
 //-------------------------------------------------------

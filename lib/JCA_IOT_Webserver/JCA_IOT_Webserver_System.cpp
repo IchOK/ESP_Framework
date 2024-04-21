@@ -27,13 +27,13 @@ namespace JCA {
      * @param _Offset RTC Timeoffset in seconds
      */
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
-        : Parent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
+        : FuncParent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
-      Tags.push_back (new ElementTagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, ElementTagUsage_T::UseConfig, &Hostname));
-      Tags.push_back (new ElementTagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, ElementTagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
-      Tags.push_back (new ElementTagUInt32 ("TimeSync", "Websocket Updatezyklus", "", false, ElementTagUsage_T::UseConfig, &TimeSync, "s", std::bind (&Webserver::setTimeCB, this)));
+      Tags.push_back (new TagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, TagUsage_T::UseConfig, &Hostname));
+      Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
+      Tags.push_back (new TagUInt32 ("TimeSync", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&Webserver::setTimeCB, this)));
 
-      Tags.push_back (new ElementTagString ("Time", "Systemzeit", "", false, ElementTagUsage_T::UseData, &Time));
+      Tags.push_back (new TagString ("Time", "Systemzeit", "", false, TagUsage_T::UseData, &Time));
 
       String ChipID;
       #ifdef ESP8266

@@ -17,9 +17,9 @@
 #include <OneWire.h>
 #include <time.h>
 
-#include <JCA_FNC_ElementTagUInt16.h>
-#include <JCA_FNC_ElementTagFloat.h>
-#include <JCA_FNC_ElementTagArrayUInt8.h>
+#include <JCA_TAG_TagUInt16.h>
+#include <JCA_TAG_TagFloat.h>
+#include <JCA_TAG_TagArrayUInt8.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
@@ -39,7 +39,7 @@ namespace JCA {
       POWER = 0xB4
     } DS18B20_Cmd;
 
-    class DS18B20 : public Parent {
+    class DS18B20 : public FuncParent {
     private:
       // Hardware
       OneWire *Wire;

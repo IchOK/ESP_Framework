@@ -17,16 +17,16 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_FNC_ElementTagBool.h>
-#include <JCA_FNC_ElementTagFloat.h>
-#include <JCA_FNC_ElementTagInt16.h>
-#include <JCA_FNC_ElementTagUInt16.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagFloat.h>
+#include <JCA_TAG_TagInt16.h>
+#include <JCA_TAG_TagUInt16.h>
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
-    class Level : public Parent {
+    class Level : public FuncParent {
     private:
       // Hardware
       uint8_t Pin;
