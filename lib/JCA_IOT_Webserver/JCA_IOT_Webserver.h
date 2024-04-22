@@ -106,11 +106,10 @@ namespace JCA {
     typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
-    class Webserver : public JCA::FNC::FuncParent {
+    class Webserver {
     private:
       // ...Webserver_System.cpp
       static const char *ElementName;
-      String Hostname;
       char ConfUser[80];
       char ConfPassword[80];
       char Firmware[80];
@@ -124,11 +123,6 @@ namespace JCA {
       SimpleCallback onSystemResetCB;
       SimpleCallback onSaveConfigCB;
       bool readConfig ();
-
-      // Protocol Functions
-      String Time;
-      uint32_t TimeSync;
-      void setTimeCB();
 
       // ...Webserver_Web.cpp
       AwsTemplateProcessor replaceHomeWildcardsCB;
@@ -157,7 +151,6 @@ namespace JCA {
       void onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json);
 
       // ...Webserver_Socket.cpp
-      uint32_t WsUpdateCycle;
       uint32_t WsLastUpdate;
       JsonVariantCallback wsDataCB;
       JsonVariantCallback wsUpdateCB;
@@ -167,6 +160,7 @@ namespace JCA {
 
     public:
       // ...Webserver_System.cpp
+      String Hostname;
       Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
       Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword);
       Webserver (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset);
@@ -175,7 +169,6 @@ namespace JCA {
       Webserver ();
       bool init ();
       bool handle ();
-      void update (struct tm &_Time);
       void onSystemReset (SimpleCallback _CB);
       void onSaveConfig (SimpleCallback _CB);
       void setTime (unsigned long _Epoch = 1609459200, int _Millis = 0); // default (1609459200) = 1st Jan 2021
@@ -199,6 +192,7 @@ namespace JCA {
       void onRestApiDelete (JsonVariantCallback _CB);
 
       // ...Webserver_Socket.cpp
+      uint32_t WsUpdateCycle;
       void onWsData (JsonVariantCallback _CB);
       void onWsUpdate (JsonVariantCallback _CB);
       void setWsUpdateCycle (uint32_t _CycleTime);

@@ -28,6 +28,7 @@
 #include <JCA_IOT_Webserver.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
+#include <JCA_IOT_FuncHandler.h>
 
 // Project function
 #include <JCA_FNC_DigitalOut.h>
@@ -42,9 +43,9 @@ using namespace JCA::FNC;
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #define CONFIGPATH "/usrConfig.json"
-DigitalOut TestDQ(STAT_PIN, "Status LED");
+FuncHandler TestHandler("test.json");
 void setupConfig () {
-  ;
+  Charger_AddToHandler(TestHandler);
 }
 void loopConfig () {
   ;
@@ -65,7 +66,7 @@ void cbSaveConfig () {
   Debug.println (FLAG_CONFIG, false, "main", __func__, ConfigFile.name());
   bool ElementInit = false;
   ConfigFile.println ("{\"elements\":[");
-  Server.writeFunction (ConfigFile, ElementInit);
+//  Server.writeFunction (ConfigFile, ElementInit);
   ConfigFile.println ("]}");
   ConfigFile.close ();
   Debug.println (FLAG_CONFIG, false, "main", __func__, "File closed");
@@ -73,7 +74,7 @@ void cbSaveConfig () {
 
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out.createNestedObject (FuncParent::JsonTagElements);
-  Server.addValues (Elements);
+//  Server.addValues (Elements);
 }
 
 void setAll (JsonVariant &_In) {

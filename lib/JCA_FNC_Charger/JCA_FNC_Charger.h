@@ -24,9 +24,16 @@
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
+#include <JCA_IOT_FuncHandler.h>
 
 #define CURRENT_AH_STEPS 0.001
 #define POWER_AH_STEPS 0.001
+
+#define JCA_FNC_CHARGER_SETUP_TYPE "charger"
+#define JCA_FNC_CHARGER_SETUP_NAME "name"
+#define JCA_FNC_CHARGER_SETUP_CHARGE "pinCharge"
+#define JCA_FNC_CHARGER_SETUP_DISCHARGE "pinDischarge"
+#define JCA_FNC_CHARGER_SETUP_OUTPUT "output"
 
 namespace JCA {
   namespace FNC {
@@ -48,7 +55,6 @@ namespace JCA {
       static const uint16_t UpdateInterval;
 
       // Hardware
-      INA219 *Sensor;
       JCA::SYS::PwmOutput *Output;
       uint8_t PinCharge;
       uint8_t PinDischarge;
@@ -70,6 +76,7 @@ namespace JCA {
       bool Fault;
       float AccuVoltage;
       float Current;
+      float Power;
       float ChargedAH;
       float ChargedWH;
       float DischargedAH;
@@ -94,11 +101,12 @@ namespace JCA {
       float DischargeSave;
 
     public:
-      Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
+      Charger (uint8_t _PinCharge, uint8_t _PinDischarge, String _Name, JCA::SYS::PwmOutput *_Output);
       bool init ();
       void update (struct tm &_Time);
-      static bool create(JsonObject _Config, std::vector<FuncParent*>& _Functions);
     };
+    void Charger_AddToHandler (JCA::IOT::FuncHandler &_Handler);
+    bool Charger_Create (JsonObject _Setup, JsonArray _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
   }
 }
 

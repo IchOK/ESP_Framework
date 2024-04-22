@@ -29,7 +29,7 @@ namespace JCA {
      * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
      * @param _Name Element Name inside the Communication
      */
-    Charger::Charger (INA219 *_Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, PwmOutput *_Output)
+    Charger::Charger (uint8_t _PinCharge, uint8_t _PinDischarge, String _Name, PwmOutput *_Output)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
@@ -67,7 +67,9 @@ namespace JCA {
       ChargeStateElement->List.insert ({ Charger_State_T::FAULT, "Fehler" });
 
       // Tags only used for in-/output
-
+      Tags.push_back (new TagFloat ("AccuVoltage", "INA219.getVoltagePlus", "", false, TagUsage_T::UseInOut, &AccuVoltage, ""));
+      Tags.push_back (new TagFloat ("Current", "abs(INA219.getCurrent)", "", false, TagUsage_T::UseInOut, &Current, ""));
+      Tags.push_back (new TagFloat ("Power", "abs(INA219.getPowerPlus)", "", false, TagUsage_T::UseInOut, &Power, ""));
 
       // Intern
       ChargeState = Charger_State_T::IDLE;
@@ -92,6 +94,7 @@ namespace JCA {
       Fault = false;
       AccuVoltage = 0.0;
       Current = 0.0;
+      Power = 0.0;
       ChargedAH = 0.0;
       ChargedWH = 0.0;
       DischargedAH = 0.0;
@@ -104,7 +107,6 @@ namespace JCA {
       Output = _Output;
       PinCharge = _PinCharge;
       PinDischarge = _PinDischarge;
-      Sensor = _Sensor;
     }
 
     /**
@@ -113,7 +115,6 @@ namespace JCA {
     bool Charger::init () {
       Output->setupPin (PinCharge, Frequency, Resolution);
       Output->setupPin (PinDischarge, Frequency, Resolution);
-      Sensor->setInterval (UpdateInterval);
       LastMillis = millis ();
       UpdateMillis = 0;
       return true;
@@ -135,9 +136,6 @@ namespace JCA {
 
       if (UpdateMillis >= UpdateInterval) {
         // Read Sensor Date
-        AccuVoltage = Sensor->getVoltagePlus ();
-        Current = abs (Sensor->getCurrent ());
-        float Power = abs (Sensor->getPowerPlus ());
         float UpdateHours = float (UpdateMillis) / 3600000.0;
 
         // Go to Idle fi Charging is deactivated
@@ -422,10 +420,66 @@ namespace JCA {
       }
     }
 
-    bool Charger::create (JsonObject _Config, std::vector<FuncParent *> &_Functions) {
+    void Charger_AddToHandler(JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonArray, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (JCA_FNC_CHARGER_SETUP_TYPE, Charger_Create));
+    }
+
+    bool Charger_Create (JsonObject _Setup, JsonArray _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
       Debug.println (FLAG_SETUP, false, "Create", __func__, "FNC::Charger");
-//      Charger (INA219 * _Sensor, uint8_t _PinCharge, uint8_t _PinDischarge, const char *_Name, JCA::SYS::PwmOutput *_Output);
-//      _Functions.push_back(new Charger(JCA_FNC_INA219_Sensor, ))
+      bool Done = true;
+      JsonObject Log = _Log.createNestedObject ();
+      String OutputName;
+      String Name;
+      JCA::SYS::PwmOutput *Output;
+      uint8_t PinCharge;
+      uint8_t PinDischarge;
+
+      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_NAME)) {
+        Name = _Setup[JCA_FNC_CHARGER_SETUP_NAME].as<String> ();
+      } else {
+        Log[JCA_FNC_CHARGER_SETUP_NAME] = "missing";
+        Done = false;
+      }
+      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_CHARGE)) {
+        if (_Setup[JCA_FNC_CHARGER_SETUP_CHARGE].is<int> ()) {
+          PinCharge = _Setup[JCA_FNC_CHARGER_SETUP_CHARGE].as<uint8_t> ();
+        } else {
+          Log[JCA_FNC_CHARGER_SETUP_CHARGE] = "wrong datatype";
+          Done = false;
+        }
+      } else {
+        Log[JCA_FNC_CHARGER_SETUP_CHARGE] = "missing";
+        Done = false;
+      }
+      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_DISCHARGE)) {
+        if (_Setup[JCA_FNC_CHARGER_SETUP_DISCHARGE].is<int> ()) {
+          PinDischarge = _Setup[JCA_FNC_CHARGER_SETUP_DISCHARGE].as<uint8_t> ();
+        } else {
+          Log[JCA_FNC_CHARGER_SETUP_DISCHARGE] = "wrong datatype";
+          Done = false;
+        }
+      } else {
+        Log[JCA_FNC_CHARGER_SETUP_DISCHARGE] = "missing";
+        Done = false;
+      }
+      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_OUTPUT)) {
+        OutputName = _Setup[JCA_FNC_CHARGER_SETUP_OUTPUT].as<String> ();
+        if (_Hardware.count (OutputName) == 1) {
+          Output = static_cast<JCA::SYS::PwmOutput *> (_Hardware[OutputName]);
+        } else {
+          Log[JCA_FNC_CHARGER_SETUP_OUTPUT] = "hardware " + OutputName + " not Found";
+          Done = false;
+        }
+      } else {
+        Log[JCA_FNC_CHARGER_SETUP_OUTPUT] = "missing";
+        Done = false;
+      }
+
+      if (Done) {
+        _Functions.push_back (new Charger (PinCharge, PinDischarge, Name, Output));
+        Log["done"] = Name + "(ChargePin:" + String (PinCharge) + ", DischargePin: " + String (PinDischarge) + ", Output: " + OutputName;
+      }
+      return Done;
     }
   }
 }

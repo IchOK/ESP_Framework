@@ -23,6 +23,19 @@
 
 namespace JCA {
   namespace IOT {
+    typedef struct {
+      String Func;
+      String Tag;
+    } FuncLinkPair_T;
+    enum FuncLinkType_T : uint8_t {
+      LinkNone = 0,
+      LinkDirect = 1
+    };
+    typedef struct {
+      std::vector<FuncLinkPair_T> Input;
+      std::vector<FuncLinkPair_T> Outpur;
+      FuncLinkType_T Type;
+    } FuncLink_T;
     class FuncHandler {
     protected:
       // Json Tags
@@ -32,13 +45,15 @@ namespace JCA {
       // Intern
       String SetupFilePath;
 
-      // Dataconfig
+      // Controller Setup
+      std::map<String, void *> HardwareMapping;
       std::vector<JCA::FNC::FuncParent *> Functions;
+      std::vector<FuncLink_T> Links;
 
     public:
       FuncHandler (String _SetupFilePath);
       // Map with the initialisation callbacks for all functions
-      std::map<String, std::function<bool(JsonObject, std::vector<JCA::FNC::FuncParent *>&)> > FunctionList;
+      std::map<String, std::function<bool (JsonObject, JsonArray, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
 
       void update (struct tm &_Time);
     };

@@ -27,13 +27,8 @@ namespace JCA {
      * @param _Offset RTC Timeoffset in seconds
      */
     Webserver::Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
-        : FuncParent (ElementName), Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
+        : Server (_Port), Websocket ("/ws"), Rtc (_Offset) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
-      Tags.push_back (new TagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, TagUsage_T::UseConfig, &Hostname));
-      Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
-      Tags.push_back (new TagUInt32 ("TimeSync", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&Webserver::setTimeCB, this)));
-
-      Tags.push_back (new TagString ("Time", "Systemzeit", "", false, TagUsage_T::UseData, &Time));
 
       String ChipID;
       #ifdef ESP8266
@@ -195,11 +190,6 @@ namespace JCA {
       return true;
     }
 
-    void Webserver::setTimeCB() {
-      setTime(TimeSync);
-      TimeSync = 0;
-    }
-
     /**
      * @brief Define all Default Web-Requests and init the Webserver
      *
@@ -295,17 +285,12 @@ namespace JCA {
       uint32_t ActMillis = millis ();
       // Update Cycle WebSocket
       if (ActMillis - WsLastUpdate >= WsUpdateCycle && WsUpdateCycle > 0) {
-        Time = getTime ();
         doWsUpdate (nullptr);
         WsLastUpdate = ActMillis;
       }
       // Check WiFi Connection
       Connector.handle ();
       return Connector.isConnected ();
-    }
-
-    void Webserver::update (struct tm &_Time) {
-      Time = getTime();
     }
 
     void Webserver::onSystemReset (SimpleCallback _CB) {
