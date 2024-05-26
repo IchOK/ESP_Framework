@@ -29,10 +29,10 @@
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
 #include <JCA_IOT_FuncHandler.h>
+#include <JCA_SYS_TimerESP32.h>
 
 // Project function
-#include <JCA_FNC_DigitalOut.h>
-#include <JCA_FNC_Charger.h>
+#include <JCA_FNC_AcDimmers.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -42,95 +42,66 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#define CONFIGPATH "/usrConfig.json"
-FuncHandler TestHandler("test.json");
-void setupConfig () {
-  Charger_AddToHandler(TestHandler);
-}
-void loopConfig () {
-  ;
-}
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// JCA IOT Functions
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Webserver Server;
-//-------------------------------------------------------
-// System Functions
-//-------------------------------------------------------
-void cbSystemReset () {
-  ESP.restart ();
-}
-void cbSaveConfig () {
-  File ConfigFile = LittleFS.open (CONFIGPATH, "w");
-  Debug.print (FLAG_CONFIG, false, "main", __func__, "File: ");
-  Debug.println (FLAG_CONFIG, false, "main", __func__, ConfigFile.name());
-  bool ElementInit = false;
-  ConfigFile.println ("{\"elements\":[");
-//  Server.writeFunction (ConfigFile, ElementInit);
-  ConfigFile.println ("]}");
-  ConfigFile.close ();
-  Debug.println (FLAG_CONFIG, false, "main", __func__, "File closed");
-}
+AcDimmersTriggers_T *IntTriggers;
+bool IRAM_ATTR timerInterrupt (void *_Args) {
+  AcDimmersTriggers_T *Triggers = static_cast<AcDimmersTriggers_T *> (_Args);
+  digitalWrite(STAT_PIN, !digitalRead(STAT_PIN));
+  Triggers->Index++;
+  if (Triggers->Index < Triggers->Count) {
+    TimerESP32_Handler.setAlarmValue (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
+    return false;
+  } else {
+    Triggers->Index = 0;
+    TimerESP32_Handler.setCounterValue (Triggers->Timer, 0);
+    TimerESP32_Handler.setAlarmValue (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
 
-void getAllValues (JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (FuncParent::JsonTagElements);
-//  Server.addValues (Elements);
-}
-
-void setAll (JsonVariant &_In) {
-  if (_In.containsKey (FuncParent::JsonTagElements)) {
-    JsonArray Elements = (_In.as<JsonObject> ())[FuncParent::JsonTagElements].as<JsonArray> ();
-//    Server.setValues (Elements);
+    //    TimerESP32_Handler.disableIntr (Triggers->Timer);
+    //    TimerESP32_Handler.pause (Triggers->Timer);
+    return false;
   }
 }
-//-------------------------------------------------------
-// Website Functions
-//-------------------------------------------------------
-String cbWebHomeReplace (const String &var) {
-  return String ();
-}
-String cbWebConfigReplace (const String &var) {
-  return String ();
-}
-//-------------------------------------------------------
-// RestAPI Functions
-//-------------------------------------------------------
-void cbRestApiGet (JsonVariant &_In, JsonVariant &_Out) {
-  getAllValues (_Out);
-}
 
-void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
-  setAll (_In);
-}
+void setupConfig () {
+  IntTriggers = new AcDimmersTriggers_T;
+  IntTriggers->Triggers = new AcDimmersTriggerPair_T[10];
+  IntTriggers->Count = 6;
+  IntTriggers->Index = 6;
+  IntTriggers->Triggers[0].Delay = 1000000;
+  IntTriggers->Triggers[1].Delay = 1500000;
+  IntTriggers->Triggers[2].Delay = 2000000;
+  IntTriggers->Triggers[3].Delay = 3500000;
+  IntTriggers->Triggers[4].Delay = 5000000;
+  IntTriggers->Triggers[5].Delay = 10000000;
+  IntTriggers->Timer = TimerESP32_Handler.addTimer();
+  TimerESP32_Handler.isrCallbackAdd (IntTriggers->Timer, timerInterrupt, IntTriggers);
 
-void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
-  _Out["message"] = "PUT not Used";
+  //  TimerESP32_Handler.setMicros (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
+  //  TimerESP32_Handler.addCallback (IntTriggers->Timer, 2^60, timerInterrupt, IntTriggers);
 }
+void loopConfig () {
+  if (IntTriggers->Index >= IntTriggers->Count) {
+//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
+//    delay (200);
+//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
+//    delay (200);
+//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
+//    delay (200);
+//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
+    TimerESP32_Handler.setCounterValue (IntTriggers->Timer, 0);
+    TimerESP32_Handler.setAlarmValue (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
+    TimerESP32_Handler.enableIntr (IntTriggers->Timer);
+    TimerESP32_Handler.start (IntTriggers->Timer);
+    IntTriggers->Index = 0;
+  }
 
-void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
-  cbSaveConfig ();
+//  if (TimerESP32_Handler.getCounter (IntTriggers->Timer) > 20000000) {
+//    for (int i = 0; i < 20; i++) {
+//      delay (200);
+//      digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
+//    }
+//    TimerESP32_Handler.restart (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
+//  }
 }
-
-void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
-  _Out["message"] = "DELETE not used";
-}
-
-//-------------------------------------------------------
-// Websocket Functions
-//-------------------------------------------------------
-void cbWsUpdate (JsonVariant &_In, JsonVariant &_Out) {
-  getAllValues (_Out);
-}
-void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
-  setAll (_In);
-
-  // Return Value update
-  getAllValues (_Out);
-}
-
-// #######################################################
-//  Setup
-// #######################################################
 void setup () {
   DynamicJsonDocument JDoc (10000);
 
@@ -148,66 +119,6 @@ void setup () {
   // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  // Filesystem
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#ifdef ESP32
-  if (!LittleFS.begin (true)) {
-#else
-  if (!LittleFS.begin ()) {
-#endif
-    Debug.println (FLAG_ERROR, false, "root", "setup", "LITTLEFS Mount Failed");
-    return;
-  } else {
-    Debug.println (FLAG_SETUP, false, "root", "setup", "LITTLEFS Mount Done");
-  }
-
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  // JCA IOT Functions - WiFiConnect
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  // System
-  Server.init ();
-  Server.onSystemReset (cbSystemReset);
-  Server.onSaveConfig (cbSaveConfig);
-  // Web
-  Server.onWebHomeReplace (cbWebHomeReplace);
-  Server.onWebConfigReplace (cbWebConfigReplace);
-  // RestAPI
-  Server.onRestApiGet (cbRestApiGet);
-  Server.onRestApiPost (cbRestApiPost);
-  Server.onRestApiPut (cbRestApiPut);
-  Server.onRestApiPatch (cbRestApiPatch);
-  // Web-Socket
-  Server.onWsData (cbWsData);
-  Server.onWsUpdate (cbWsUpdate);
-
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  // Custom Code
-  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  //-------------------------------------------------------
-  // Init Elements
-  //-------------------------------------------------------
-
-  //-------------------------------------------------------
-  // Read Config File
-  //-------------------------------------------------------
-  File ConfigFile = LittleFS.open (CONFIGPATH, "r");
-  if (ConfigFile) {
-    Debug.println (FLAG_CONFIG, false, "main", "setup", "Config File Found");
-    DeserializationError Error = deserializeJson (JDoc, ConfigFile);
-    if (!Error) {
-      Debug.println (FLAG_CONFIG, false, "main", "setup", "Deserialize Done");
-      JsonVariant InConfig = JDoc.as<JsonVariant> ();
-      setAll (InConfig);
-    } else {
-      Debug.print (FLAG_ERROR, false, "main", "setup", "deserializeJson() failed: ");
-      Debug.println (FLAG_ERROR, false, "main", "setup", Error.c_str ());
-    }
-    ConfigFile.close ();
-  } else {
-    Debug.println (FLAG_ERROR, false, "main", "setup", "Config File NOT found");
-  }
-
   setupConfig();
 }
 
@@ -216,14 +127,5 @@ void setup () {
 // #######################################################
 int8_t LastSeconds = 0;
 void loop () {
-  Server.handle ();
-  tm CurrentTime = Server.getTimeStruct ();
-  if (LastSeconds != CurrentTime.tm_sec) {
-    if (Debug.print (FLAG_LOOP, false, "main", "loop", "Current Time: ")) {
-      Debug.println (FLAG_LOOP, false, "main", "loop", Server.getTimeString (""));
-    }
-    LastSeconds = CurrentTime.tm_sec;
-
-    loopConfig();
-  }
+  loopConfig();
 }
