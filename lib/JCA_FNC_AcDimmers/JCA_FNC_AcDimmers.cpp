@@ -17,6 +17,7 @@ using namespace JCA::TAG;
 namespace JCA {
   namespace FNC {
     const uint8_t AcDimmers::CalibrationLoops = 100;
+    portMUX_TYPE AcDimmers::PortMux = portMUX_INITIALIZER_UNLOCKED;
 
     /**
      * @brief Construct a new AcDimmers::AcDimmers object
@@ -42,6 +43,10 @@ namespace JCA {
           PinsOutputs[i] = _PinsOutputs[i];
           Delays[i] = 0;
           Values[i] = 0;
+
+          // Init digital Output
+          pinMode (PinsOutputs[i], OUTPUT);
+          digitalWrite (PinsOutputs[i], LOW);
 
           // Create Tag-List
           String NumStr = String (i + 1);
@@ -69,11 +74,11 @@ namespace JCA {
       IntTriggers->Count = 0;
 
       // define Hardware interrupt
-      attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::zeroInterrupt, this), CHANGE);
-      OutputTimer = TimerESP32_Handler.addTimer();
-      IntTriggers->Timer = OutputTimer;
-      if (OutputTimer >= 0) {
-        TimerESP32_Handler.addCallback (OutputTimer, 2 ^ 60, AcDimmers::timerInterrupt, IntTriggers);
+      attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::isrZero, this), CHANGE);
+      CalcTriggers->Timer = TimerESP32_Handler.addTimer ();
+      IntTriggers->Timer = CalcTriggers->Timer;
+      if (CalcTriggers->Timer >= 0) {
+        TimerESP32_Handler.isrCallbackAdd (CalcTriggers->Timer, AcDimmers::isrTimer, IntTriggers);
       }
     }
 
@@ -93,10 +98,10 @@ namespace JCA {
         // Convert Value to Time-Delay
         if (Value < 0.02) {
           Delays[i] = 0;
-          digitalWrite(PinsOutputs[i], false);
+          digitalWrite(PinsOutputs[i], LOW);
         } else if (Value > 0.98) {
           Delays[i] = 0;
-          digitalWrite (PinsOutputs[i], true);
+          digitalWrite (PinsOutputs[i], HIGH);
         } else {
           Delays[i] = static_cast<int16_t> (asin (Value) / (PI / 2.0) * (Period / 2)) + (ZeroWidth / 2);
           CalcTriggers->Triggers[CalcTriggers->Count].Delay = Delays[i];
@@ -121,8 +126,10 @@ namespace JCA {
       CalcUpdate = true;
     }
 
-    void AcDimmers::zeroInterrupt () {
-      uint32_t ActMicros = micros();
+    void AcDimmers::isrZero () {
+      portENTER_CRITICAL_ISR (&PortMux);
+      noInterrupts ();
+      uint32_t ActMicros = micros ();
       bool ZeroOn = digitalRead(PinZeroDetection);
       if (CalibrationDone) {
         if (CalcUpdate) {
@@ -130,14 +137,15 @@ namespace JCA {
           for(size_t i = 0; i<CountOutputs; i++) {
             IntTriggers->Triggers[i].Delay = CalcTriggers->Triggers[i].Delay;
             IntTriggers->Triggers[i].Pin = CalcTriggers->Triggers[i].Pin;
+            digitalWrite (CalcTriggers->Triggers[i].Pin, LOW);
           }
           CalcUpdate = false;
         }
         IntTriggers->Index = 0;
         if (IntTriggers->Count > 0) {
-          TimerESP32_Handler.restartTimer (OutputTimer, IntTriggers->Triggers[0].Delay);
+          TimerESP32_Handler.restartTimer (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
         } else {
-          TimerESP32_Handler.pauseTimer (OutputTimer);
+          TimerESP32_Handler.pauseTimer (IntTriggers->Timer);
         };
       } else {
         // Periode and ZeroImpulse-Width have to be calibrated
@@ -153,7 +161,7 @@ namespace JCA {
               ZeroWidth = static_cast<int16_t> (CalSumZeroWidth / CalibrationCount);
               CalibrationDone = true;
               detachInterrupt (digitalPinToInterrupt (PinZeroDetection));
-              attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::zeroInterrupt, this), RISING);
+              attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::isrZero, this), RISING);
             }
           }
         } else {
@@ -164,11 +172,15 @@ namespace JCA {
           }
         }
       }
+      interrupts ();
+      portEXIT_CRITICAL_ISR (&PortMux);
     }
 
-    bool AcDimmers::timerInterrupt (void *_Args) {
+    bool AcDimmers::isrTimer (void *_Args) {
+      portENTER_CRITICAL_ISR (&PortMux);
+      noInterrupts ();
       AcDimmersTriggers_T *Triggers = static_cast<AcDimmersTriggers_T *> (_Args);
-      digitalWrite (Triggers->Triggers[Triggers->Index].Pin, true);
+      digitalWrite (Triggers->Triggers[Triggers->Index].Pin, HIGH);
       Triggers->Index++;
       if (Triggers->Index < Triggers->Count) {
         TimerESP32_Handler.setMicros (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
@@ -177,6 +189,8 @@ namespace JCA {
         TimerESP32_Handler.pauseTimer (Triggers->Timer);
         return true;
       }
+      interrupts ();
+      portEXIT_CRITICAL_ISR (&PortMux);
     }
   }
 }

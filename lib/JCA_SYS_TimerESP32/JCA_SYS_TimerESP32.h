@@ -3,6 +3,7 @@
 #define _JCA_SYS_TIMERESP32_
 
 #ifdef ESP32
+  #include <esp32-hal-timer.h>
   #include <driver/timer.h>
 #else
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
@@ -12,7 +13,7 @@
 #include <JCA_SYS_EspError.h>
 
 #define JCA_SYS_TIMERESP32_MAX_TIMERS 2
-#define JCA_SYS_TIMERESP32_DIVIDER 80
+#define JCA_SYS_TIMERESP32_DIVIDER TIMER_BASE_CLK / 1000000 // -> 1MHz
 
 namespace JCA {
   namespace SYS {

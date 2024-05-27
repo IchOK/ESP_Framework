@@ -16,6 +16,7 @@
 #include <LittleFS.h>
 #include <Wire.h>
 #include <time.h>
+#include <esp32-hal-timer.h>
 
 #ifdef ESP8266
   #define SPIFFS LittleFS
@@ -42,23 +43,30 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+uint64_t LastMicros;
+portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 AcDimmersTriggers_T *IntTriggers;
 bool IRAM_ATTR timerInterrupt (void *_Args) {
+  portENTER_CRITICAL_ISR(&timerMux);
+  noInterrupts();
+  uint64_t ActMicros = micros();
+  Debug.print (FLAG_PROTOCOL, false, "Main", __func__, "Micros = ");
+  Debug.println (FLAG_PROTOCOL, false, "Main", __func__, ActMicros - LastMicros);
+  LastMicros = ActMicros;
+
   AcDimmersTriggers_T *Triggers = static_cast<AcDimmersTriggers_T *> (_Args);
+  Debug.println (FLAG_PROTOCOL, false, "Main", __func__, "Trigger");
   digitalWrite(STAT_PIN, !digitalRead(STAT_PIN));
   Triggers->Index++;
   if (Triggers->Index < Triggers->Count) {
     TimerESP32_Handler.setAlarmValue (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
-    return false;
   } else {
-    Triggers->Index = 0;
-    TimerESP32_Handler.setCounterValue (Triggers->Timer, 0);
-    TimerESP32_Handler.setAlarmValue (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
-
-    //    TimerESP32_Handler.disableIntr (Triggers->Timer);
-    //    TimerESP32_Handler.pause (Triggers->Timer);
-    return false;
+    TimerESP32_Handler.pause (Triggers->Timer);
+    TimerESP32_Handler.setAlarmValue (Triggers->Timer, 0);
   }
+  interrupts();
+  portEXIT_CRITICAL_ISR(&timerMux);
+  return false;
 }
 
 void setupConfig () {
@@ -74,33 +82,16 @@ void setupConfig () {
   IntTriggers->Triggers[5].Delay = 10000000;
   IntTriggers->Timer = TimerESP32_Handler.addTimer();
   TimerESP32_Handler.isrCallbackAdd (IntTriggers->Timer, timerInterrupt, IntTriggers);
-
-  //  TimerESP32_Handler.setMicros (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
-  //  TimerESP32_Handler.addCallback (IntTriggers->Timer, 2^60, timerInterrupt, IntTriggers);
 }
 void loopConfig () {
   if (IntTriggers->Index >= IntTriggers->Count) {
-//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
-//    delay (200);
-//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
-//    delay (200);
-//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
-//    delay (200);
-//    digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
-    TimerESP32_Handler.setCounterValue (IntTriggers->Timer, 0);
-    TimerESP32_Handler.setAlarmValue (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
-    TimerESP32_Handler.enableIntr (IntTriggers->Timer);
-    TimerESP32_Handler.start (IntTriggers->Timer);
+    Debug.println (FLAG_PROTOCOL, false, "Main", __func__, "IndexUpdate");
+    noInterrupts();
+    LastMicros = micros();
+    bool RestartIO = TimerESP32_Handler.restartTimer (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
     IntTriggers->Index = 0;
+    interrupts ();
   }
-
-//  if (TimerESP32_Handler.getCounter (IntTriggers->Timer) > 20000000) {
-//    for (int i = 0; i < 20; i++) {
-//      delay (200);
-//      digitalWrite (STAT_PIN, !digitalRead (STAT_PIN));
-//    }
-//    TimerESP32_Handler.restart (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
-//  }
 }
 void setup () {
   DynamicJsonDocument JDoc (10000);

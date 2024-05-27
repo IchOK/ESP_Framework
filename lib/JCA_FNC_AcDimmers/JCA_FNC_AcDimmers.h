@@ -44,8 +44,6 @@ namespace JCA {
       static const uint8_t CalibrationLoops;
 
       // Hardware
-      uint8_t OutputTimer;
-      portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
       uint8_t PinZeroDetection;
       uint8_t *PinsOutputs;
       uint8_t CountOutputs;
@@ -70,11 +68,14 @@ namespace JCA {
       AcDimmersTriggers_T *IntTriggers;
 
     public :
+      static portMUX_TYPE PortMux;
+
       AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, uint8_t _TimerIndex, char *_Name);
       void update (struct tm &_Time);
       void calc();
-      void IRAM_ATTR zeroInterrupt ();
-      static bool IRAM_ATTR timerInterrupt (void *_Args);
+
+      void IRAM_ATTR isrZero ();
+      static bool IRAM_ATTR isrTimer (void *_Args);
     };
   }
 }
