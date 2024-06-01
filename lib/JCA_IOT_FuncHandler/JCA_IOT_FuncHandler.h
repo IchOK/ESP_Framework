@@ -15,6 +15,7 @@
 
 #include <ArduinoJson.h>
 #include <FS.h>
+#include <LittleFS.h>
 #include <map>
 #include <vector>
 
@@ -24,8 +25,8 @@
 namespace JCA {
   namespace IOT {
     typedef struct {
-      String Func;
-      String Tag;
+      int16_t Func;
+      int16_t Tag;
     } FuncLinkPair_T;
     enum FuncLinkType_T : uint8_t {
       LinkNone = 0,
@@ -33,7 +34,7 @@ namespace JCA {
     };
     typedef struct {
       std::vector<FuncLinkPair_T> Input;
-      std::vector<FuncLinkPair_T> Outpur;
+      std::vector<FuncLinkPair_T> Output;
       FuncLinkType_T Type;
     } FuncLink_T;
     class FuncHandler {
@@ -42,20 +43,38 @@ namespace JCA {
       static const char *JsonTagHardware;
       static const char *JsonTagFunctions;
       static const char *JsonTagLinks;
-      // Intern
+      static const char *Name;
+      // Setup
       String SetupFilePath;
+      String FuncFilePath;
+      String ValueFilePath;
+
+      // LoopData
+      unsigned long LastUpdate;
 
       // Controller Setup
-      std::map<String, void *> HardwareMapping;
-      std::vector<JCA::FNC::FuncParent *> Functions;
       std::vector<FuncLink_T> Links;
+      std::map<String, FuncLinkType_T> LinkMapping;
+
+      void saveFunctions();
+      bool checkLink (String _FuncName, int16_t &_Func, String _TagName, int16_t &_Tag, JsonArray _LogArray);
 
     public:
-      FuncHandler (String _SetupFilePath);
       // Map with the initialisation callbacks for all functions
+      std::map<String, std::function<bool (JsonObject, JsonArray, std::map<String, void *>&)>> HardwareList;
+      std::map<String, void *> HardwareMapping;
       std::map<String, std::function<bool (JsonObject, JsonArray, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
+      std::vector<JCA::FNC::FuncParent *> Functions;
 
+      FuncHandler (String _SetupFilePath, String _FuncFilePath, String _ValueFilePath);
+      FuncHandler ();
+      void setup ();
       void update (struct tm &_Time);
+      int16_t getFuncIndex (String _Name);
+      void setValues (JsonObject &_Functions);
+      void getValues (JsonObject &_Functions);
+      void saveValues ();
+      void loadValues();
     };
   }
 }

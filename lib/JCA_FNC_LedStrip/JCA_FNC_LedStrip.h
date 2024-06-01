@@ -39,7 +39,7 @@ namespace JCA {
       uint16_t DelayCounter;
 
       // Intern
-      uint32_t LastMillis;
+      unsigned long LastMillis;
       uint16_t UpdateMillis;
       uint16_t DelayMillis;
       void updateColorCB ();

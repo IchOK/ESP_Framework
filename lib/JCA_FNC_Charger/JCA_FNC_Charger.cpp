@@ -128,7 +128,7 @@ namespace JCA {
     void Charger::update (struct tm &_Time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       // Get Update Intervall
-      uint32_t ActMillis = millis ();
+      unsigned long ActMillis = millis ();
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
       float CurrentDiff;

@@ -1,0 +1,28 @@
+{
+  // Name of the Function
+  "ExampleFunction" : {
+    // Collection of tags are showen in the Config-Tab on the webpage
+    "config" : [
+      {
+        // Type-ID defined in JCA_TAG_Parent.h::TagTagTyper_T
+        "type": 0,
+        "name": "ExampleTag",
+        "text": "Tagname showen on the webpage",
+        // no write access if TRUE
+        "readOnly": true
+      }
+    ],
+    // Collection of tags are showen in the Data-Tab on the webpage
+    "data": [
+      {
+        // Type-ID defined in JCA_TAG_Parent.h::TagTagTyper_T
+        "type": 0,
+        "name": "ExampleTag",
+        "text": "Tagname showen on the webpage",
+        // no write access if TRUE
+        "readOnly": true
+      }
+    ]
+  },
+  "MaybeOneMore" : {}
+}

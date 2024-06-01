@@ -56,7 +56,7 @@ namespace JCA {
       uint8_t Raw[12];
       int32_t Resend;
       bool ReadData;
-      uint32_t LastMillis;
+      unsigned long LastMillis;
 
     public:
       DS18B20 (OneWire *_Wire, const char *_Name);

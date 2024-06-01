@@ -160,6 +160,12 @@ namespace JCA {
                 Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Subnet invalid");
               }
             }
+            if (WiFiConfig.containsKey (JCA_IOT_WEBSERVER_CONFKEY_WIFI_STATPIN)) {
+              Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found State Pin");
+              if (!Connector.setStatePin (WiFiConfig[JCA_IOT_WEBSERVER_CONFKEY_WIFI_STATPIN].as<int8_t> ())) {
+                Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] State Pin invalid");
+              }
+            }
           }
           //------------------------------------------------------
           // Read Server Config
@@ -282,7 +288,7 @@ namespace JCA {
      */
     bool Webserver::handle () {
       Debug.println (FLAG_LOOP, false, ObjectName, __func__, "Run");
-      uint32_t ActMillis = millis ();
+      unsigned long ActMillis = millis ();
       // Update Cycle WebSocket
       if (ActMillis - WsLastUpdate >= WsUpdateCycle && WsUpdateCycle > 0) {
         doWsUpdate (nullptr);

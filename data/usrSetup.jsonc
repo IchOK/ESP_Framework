@@ -1,0 +1,63 @@
+{
+  "hardware" : [
+    {
+      // The Type is used to identify the Create-Function in the Handlers HardwareList
+      "type" : "EXAMPLE",
+      // The Name could be used by Function-Arguments as Referenz
+      "name" : "ExampleHardware",
+      // The Arguments depends on the Hardware-Type
+      "argX" : "additional Constuctor Data"      ,
+      "argY" : "Key has to match a Key in the static Create-Method of the Hardware"
+    }
+  ],
+  "functions" : [
+    {
+      // The Type is used to identify the Create-Function in the Handlers FunctionList
+      "type" : "EXAMPLE",
+      // The Name could be used by Link get/set Date of the Function
+      "name" : "ExampleFunction",
+      // The Arguments depends on the Function-Type
+      "zeroPin" : 4,
+      "outPins" : [11,12,8],
+      "count" : 4
+    }, {
+      "type": "AcDimmer",
+      "name": "TestDimmer",
+      "zeroPin": 4,
+      "outPins": [11,12,8],
+      "count": 4
+    },
+    {
+      "type": "charger",
+      "name": "ExampleCharger",
+      "pinCharge": 1,
+      "pinDischarge": 2,
+      "output": 4
+    }
+  ],
+  "links" : [
+    {
+      "type" : "EXAMPLE",
+      "from" : [
+        {
+          // Name of the Function to read a Value from
+          "func" : "ExampleFunction",
+          // Name of the Tag that should be read
+          "tag" : "ExampleTag"
+        }, {
+          // Maybe more, depants on the Link-Type
+        }
+      ],
+      "to": [
+        {
+          // Name of the Function to write a Value from
+          "func": "ExampleFunction",
+          // Name of the Tag that should be write
+          "tag": "ExampleTag"
+        }, {
+          // Maybe more, depants on the Link-Type
+        }
+      ]
+    }
+  ]
+}

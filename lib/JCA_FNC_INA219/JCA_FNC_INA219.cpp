@@ -90,7 +90,7 @@ namespace JCA {
     void INA219::update (struct tm &time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       // Get Update Intervall
-      uint32_t ActMillis = millis ();
+      unsigned long ActMillis = millis ();
       UpdateMillis += (ActMillis - LastMillis);
       LastMillis = ActMillis;
 

@@ -61,6 +61,7 @@ namespace JCA {
       // external Functions
       FuncParent (String _Name, String _Comment);
       FuncParent (String _Name);
+      String getName ();
       void writeFunction (File _FuncFile, bool &_Init);
       void setValues (JsonObject &_Function);
       void addValues (JsonObject &_Function);

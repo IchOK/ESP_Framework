@@ -55,6 +55,7 @@ namespace JCA {
       unsigned long BusyTimer;
       unsigned long ReconnectTimer;
       const char *ObjectName = "IOT::WiFiConnect";
+      int8_t StatPin;
       // Defined by Contructor
       enum WiFiState State;
       char ApSsid[80];
@@ -80,6 +81,7 @@ namespace JCA {
       ~WiFiConnect ();
 
       // Setter
+      bool setStatePin (const int8_t _Pin);
       bool setSsid (const char *_Ssid);
       bool setPassword (const char *_Password);
       bool setIP (const char *_IP);

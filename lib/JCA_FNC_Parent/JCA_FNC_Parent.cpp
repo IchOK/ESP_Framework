@@ -51,6 +51,10 @@ namespace JCA {
     FuncParent::FuncParent (String _Name) : FuncParent (_Name, "") {
     }
 
+    String FuncParent::getName () {
+      return Name;
+    }
+    
     /**
      * @brief 
      * 

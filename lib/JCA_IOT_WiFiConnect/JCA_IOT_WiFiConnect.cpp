@@ -43,6 +43,7 @@ namespace JCA {
       ApSubnet.fromString (_ApSubnet);
       State = Init;
       DHCP = true;
+      StatPin = -1;
     }
 
     /**
@@ -67,6 +68,17 @@ namespace JCA {
      *
      */
     WiFiConnect::~WiFiConnect () {
+    }
+
+    bool WiFiConnect::setStatePin (const int8_t _Pin) {
+      if (_Pin >= 0) {
+        StatPin = _Pin;
+        pinMode (StatPin, OUTPUT);
+        digitalWrite (StatPin, LOW);
+        return true;
+      } else {
+        return false;
+      }
     }
 
     /**
@@ -258,8 +270,6 @@ namespace JCA {
             State = STA;
           } else {
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, " FAILED");
-            //            BusyTimer = millis ();
-            //            State = Failed;
             Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
             WiFi.mode (WIFI_AP);
@@ -269,8 +279,6 @@ namespace JCA {
             ReconnectTimer = millis ();
           }
         } else {
-          //          BusyTimer = millis ();
-          //          State = Failed;
           Debug.print (FLAG_SETUP, true, ObjectName, __func__, "[Init] Start AP: ");
           Debug.println (FLAG_SETUP, true, ObjectName, __func__, ApSsid);
           WiFi.mode (WIFI_AP);
@@ -315,7 +323,9 @@ namespace JCA {
           Debug.println (FLAG_SETUP, true, ObjectName, __func__, WiFi.localIP ().toString ());
           State = STA;
         } else {
-          digitalWrite (LED_BUILTIN, !digitalRead (LED_BUILTIN));
+          if (StatPin >= 0){
+            digitalWrite (StatPin, !digitalRead (StatPin));
+          }
           if (millis () - BusyTimer > JCA_IOT_WIFICONNECT_DELAY_FAILED) {
             Debug.println (FLAG_SETUP, true, ObjectName, __func__, "[Connect] Connect FAILED");
             State = Failed;
@@ -340,14 +350,18 @@ namespace JCA {
         //-----------------------------
         // Connected to STA
         //-----------------------------
-        digitalWrite (LED_BUILTIN, HIGH);
+        if (StatPin >= 0) {
+          digitalWrite (StatPin, HIGH);
+        }
         break;
 
       case AP:
         //-----------------------------
         // Connected to AP
         //-----------------------------
-        digitalWrite (LED_BUILTIN, LOW);
+        if (StatPin >= 0) {
+          digitalWrite (StatPin, LOW);
+        }
         if (WiFi.softAPgetStationNum () > 0) {
           ReconnectTimer = millis ();
         } else if (millis () - ReconnectTimer > JCA_IOT_WIFICONNECT_DELAY_RECONNECT) {

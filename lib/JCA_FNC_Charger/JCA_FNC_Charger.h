@@ -92,8 +92,8 @@ namespace JCA {
       uint8_t Resolution;
       uint32_t Frequency;
       float DutyScale;
-      uint32_t LastMillis;
-      uint32_t UpdateMillis;
+      unsigned long LastMillis;
+      unsigned long UpdateMillis;
       uint32_t StepDelay;
       float CurrentStep;
       float PowerStep;

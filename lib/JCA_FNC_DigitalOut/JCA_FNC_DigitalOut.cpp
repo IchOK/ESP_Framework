@@ -50,8 +50,8 @@ namespace JCA {
 
       // Get Millis for AutoOff
       if (DelayAutoOff > 0 && Value) {
-        uint32_t ActMillis = millis ();
-        uint32_t DiffMillis = ActMillis - LastMillis;
+        unsigned long ActMillis = millis ();
+        unsigned long DiffMillis = ActMillis - LastMillis;
         LastMillis = ActMillis;
         DelayMillis += DiffMillis;
         if (DelayMillis >= 60000) {

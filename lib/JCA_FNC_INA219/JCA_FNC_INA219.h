@@ -39,8 +39,8 @@ namespace JCA {
       float Current;
 
       // Intern
-      uint32_t LastMillis;
-      uint32_t UpdateMillis;
+      unsigned long LastMillis;
+      unsigned long UpdateMillis;
       float ShuntVoltage_mV;
       float BusVoltage_V;
       float Current_mA;

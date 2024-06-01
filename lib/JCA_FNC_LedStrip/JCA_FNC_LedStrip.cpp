@@ -68,8 +68,8 @@ namespace JCA {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
 
       // Get Millis for AutoOff
-      uint32_t ActMillis = millis ();
-      uint32_t DiffMillis = ActMillis - LastMillis;
+      unsigned long ActMillis = millis ();
+      unsigned long DiffMillis = ActMillis - LastMillis;
       LastMillis = ActMillis;
 
       if (DelayAutoOff > 0 && OnOff) {

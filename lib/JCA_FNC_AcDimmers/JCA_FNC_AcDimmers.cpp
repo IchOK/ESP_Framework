@@ -1,11 +1,12 @@
 /**
  * @file JCA_FNC_AcDimmers.cpp
  * @author JCA (https://github.com/ichok)
- * @brief Framework Element get a AcDimmers by an analog Distancesensor. With Calibation an Alarmlevel
+ * @brief Framework Element get creates an Array of AC Dimmers by using one Zero-Cross detection Pin
+ * The Element callibrate the AC Periode and the Zreo-Cross-Pulse on startup.
  * @version 1.0
- * @date 2022-11-06
+ * @date 2024-05-22
  *
- * Copyright Jochen Cabrera 2022
+ * Copyright Jochen Cabrera 2024
  * Apache License
  *
  */
@@ -21,36 +22,36 @@ namespace JCA {
 
     /**
      * @brief Construct a new AcDimmers::AcDimmers object
-     *
-     * @param _Pin Analog Pin conected to the AcDimmers-Sensor
+     * The Arrays to store the Dimmer Informations will create on consturtion
+     * @param _PinZeroDetection Pin for Zero-Cross detection
+     * @param _PinsOutputs Array of AC-Dimmer output Pins
+     * @param _CountOutputs Array Length
      * @param _Name Element Name inside the Communication
      */
-    AcDimmers::AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, uint8_t _TimerIndex, char *_Name)
+    AcDimmers::AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, char *_Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Output-Arrays
       if (_CountOutputs > 0) {
-        PinsOutputs = new uint8_t[_CountOutputs];
-        Delays = new uint16_t[_CountOutputs];
         Values = new uint8_t[_CountOutputs];
-        CalcTriggers = new AcDimmersTriggers_T;
-        CalcTriggers->Triggers = new AcDimmersTriggerPair_T[_CountOutputs];
-        IntTriggers = new AcDimmersTriggers_T;
-        IntTriggers->Triggers = new AcDimmersTriggerPair_T[_CountOutputs];
+        Triggers = new AcDimmersTriggers_T;
+        Triggers->Pairs = new AcDimmersTriggerPair_T[_CountOutputs];
+        Triggers->Count = _CountOutputs;
 
         for (size_t i = 0; i < _CountOutputs; i++) {
           // Init Data
-          PinsOutputs[i] = _PinsOutputs[i];
-          Delays[i] = 0;
           Values[i] = 0;
+          Triggers->Pairs[i].Delay = 0;
+          Triggers->Pairs[i].Pin = _PinsOutputs[i];
+          
 
           // Init digital Output
-          pinMode (PinsOutputs[i], OUTPUT);
-          digitalWrite (PinsOutputs[i], LOW);
+          pinMode (Triggers->Pairs[i].Pin, OUTPUT);
+          digitalWrite (Triggers->Pairs[i].Pin, LOW);
 
           // Create Tag-List
           String NumStr = String (i + 1);
-          Tags.push_back (new TagUInt16 ("Delay" + NumStr, "Verzögerung " + NumStr, "", true, TagUsage_T::UseConfig, &(Delays[i]), "us"));
+          Tags.push_back (new TagUInt16 ("Delay" + NumStr, "Verzögerung " + NumStr, "", true, TagUsage_T::UseConfig, &(Triggers->Pairs[i].Delay), "us"));
           Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", false, TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
         }
       }
@@ -59,7 +60,6 @@ namespace JCA {
       Tags.push_back (new TagUInt16 ("Period", "Dauer einer Sinuswelle", "", true, TagUsage_T::UseConfig, &Period, "us"));
 
       // Init Data
-      CountOutputs = _CountOutputs;
       PinZeroDetection = _PinZeroDetection;
       ZeroWidth = 0;
       Period = 0;
@@ -69,84 +69,64 @@ namespace JCA {
       CalibrationCount = 0;
       CalSumPeriod = 0;
       CalSumZeroWidth = 0;
-      CalcUpdate = false;
-      CalcTriggers->Count = 0;
-      IntTriggers->Count = 0;
 
       // define Hardware interrupt
       attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::isrZero, this), CHANGE);
-      CalcTriggers->Timer = TimerESP32_Handler.addTimer ();
-      IntTriggers->Timer = CalcTriggers->Timer;
-      if (CalcTriggers->Timer >= 0) {
-        TimerESP32_Handler.isrCallbackAdd (CalcTriggers->Timer, AcDimmers::isrTimer, IntTriggers);
+      TimerIndex = TimerESP32_Handler.addTimer ();
+      if (TimerIndex >= 0) {
+        TimerESP32_Handler.isrCallbackAdd (TimerIndex, AcDimmers::isrTimer, Triggers);
+        TimerESP32_Handler.autoReload (TimerIndex, true);
       }
     }
 
     /**
      * @brief Handling AcDimmers
-     * Write the digital Output-Pin and check the AutoOff Delay
+     * Only to support the Element Defaults. The Magic happens in the ISRs
      * @param time Current Time to check the Samplerate
      */
-    void AcDimmers::update (struct tm &time) {
+    void AcDimmers::update (struct tm &_Time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
     }
 
+    /**
+     * @brief Calculate the Delays for each Dimmer-Value
+     * 
+     */
     void AcDimmers::calc () {
-      CalcTriggers->Count = 0;
-      for (size_t i = 0; i < CountOutputs; i++) {
-        float Value = static_cast<float> (Values[i]) / 100.0;
-        // Convert Value to Time-Delay
-        if (Value < 0.02) {
-          Delays[i] = 0;
-          digitalWrite(PinsOutputs[i], LOW);
-        } else if (Value > 0.98) {
-          Delays[i] = 0;
-          digitalWrite (PinsOutputs[i], HIGH);
-        } else {
-          Delays[i] = static_cast<int16_t> (asin (Value) / (PI / 2.0) * (Period / 2)) + (ZeroWidth / 2);
-          CalcTriggers->Triggers[CalcTriggers->Count].Delay = Delays[i];
-          CalcTriggers->Triggers[CalcTriggers->Count].Pin = PinsOutputs[i];
-          CalcTriggers->Count++;
+      if (CalibrationDone) {
+        // Calculation is only possible after calibation is done
+        for (size_t i = 0; i < Triggers->Count; i++) {
+          float Value = static_cast<float> (Values[i]) / 100.0;
+          // Convert Value to Time-Delay
+          if (Value < 0.02) {
+            // lower than 2% is OFF
+            Triggers->Pairs[i].Delay = Period * 2;
+          } else if (Value > 0.98) {
+            // higher than 98% is ON
+            Triggers->Pairs[i].Delay = 0;
+          } else {
+            // between calc the ON-Delay and turn off the Output for retrigger
+            Triggers->Pairs[i].Delay = static_cast<int16_t> (asin (Value) / (PI / 2.0) * static_cast<float> (Period)) + (ZeroWidth / 2);
+            digitalWrite (Triggers->Pairs[i].Pin, LOW);
+          }
         }
       }
-
-      // Reset not used Triggers
-      for (size_t i = CalcTriggers->Count; i < CountOutputs; i++) {
-        CalcTriggers->Triggers[i].Delay = 0;
-        CalcTriggers->Triggers[i].Pin = 0;
-      }
-
-      // Sort Interrupts
-      if (CalcTriggers->Count > 0) {
-        // Sort Interrupts
-        std::sort (CalcTriggers->Triggers, CalcTriggers->Triggers + CalcTriggers->Count, [] (const AcDimmersTriggerPair_T &a, const AcDimmersTriggerPair_T &b) {
-          return a.Delay < a.Delay;
-        });
-      }
-      CalcUpdate = true;
     }
 
+    /**
+     * @brief ISR runs on Zero-Cross-Detection
+     * First do calibration: get Period and Zero-Cross-Pulswidth in Microseconds
+     * After calibration: Restart the Dimmer-Timer-Interrupt
+     */
     void AcDimmers::isrZero () {
       portENTER_CRITICAL_ISR (&PortMux);
       noInterrupts ();
-      uint32_t ActMicros = micros ();
+      unsigned long ActMicros = micros ();
       bool ZeroOn = digitalRead(PinZeroDetection);
       if (CalibrationDone) {
-        if (CalcUpdate) {
-          IntTriggers->Count = CalcTriggers->Count;
-          for(size_t i = 0; i<CountOutputs; i++) {
-            IntTriggers->Triggers[i].Delay = CalcTriggers->Triggers[i].Delay;
-            IntTriggers->Triggers[i].Pin = CalcTriggers->Triggers[i].Pin;
-            digitalWrite (CalcTriggers->Triggers[i].Pin, LOW);
-          }
-          CalcUpdate = false;
-        }
-        IntTriggers->Index = 0;
-        if (IntTriggers->Count > 0) {
-          TimerESP32_Handler.restartTimer (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
-        } else {
-          TimerESP32_Handler.pauseTimer (IntTriggers->Timer);
-        };
+        // Start/Restart Timer when calibration ist done
+        Triggers->ZeroCross = ActMicros;
+        TimerESP32_Handler.restartTimer (TimerIndex, Period / 100);
       } else {
         // Periode and ZeroImpulse-Width have to be calibrated
         if (InitDone) {
@@ -176,21 +156,28 @@ namespace JCA {
       portEXIT_CRITICAL_ISR (&PortMux);
     }
 
+    /**
+     * @brief ISR cyclic timer Interrupt, check if some output have to be switched on
+     * 
+     * @param _Args 
+     * @return true 
+     * @return false 
+     */
     bool AcDimmers::isrTimer (void *_Args) {
       portENTER_CRITICAL_ISR (&PortMux);
       noInterrupts ();
       AcDimmersTriggers_T *Triggers = static_cast<AcDimmersTriggers_T *> (_Args);
-      digitalWrite (Triggers->Triggers[Triggers->Index].Pin, HIGH);
-      Triggers->Index++;
-      if (Triggers->Index < Triggers->Count) {
-        TimerESP32_Handler.setMicros (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
-        return false;
-      } else {
-        TimerESP32_Handler.pauseTimer (Triggers->Timer);
-        return true;
+      unsigned long ActMicros = micros () - Triggers->ZeroCross;
+      for (uint8_t i = 0; i < Triggers->Count; i++) {
+        if (Triggers->Pairs[i].Delay <= ActMicros) {
+          digitalWrite (Triggers->Pairs[i].Pin, HIGH);
+        } else {
+          digitalWrite (Triggers->Pairs[i].Pin, LOW);
+        }
       }
       interrupts ();
       portEXIT_CRITICAL_ISR (&PortMux);
+      return false;
     }
   }
 }

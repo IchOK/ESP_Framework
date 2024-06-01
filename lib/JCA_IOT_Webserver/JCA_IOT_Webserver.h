@@ -81,6 +81,7 @@
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY "gateway"
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET "subnet"
 #define JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP "dhcp"
+#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_STATPIN "statpin"
 // JSON Keys for Server Config
 #define JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME "hostname"
 #define JCA_IOT_WEBSERVER_CONFKEY_PORT "port"
@@ -151,7 +152,7 @@ namespace JCA {
       void onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json);
 
       // ...Webserver_Socket.cpp
-      uint32_t WsLastUpdate;
+      unsigned long WsLastUpdate;
       JsonVariantCallback wsDataCB;
       JsonVariantCallback wsUpdateCB;
       void onWsEvent (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len);

@@ -11,12 +11,11 @@
  */
 
 // Firmware
-#include "FS.h"
+#include <FS.h>
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <Wire.h>
 #include <time.h>
-#include <esp32-hal-timer.h>
 
 #ifdef ESP8266
   #define SPIFFS LittleFS
@@ -30,74 +29,107 @@
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
 #include <JCA_IOT_FuncHandler.h>
-#include <JCA_SYS_TimerESP32.h>
 
 // Project function
 #include <JCA_FNC_AcDimmers.h>
+#include <JCA_FNC_Charger.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
 using namespace JCA::FNC;
-#define STAT_PIN LED_BUILTIN
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-uint64_t LastMicros;
-portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
-AcDimmersTriggers_T *IntTriggers;
-bool IRAM_ATTR timerInterrupt (void *_Args) {
-  portENTER_CRITICAL_ISR(&timerMux);
-  noInterrupts();
-  uint64_t ActMicros = micros();
-  Debug.print (FLAG_PROTOCOL, false, "Main", __func__, "Micros = ");
-  Debug.println (FLAG_PROTOCOL, false, "Main", __func__, ActMicros - LastMicros);
-  LastMicros = ActMicros;
+FuncHandler Handler;
 
-  AcDimmersTriggers_T *Triggers = static_cast<AcDimmersTriggers_T *> (_Args);
-  Debug.println (FLAG_PROTOCOL, false, "Main", __func__, "Trigger");
-  digitalWrite(STAT_PIN, !digitalRead(STAT_PIN));
-  Triggers->Index++;
-  if (Triggers->Index < Triggers->Count) {
-    TimerESP32_Handler.setAlarmValue (Triggers->Timer, Triggers->Triggers[Triggers->Index].Delay);
-  } else {
-    TimerESP32_Handler.pause (Triggers->Timer);
-    TimerESP32_Handler.setAlarmValue (Triggers->Timer, 0);
-  }
-  interrupts();
-  portEXIT_CRITICAL_ISR(&timerMux);
-  return false;
+//#define CONFIGPATH "/usrConfig.json"
+//#define FUNCPATH "/fncConfig.json"
+
+//uint8_t DimmerZeroPin = 4;
+//uint8_t DimmerCount = 4;
+//uint8_t DimmerOutputs[] = { 11, 12, 8, LED_BUILTIN };
+
+
+void addFunctionsToHandler () {
+  Charger_AddToHandler(Handler);
 }
 
-void setupConfig () {
-  IntTriggers = new AcDimmersTriggers_T;
-  IntTriggers->Triggers = new AcDimmersTriggerPair_T[10];
-  IntTriggers->Count = 6;
-  IntTriggers->Index = 6;
-  IntTriggers->Triggers[0].Delay = 1000000;
-  IntTriggers->Triggers[1].Delay = 1500000;
-  IntTriggers->Triggers[2].Delay = 2000000;
-  IntTriggers->Triggers[3].Delay = 3500000;
-  IntTriggers->Triggers[4].Delay = 5000000;
-  IntTriggers->Triggers[5].Delay = 10000000;
-  IntTriggers->Timer = TimerESP32_Handler.addTimer();
-  TimerESP32_Handler.isrCallbackAdd (IntTriggers->Timer, timerInterrupt, IntTriggers);
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// JCA IOT Functions
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Webserver Server;
+//-------------------------------------------------------
+// System Functions
+//-------------------------------------------------------
+void cbSystemReset () {
+  ESP.restart ();
 }
-void loopConfig () {
-  if (IntTriggers->Index >= IntTriggers->Count) {
-    Debug.println (FLAG_PROTOCOL, false, "Main", __func__, "IndexUpdate");
-    noInterrupts();
-    LastMicros = micros();
-    bool RestartIO = TimerESP32_Handler.restartTimer (IntTriggers->Timer, IntTriggers->Triggers[0].Delay);
-    IntTriggers->Index = 0;
-    interrupts ();
+void cbSaveConfig () {
+  Handler.saveValues();
+}
+
+void getAllValues (JsonVariant &_Out) {
+  JsonObject Elements = _Out.createNestedObject (FuncParent::JsonTagElements);
+  Handler.getValues(Elements);
+}
+
+void setAll (JsonVariant &_In) {
+  if (_In.containsKey (FuncParent::JsonTagElements)) {
+    JsonObject Elements = (_In.as<JsonObject> ())[FuncParent::JsonTagElements].as<JsonObject> ();
+    Handler.setValues(Elements);
   }
 }
+//-------------------------------------------------------
+// Website Functions
+//-------------------------------------------------------
+String cbWebHomeReplace (const String &var) {
+  return String ();
+}
+String cbWebConfigReplace (const String &var) {
+  return String ();
+}
+//-------------------------------------------------------
+// RestAPI Functions
+//-------------------------------------------------------
+void cbRestApiGet (JsonVariant &_In, JsonVariant &_Out) {
+  getAllValues (_Out);
+}
+
+void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
+  setAll (_In);
+}
+
+void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
+  _Out["message"] = "PUT not Used";
+}
+
+void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
+  cbSaveConfig ();
+}
+
+void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
+  _Out["message"] = "DELETE not used";
+}
+
+//-------------------------------------------------------
+// Websocket Functions
+//-------------------------------------------------------
+void cbWsUpdate (JsonVariant &_In, JsonVariant &_Out) {
+  getAllValues (_Out);
+}
+void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
+  setAll (_In);
+
+  // Return Value update
+  getAllValues (_Out);
+}
+
+// #######################################################
+//  Setup
+// #######################################################
 void setup () {
   DynamicJsonDocument JDoc (10000);
-
-  pinMode (STAT_PIN, OUTPUT);
-  digitalWrite (STAT_PIN, LOW);
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
@@ -110,7 +142,47 @@ void setup () {
   // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
-  setupConfig();
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Filesystem
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifdef ESP32
+  if (!LittleFS.begin (true)) {
+#else
+  if (!LittleFS.begin ()) {
+#endif
+    Debug.println (FLAG_ERROR, false, "root", "setup", "LITTLEFS Mount Failed");
+    return;
+  } else {
+    Debug.println (FLAG_SETUP, false, "root", "setup", "LITTLEFS Mount Done");
+  }
+
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // JCA IOT Functions
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // System
+  Server.init ();
+  Server.onSystemReset (cbSystemReset);
+  Server.onSaveConfig (cbSaveConfig);
+  // Web
+  Server.onWebHomeReplace (cbWebHomeReplace);
+  Server.onWebConfigReplace (cbWebConfigReplace);
+  // RestAPI
+  Server.onRestApiGet (cbRestApiGet);
+  Server.onRestApiPost (cbRestApiPost);
+  Server.onRestApiPut (cbRestApiPut);
+  Server.onRestApiPatch (cbRestApiPatch);
+  // Web-Socket
+  Server.onWsData (cbWsData);
+  Server.onWsUpdate (cbWsUpdate);
+
+  // Function-Handler
+  addFunctionsToHandler();
+  Handler.setup ();
+  Handler.saveValues();
+
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Custom Code
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }
 
 // #######################################################
@@ -118,5 +190,7 @@ void setup () {
 // #######################################################
 int8_t LastSeconds = 0;
 void loop () {
-  loopConfig();
+  Server.handle ();
+  tm CurrentTime = Server.getTimeStruct ();
+  Handler.update(CurrentTime);
 }
