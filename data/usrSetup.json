@@ -6,7 +6,7 @@
       "name": "ExampleCharger",
       "pinCharge": 1,
       "pinDischarge": 2,
-      "output": 4
+      "output": "PWM"
     }
   ],
   "links" : []

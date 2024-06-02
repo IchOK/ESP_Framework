@@ -43,11 +43,12 @@ namespace JCA {
       static const char *JsonTagHardware;
       static const char *JsonTagFunctions;
       static const char *JsonTagLinks;
-      static const char *Name;
+      String Name;
       // Setup
       String SetupFilePath;
       String FuncFilePath;
       String ValueFilePath;
+      String LogFilePath;
 
       // LoopData
       unsigned long LastUpdate;
@@ -61,13 +62,12 @@ namespace JCA {
 
     public:
       // Map with the initialisation callbacks for all functions
-      std::map<String, std::function<bool (JsonObject, JsonArray, std::map<String, void *>&)>> HardwareList;
+      std::map<String, std::function<bool (JsonObject, JsonObject, std::map<String, void *>&)>> HardwareList;
       std::map<String, void *> HardwareMapping;
-      std::map<String, std::function<bool (JsonObject, JsonArray, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
+      std::map<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
       std::vector<JCA::FNC::FuncParent *> Functions;
 
-      FuncHandler (String _SetupFilePath, String _FuncFilePath, String _ValueFilePath);
-      FuncHandler ();
+      FuncHandler (String _Name, String _SetupFilePath = "/usrSetup.json", String _FuncFilePath = "/usrFunctions.json", String _ValueFilePath = "/usrValues.json", String _LogFilePath = "/usrLog.json");
       void setup ();
       void update (struct tm &_Time);
       int16_t getFuncIndex (String _Name);

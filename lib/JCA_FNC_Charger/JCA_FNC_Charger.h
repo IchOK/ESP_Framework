@@ -104,9 +104,9 @@ namespace JCA {
       Charger (uint8_t _PinCharge, uint8_t _PinDischarge, String _Name, JCA::SYS::PwmOutput *_Output);
       bool init ();
       void update (struct tm &_Time);
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
-    void Charger_AddToHandler (JCA::IOT::FuncHandler &_Handler);
-    bool Charger_Create (JsonObject _Setup, JsonArray _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
   }
 }
 

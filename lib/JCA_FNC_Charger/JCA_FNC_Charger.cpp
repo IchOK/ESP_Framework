@@ -420,14 +420,14 @@ namespace JCA {
       }
     }
 
-    void Charger_AddToHandler(JCA::IOT::FuncHandler &_Handler) {
-      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonArray, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (JCA_FNC_CHARGER_SETUP_TYPE, Charger_Create));
+    void Charger::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (JCA_FNC_CHARGER_SETUP_TYPE, Create));
     }
 
-    bool Charger_Create (JsonObject _Setup, JsonArray _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+    bool Charger::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
       Debug.println (FLAG_SETUP, false, "Create", __func__, "FNC::Charger");
       bool Done = true;
-      JsonObject Log = _Log.createNestedObject ();
+      JsonObject Log = _Log.createNestedObject ("Charger");
       String OutputName;
       String Name;
       JCA::SYS::PwmOutput *Output;

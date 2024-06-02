@@ -7,15 +7,14 @@ namespace JCA {
     const char *FuncHandler::JsonTagHardware = "hardware";
     const char *FuncHandler::JsonTagFunctions = "functions";
     const char *FuncHandler::JsonTagLinks = "links";
-    const char *FuncHandler::Name = "FuncHandler";
 
-    FuncHandler::FuncHandler (String _SetupFilePath, String _FuncFilePath, String _ValueFilePath) {
+    FuncHandler::FuncHandler (String _Name, String _SetupFilePath, String _FuncFilePath, String _ValueFilePath, String _LogFilePath) {
       SetupFilePath = _SetupFilePath;
       FuncFilePath = _FuncFilePath;
       ValueFilePath = _ValueFilePath;
+      LogFilePath = _LogFilePath;
+      Name = _Name;
       LinkMapping["direct"] = FuncLinkType_T::LinkDirect;
-    }
-    FuncHandler::FuncHandler () : FuncHandler ("/usrSetup.json", "/usrFunctions.json", "/usrValues.json"){
     }
 
     /**
@@ -49,7 +48,8 @@ namespace JCA {
      * @return false Function or Tag not found
      */
     bool FuncHandler::checkLink(String _FuncName, int16_t &_Func, String _TagName, int16_t &_Tag, JsonArray _LogArray) {
-      _Func = getFuncIndex(_FuncName);
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      _Func = getFuncIndex (_FuncName);
 
       if (_Func >= 0) {
         _Tag = Functions[_Func]->getTagIndex (_TagName);
@@ -77,7 +77,8 @@ namespace JCA {
      * 
      */
     void FuncHandler::setup(){
-      DynamicJsonDocument SetupDoc(10000);
+      Debug.println (FLAG_SETUP, true, Name, __func__, "Run");
+      DynamicJsonDocument SetupDoc (10000);
       DynamicJsonDocument LogDoc(10000);
       // Open Setup File
       File SetupFile = LittleFS.open (SetupFilePath, FILE_READ);
@@ -87,6 +88,9 @@ namespace JCA {
       if (Error) {
         Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
         Debug.println (FLAG_ERROR, true, Name, __func__, Error.c_str());
+        JsonObject LogObj = LogDoc.createNestedObject ("File");
+        LogObj["Name"] = SetupFilePath;
+        LogObj["Error"] = Error.c_str ();
       } else {
         JsonObject SetupObj = SetupDoc.as<JsonObject>();
 
@@ -94,67 +98,61 @@ namespace JCA {
         // HardwareMapping 
         //-------------------------------------------------------
         if (SetupObj.containsKey (JsonTagHardware)) {
-          JsonArray LogArray = LogDoc.createNestedArray("Hardware");
+          Debug.println (FLAG_SETUP, true, Name, __func__, "Found Hardware");
+          JsonArray LogArray = LogDoc.createNestedArray ("Hardware");
           JsonArray SetupHwArr = SetupObj[JsonTagHardware].as<JsonArray>();
           for (JsonObject SetupHwObj : SetupHwArr) {
+            JsonObject Log = LogArray.createNestedObject ();
             if (HardwareList.count(SetupHwObj["type"]) == 1) {
               // Hardware found in creator List -> Call Creator and add to HardwareMapping
-              HardwareList[SetupHwObj["type"].as<String> ()](SetupHwObj, LogArray, HardwareMapping);
+              HardwareList[SetupHwObj["type"].as<String> ()](SetupHwObj, Log, HardwareMapping);
             } else {
               // Hardware not found, log error
               Debug.print (FLAG_ERROR, true, Name, __func__, "Hardware not found in Hardware List : ");
               Debug.println (FLAG_ERROR, true, Name, __func__, SetupHwObj["type"].as<String> ());
-              JsonObject Log = LogArray.createNestedObject ();
-              Log["FAULT"] = "not fault";
-              Log["type"] = SetupHwObj["type"].as<String> ();
+              Log["Fault"] = "Type not found" + SetupHwObj["type"].as<String> ();
             }
           }
-          Debug.print (FLAG_SETUP, true, Name, __func__, "Done > HardwareMapping[");
-          Debug.print (FLAG_SETUP, true, Name, __func__, HardwareMapping.size ());
-          Debug.println (FLAG_SETUP, true, Name, __func__, "]");
-        } else {
-          Debug.println (FLAG_SETUP, true, Name, __func__, "None > HardwareMapping");
+          if (Debug.print (FLAG_SETUP, true, Name, __func__, "Done > HardwareMapping[")) {
+            Debug.print (FLAG_SETUP, true, Name, __func__, HardwareMapping.size ());
+            Debug.println (FLAG_SETUP, true, Name, __func__, "]");
+          }
         }
 
         //-------------------------------------------------------
         // FunctionList
         //-------------------------------------------------------
         if (SetupObj.containsKey (JsonTagFunctions)) {
+          Debug.println (FLAG_SETUP, true, Name, __func__, "Found Functions");
           JsonArray LogArray = LogDoc.createNestedArray ("Functions");
           JsonArray SetupFuncArr = SetupObj[JsonTagFunctions].as<JsonArray> ();
-          if (Debug.println (FLAG_PROTOCOL, true, Name, __func__, "FunctionsArray:")) {
-            char Buffer[4000];
-            serializeJson(SetupFuncArr, Buffer, 4000);
-            Debug.println(FLAG_PROTOCOL, true, Name, __func__, Buffer);
-          }
           for (JsonObject SetupFuncObj : SetupFuncArr) {
+            JsonObject Log = LogArray.createNestedObject ();
             if (FunctionList.count (SetupFuncObj["type"]) == 1) {
               // Function found in creator List -> Call Creator and add to Function Vector
-              FunctionList[SetupFuncObj["type"].as<String> ()](SetupFuncObj, LogArray, Functions, HardwareMapping);
+              FunctionList[SetupFuncObj["type"].as<String> ()](SetupFuncObj, Log, Functions, HardwareMapping);
             } else {
               // Function not found, log error
               Debug.print (FLAG_ERROR, true, Name, __func__, "Function not found in Function List : ");
               Debug.println (FLAG_ERROR, true, Name, __func__, SetupFuncObj["type"].as<String> ());
-              JsonObject Log = LogArray.createNestedObject ();
-              Log["FAULT"] = "not fault";
-              Log["type"] = SetupFuncObj["type"].as<String> ();
+              Log["Fault"] = "Type not found" + SetupFuncObj["type"].as<String> ();
             }
           }
-          Debug.print (FLAG_SETUP, true, Name, __func__, "Done > Functions[");
-          Debug.print (FLAG_SETUP, true, Name, __func__, Functions.size ());
-          Debug.println (FLAG_SETUP, true, Name, __func__, "]");
-        } else {
-          Debug.println (FLAG_SETUP, true, Name, __func__, "None > Functions");
+          if (Debug.print (FLAG_SETUP, true, Name, __func__, "Done > Functions[")) {
+            Debug.print (FLAG_SETUP, true, Name, __func__, Functions.size ());
+            Debug.println (FLAG_SETUP, true, Name, __func__, "]");
+          }
         }
 
         //-------------------------------------------------------
         // Links
         //-------------------------------------------------------
         if (SetupObj.containsKey (JsonTagLinks)) {
+          Debug.println (FLAG_SETUP, true, Name, __func__, "Found Links");
           JsonArray LogArray = LogDoc.createNestedArray ("Links");
           JsonArray SetupLinkArr = SetupObj[JsonTagLinks].as<JsonArray> ();
           for (JsonObject SetupLinkObj : SetupLinkArr) {
-
+            JsonObject Log = LogArray.createNestedObject ();
             if (LinkMapping.count (SetupLinkObj["type"]) == 1) {
               // Create Link
               Links.push_back(FuncLink_T());
@@ -166,33 +164,36 @@ namespace JCA {
 
               // Add all From Pointer
               JsonArray FromArr = SetupLinkObj["from"].as<JsonArray> ();
+              JsonArray LogFrom = Log.createNestedArray("IN");
               for (JsonObject FromObj : FromArr) {
                 if (checkLink (FromObj["func"].as<String> (), FuncIndex, FromObj["tag"].as<String> (), TagIndex, LogArray)) {
                   Links[Link].Input.push_back ({ FuncIndex, TagIndex });
+                } else {
+                  LogFrom.add ("FAIL: " + FromObj["func"].as<String> () + "_" + FromObj["tag"].as<String> ());
                 }
               }
 
               // Add all To Pointer
               JsonArray ToArr = SetupLinkObj["to"].as<JsonArray> ();
+              JsonArray LogTo = Log.createNestedArray ("OUT");
               for (JsonObject ToObj : ToArr) {
                 if (checkLink (ToObj["func"].as<String> (), FuncIndex, ToObj["tag"].as<String> (), TagIndex, LogArray)) {
                   Links[Link].Output.push_back ({ FuncIndex, TagIndex });
+                } else {
+                  LogTo.add ("FAIL: " + ToObj["func"].as<String> () + "_" + ToObj["tag"].as<String> ());
                 }
               }
             } else {
               // Function not found, log error
               Debug.print (FLAG_ERROR, true, Name, __func__, "Link-Type not defined : ");
               Debug.println (FLAG_ERROR, true, Name, __func__, SetupLinkObj["type"].as<String> ());
-              JsonObject Log = LogArray.createNestedObject ();
-              Log["FAULT"] = "not defined";
-              Log["type"] = SetupLinkObj["type"].as<String> ();
+              Log["Fault"] = "Type not found" + SetupLinkObj["type"].as<String> ();
             }
           }
-          Debug.print (FLAG_SETUP, true, Name, __func__, "Done > Links[");
-          Debug.print (FLAG_SETUP, true, Name, __func__, Links.size ());
-          Debug.println (FLAG_SETUP, true, Name, __func__, "]");
-        } else {
-          Debug.println (FLAG_SETUP, true, Name, __func__, "None > Links");
+          if (Debug.print (FLAG_SETUP, true, Name, __func__, "Done > Links[")) {
+            Debug.print (FLAG_SETUP, true, Name, __func__, Links.size ());
+            Debug.println (FLAG_SETUP, true, Name, __func__, "]");
+          }
         }
 
         // write Functions File to used by Webpage
@@ -200,6 +201,12 @@ namespace JCA {
       }
       SetupFile.close ();
 
+      // Write Logfile
+      File LogFile = LittleFS.open (LogFilePath, FILE_WRITE);
+      serializeJson (LogDoc, LogFile);
+      LogFile.close ();
+
+      Debug.println (FLAG_SETUP, true, Name, __func__, "Done");
     }
 
     /**
@@ -208,6 +215,7 @@ namespace JCA {
      * @param _Time current Time from RTC
      */
     void FuncHandler::update (struct tm &_Time) {
+      Debug.println (FLAG_LOOP, true, Name, __func__, "Run");
       // Create JsonDoc to hold variant Data
       DynamicJsonDocument LinkDoc(1000);
 
@@ -263,6 +271,7 @@ namespace JCA {
      * @param _Functions REF to a Values-Object in format like the usrValues.json
      */
     void FuncHandler::setValues( JsonObject &_Functions) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       for (JsonPair Function : _Functions) {
         int16_t FuncIndex = getFuncIndex (Function.key ().c_str ());
         if (FuncIndex >= 0) {
@@ -278,6 +287,7 @@ namespace JCA {
      * @param _Functions REF where the data will returned
      */
     void FuncHandler::getValues (JsonObject &_Functions) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       for (int16_t i = 0; i < Functions.size (); i++) {
         JsonObject Function = _Functions.createNestedObject(Functions[i]->getName());
         Functions[i]->addValues(Function);
@@ -289,7 +299,8 @@ namespace JCA {
      * 
      */
     void FuncHandler::saveValues (){
-      DynamicJsonDocument ValueDoc(10000);
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      DynamicJsonDocument ValueDoc (10000);
       JsonObject Values = ValueDoc.as<JsonObject>();
       getValues(Values);
       File ValuesFile = LittleFS.open (ValueFilePath, FILE_WRITE);
@@ -298,6 +309,7 @@ namespace JCA {
     }
 
     void FuncHandler::loadValues () {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       DynamicJsonDocument ValueDoc (10000);
       File ValuesFile = LittleFS.open (ValueFilePath, FILE_READ);
       DeserializationError Error = deserializeJson (ValueDoc, ValuesFile);

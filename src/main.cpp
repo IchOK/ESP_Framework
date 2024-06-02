@@ -41,24 +41,31 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-FuncHandler Handler;
-
-//#define CONFIGPATH "/usrConfig.json"
-//#define FUNCPATH "/fncConfig.json"
-
 //uint8_t DimmerZeroPin = 4;
 //uint8_t DimmerCount = 4;
 //uint8_t DimmerOutputs[] = { 11, 12, 8, LED_BUILTIN };
-
-
-void addFunctionsToHandler () {
-  Charger_AddToHandler(Handler);
-}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Webserver Server;
+FuncHandler Handler ("handler");
+
+//-------------------------------------------------------
+// Hardware
+//-------------------------------------------------------
+PwmOutput OutputPwm;
+void linkHardware() {
+  Handler.HardwareMapping.insert(std::pair<String, void*> ("PWM", &OutputPwm));
+}
+
+//-------------------------------------------------------
+// Functions
+//-------------------------------------------------------
+void addFunctionsToHandler () {
+  Charger::AddToHandler (Handler);
+}
+
 //-------------------------------------------------------
 // System Functions
 //-------------------------------------------------------
@@ -163,22 +170,28 @@ void setup () {
   Server.init ();
   Server.onSystemReset (cbSystemReset);
   Server.onSaveConfig (cbSaveConfig);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-System Done");
   // Web
   Server.onWebHomeReplace (cbWebHomeReplace);
   Server.onWebConfigReplace (cbWebConfigReplace);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-Web Done");
   // RestAPI
   Server.onRestApiGet (cbRestApiGet);
   Server.onRestApiPost (cbRestApiPost);
   Server.onRestApiPut (cbRestApiPut);
   Server.onRestApiPatch (cbRestApiPatch);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-RestAPI Done");
   // Web-Socket
   Server.onWsData (cbWsData);
   Server.onWsUpdate (cbWsUpdate);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-WebSocket Done");
 
   // Function-Handler
   addFunctionsToHandler();
+  linkHardware();
   Handler.setup ();
-  Handler.saveValues();
+  Handler.saveValues ();
+  Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Custom Code
@@ -192,5 +205,5 @@ int8_t LastSeconds = 0;
 void loop () {
   Server.handle ();
   tm CurrentTime = Server.getTimeStruct ();
-  Handler.update(CurrentTime);
+//  Handler.update(CurrentTime);
 }
