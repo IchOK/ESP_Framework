@@ -16,6 +16,11 @@ using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
+    const char *Feeder::ClassName = "Feeder";
+    const char *Feeder::SetupTagType = "feeder";
+    const char *Feeder::SetupTagEnablePin = "pinEnable";
+    const char *Feeder::SetupTagStepPin = "pinStep";
+    const char *Feeder::SetupTagDirPin = "pinDir";
     /**
      * @brief Construct a new Feeder::Feeder object
      *
@@ -24,7 +29,7 @@ namespace JCA {
      * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
      * @param _Name Element Name inside the Communication
      */
-    Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name)
+    Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, String _Name)
         : FuncParent (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       Tags.push_back (new TagInt16 ("FeedingHour", "Fütterung Stunde", "", false, TagUsage_T::UseConfig, &FeedingHour, "h"));
@@ -108,6 +113,43 @@ namespace JCA {
       AutoFeedDone = AutoFeed;
       DistanceToGo = Stepper.distanceToGo ();
       Speed = Stepper.speed ();
+    }
+
+    /**
+     * @brief Adds the creation method to the Function-Handler
+     *
+     * @param _Handler Function Handler
+     */
+    void Feeder::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+    }
+
+    /**
+     * @brief Create a new Instanz of the Class using the JSON-Configdata and add it to the Functions-List
+     *
+     * @param _Setup Object contains the creation data
+     * @param _Log Logging-Object for Debug after creation
+     * @param _Functions List of Function to add the Instanz to
+     * @param _Hardware List of knowen Hardware-References
+     * @return true
+     * @return false
+     */
+    bool Feeder::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+      Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
+      bool Done = true;
+      JsonObject Log = _Log.createNestedObject (SetupTagType);
+
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      uint8_t PinEnable = GetSetupValueUINT8 (SetupTagEnablePin, Done, _Setup, _Log);
+      uint8_t PinStep = GetSetupValueUINT8 (SetupTagStepPin, Done, _Setup, _Log);
+      uint8_t PinDir = GetSetupValueUINT8 (SetupTagDirPin, Done, _Setup, _Log);
+
+      if (Done) {
+        _Functions.push_back (new Feeder (PinEnable, PinStep, PinDir, Name));
+        Log["done"] = Name + " (EnablePin:" + String (PinEnable) + ", StepPin: " + String (PinStep) + ", DirPin: " + String (PinDir) + ")";
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
+      }
+      return Done;
     }
   }
 }

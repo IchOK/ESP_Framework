@@ -16,13 +16,16 @@ using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
+    const char *DS18B20::ClassName = "DS18B20";
+    const char *DS18B20::SetupTagType = "ds18b20";
+    const char *DS18B20::SetupTagRefName = "refName";
     /**
      * @brief Construct a new DS18B20::DS18B20 object
      *
      * @param _Wire Pointer to the OneWire Interface
      * @param _Name Element Name inside the Communication
      */
-    DS18B20::DS18B20 (OneWire *_Wire, const char *_Name)
+    DS18B20::DS18B20 (OneWire *_Wire, String _Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
@@ -119,12 +122,39 @@ namespace JCA {
     }
 
     /**
-     * @brief Get the scaled DS18B20 Value
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current DS18B20 (0-100%)
+     * @brief Adds the creation method to the Function-Handler
+     *
+     * @param _Handler Function Handler
      */
-    float DS18B20::getValue () {
-      return Value;
+    void DS18B20::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+    }
+
+    /**
+     * @brief Create a new Instanz of the Class using the JSON-Configdata and add it to the Functions-List
+     *
+     * @param _Setup Object contains the creation data
+     * @param _Log Logging-Object for Debug after creation
+     * @param _Functions List of Function to add the Instanz to
+     * @param _Hardware List of knowen Hardware-References
+     * @return true
+     * @return false
+     */
+    bool DS18B20::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+      Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
+      bool Done = true;
+      JsonObject Log = _Log.createNestedObject (SetupTagType);
+
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      String OneWireName;
+      OneWire *OneWireRef = static_cast<OneWire *> (GetSetupHardwareRef(SetupTagRefName, OneWireName, Done, _Setup, _Log, _Hardware));
+
+      if (Done) {
+        _Functions.push_back (new DS18B20(OneWireRef, Name));
+        Log["done"] = Name + " (OneWire: " + OneWireName + ")";
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
+      }
+      return Done;
     }
   }
 }

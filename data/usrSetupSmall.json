@@ -1,0 +1,13 @@
+{
+  "hardware" : [],
+  "functions" : [
+    {
+      "type": "charger",
+      "name": "ExampleCharger",
+      "pinCharge": 1,
+      "pinDischarge": 2,
+      "output": "PWM"
+    }
+  ],
+  "links" : []
+}

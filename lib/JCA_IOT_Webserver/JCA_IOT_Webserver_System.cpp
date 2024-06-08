@@ -11,7 +11,6 @@
  */
 #include <JCA_IOT_Webserver.h>
 using namespace JCA::SYS;
-using namespace JCA::FNC;
 
 namespace JCA {
   namespace IOT {

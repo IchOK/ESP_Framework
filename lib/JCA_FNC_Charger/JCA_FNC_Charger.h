@@ -44,15 +44,16 @@ namespace JCA {
     class Charger : public FuncParent {
     private:
       static const char *ClassName;
-      static const char *SetupTagType;
-      static const char *SetupTagChargePin;
-      static const char *SetupTagDischargePin;
-      static const char *SetupTagOutputPWN;
-
       static const float CurrentHyst;
       static const float VoltageHyst;
       static const float OutputStep;
       static const uint16_t UpdateInterval;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagChargePin;
+      static const char *SetupTagDischargePin;
+      static const char *SetupTagRefName;
 
       // Hardware
       JCA::SYS::PwmOutput *Output;

@@ -16,6 +16,10 @@ using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
+    const char *INA219::ClassName = "INA219";
+    const char *INA219::SetupTagType = "ina219";
+    const char *INA219::SetupTagAddr = "addr";
+    const char *INA219::SetupTagRefName = "refName";
     /**
      * @brief Construct a new INA219::INA219 object
      *
@@ -23,7 +27,7 @@ namespace JCA {
      * @param _Addr Address of the INA219 Sensor
      * @param _Name Element Name inside the Communication
      */
-    INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name)
+    INA219::INA219 (TwoWire *_Wire, const uint8_t _Addr, String _Name)
         : FuncParent (_Name), Sensor (_Wire, _Addr) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       createTags();
@@ -61,11 +65,11 @@ namespace JCA {
       // Create Tag-List
       Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new TagFloat ("PowerPlus", "Leistung Eingang", "", true, TagUsage_T::UseConfig, &PowerPlus, "W"));
-      Tags.push_back (new TagFloat ("VoltagePlus", "Spannung Eingang", "", true, TagUsage_T::UseConfig, &VoltagePlus, "V"));
-      Tags.push_back (new TagFloat ("PowerMinus", "Leistung Ausgang", "", true, TagUsage_T::UseConfig, &PowerMinus, "W"));
-      Tags.push_back (new TagFloat ("VoltageMinus", "Spannung Ausgang", "", true, TagUsage_T::UseConfig, &VoltageMinus, "V"));
-      Tags.push_back (new TagFloat ("Current", "Strom", "", true, TagUsage_T::UseConfig, &Current, "A"));
+      Tags.push_back (new TagFloat ("PowerPlus", "Leistung Eingang", "", true, TagUsage_T::UseData, &PowerPlus, "W"));
+      Tags.push_back (new TagFloat ("VoltagePlus", "Spannung Eingang", "", true, TagUsage_T::UseData, &VoltagePlus, "V"));
+      Tags.push_back (new TagFloat ("PowerMinus", "Leistung Ausgang", "", true, TagUsage_T::UseData, &PowerMinus, "W"));
+      Tags.push_back (new TagFloat ("VoltageMinus", "Spannung Ausgang", "", true, TagUsage_T::UseData, &VoltageMinus, "V"));
+      Tags.push_back (new TagFloat ("Current", "Strom", "", true, TagUsage_T::UseData, &Current, "A"));
     }
 
     /**
@@ -139,48 +143,40 @@ namespace JCA {
     }
 
     /**
-     * @brief Get the scaled INA219 PowerPlus
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current INA219 PowerPlus [W]
+     * @brief Adds the creation method to the Function-Handler
+     *
+     * @param _Handler Function Handler
      */
-    float INA219::getPowerPlus () {
-      return PowerPlus;
+    void INA219::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
     }
 
     /**
-     * @brief Get the scaled INA219 VoltagePlus
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current INA219 VoltagePlus [V]
+     * @brief Create a new Instanz of the Class using the JSON-Configdata and add it to the Functions-List
+     *
+     * @param _Setup Object contains the creation data
+     * @param _Log Logging-Object for Debug after creation
+     * @param _Functions List of Function to add the Instanz to
+     * @param _Hardware List of knowen Hardware-References
+     * @return true
+     * @return false
      */
-    float INA219::getVoltagePlus () {
-      return VoltagePlus;
-    }
+    bool INA219::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+      Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
+      bool Done = true;
+      JsonObject Log = _Log.createNestedObject (SetupTagType);
 
-    /**
-     * @brief Get the scaled INA219 PowerMinus
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current INA219 PowerMinus [W]
-     */
-    float INA219::getPowerMinus () {
-      return PowerMinus;
-    }
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      String TwoWireName;
+      TwoWire *TwoWireRef = static_cast<TwoWire *> (GetSetupHardwareRef (SetupTagRefName, TwoWireName, Done, _Setup, _Log, _Hardware));
+      uint8_t Addr = GetSetupValueUINT8 (SetupTagAddr, Done, _Setup, _Log);
 
-    /**
-     * @brief Get the scaled INA219 VoltageMinus
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current INA219 VoltageMinus [V]
-     */
-    float INA219::getVoltageMinus () {
-      return VoltageMinus;
-    }
-
-    /**
-     * @brief Get the scaled INA219 Current
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current INA219 Current [A]
-     */
-    float INA219::getCurrent () {
-      return Current;
+      if (Done) {
+        _Functions.push_back (new INA219 (TwoWireRef, Addr, Name));
+        Log["done"] = Name + "(Addr:" + String (Addr) + ", TwoWire: " + TwoWireName + ")";
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
+      }
+      return Done;
     }
   }
 }

@@ -16,13 +16,17 @@ using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
+    const char *Level::ClassName = "Level";
+    const char *Level::SetupTagType = "level";
+    const char *Level::SetupTagInputPin = "pinInput";
+
     /**
      * @brief Construct a new Level::Level object
      *
      * @param _Pin Analog Pin conected to the Level-Sensor
      * @param _Name Element Name inside the Communication
      */
-    Level::Level (uint8_t _Pin, const char *_Name)
+    Level::Level (uint8_t _Pin, String _Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
@@ -77,22 +81,38 @@ namespace JCA {
     }
 
     /**
-     * @brief Get the scaled Level Value
-     * just return the last Value, don't read the current Hardware-Value
-     * @return float Current Level (0-100%)
+     * @brief Adds the creation method to the Function-Handler
+     *
+     * @param _Handler Function Handler
      */
-    float Level::getValue () {
-      return Value;
+    void Level::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
     }
 
     /**
-     * @brief Level Alarm of the Feeder
+     * @brief Create a new Instanz of the Class using the JSON-Configdata and add it to the Functions-List
      *
-     * @return true Level is less Limit
-     * @return false Level is good
+     * @param _Setup Object contains the creation data
+     * @param _Log Logging-Object for Debug after creation
+     * @param _Functions List of Function to add the Instanz to
+     * @param _Hardware List of knowen Hardware-References
+     * @return true
+     * @return false
      */
-    bool Level::getAlarm () {
-      return Alarm;
+    bool Level::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+      Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
+      bool Done = true;
+      JsonObject Log = _Log.createNestedObject (SetupTagType);
+
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      uint8_t InputPin = GetSetupValueUINT8 (SetupTagInputPin, Done, _Setup, _Log);
+
+      if (Done) {
+        _Functions.push_back (new Level(InputPin, Name));
+        Log["done"] = Name + "(Pin:" + String (InputPin) + ")";
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
+      }
+      return Done;
     }
   }
 }

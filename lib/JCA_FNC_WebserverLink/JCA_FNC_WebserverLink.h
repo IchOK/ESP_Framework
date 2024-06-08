@@ -1,5 +1,5 @@
 /**
- * @file JCA_FNC_Webserver.h
+ * @file JCA_FNC_WebserverLink.h
  * @author JCA (https://github.com/ichok)
  * @brief Interface to IOT_Webserver class
  * @version 0.1
@@ -10,22 +10,29 @@
  *
  */
 
-#ifndef _JCA_FNC_WEBSERVER_
-#define _JCA_FNC_WEBSERVER_
+#ifndef _JCA_FNC_WEBSERVERLINK_
+#define _JCA_FNC_WEBSERVERLINK_
 
 #include <ArduinoJson.h>
 #include <time.h>
 
 #include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
+#include <JCA_IOT_Webserver.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagString.h>
 #include <JCA_TAG_TagUInt32.h>
-#include <JCA_IOT_Webserver.h>
 
 namespace JCA {
   namespace FNC {
-    class Webserver : public FuncParent {
+    class WebserverLink : public FuncParent {
     private:
+      static const char *ClassName;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagRefName;
+
       // Hardware
       JCA::IOT::Webserver *ServerRef;
       void setTimeCB();
@@ -39,8 +46,12 @@ namespace JCA {
       String ActTime;
 
     public:
-      Webserver (JCA::IOT::Webserver *_ServerRef, const char *_Name);
+      WebserverLink (JCA::IOT::Webserver *_ServerRef, String _Name);
       void update (struct tm &_Time);
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

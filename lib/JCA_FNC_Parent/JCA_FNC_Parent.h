@@ -13,8 +13,9 @@
 #ifndef _JCA_FNC_PARENT_
 #define _JCA_FNC_PARENT_
 
-#include "FS.h"
 #include <ArduinoJson.h>
+#include <FS.h>
+#include <map>
 #include <vector>
 
 #include <JCA_SYS_DebugOut.h>
@@ -27,6 +28,7 @@ namespace JCA {
     class FuncParent {
     protected:
       // Element Strings for Parent and Debug-Output
+      static const char *ClassName;
       static const char *DebugSeparator;
 
       // Intern
@@ -38,9 +40,16 @@ namespace JCA {
 
       // Create Parent-Structure
       // Functions Get/Set Data from/to Tag-Vector
-      void writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage);
+      bool writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage);
 
-    public:
+      // Creation Sub-Functions
+      static uint8_t GetSetupValueUINT8 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
+      static uint16_t GetSetupValueUINT16 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
+      static uint8_t GetSetupValueUINT8Arr (const char *_TagName, uint8_t *&_Values, bool &_Done, JsonObject _Setup, JsonObject _Log);
+      static String GetSetupValueString (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
+      static void *GetSetupHardwareRef (const char *_TagName, String &_HwName, bool &_Done, JsonObject _Setup, JsonObject _Log, std::map<String, void *> _Hardware);
+
+    public :
       // Json Tags
       static const char *JsonTagElements;
       static const char *JsonTagConfig;

@@ -11,9 +11,10 @@
  */
 
 // Firmware
-#include <FS.h>
 #include <Arduino.h>
+#include <FS.h>
 #include <LittleFS.h>
+#include <OneWire.h>
 #include <Wire.h>
 #include <time.h>
 
@@ -33,6 +34,13 @@
 // Project function
 #include <JCA_FNC_AcDimmers.h>
 #include <JCA_FNC_Charger.h>
+#include <JCA_FNC_DigitalOut.h>
+#include <JCA_FNC_DS18B20.h>
+#include <JCA_FNC_Feeder.h>
+#include <JCA_FNC_INA219.h>
+#include <JCA_FNC_LedStrip.h>
+#include <JCA_FNC_Level.h>
+#include <JCA_FNC_WebserverLink.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -51,17 +59,33 @@ FuncHandler Handler ("handler");
 //-------------------------------------------------------
 // Hardware
 //-------------------------------------------------------
-PwmOutput OutputPwm;
+const uint8_t TwoWireNum = 1;
+const int TwoWireSDA = -1;
+const int TwoWireSCL = -1;
+PwmOutput HwPWM;
+OneWire HwOneWire;
+TwoWire HwTwoWire = TwoWire(TwoWireNum);
 void linkHardware() {
-  Handler.HardwareMapping.insert(std::pair<String, void*> ("PWM", &OutputPwm));
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("WebServer", &Server));
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
+  HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
 }
 
 //-------------------------------------------------------
 // Functions
 //-------------------------------------------------------
 void addFunctionsToHandler () {
-  Charger::AddToHandler (Handler);
   AcDimmers::AddToHandler (Handler);
+  Charger::AddToHandler (Handler);
+  DigitalOut::AddToHandler(Handler);
+  DS18B20::AddToHandler(Handler);
+  Feeder::AddToHandler(Handler);
+  INA219::AddToHandler(Handler);
+  LedStrip::AddToHandler(Handler);
+  Level::AddToHandler(Handler);
+  WebserverLink::AddToHandler (Handler);
 }
 
 //-------------------------------------------------------
@@ -107,6 +131,7 @@ void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
 
 void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
   _Out["message"] = "PUT not Used";
+  _Out["freeHeap"] = ESP.getFreeHeap ();
 }
 
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
@@ -115,6 +140,8 @@ void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
 
 void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
   _Out["message"] = "DELETE not used";
+  Handler.setup ();
+  Handler.loadValues ();
 }
 
 //-------------------------------------------------------
@@ -178,6 +205,7 @@ void setup () {
   Server.onRestApiPost (cbRestApiPost);
   Server.onRestApiPut (cbRestApiPut);
   Server.onRestApiPatch (cbRestApiPatch);
+  Server.onRestApiDelete (cbRestApiDelete);
   Debug.println (FLAG_SETUP, false, "root", __func__, "Server-RestAPI Done");
   // Web-Socket
   Server.onWsData (cbWsData);

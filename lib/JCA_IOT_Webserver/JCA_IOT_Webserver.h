@@ -51,10 +51,6 @@
 
 #include <ESP32Time.h>
 
-#include <JCA_TAG_TagUInt32.h>
-#include <JCA_TAG_TagString.h>
-#include <JCA_TAG_TagBool.h>
-#include <JCA_FNC_Parent.h>
 #include <JCA_IOT_Webserver_Boardinfo.h>
 #include <JCA_IOT_Webserver_SVGs.h>
 #include <JCA_IOT_Webserver_Sites.h>

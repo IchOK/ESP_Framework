@@ -18,17 +18,25 @@
 #include <time.h>
 
 #include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
 #include <JCA_SYS_DebugOut.h>
-#include <JCA_TAG_TagInt16.h>
-#include <JCA_TAG_TagFloat.h>
 #include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagFloat.h>
+#include <JCA_TAG_TagInt16.h>
 #include <JCA_TAG_TagInt32.h>
-
 
 namespace JCA {
   namespace FNC {
     class Feeder : public FuncParent {
     private:
+      static const char *ClassName;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagEnablePin;
+      static const char *SetupTagStepPin;
+      static const char *SetupTagDirPin;
+
       // Hardware
       AccelStepper Stepper;
 
@@ -53,8 +61,12 @@ namespace JCA {
       void doFeedCB();
 
     public:
-      Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, const char *_Name);
+      Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, String _Name);
       void update (struct tm &_Time);
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

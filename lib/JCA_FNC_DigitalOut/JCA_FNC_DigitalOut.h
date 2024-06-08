@@ -17,6 +17,7 @@
 #include <time.h>
 
 #include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagBool.h>
 #include <JCA_TAG_TagUInt16.h>
@@ -25,6 +26,12 @@ namespace JCA {
   namespace FNC {
     class DigitalOut : public FuncParent {
     private:
+      static const char *ClassName;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagOutputPin;
+
       // Hardware
       uint8_t Pin;
 
@@ -40,9 +47,12 @@ namespace JCA {
       uint16_t DelayMillis;
 
     public:
-      DigitalOut (uint8_t _Pin, const char *_Name);
+      DigitalOut (uint8_t _Pin, String _Name);
       void update (struct tm &_Time);
-      bool getValue ();
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

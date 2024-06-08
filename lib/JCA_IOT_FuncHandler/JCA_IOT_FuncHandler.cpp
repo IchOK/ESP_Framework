@@ -105,7 +105,10 @@ namespace JCA {
             JsonObject Log = LogArray.createNestedObject ();
             if (HardwareList.count(SetupHwObj["type"]) == 1) {
               // Hardware found in creator List -> Call Creator and add to HardwareMapping
-              HardwareList[SetupHwObj["type"].as<String> ()](SetupHwObj, Log, HardwareMapping);
+              if (HardwareMapping.count (SetupHwObj["type"]) == 0) {
+                // Add Hardware only once
+                HardwareList[SetupHwObj["type"].as<String> ()](SetupHwObj, Log, HardwareMapping);
+              }
             } else {
               // Hardware not found, log error
               Debug.print (FLAG_ERROR, true, Name, __func__, "Hardware not found in Hardware List : ");

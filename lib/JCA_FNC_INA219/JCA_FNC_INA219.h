@@ -16,15 +16,23 @@
 #include <ArduinoJson.h>
 #include <INA219_WE.h>
 
+#include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
+#include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagFloat.h>
 #include <JCA_TAG_TagUInt16.h>
-#include <JCA_FNC_Parent.h>
-#include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
     class INA219 : public FuncParent {
     private:
+      static const char *ClassName;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagAddr;
+      static const char *SetupTagRefName;
+
       // Hardware
       INA219_WE Sensor;
 
@@ -47,17 +55,18 @@ namespace JCA {
       void createTags();
 
     public:
-      INA219 (TwoWire *_Wire, const uint8_t _Addr, const char *_Name);
+      INA219 (TwoWire *_Wire, const uint8_t _Addr, String _Name);
       INA219 (const uint8_t _Addr, const char *_Name);
       INA219 (const char *_Name);
-      bool init();
       void update (struct tm &_Time);
+
+      // Additional initialisiations
+      bool init ();
       void setInterval (uint16_t _ReadInterval);
-      float getPowerPlus ();
-      float getVoltagePlus ();
-      float getPowerMinus ();
-      float getVoltageMinus ();
-      float getCurrent ();
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

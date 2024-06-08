@@ -17,16 +17,26 @@
 #include <Adafruit_NeoPixel.h>
 #include <time.h>
 
-#include <JCA_TAG_TagBool.h>
-#include <JCA_TAG_TagUInt32.h>
-#include <JCA_TAG_TagUInt16.h>
 #include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagUInt16.h>
+#include <JCA_TAG_TagUInt32.h>
 
 namespace JCA {
   namespace FNC {
     class LedStrip : public FuncParent {
     private:
+      static const char *ClassName;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagOutputPin;
+      static const char *SetupTagNumLeds;
+      static const char *SetupTagPixelType;
+      static const char *SetupTagPixelSpeed;
+
       // Hardware
       Adafruit_NeoPixel Strip;
 
@@ -45,10 +55,15 @@ namespace JCA {
       void updateColorCB ();
 
     public:
-      LedStrip (uint8_t _Pin, uint8_t _NumLeds, neoPixelType _Type, const char *_Name);
-      bool init();
+      LedStrip (uint8_t _Pin, uint8_t _NumLeds, neoPixelType _Type, String _Name);
       void update (struct tm &_Time);
-      bool getOnOff ();
+
+      // Additional initialisiations
+      bool init ();
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

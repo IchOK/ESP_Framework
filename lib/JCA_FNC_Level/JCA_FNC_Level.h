@@ -17,17 +17,24 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
+#include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
+#include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagBool.h>
 #include <JCA_TAG_TagFloat.h>
 #include <JCA_TAG_TagInt16.h>
 #include <JCA_TAG_TagUInt16.h>
-#include <JCA_FNC_Parent.h>
-#include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace FNC {
     class Level : public FuncParent {
     private:
+      static const char *ClassName;
+
+      // Function-Handler JSON-Tags
+      static const char *SetupTagType;
+      static const char *SetupTagInputPin;
+
       // Hardware
       uint8_t Pin;
 
@@ -47,10 +54,12 @@ namespace JCA {
       uint16_t IntervalCount;
 
     public:
-      Level (uint8_t _Pin, const char *_Name);
+      Level (uint8_t _Pin, String _Name);
       void update (struct tm &_Time);
-      float getValue ();
-      bool getAlarm ();
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

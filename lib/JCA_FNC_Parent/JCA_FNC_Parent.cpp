@@ -30,6 +30,8 @@ namespace JCA {
     const char *FuncParent::JsonTagOff = "off";
     const char *FuncParent::JsonTagType = "type";
     const char *FuncParent::JsonTagReadOnly = "readOnly";
+
+    const char *FuncParent::ClassName = "FuncParent";
     const char *FuncParent::DebugSeparator = " - ";
 
     /**
@@ -61,7 +63,7 @@ namespace JCA {
      * @param _FuncFile 
      * @param _FilterUsage 
      */
-    void FuncParent::writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage) {
+    bool FuncParent::writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       int16_t Counter = 0;
       String ObjectKey;
@@ -95,6 +97,102 @@ namespace JCA {
       if (Counter > 0) {
         _FuncFile.println ("]");
       }
+      return Counter > 0;
+    }
+
+    uint8_t FuncParent::GetSetupValueUINT8 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log) {
+      if (_Setup.containsKey (_TagName)) {
+        if (_Setup[_TagName].is<int> ()) {
+          uint8_t Value = _Setup[_TagName].as<uint8_t> ();
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + String (Value));
+          return Value;
+        } else {
+          _Log[_TagName] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > wrong datatype");
+        }
+      } else {
+        _Log[_TagName] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > Missing");
+      }
+      _Done = false;
+      return 0;
+    }
+
+    uint16_t FuncParent::GetSetupValueUINT16 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log) {
+      if (_Setup.containsKey (_TagName)) {
+        if (_Setup[_TagName].is<int> ()) {
+          uint16_t Value = _Setup[_TagName].as<uint16_t> ();
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + String (Value));
+          return Value;
+        } else {
+          _Log[_TagName] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > wrong datatype");
+        }
+      } else {
+        _Log[_TagName] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > Missing");
+      }
+      _Done = false;
+      return 0;
+    }
+
+    uint8_t FuncParent::GetSetupValueUINT8Arr (const char *_TagName, uint8_t *&_Values, bool &_Done, JsonObject _Setup, JsonObject _Log) {
+      uint8_t Count;
+      if (_Setup.containsKey (_TagName)) {
+        if (_Setup[_TagName].is<JsonArray> ()) {
+          JsonArray OutputArray = _Setup[_TagName].as<JsonArray> ();
+          Count = OutputArray.size ();
+          _Values = new uint8_t[Count];
+          Debug.print (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + String (Count) + " [ ");
+          for (uint8_t i = 0; i < Count; i++) {
+            _Values[i] = OutputArray[i].as<uint8_t> ();
+            Debug.print (FLAG_SETUP, true, ClassName, __func__, String (_Values[i]) + " ");
+          }
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, "]");
+          return Count;
+        } else {
+          _Log[_TagName] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > wrong datatype");
+        }
+      } else {
+        _Log[_TagName] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > Missing");
+      }
+      _Done = false;
+      return 0;
+    }
+
+    String FuncParent::GetSetupValueString (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log) {
+      if (_Setup.containsKey (_TagName)) {
+        String Value = _Setup[_TagName].as<String> ();
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + Value);
+        return Value;
+      } else {
+        _Log[_TagName] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > Missing");
+      }
+      _Done = false;
+      return "";
+    }
+
+    void* FuncParent::GetSetupHardwareRef (const char *_TagName, String &_HwName, bool &_Done, JsonObject _Setup, JsonObject _Log, std::map<String, void *> _Hardware) {
+      void *HwRef;
+      if (_Setup.containsKey (_TagName)) {
+        _HwName = _Setup[_TagName].as<String> ();
+        if (_Hardware.count (_HwName) == 1) {
+          HwRef = _Hardware[_HwName];
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + String (_HwName));
+          return HwRef;
+        } else {
+          _Log[_TagName] = "hardware " + _HwName + " not Found";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > Hardware not listed");
+        }
+      } else {
+        _Log[_TagName] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > Missing");
+      }
+      _Done = false;
+      return nullptr;
     }
 
     /**
@@ -113,8 +211,9 @@ namespace JCA {
       if (Comment.length () > 0) {
         _FuncFile.println ("\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
       }
-      writeFunctionTags (_FuncFile, TagUsage_T::GetWebConfig);
-      _FuncFile.println (",");
+      if (writeFunctionTags (_FuncFile, TagUsage_T::GetWebConfig)) {
+        _FuncFile.println (",");
+      }
       writeFunctionTags (_FuncFile, TagUsage_T::GetWebData);
       _FuncFile.println ("}");
     }

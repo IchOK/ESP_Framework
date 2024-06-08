@@ -42,11 +42,12 @@ namespace JCA {
     class AcDimmers : public FuncParent {
     private:
       static const char *ClassName;
+      static const uint8_t CalibrationLoops;
+
+      // Function-Handler JSON-Tags
       static const char *SetupTagType;
       static const char *SetupTagZeroPin;
       static const char *SetupTagOutputPins;
-
-      static const uint8_t CalibrationLoops;
 
       // Hardware
       uint8_t PinZeroDetection;
@@ -71,9 +72,9 @@ namespace JCA {
 
       AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, String _Name);
       void update (struct tm &_Time);
-      void calc();
 
       // Interrput Functions
+      void calc ();
       void IRAM_ATTR isrZero ();
       static bool IRAM_ATTR isrTimer (void *_Args);
 

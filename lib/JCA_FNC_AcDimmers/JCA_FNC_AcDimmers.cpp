@@ -42,7 +42,9 @@ namespace JCA {
         Triggers = new AcDimmersTriggers_T;
         Triggers->Pairs = new AcDimmersTriggerPair_T[_CountOutputs];
         Triggers->Count = _CountOutputs;
-        Debug.println (FLAG_SETUP, false, Name, __func__, "Create Trigger Done");
+        Debug.print (FLAG_SETUP, false, Name, __func__, "Create Trigger Done [");
+        Debug.print (FLAG_SETUP, false, Name, __func__, _CountOutputs);
+        Debug.println (FLAG_SETUP, false, Name, __func__, "]");
 
         for (size_t i = 0; i < _CountOutputs; i++) {
           Debug.print (FLAG_SETUP, false, Name, __func__, i);
@@ -196,6 +198,11 @@ namespace JCA {
       return false;
     }
 
+    /**
+     * @brief Adds the creation method to the Function-Handler
+     *
+     * @param _Handler Function Handler
+     */
     void AcDimmers::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
       _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
     }
@@ -204,61 +211,18 @@ namespace JCA {
       Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
       bool Done = true;
       JsonObject Log = _Log.createNestedObject (SetupTagType);
-      String Name;
-      uint8_t PinZeroDetection;
-      uint8_t *PinsOutput;
-      uint8_t CountOutputs;
 
-      if (_Setup.containsKey (JCA_IOT_FUNCHANDLER_SETUP_NAME)) {
-        Name = _Setup[JCA_IOT_FUNCHANDLER_SETUP_NAME].as<String> ();
-        Debug.println (FLAG_SETUP, true, ClassName, __func__, String (JCA_IOT_FUNCHANDLER_SETUP_NAME) + " > " + String(Name));
-      } else {
-        Log[JCA_IOT_FUNCHANDLER_SETUP_NAME] = "missing";
-        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (JCA_IOT_FUNCHANDLER_SETUP_NAME) + " > Missing");
-        Done = false;
-      }
-      if (_Setup.containsKey (SetupTagZeroPin)) {
-        if (_Setup[SetupTagZeroPin].is<int> ()) {
-          PinZeroDetection = _Setup[SetupTagZeroPin].as<uint8_t> ();
-          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (SetupTagZeroPin) + " > " + String (PinZeroDetection));
-        } else {
-          Log[SetupTagZeroPin] = "wrong datatype";
-          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagZeroPin) + " > wrong datatype");
-          Done = false;
-        }
-      } else {
-        Log[SetupTagZeroPin] = "missing";
-        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagZeroPin) + " > Missing");
-        Done = false;
-      }
-      if (_Setup.containsKey (SetupTagOutputPins)) {
-        if (_Setup[SetupTagOutputPins].is<JsonArray> ()) {
-          JsonArray OutputArray = _Setup[SetupTagOutputPins].as<JsonArray> ();
-          CountOutputs = OutputArray.size();
-          PinsOutput = new uint8_t[CountOutputs];
-          Debug.print (FLAG_SETUP, true, ClassName, __func__, String (SetupTagOutputPins) + " > " + String (CountOutputs) + " [ ");
-          for (uint8_t i = 0; i < CountOutputs; i++) {
-            PinsOutput[i] = OutputArray[i].as<uint8_t>();
-            Debug.print (FLAG_SETUP, true, ClassName, __func__, String(PinsOutput[i]) + " ");
-          }
-          Debug.println (FLAG_SETUP, true, ClassName, __func__, "]");
-        } else {
-          Log[SetupTagOutputPins] = "wrong datatype";
-          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagOutputPins) + " > wrong datatype");
-          Done = false;
-        }
-      } else {
-        Log[SetupTagOutputPins] = "missing";
-        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagOutputPins) + " > Missing");
-        Done = false;
-      }
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      uint8_t PinZeroDetection = GetSetupValueUINT8 (SetupTagZeroPin, Done, _Setup, _Log);
+      uint8_t *PinsOutput;
+      uint8_t CountOutputs = GetSetupValueUINT8Arr(SetupTagOutputPins, PinsOutput, Done, _Setup, _Log);
 
       if (Done) {
         _Functions.push_back (new AcDimmers (PinZeroDetection, PinsOutput, CountOutputs, Name));
-        Log["done"] = Name + "(ZeroPin:" + String (PinZeroDetection) + ", Output Count: " + String (CountOutputs);
+        Log["done"] = Name + " (ZeroPin:" + String (PinZeroDetection) + ", Output Count: " + String (CountOutputs) + ")";
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
-      delete[] PinsOutput;
+      //delete[] PinsOutput;
       return Done;
     }
   }
