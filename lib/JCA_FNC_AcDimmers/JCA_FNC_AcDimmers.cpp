@@ -17,6 +17,11 @@ using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
+    const char *AcDimmers::ClassName = "AcDimmers";
+    const char *AcDimmers::SetupTagType = "acDimmer";
+    const char *AcDimmers::SetupTagZeroPin = "pinZero";
+    const char *AcDimmers::SetupTagOutputPins = "pinsOutput";
+
     const uint8_t AcDimmers::CalibrationLoops = 100;
     portMUX_TYPE AcDimmers::PortMux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -28,7 +33,7 @@ namespace JCA {
      * @param _CountOutputs Array Length
      * @param _Name Element Name inside the Communication
      */
-    AcDimmers::AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, char *_Name)
+    AcDimmers::AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, String _Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Output-Arrays
@@ -37,27 +42,34 @@ namespace JCA {
         Triggers = new AcDimmersTriggers_T;
         Triggers->Pairs = new AcDimmersTriggerPair_T[_CountOutputs];
         Triggers->Count = _CountOutputs;
+        Debug.println (FLAG_SETUP, false, Name, __func__, "Create Trigger Done");
 
         for (size_t i = 0; i < _CountOutputs; i++) {
+          Debug.print (FLAG_SETUP, false, Name, __func__, i);
           // Init Data
           Values[i] = 0;
           Triggers->Pairs[i].Delay = 0;
           Triggers->Pairs[i].Pin = _PinsOutputs[i];
-          
+          Debug.print (FLAG_SETUP, false, Name, __func__, " > Pair Done [");
+          Debug.print (FLAG_SETUP, false, Name, __func__, Triggers->Pairs[i].Pin);
+          Debug.print (FLAG_SETUP, false, Name, __func__, "]");
 
           // Init digital Output
           pinMode (Triggers->Pairs[i].Pin, OUTPUT);
           digitalWrite (Triggers->Pairs[i].Pin, LOW);
+          Debug.print (FLAG_SETUP, false, Name, __func__, " > Mode Done");
 
           // Create Tag-List
           String NumStr = String (i + 1);
           Tags.push_back (new TagUInt16 ("Delay" + NumStr, "Verzögerung " + NumStr, "", true, TagUsage_T::UseConfig, &(Triggers->Pairs[i].Delay), "us"));
           Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", false, TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
+          Debug.println (FLAG_SETUP, false, Name, __func__, " > Tags Done");
         }
       }
       // Create Tag-List
       Tags.push_back (new TagUInt16 ("ZeroWidth", "Nullpunkt länge", "", true, TagUsage_T::UseConfig, &ZeroWidth, "us"));
       Tags.push_back (new TagUInt16 ("Period", "Dauer einer Sinuswelle", "", true, TagUsage_T::UseConfig, &Period, "us"));
+      Debug.println (FLAG_SETUP, false, Name, __func__, "General Tags Done");
 
       // Init Data
       PinZeroDetection = _PinZeroDetection;
@@ -72,10 +84,14 @@ namespace JCA {
 
       // define Hardware interrupt
       attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::isrZero, this), CHANGE);
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Interrupt Done");
       TimerIndex = TimerESP32_Handler.addTimer ();
+      Debug.println (FLAG_SETUP, false, Name, __func__, "Timer Done");
       if (TimerIndex >= 0) {
         TimerESP32_Handler.isrCallbackAdd (TimerIndex, AcDimmers::isrTimer, Triggers);
+        Debug.println (FLAG_SETUP, false, Name, __func__, "Callback Done");
         TimerESP32_Handler.autoReload (TimerIndex, true);
+        Debug.println (FLAG_SETUP, false, Name, __func__, "Reload Done");
       }
     }
 
@@ -178,6 +194,72 @@ namespace JCA {
       interrupts ();
       portEXIT_CRITICAL_ISR (&PortMux);
       return false;
+    }
+
+    void AcDimmers::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+    }
+
+    bool AcDimmers::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+      Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
+      bool Done = true;
+      JsonObject Log = _Log.createNestedObject (SetupTagType);
+      String Name;
+      uint8_t PinZeroDetection;
+      uint8_t *PinsOutput;
+      uint8_t CountOutputs;
+
+      if (_Setup.containsKey (JCA_IOT_FUNCHANDLER_SETUP_NAME)) {
+        Name = _Setup[JCA_IOT_FUNCHANDLER_SETUP_NAME].as<String> ();
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, String (JCA_IOT_FUNCHANDLER_SETUP_NAME) + " > " + String(Name));
+      } else {
+        Log[JCA_IOT_FUNCHANDLER_SETUP_NAME] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (JCA_IOT_FUNCHANDLER_SETUP_NAME) + " > Missing");
+        Done = false;
+      }
+      if (_Setup.containsKey (SetupTagZeroPin)) {
+        if (_Setup[SetupTagZeroPin].is<int> ()) {
+          PinZeroDetection = _Setup[SetupTagZeroPin].as<uint8_t> ();
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (SetupTagZeroPin) + " > " + String (PinZeroDetection));
+        } else {
+          Log[SetupTagZeroPin] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagZeroPin) + " > wrong datatype");
+          Done = false;
+        }
+      } else {
+        Log[SetupTagZeroPin] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagZeroPin) + " > Missing");
+        Done = false;
+      }
+      if (_Setup.containsKey (SetupTagOutputPins)) {
+        if (_Setup[SetupTagOutputPins].is<JsonArray> ()) {
+          JsonArray OutputArray = _Setup[SetupTagOutputPins].as<JsonArray> ();
+          CountOutputs = OutputArray.size();
+          PinsOutput = new uint8_t[CountOutputs];
+          Debug.print (FLAG_SETUP, true, ClassName, __func__, String (SetupTagOutputPins) + " > " + String (CountOutputs) + " [ ");
+          for (uint8_t i = 0; i < CountOutputs; i++) {
+            PinsOutput[i] = OutputArray[i].as<uint8_t>();
+            Debug.print (FLAG_SETUP, true, ClassName, __func__, String(PinsOutput[i]) + " ");
+          }
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, "]");
+        } else {
+          Log[SetupTagOutputPins] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagOutputPins) + " > wrong datatype");
+          Done = false;
+        }
+      } else {
+        Log[SetupTagOutputPins] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagOutputPins) + " > Missing");
+        Done = false;
+      }
+
+      if (Done) {
+        _Functions.push_back (new AcDimmers (PinZeroDetection, PinsOutput, CountOutputs, Name));
+        Log["done"] = Name + "(ZeroPin:" + String (PinZeroDetection) + ", Output Count: " + String (CountOutputs);
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
+      }
+      delete[] PinsOutput;
+      return Done;
     }
   }
 }

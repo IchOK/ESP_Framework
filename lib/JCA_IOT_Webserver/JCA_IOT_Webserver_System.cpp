@@ -52,6 +52,7 @@ namespace JCA {
       strncpy (ConfPassword, _ConfPassword, sizeof (ConfPassword));
       WsUpdateCycle = 1000;
       WsLastUpdate = millis ();
+      WebConfigFile = "/usrFunctions.json";
     }
 
     /**
@@ -315,6 +316,9 @@ namespace JCA {
     }
     void Webserver::setTimeStruct (tm _Time) {
       Rtc.setTimeStruct (_Time);
+    }
+    void Webserver::setWebConfigFile (String _WebConfigFile) {
+      WebConfigFile = _WebConfigFile;
     }
     bool Webserver::timeIsValid () {
       return Rtc.getEpoch () > JCA_IOT_WEBSERVER_TIME_VALID;

@@ -18,6 +18,10 @@
   </style>
   <script src="/view.js"></script>
   <script type="text/javascript">
+      var ws;
+      function connectWS() {
+        ws = new WebSocket("ws://" + location.host + "/ws");
+      }
     function handleWsMsg(msg) {
       let DataObject = JSON.parse(msg.data);
       updateView(DataObject.elements, "config");
@@ -25,26 +29,33 @@
     }
     function onChange(ValueInput) {
       let OutData = getOnChangeObject(ValueInput);
+      if (ws.readyState !== WebSocket.OPEN) {
+        connectWS();
+      }
       ws.send(JSON.stringify(OutData));
     }
     function onClick(ValueInput) {
       let OutData = getOnClickObject(ValueInput);
+      if (ws.readyState !== WebSocket.OPEN) {
+        connectWS();
+      }
       ws.send(JSON.stringify(OutData));
     }
     function onSaveConfig() {
       location.href = '/configSave';
     }
 
-    fetch("http://" + location.host + "/usrConfig.json")
+    fetch("http://" + location.host + "%CONF_FILE%")
       .then(response => {
         return response.json();
       })
       .then(data => {
         console.log(data);
-        createView(data.elements, "config");
-        createView(data.elements, "cmdInfo");
+        createView(data, "config");
+        createView(data, "cmdInfo");
       });
-    var ws = new WebSocket("ws://" + location.host + "/ws");
+    //var ws = new WebSocket("ws://" + location.host + "/ws");
+    connectWS();
     ws.onmessage = function (_msg) {
       handleWsMsg(_msg);
     };

@@ -16,24 +16,18 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_TAG_TagBool.h>
-#include <JCA_TAG_TagFloat.h>
-#include <JCA_TAG_TagUInt16.h>
-#include <JCA_TAG_TagListUInt8.h>
 #include <JCA_FNC_INA219.h>
 #include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
-#include <JCA_IOT_FuncHandler.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagFloat.h>
+#include <JCA_TAG_TagListUInt8.h>
+#include <JCA_TAG_TagUInt16.h>
 
 #define CURRENT_AH_STEPS 0.001
 #define POWER_AH_STEPS 0.001
-
-#define JCA_FNC_CHARGER_SETUP_TYPE "charger"
-#define JCA_FNC_CHARGER_SETUP_NAME "name"
-#define JCA_FNC_CHARGER_SETUP_CHARGE "pinCharge"
-#define JCA_FNC_CHARGER_SETUP_DISCHARGE "pinDischarge"
-#define JCA_FNC_CHARGER_SETUP_OUTPUT "output"
 
 namespace JCA {
   namespace FNC {
@@ -49,6 +43,12 @@ namespace JCA {
 
     class Charger : public FuncParent {
     private:
+      static const char *ClassName;
+      static const char *SetupTagType;
+      static const char *SetupTagChargePin;
+      static const char *SetupTagDischargePin;
+      static const char *SetupTagOutputPWN;
+
       static const float CurrentHyst;
       static const float VoltageHyst;
       static const float OutputStep;
@@ -104,6 +104,8 @@ namespace JCA {
       Charger (uint8_t _PinCharge, uint8_t _PinDischarge, String _Name, JCA::SYS::PwmOutput *_Output);
       bool init ();
       void update (struct tm &_Time);
+
+      // Function Handler Statics
       static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
       static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };

@@ -1,14 +1,14 @@
 function createView(DataElements, ViewType) {
   //Loop Elements
   let ViewElements = document.getElementById("elements");
-  DataElements.forEach ((DataElement, EIndex) => {
-    if ((typeof DataElement === "object") && (DataElement !== null)) {
-      if (ViewType in DataElement) {
-        let DataTags = DataElement[ViewType];
+  for (const [DataElementName, DataElementValue] of Object.entries(DataElements)) {
+    if ((typeof DataElementValue === "object") && (DataElementValue !== null)) {
+      if (ViewType in DataElementValue) {
+        let DataTags = DataElementValue[ViewType];
         if (DataTags.length > 0) {
-          let ViewElement = ViewElements.querySelector("article[name='" + DataElement.name + "']");
+          let ViewElement = ViewElements.querySelector("article[name='" + DataElementName + "']");
           if (ViewElement === null) {
-            ViewElement = createViewElement(ViewElements, DataElement);
+            ViewElement = createViewElement(ViewElements, DataElementName, DataElementValue);
           }
           DataTags.forEach((DataTag, DIndex) => {
             let ViewTag = ViewElement.querySelector("div[name='" + DataTag.name + "']");
@@ -19,39 +19,36 @@ function createView(DataElements, ViewType) {
         }
       }
     }
-  });
+  }
 }
 
-function updateView(DataElements, ViewType) {
+function updateView(DataElements) {
   //Loop Elements
   let ViewElements = document.getElementById("elements");
   for (const [DataElementName, DataElementValue] of Object.entries(DataElements)) {
-    if (ViewType in DataElementValue) {
-      let ViewElement = ViewElements.querySelector("article[name='" + DataElementName + "']");
-      if (ViewElement !== null) {
-        let DataTagValues = DataElementValue[ViewType];
-        for (const [DataTagName, DataTagValue] of Object.entries(DataTagValues)) {
-          let ViewTag = ViewElement.querySelector("div[name='" + DataTagName + "']");
-          if (ViewTag !== null) {
-            updateViewTag(ViewTag, DataTagValue);
-          }
+    let ViewElement = ViewElements.querySelector("article[name='" + DataElementName + "']");
+    if (ViewElement !== null) {
+      for (const [DataTagName, DataTagValue] of Object.entries(DataElementValue)) {
+        let ViewTag = ViewElement.querySelector("div[name='" + DataTagName + "']");
+        if (ViewTag !== null) {
+          updateViewTag(ViewTag, DataTagValue);
         }
       }
     }
   }
 }
 
-function createViewElement(ViewElements, DataElement) {
+function createViewElement(ViewElements, DataElementName, DataElementValue) {
   let ViewElement = document.createElement("article");
-  ViewElement.setAttribute("name", DataElement.name);
+  ViewElement.setAttribute("name", DataElementName);
   let ViewElementHeader;
   ViewElementHeader = document.createElement("header");
-  ViewElementHeader.innerText = DataElement.name;
+  ViewElementHeader.innerText = DataElementName;
   ViewElement.appendChild(ViewElementHeader);
-  if ("comment" in DataElement) {
+  if ("comment" in DataElementValue) {
     let ViewElementFooter;
     ViewElementFooter = document.createElement("footer");
-    ViewElementFooter.innerText = DataElement.comment;
+    ViewElementFooter.innerText = DataElementValue.comment;
     ViewElement.appendChild(ViewElementFooter);
   }
   ViewElements.appendChild(ViewElement);
@@ -59,12 +56,11 @@ function createViewElement(ViewElements, DataElement) {
 }
 
 
-function createViewTag(ViewElement, DataTag, ViewType) {
+function createViewTag(ViewElement, DataTag) {
   // create Tag Row
   let ViewTag = document.createElement("div");
   ViewTag.setAttribute("name", DataTag.name);
   ViewTag.setAttribute("style", "align-items:baseline ;");
-  ViewTag.setAttribute("tagGroup", ViewType);
   ViewTag.classList.add("grid");
   // create Tag Name
   let TagName = document.createElement("p");
@@ -78,21 +74,27 @@ function createViewTag(ViewElement, DataTag, ViewType) {
   let ViewTagValue = document.createElement("div");
   ViewTagValue.setAttribute("style", "display:flex;align-items:baseline;");
   ViewTag.appendChild(ViewTagValue);
-  if ("type" in DataTag) {
-    if (DataTag.type == "bool") {
-      createViewTagInputBoolean(ViewTagValue, DataTag, true);
-    } else {
-      createViewTagInputString(ViewTagValue, DataTag, true);
-    }
-  }
-  else if (typeof DataTag.value === "number") {
-    createViewTagInputNumber(ViewTagValue, DataTag, false);
-  }
-  else if (typeof DataTag.value === "string") {
-    createViewTagInputString(ViewTagValue, DataTag, false);
-  }
-  else if (typeof DataTag.value === "boolean") {
-    createViewTagInputBoolean(ViewTagValue, DataTag, false);
+  switch (DataTag.type) {
+    case 1:
+      createViewTagInputBoolean(ViewTagValue, DataTag, false);
+      break;
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      createViewTagInputNumber(ViewTagValue, DataTag, false);
+      break;
+
+    case 9:
+      createViewTagInputString(ViewTagValue, DataTag, false);
+      break;
+
+    default:
+      createViewTagInputString(ViewTagValue, DataTag, false);
+      break;
   }
   // add Tag to Element
   ViewElement.appendChild(ViewTag);
@@ -192,15 +194,11 @@ function getOnChangeObject (ValueInput) {
     Value = ValueInput.value;
   }
   let ViewTag = ValueInput.parentElement.parentElement;
-  let TagGrp = ViewTag.getAttribute("tagGroup");
-  if (TagGrp == "cmdInfo") {
-    TagGrp = "cmd";
-  }
   let ViewElement = ViewTag.parentElement;
-  let DataElement = {"name": ViewElement.getAttribute("name")};
-  DataElement[TagGrp] = [{ "name": ViewTag.getAttribute("name"), "value": Value }];
-  let DataElements = { "elements": []};
-  DataElements.elements.push(DataElement);
+  let DataElement = {};
+  DataElement[ViewElement.getAttribute("name")] = {};
+  DataElement[ViewElement.getAttribute("name")][ViewTag.getAttribute("name")] = Value;
+  let DataElements = { "elements": DataElement };
   return DataElements;
 }
 
@@ -219,15 +217,11 @@ function getOnClickObject(ValueInput) {
     }
   }
   let ViewTag = ValueInput.parentElement.parentElement;
-  let TagGrp = ViewTag.getAttribute("tagGroup");
-  if (TagGrp == "cmdInfo") {
-    TagGrp = "cmd";
-  }
   let ViewElement = ViewTag.parentElement;
-  let DataElement = { "name": ViewElement.getAttribute("name") };
-  DataElement[TagGrp] = [{ "name": ViewTag.getAttribute("name"), "value": Value }];
-  let DataElements = { "elements": [] };
-  DataElements.elements.push(DataElement);
+  let DataElement = { };
+  DataElement[ViewElement.getAttribute("name")] = {};
+  DataElement[ViewElement.getAttribute("name")][ViewTag.getAttribute("name")] = Value;
+  let DataElements = { "elements": DataElement };
   return DataElements;
 }
 

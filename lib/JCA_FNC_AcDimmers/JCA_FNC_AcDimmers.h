@@ -14,17 +14,17 @@
 #ifndef _JCA_FNC_ACDIMMERS_
 #define _JCA_FNC_ACDIMMERS_
 
-//  #include "ESP32TimerInterrupt.h"
-  #include "FunctionalInterrupt.h"
-  #include <ArduinoJson.h>
-  #include <algorithm>
-  #include <time.h>
+#include "FunctionalInterrupt.h"
+#include <ArduinoJson.h>
+#include <algorithm>
+#include <time.h>
 
-  #include <JCA_FNC_Parent.h>
-  #include <JCA_SYS_DebugOut.h>
-  #include <JCA_SYS_TimerESP32.h>
-  #include <JCA_TAG_TagUInt8.h>
-  #include <JCA_TAG_TagUInt16.h>
+#include <JCA_FNC_Parent.h>
+#include <JCA_IOT_FuncHandler.h>
+#include <JCA_SYS_DebugOut.h>
+#include <JCA_SYS_TimerESP32.h>
+#include <JCA_TAG_TagUInt16.h>
+#include <JCA_TAG_TagUInt8.h>
 
 namespace JCA {
   namespace FNC {
@@ -41,6 +41,11 @@ namespace JCA {
 
     class AcDimmers : public FuncParent {
     private:
+      static const char *ClassName;
+      static const char *SetupTagType;
+      static const char *SetupTagZeroPin;
+      static const char *SetupTagOutputPins;
+
       static const uint8_t CalibrationLoops;
 
       // Hardware
@@ -64,12 +69,17 @@ namespace JCA {
     public :
       static portMUX_TYPE PortMux;
 
-      AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, char *_Name);
+      AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, String _Name);
       void update (struct tm &_Time);
       void calc();
 
+      // Interrput Functions
       void IRAM_ATTR isrZero ();
       static bool IRAM_ATTR isrTimer (void *_Args);
+
+      // Function Handler Statics
+      static void AddToHandler (JCA::IOT::FuncHandler &_Handler);
+      static bool Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
     };
   }
 }

@@ -41,9 +41,6 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//uint8_t DimmerZeroPin = 4;
-//uint8_t DimmerCount = 4;
-//uint8_t DimmerOutputs[] = { 11, 12, 8, LED_BUILTIN };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -64,6 +61,7 @@ void linkHardware() {
 //-------------------------------------------------------
 void addFunctionsToHandler () {
   Charger::AddToHandler (Handler);
+  AcDimmers::AddToHandler (Handler);
 }
 
 //-------------------------------------------------------
@@ -146,7 +144,7 @@ void setup () {
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   DebugFlags |= FLAG_PROTOCOL;
-  // DebugFlags |= FLAG_DATA;
+  DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -190,7 +188,7 @@ void setup () {
   addFunctionsToHandler();
   linkHardware();
   Handler.setup ();
-  Handler.saveValues ();
+  Handler.loadValues ();
   Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++

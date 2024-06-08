@@ -83,7 +83,7 @@ namespace JCA {
         for (int16_t i = 0; i < Tags.size (); i++) {
           if (Tags[i]->Usage & _FilterUsage) {
             if (Counter == 0) {
-              _FuncFile.println (",\"" + ObjectKey + "\":[");
+              _FuncFile.println ("\"" + ObjectKey + "\":[");
               _FuncFile.println ("{" + Tags[i]->writeTag () + "}");
             } else {
               _FuncFile.println (",{" + Tags[i]->writeTag () + "}");
@@ -114,6 +114,7 @@ namespace JCA {
         _FuncFile.println ("\"" + String (JsonTagComment) + "\":\"" + Comment + "\"");
       }
       writeFunctionTags (_FuncFile, TagUsage_T::GetWebConfig);
+      _FuncFile.println (",");
       writeFunctionTags (_FuncFile, TagUsage_T::GetWebData);
       _FuncFile.println ("}");
     }

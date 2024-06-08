@@ -22,6 +22,8 @@
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 
+#define JCA_IOT_FUNCHANDLER_SETUP_NAME "name"
+
 namespace JCA {
   namespace IOT {
     typedef struct {

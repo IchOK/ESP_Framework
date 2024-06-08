@@ -16,6 +16,12 @@ using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
+    const char *Charger::ClassName = "Charger";
+    const char *Charger::SetupTagType = "charger";
+    const char *Charger::SetupTagChargePin = "pinCharge";
+    const char *Charger::SetupTagDischargePin = "pinDischarge";
+    const char *Charger::SetupTagOutputPWN = "output";
+
     const float Charger::CurrentHyst = 0.01;
     const float Charger::VoltageHyst = 0.01;
     const float Charger::OutputStep = 0.1;
@@ -421,11 +427,11 @@ namespace JCA {
     }
 
     void Charger::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
-      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (JCA_FNC_CHARGER_SETUP_TYPE, Create));
+      _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
     }
 
     bool Charger::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
-      Debug.println (FLAG_SETUP, false, "Create", __func__, "FNC::Charger");
+      Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
       bool Done = true;
       JsonObject Log = _Log.createNestedObject ("Charger");
       String OutputName;
@@ -434,50 +440,62 @@ namespace JCA {
       uint8_t PinCharge;
       uint8_t PinDischarge;
 
-      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_NAME)) {
-        Name = _Setup[JCA_FNC_CHARGER_SETUP_NAME].as<String> ();
+      if (_Setup.containsKey (JCA_IOT_FUNCHANDLER_SETUP_NAME)) {
+        Name = _Setup[JCA_IOT_FUNCHANDLER_SETUP_NAME].as<String> ();
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, String (JCA_IOT_FUNCHANDLER_SETUP_NAME) + " > " + String (Name));
       } else {
-        Log[JCA_FNC_CHARGER_SETUP_NAME] = "missing";
+        Log[JCA_IOT_FUNCHANDLER_SETUP_NAME] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (JCA_IOT_FUNCHANDLER_SETUP_NAME) + " > Missing");
         Done = false;
       }
-      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_CHARGE)) {
-        if (_Setup[JCA_FNC_CHARGER_SETUP_CHARGE].is<int> ()) {
-          PinCharge = _Setup[JCA_FNC_CHARGER_SETUP_CHARGE].as<uint8_t> ();
+      if (_Setup.containsKey (SetupTagChargePin)) {
+        if (_Setup[SetupTagChargePin].is<int> ()) {
+          PinCharge = _Setup[SetupTagChargePin].as<uint8_t> ();
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (SetupTagChargePin) + " > " + String (PinCharge));
         } else {
-          Log[JCA_FNC_CHARGER_SETUP_CHARGE] = "wrong datatype";
+          Log[SetupTagChargePin] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagChargePin) + " > wrong datatype");
           Done = false;
         }
       } else {
-        Log[JCA_FNC_CHARGER_SETUP_CHARGE] = "missing";
+        Log[SetupTagChargePin] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagChargePin) + " > Missing");
         Done = false;
       }
-      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_DISCHARGE)) {
-        if (_Setup[JCA_FNC_CHARGER_SETUP_DISCHARGE].is<int> ()) {
-          PinDischarge = _Setup[JCA_FNC_CHARGER_SETUP_DISCHARGE].as<uint8_t> ();
+      if (_Setup.containsKey (SetupTagDischargePin)) {
+        if (_Setup[SetupTagDischargePin].is<int> ()) {
+          PinDischarge = _Setup[SetupTagDischargePin].as<uint8_t> ();
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (SetupTagDischargePin) + " > " + String (PinDischarge));
         } else {
-          Log[JCA_FNC_CHARGER_SETUP_DISCHARGE] = "wrong datatype";
+          Log[SetupTagDischargePin] = "wrong datatype";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagDischargePin) + " > wrong datatype");
           Done = false;
         }
       } else {
-        Log[JCA_FNC_CHARGER_SETUP_DISCHARGE] = "missing";
+        Log[SetupTagDischargePin] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagDischargePin) + " > Missing");
         Done = false;
       }
-      if (_Setup.containsKey (JCA_FNC_CHARGER_SETUP_OUTPUT)) {
-        OutputName = _Setup[JCA_FNC_CHARGER_SETUP_OUTPUT].as<String> ();
+      if (_Setup.containsKey (SetupTagOutputPWN)) {
+        OutputName = _Setup[SetupTagOutputPWN].as<String> ();
         if (_Hardware.count (OutputName) == 1) {
           Output = static_cast<JCA::SYS::PwmOutput *> (_Hardware[OutputName]);
+          Debug.println (FLAG_SETUP, true, ClassName, __func__, String (SetupTagOutputPWN) + " > " + String (OutputName));
         } else {
-          Log[JCA_FNC_CHARGER_SETUP_OUTPUT] = "hardware " + OutputName + " not Found";
+          Log[SetupTagOutputPWN] = "hardware " + OutputName + " not Found";
+          Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagOutputPWN) + " > Hardware not listed");
           Done = false;
         }
       } else {
-        Log[JCA_FNC_CHARGER_SETUP_OUTPUT] = "missing";
+        Log[SetupTagOutputPWN] = "missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (SetupTagOutputPWN) + " > Missing");
         Done = false;
       }
 
       if (Done) {
         _Functions.push_back (new Charger (PinCharge, PinDischarge, Name, Output));
         Log["done"] = Name + "(ChargePin:" + String (PinCharge) + ", DischargePin: " + String (PinDischarge) + ", Output: " + OutputName;
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;
     }

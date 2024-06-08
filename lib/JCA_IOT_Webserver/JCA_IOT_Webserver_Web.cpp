@@ -282,6 +282,9 @@ namespace JCA {
       if (var == "SVG_SYSTEM") {
         return String (SvgSystem);
       }
+      if (var == "CONF_FILE") {
+        return WebConfigFile;
+      }
       return String ();
     }
 

@@ -121,6 +121,8 @@ namespace JCA {
       AsyncWebSocket Websocket;
       ESP32Time Rtc;
       uint16_t Port;
+      String WebConfigFile;
+
       SimpleCallback onSystemResetCB;
       SimpleCallback onSaveConfigCB;
       bool readConfig ();
@@ -175,6 +177,7 @@ namespace JCA {
       void setTime (unsigned long _Epoch = 1609459200, int _Millis = 0); // default (1609459200) = 1st Jan 2021
       void setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis = 0);
       void setTimeStruct (tm _Time);
+      void setWebConfigFile (String _WebConfigFile);
       bool timeIsValid ();
       tm getTimeStruct ();
       String getTime ();

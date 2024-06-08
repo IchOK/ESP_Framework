@@ -275,7 +275,7 @@ namespace JCA {
       for (JsonPair Function : _Functions) {
         int16_t FuncIndex = getFuncIndex (Function.key ().c_str ());
         if (FuncIndex >= 0) {
-          JsonObject FuncValues = Function.value().as<JsonObject>();
+          JsonObject FuncValues = Function.value ().as<JsonObject> ();
           Functions[FuncIndex]->setValues(FuncValues);
         }
       }
@@ -301,10 +301,16 @@ namespace JCA {
     void FuncHandler::saveValues (){
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       DynamicJsonDocument ValueDoc (10000);
-      JsonObject Values = ValueDoc.as<JsonObject>();
+      JsonObject Values = ValueDoc.createNestedObject (JCA::FNC::FuncParent::JsonTagElements); //.as<JsonObject>();
       getValues(Values);
       File ValuesFile = LittleFS.open (ValueFilePath, FILE_WRITE);
-      serializeJson (ValueDoc, ValuesFile);
+      if (!ValuesFile) {
+        Debug.print (FLAG_ERROR, true, Name, __func__, "Faild to open File for write : ");
+        Debug.println (FLAG_ERROR, true, Name, __func__, ValueFilePath);
+      }
+      size_t FileSize = serializeJson (ValueDoc, ValuesFile);
+      Debug.print (FLAG_PROTOCOL, true, Name, __func__, "File length : ");
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, FileSize);
       ValuesFile.close ();
     }
 
@@ -312,12 +318,16 @@ namespace JCA {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       DynamicJsonDocument ValueDoc (10000);
       File ValuesFile = LittleFS.open (ValueFilePath, FILE_READ);
+      if (!ValuesFile) {
+        Debug.print (FLAG_ERROR, true, Name, __func__, "Faild to open File for read : ");
+        Debug.println (FLAG_ERROR, true, Name, __func__, ValueFilePath);
+      }
       DeserializationError Error = deserializeJson (ValueDoc, ValuesFile);
       if (Error) {
         Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
         Debug.println (FLAG_ERROR, true, Name, __func__, Error.c_str ());
-      } else {
-        JsonObject Values = ValueDoc.as<JsonObject> ();
+      } else if (ValueDoc.containsKey (JCA::FNC::FuncParent::JsonTagElements)) {
+        JsonObject Values = ValueDoc[JCA::FNC::FuncParent::JsonTagElements].as<JsonObject> ();
         setValues (Values);
       }
       ValuesFile.close ();
