@@ -71,6 +71,7 @@ namespace JCA {
       static portMUX_TYPE PortMux;
 
       AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, String _Name);
+      ~AcDimmers();
       void update (struct tm &_Time);
 
       // Interrput Functions

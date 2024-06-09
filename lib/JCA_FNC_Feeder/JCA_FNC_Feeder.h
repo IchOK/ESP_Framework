@@ -62,6 +62,7 @@ namespace JCA {
 
     public:
       Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, String _Name);
+      ~Feeder () {;};
       void update (struct tm &_Time);
 
       // Function Handler Statics

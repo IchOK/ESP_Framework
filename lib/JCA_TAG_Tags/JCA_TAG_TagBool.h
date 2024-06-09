@@ -25,6 +25,7 @@ namespace JCA {
 
         TagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText, SetCallback _CB);
         TagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText);
+        ~TagBool () { ; };
         String writeTag ();
         bool getValue (JsonVariant _Value);
         bool setValue(JsonVariant _Value);

@@ -39,6 +39,18 @@ namespace JCA {
       std::vector<FuncLinkPair_T> Output;
       FuncLinkType_T Type;
     } FuncLink_T;
+    enum FuncPatchRet_T : int8_t {
+      done = 127,
+      linkObjMissing = 35,
+      linkTypMissing = 30,
+      hardwareMissing = 20,
+      functionMissing = 10,
+      fileMissing = -1,
+      jsonSyntax = -2,
+      fileOpen = -3,
+      modeUndef = -4,
+      failed = -99
+    };
     class FuncHandler {
     protected:
       // Json Tags
@@ -59,8 +71,14 @@ namespace JCA {
       std::vector<FuncLink_T> Links;
       std::map<String, FuncLinkType_T> LinkMapping;
 
-      void saveFunctions();
       bool checkLink (String _FuncName, int16_t &_Func, String _TagName, int16_t &_Tag, JsonArray _LogArray);
+      void deleteLinks();
+      void deleteFunctions();
+      FuncPatchRet_T setup ();
+      FuncPatchRet_T remove ();
+      FuncPatchRet_T saveFunctions ();
+      FuncPatchRet_T saveValues ();
+      FuncPatchRet_T loadValues ();
 
     public:
       // Map with the initialisation callbacks for all functions
@@ -70,13 +88,14 @@ namespace JCA {
       std::vector<JCA::FNC::FuncParent *> Functions;
 
       FuncHandler (String _Name, String _SetupFilePath = "/usrSetup.json", String _FuncFilePath = "/usrFunctions.json", String _ValueFilePath = "/usrValues.json", String _LogFilePath = "/usrLog.json");
-      void setup ();
       void update (struct tm &_Time);
+      String patch(String _Command);
+
       int16_t getFuncIndex (String _Name);
       void setValues (JsonObject &_Functions);
       void getValues (JsonObject &_Functions);
-      void saveValues ();
-      void loadValues();
+      int16_t getLinkCount();
+      int16_t getFuncCount();
     };
   }
 }

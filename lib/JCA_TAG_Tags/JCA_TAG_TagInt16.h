@@ -24,6 +24,7 @@ namespace JCA {
 
         TagInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, int16_t *_Value, String _Unit, SetCallback _CB);
         TagInt16 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, int16_t *_Value, String _Unit);
+        ~TagInt16 () { ; };
         String writeTag ();
         bool getValue (JsonVariant _Value);
         bool setValue(JsonVariant _Value);

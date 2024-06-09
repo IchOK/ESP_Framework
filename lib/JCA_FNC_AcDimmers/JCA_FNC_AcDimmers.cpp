@@ -97,6 +97,12 @@ namespace JCA {
       }
     }
 
+    AcDimmers::~AcDimmers() {
+      delete[] Values;
+      delete[] Triggers->Pairs;
+      delete Triggers;
+    }
+
     /**
      * @brief Handling AcDimmers
      * Only to support the Element Defaults. The Magic happens in the ISRs

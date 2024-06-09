@@ -40,7 +40,7 @@
 
 namespace JCA {
   namespace IOT {
-    enum WiFiState {
+    enum WiFiState_T {
       Init = 0,
       Connect = 1,
       Busy = 2,
@@ -57,7 +57,7 @@ namespace JCA {
       const char *ObjectName = "IOT::WiFiConnect";
       int8_t StatPin;
       // Defined by Contructor
-      enum WiFiState State;
+      WiFiState_T State;
       char ApSsid[80];
       char ApPassword[80];
       IPAddress ApIP;

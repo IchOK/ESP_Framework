@@ -47,6 +47,7 @@ namespace JCA {
 
     public:
       WebserverLink (JCA::IOT::Webserver *_ServerRef, String _Name);
+      ~WebserverLink () {;};
       void update (struct tm &_Time);
 
       // Function Handler Statics

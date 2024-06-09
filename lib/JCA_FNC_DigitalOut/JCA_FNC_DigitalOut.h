@@ -48,6 +48,7 @@ namespace JCA {
 
     public:
       DigitalOut (uint8_t _Pin, String _Name);
+      ~DigitalOut () {;};
       void update (struct tm &_Time);
 
       // Function Handler Statics

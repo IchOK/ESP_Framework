@@ -24,6 +24,7 @@ namespace JCA {
 
         TagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint32_t *_Value, String _Unit, SetCallback _CB);
         TagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint32_t *_Value, String _Unit);
+        ~TagUInt32() {;};
         String writeTag ();
         bool getValue (JsonVariant _Value);
         bool setValue (JsonVariant _Value);

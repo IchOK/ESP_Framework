@@ -77,6 +77,7 @@ namespace JCA {
 
         TagParent (String _Name, String _Text, String _Comment, bool _ReadOnly, void* _Value, TagTypes_T _Type, TagUsage_T _Usage, SetCallback _CB);
         TagParent (String _Name, String _Text, String _Comment, bool _ReadOnly, void *_Value, TagTypes_T _Type, TagUsage_T _Usage);
+        virtual ~TagParent() {;};
         virtual String writeTag () { return ""; };
         virtual bool getValue (JsonVariant _Value) { return false; };
         virtual bool setValue(JsonVariant _Value) {return false; };

@@ -95,7 +95,7 @@ void cbSystemReset () {
   ESP.restart ();
 }
 void cbSaveConfig () {
-  Handler.saveValues();
+  Handler.patch ("savevalues");
 }
 
 void getAllValues (JsonVariant &_Out) {
@@ -107,6 +107,9 @@ void setAll (JsonVariant &_In) {
   if (_In.containsKey (FuncParent::JsonTagElements)) {
     JsonObject Elements = (_In.as<JsonObject> ())[FuncParent::JsonTagElements].as<JsonObject> ();
     Handler.setValues(Elements);
+  }
+  if (_In.containsKey ("mode")) {
+    Handler.patch (_In["mode"].as<String> ());
   }
 }
 //-------------------------------------------------------
@@ -130,18 +133,32 @@ void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
 }
 
 void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
-  _Out["message"] = "PUT not Used";
   _Out["freeHeap"] = ESP.getFreeHeap ();
+  _Out["functions"] = Handler.getFuncCount();
+  _Out["links"] = Handler.getFuncCount ();
 }
 
+FuncParent *TestAlloc;
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
-  cbSaveConfig ();
+  if (_In.containsKey ("mode")) {
+    String Mode = _In["mode"].as<String> ();
+    _Out["mode"] = Mode;
+    _Out["ret"] = Handler.patch (Mode);
+  } else {
+    _Out["ret"] = "mode Missing";
+  }
+  if (_In.containsKey ("new")) {
+    TestAlloc = new LedStrip (3, 200, NEO_RGB, _In["new"].as<String> ());
+  }
+  if (_In.containsKey ("delete")) {
+    delete TestAlloc;
+  }
 }
 
 void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
-  _Out["message"] = "DELETE not used";
-  Handler.setup ();
-  Handler.loadValues ();
+  String Mode = "delete";
+  _Out["mode"] = Mode;
+  _Out["ret"] = Handler.patch (Mode);
 }
 
 //-------------------------------------------------------
@@ -166,12 +183,12 @@ void setup () {
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
   DebugFlags |= FLAG_ERROR;
-  DebugFlags |= FLAG_SETUP;
-  DebugFlags |= FLAG_CONFIG;
+  // DebugFlags |= FLAG_SETUP;
+  // DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
-  DebugFlags |= FLAG_PROTOCOL;
-  DebugFlags |= FLAG_DATA;
+  // DebugFlags |= FLAG_PROTOCOL;
+  // DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -215,8 +232,7 @@ void setup () {
   // Function-Handler
   addFunctionsToHandler();
   linkHardware();
-  Handler.setup ();
-  Handler.loadValues ();
+  Handler.patch ("init");
   Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++

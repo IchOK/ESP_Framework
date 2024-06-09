@@ -103,6 +103,7 @@ namespace JCA {
 
     public:
       Charger (uint8_t _PinCharge, uint8_t _PinDischarge, String _Name, JCA::SYS::PwmOutput *_Output);
+      ~Charger () {;};
       bool init ();
       void update (struct tm &_Time);
 

@@ -26,19 +26,19 @@
 
 namespace JCA {
   namespace FNC {
-    typedef enum DS18B20_Type_T {
+    enum DS18B20_Type_T {
       TYPE_S = 0x10,
       TYPE_B = 0x28,
       TYPE_22 = 0x22
-    } DS18B20_Type;
-    typedef enum DS18B20_Cmd_T {
+    };
+    enum DS18B20_Cmd_T {
       CONV = 0x44,
       READ = 0xBE,
       WRITE = 0x4E,
       COPY = 0x48,
       RECALL = 0xB8,
       POWER = 0xB4
-    } DS18B20_Cmd;
+    };
 
     class DS18B20 : public FuncParent {
     private:
@@ -67,6 +67,7 @@ namespace JCA {
 
     public:
       DS18B20 (OneWire *_Wire, String _Name);
+      ~DS18B20 () {;};
       void update (struct tm &_Time);
 
       // Function Handler Statics

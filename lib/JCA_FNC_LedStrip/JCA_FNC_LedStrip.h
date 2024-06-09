@@ -56,6 +56,7 @@ namespace JCA {
 
     public:
       LedStrip (uint8_t _Pin, uint8_t _NumLeds, neoPixelType _Type, String _Name);
+      ~LedStrip () {;};
       void update (struct tm &_Time);
 
       // Additional initialisiations

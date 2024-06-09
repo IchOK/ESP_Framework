@@ -55,6 +55,7 @@ namespace JCA {
 
     public:
       Level (uint8_t _Pin, String _Name);
+      ~Level () {;};
       void update (struct tm &_Time);
 
       // Function Handler Statics

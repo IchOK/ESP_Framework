@@ -58,6 +58,17 @@ namespace JCA {
     }
     
     /**
+     * @brief Destroy the FuncParent::FuncParent object
+     * including the Tags-Vector
+     */
+    FuncParent::~FuncParent () {
+      for (TagParent *Tag : Tags) {
+        delete Tag;
+      }
+      Tags.clear();
+    }
+
+    /**
      * @brief 
      * 
      * @param _FuncFile 

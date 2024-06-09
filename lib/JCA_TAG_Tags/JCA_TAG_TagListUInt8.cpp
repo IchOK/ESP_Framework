@@ -35,6 +35,10 @@ namespace JCA {
     : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeListUInt8, _Usage) {
     }
 
+    TagListUInt8::~TagListUInt8() {
+      List.clear();
+    }
+
     /**
      * @brief Create the complete Json-String of the Tag-Data
      *
