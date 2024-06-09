@@ -1,58 +1,12 @@
 {
+  "hardware" : [],
   "functions" : [
     {
       "type": "acDimmer",
       "name": "TestDimmer",
       "pinZero": 4,
-      "pinsOutput": [2,3,5]
-    },
-    {
-      "type": "charger",
-      "name": "ExampleCharger",
-      "pinCharge": 1,
-      "pinDischarge": 2,
-      "refName": "PWM"
-    },
-    {
-      "type": "digitalOut",
-      "name": "ExampleDQ",
-      "pinOutput": 1
-    },
-    {
-      "type": "ledStrip",
-      "name": "ExampleLedStrip",
-      "pinOutput": 1,
-      "numLeds": 2,
-      "pixelType": "RGB",
-      "pixelSpeed": 400
-    },
-    {
-      "type": "level",
-      "name": "ExampleLevel",
-      "pinInput": 1
-    },
-    {
-      "type": "webserver",
-      "name": "ExampleWebserver",
-      "refName": "WebServer"
-    },
-    {
-      "type": "feeder",
-      "name": "ExampleFeeder",
-      "pinEnable": 1,
-      "pinStep": 2,
-      "pinDir": 4
-    },
-    {
-      "type": "ina219",
-      "name": "ExampleINA219",
-      "addr": 1,
-      "refName": "TwoWire"
-    },
-    {
-      "type": "ds18b20",
-      "name": "ExampleDS18B20",
-      "refName": "OneWire"
+      "pinsOutput": [21,22,18]
     }
-  ]
+  ],
+  "links" : []
 }

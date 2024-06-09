@@ -25,11 +25,12 @@
 #include <JCA_SYS_TimerESP32.h>
 #include <JCA_TAG_TagUInt16.h>
 #include <JCA_TAG_TagUInt8.h>
+#include <JCA_TAG_TagInt32.h>
 
 namespace JCA {
   namespace FNC {
     typedef struct {
-      uint16_t Delay;
+      int32_t Delay;
       uint8_t Pin;
     } AcDimmersTriggerPair_T;
 

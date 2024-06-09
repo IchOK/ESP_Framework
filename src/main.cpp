@@ -49,6 +49,8 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#define STATE_LED_PIN -1           // disable Status-LED
+//#define STATE_LED_PIN LED_BUILTIN  // set Status to onborad LED
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
@@ -59,18 +61,18 @@ FuncHandler Handler ("handler");
 //-------------------------------------------------------
 // Hardware
 //-------------------------------------------------------
-const uint8_t TwoWireNum = 1;
-const int TwoWireSDA = -1;
-const int TwoWireSCL = -1;
-PwmOutput HwPWM;
-OneWire HwOneWire;
-TwoWire HwTwoWire = TwoWire(TwoWireNum);
+//const uint8_t TwoWireNum = 1;
+//const int TwoWireSDA = -1;
+//const int TwoWireSCL = -1;
+//PwmOutput HwPWM;
+//OneWire HwOneWire;
+//TwoWire HwTwoWire = TwoWire(TwoWireNum);
 void linkHardware() {
-  Handler.HardwareMapping.insert (std::pair<String, void *> ("WebServer", &Server));
-  Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
-  Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
-  HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
-  Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("WebServer", &Server));
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
+  //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
 }
 
 //-------------------------------------------------------
@@ -138,7 +140,6 @@ void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
   _Out["links"] = Handler.getFuncCount ();
 }
 
-FuncParent *TestAlloc;
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
   if (_In.containsKey ("mode")) {
     String Mode = _In["mode"].as<String> ();
@@ -147,12 +148,12 @@ void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
   } else {
     _Out["ret"] = "mode Missing";
   }
-  if (_In.containsKey ("new")) {
-    TestAlloc = new LedStrip (3, 200, NEO_RGB, _In["new"].as<String> ());
+  if (_In.containsKey ("reboot")) {
+    if (_In["mode"].as<bool> ()) {
+      ESP.restart ();
+    }
   }
-  if (_In.containsKey ("delete")) {
-    delete TestAlloc;
-  }
+
 }
 
 void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
@@ -182,13 +183,13 @@ void setup () {
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
-  DebugFlags |= FLAG_ERROR;
-  // DebugFlags |= FLAG_SETUP;
+   DebugFlags |= FLAG_ERROR;
+   DebugFlags |= FLAG_SETUP;
   // DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
-  // DebugFlags |= FLAG_DATA;
+   DebugFlags |= FLAG_DATA;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -210,6 +211,7 @@ void setup () {
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // System
   Server.init ();
+  Server.setStatePin (STATE_LED_PIN);
   Server.onSystemReset (cbSystemReset);
   Server.onSaveConfig (cbSaveConfig);
   Debug.println (FLAG_SETUP, false, "root", __func__, "Server-System Done");
@@ -247,5 +249,5 @@ int8_t LastSeconds = 0;
 void loop () {
   Server.handle ();
   tm CurrentTime = Server.getTimeStruct ();
-//  Handler.update(CurrentTime);
+  Handler.update(CurrentTime);
 }

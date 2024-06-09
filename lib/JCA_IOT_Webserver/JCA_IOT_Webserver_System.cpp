@@ -313,6 +313,10 @@ namespace JCA {
     void Webserver::setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis) {
       Rtc.setTime (_Second, _Minute, _Hour, _Day, _Month, _Year, _Millis);
     }
+    void Webserver::setStatePin (int8_t _Pin) {
+      Connector.setStatePin (_Pin);
+    }
+
     void Webserver::setTimeStruct (tm _Time) {
       Rtc.setTimeStruct (_Time);
     }

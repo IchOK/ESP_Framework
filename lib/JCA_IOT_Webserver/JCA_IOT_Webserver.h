@@ -172,6 +172,7 @@ namespace JCA {
       void onSaveConfig (SimpleCallback _CB);
       void setTime (unsigned long _Epoch = 1609459200, int _Millis = 0); // default (1609459200) = 1st Jan 2021
       void setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis = 0);
+      void setStatePin (int8_t _Pin);
       void setTimeStruct (tm _Time);
       void setWebConfigFile (String _WebConfigFile);
       bool timeIsValid ();
