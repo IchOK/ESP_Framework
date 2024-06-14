@@ -38,6 +38,8 @@ namespace JCA {
       AcDimmersTriggerPair_T *Pairs;
       unsigned long ZeroCross;
       uint8_t Count;
+      uint8_t ZeroPin;
+      bool ZeroValue;
     } AcDimmersTriggers_T;
 
     class AcDimmers : public FuncParent {
@@ -63,8 +65,8 @@ namespace JCA {
       unsigned long LastMicros;
       bool InitDone;
       bool CalibrationDone;
-      uint8_t CalibrationCount;
-      unsigned long CalSumPeriod;
+      unsigned long CalibrationCount;
+      unsigned long CalSumPeriodWidth;
       unsigned long CalSumZeroWidth;
       AcDimmersTriggers_T *Triggers;
 

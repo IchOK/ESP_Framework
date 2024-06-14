@@ -36,12 +36,13 @@ namespace JCA {
     AcDimmers::AcDimmers (uint8_t _PinZeroDetection, uint8_t *_PinsOutputs, uint8_t _CountOutputs, String _Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
+      
       // Create Output-Arrays
+      Triggers = new AcDimmersTriggers_T;
       if (_CountOutputs > 0) {
         Values = new uint8_t[_CountOutputs];
-        Triggers = new AcDimmersTriggers_T;
-        Triggers->Pairs = new AcDimmersTriggerPair_T[_CountOutputs];
         Triggers->Count = _CountOutputs;
+        Triggers->Pairs = new AcDimmersTriggerPair_T[_CountOutputs];
         Debug.print (FLAG_SETUP, false, Name, __func__, "Create Trigger Done [");
         Debug.print (FLAG_SETUP, false, Name, __func__, _CountOutputs);
         Debug.println (FLAG_SETUP, false, Name, __func__, "]");
@@ -76,16 +77,20 @@ namespace JCA {
       // Init Data
       PinZeroDetection = _PinZeroDetection;
       ZeroWidth = 0;
-      Period = 0;
+      Period = 10000;
       LastMicros = 0;
       InitDone = false;
       CalibrationDone = false;
       CalibrationCount = 0;
-      CalSumPeriod = 0;
+      CalSumPeriodWidth = 0;
       CalSumZeroWidth = 0;
 
+      pinMode (PinZeroDetection, INPUT_PULLUP);
+      Triggers->ZeroValue = digitalRead (PinZeroDetection);
+      Triggers->ZeroPin = PinZeroDetection;
+
       // define Hardware interrupt
-      attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::isrZero, this), RISING);
+      //      attachInterrupt (digitalPinToInterrupt (PinZeroDetection), std::bind (&AcDimmers::isrZero, this), HIGH);
       Debug.println (FLAG_SETUP, false, Name, __func__, "Interrupt Done");
       TimerIndex = TimerESP32_Handler.addTimer ();
       Debug.println (FLAG_SETUP, false, Name, __func__, "Timer Done");
@@ -94,6 +99,9 @@ namespace JCA {
         Debug.println (FLAG_SETUP, false, Name, __func__, "Callback Done");
         TimerESP32_Handler.autoReload (TimerIndex, true);
         Debug.println (FLAG_SETUP, false, Name, __func__, "Reload Done");
+
+        TimerESP32_Handler.restartTimer (TimerIndex, Period / 500);
+        CalibrationDone = true;
       }
     }
 
@@ -122,18 +130,15 @@ namespace JCA {
         for (size_t i = 0; i < Triggers->Count; i++) {
           float Value = static_cast<float> (Values[i]) / 100.0;
           // Convert Value to Time-Delay
-          if (Value < 0.02) {
-            // lower than 2% is OFF
+          if (Value < 0.1) {
+            // lower than 20% is OFF
             Triggers->Pairs[i].Delay = -1;
-            digitalWrite (Triggers->Pairs[i].Pin, LOW);
-          } else if (Value > 0.98) {
-            // higher than 98% is ON
+          } else if (Value > 0.9) {
+            // higher than 90% is ON
             Triggers->Pairs[i].Delay = 0;
-            digitalWrite (Triggers->Pairs[i].Pin, HIGH);
           } else {
             // between calc the ON-Delay and turn off the Output for retrigger
-            Triggers->Pairs[i].Delay = static_cast<int16_t> (asin (Value) / (PI / 2.0) * static_cast<float> (Period)) + (ZeroWidth / 2);
-            digitalWrite (Triggers->Pairs[i].Pin, LOW);
+            Triggers->Pairs[i].Delay = static_cast<int16_t> ((1.0 - Value) * static_cast<float> (Period)) + (ZeroWidth / 2);
           }
         }
       }
@@ -146,17 +151,24 @@ namespace JCA {
      */
     void AcDimmers::isrZero () {
       unsigned long ActMicros = micros ();
+      bool ZeroHigh = digitalRead(PinZeroDetection);
       if (InitDone) {
-        
-        CalSumPeriod += ActMicros - LastMicros;
-        CalibrationCount++;
-        if (CalibrationCount >= CalibrationLoops) {
-          Period = static_cast<int16_t> (CalSumPeriod / CalibrationCount);
-          CalSumPeriod = 0;
-          CalibrationCount = 0;
-          CalibrationDone = true;
+        if (ZeroHigh) {
+          CalSumPeriodWidth += LastMicros - ActMicros;
+          CalibrationCount++;
+          ActMicros = LastMicros;
+        } else {
+          CalSumZeroWidth += LastMicros - ActMicros;
         }
-        LastMicros = ActMicros;
+        if (CalibrationCount >= CalibrationLoops) {
+          Period = static_cast<int16_t> (CalSumPeriodWidth / CalibrationCount);
+          ZeroWidth = static_cast<int16_t> (CalSumZeroWidth / CalibrationCount);
+          CalibrationCount = 0;
+          CalSumPeriodWidth = 0;
+          CalSumZeroWidth = 0;
+          CalibrationDone = true;
+          LastMicros = ActMicros;
+        }
       }
       else {
         LastMicros = ActMicros;
@@ -165,6 +177,17 @@ namespace JCA {
       if (CalibrationDone) {
         TimerESP32_Handler.restartTimer (TimerIndex, Period / 100);
         Triggers->ZeroCross = ActMicros;
+      }
+      if (ZeroHigh) {
+        for (uint8_t i = 0; i < Triggers->Count; i++) {
+          if (Triggers->Pairs[i].Delay == -1) {
+            digitalWrite (Triggers->Pairs[i].Pin, LOW);
+          } else if (Triggers->Pairs[i].Delay == 0) {
+            digitalWrite (Triggers->Pairs[i].Pin, HIGH);
+          } else {
+            digitalWrite (Triggers->Pairs[i].Pin, LOW);
+          }
+        }
       }
     }
 
@@ -179,18 +202,27 @@ namespace JCA {
       portENTER_CRITICAL_ISR (&PortMux);
       noInterrupts ();
       AcDimmersTriggers_T *Triggers = static_cast<AcDimmersTriggers_T *> (_Args);
-      unsigned long ActMicros = micros () - Triggers->ZeroCross;
+      unsigned long ActMicros = micros ();
+
+      bool ZeroValue = digitalRead (Triggers->ZeroPin);
+      if (ZeroValue && !Triggers->ZeroValue) {
+        // Rising edge on ZeroDetection
+        Triggers->ZeroCross = ActMicros;
+      } else if (!ZeroValue && Triggers->ZeroValue) {
+        // Falling edge on ZeroDetection
+        ;
+      }
+
+      unsigned long DeltaMicros = ActMicros - Triggers->ZeroCross;
       for (uint8_t i = 0; i < Triggers->Count; i++) {
         if (Triggers->Pairs[i].Delay == -1) {
           digitalWrite (Triggers->Pairs[i].Pin, LOW);
         } else if (Triggers->Pairs[i].Delay == 0) {
           digitalWrite (Triggers->Pairs[i].Pin, HIGH);
-        } else if (ActMicros >= Triggers->Pairs[i].Delay + 200) {
+        } else if (DeltaMicros == 0) {
           digitalWrite (Triggers->Pairs[i].Pin, LOW);
-        } else if (ActMicros >= Triggers->Pairs[i].Delay) {
+        } else if (DeltaMicros >= Triggers->Pairs[i].Delay) {
           digitalWrite (Triggers->Pairs[i].Pin, HIGH);
-        } else {
-          digitalWrite (Triggers->Pairs[i].Pin, LOW);
         }
       }
       interrupts ();
