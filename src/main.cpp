@@ -34,6 +34,8 @@
 // Project function
 #include <JCA_FNC_AcDimmers.h>
 #include <JCA_FNC_Charger.h>
+#include <JCA_FNC_ClockValues.h>
+#include <JCA_FNC_DigitalCounter.h>
 #include <JCA_FNC_DigitalOut.h>
 #include <JCA_FNC_DS18B20.h>
 #include <JCA_FNC_Feeder.h>
