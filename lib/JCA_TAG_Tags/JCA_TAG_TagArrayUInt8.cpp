@@ -11,6 +11,7 @@
  */
 
 #include <JCA_TAG_TagArrayUInt8.h>
+using namespace JCA::SYS;
 
 namespace JCA {
   namespace TAG {
@@ -42,7 +43,8 @@ namespace JCA {
      * @return String Json-String
      */
     String TagArrayUInt8::writeTag () {
-      return writeTagBase ();
+      String SetupTag = writeTagBase ();
+      return SetupTag;
     }
 
     /**

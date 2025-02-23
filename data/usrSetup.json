@@ -2,11 +2,50 @@
   "hardware" : [],
   "functions" : [
     {
+      "type": "webServer",
+      "name": "Webserver",
+      "server": "WebServer"
+    }, {
+      "type": "clockValues",
+      "name": "TestSchaltuhr",
+      "countClockPoints": 5
+    }, {
       "type": "acDimmer",
       "name": "TestDimmer",
       "pinZero": 4,
-      "pinsOutput": [21,22,18]
+      "pinsOutput": [2,3,5]
     }
   ],
-  "links" : []
+  "links": [
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "TestSchaltuhr",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "TestDimmer",
+          "tag": "Value1"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "TestDimmer",
+          "tag": "Value2"
+        }
+      ],
+      "to": [
+        {
+          "func": "TestDimmer",
+          "tag": "Value3"
+        }
+      ]
+    }
+  ]
 }

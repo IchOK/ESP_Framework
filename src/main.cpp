@@ -70,7 +70,7 @@ FuncHandler Handler ("handler");
 //OneWire HwOneWire;
 //TwoWire HwTwoWire = TwoWire(TwoWireNum);
 void linkHardware() {
-  //Handler.HardwareMapping.insert (std::pair<String, void *> ("WebServer", &Server));
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("WebServer", &Server));
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
   //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
@@ -83,6 +83,8 @@ void linkHardware() {
 void addFunctionsToHandler () {
   AcDimmers::AddToHandler (Handler);
   Charger::AddToHandler (Handler);
+  ClockValues::AddToHandler(Handler);
+  DigitalCounter::AddToHandler(Handler);
   DigitalOut::AddToHandler(Handler);
   DS18B20::AddToHandler(Handler);
   Feeder::AddToHandler(Handler);

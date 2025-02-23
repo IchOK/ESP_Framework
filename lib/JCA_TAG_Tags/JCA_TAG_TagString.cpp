@@ -27,11 +27,11 @@ namespace JCA {
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
     TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value, SetCallback _CB)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage, _CB) {
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeString, _Usage, _CB) {
     }
 
     TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage) {
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeString, _Usage) {
     }
 
     /**
@@ -40,7 +40,8 @@ namespace JCA {
      * @return String Json-String
      */
     String TagString::writeTag () {
-      return writeTagBase ();
+      String SetupTag = writeTagBase ();
+      return SetupTag;
     }
 
     /**

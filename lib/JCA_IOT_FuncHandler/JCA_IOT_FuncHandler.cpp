@@ -8,6 +8,33 @@ namespace JCA {
     const char *FuncHandler::JsonTagFunctions = "functions";
     const char *FuncHandler::JsonTagLinks = "links";
 
+    FuncLink::FuncLink(FuncLinkType_T _Type) {
+      Input = std::vector<FuncLinkPair_T>();
+      Output = std::vector<FuncLinkPair_T>();
+      Type = _Type;
+    }
+
+    FuncLink::~FuncLink() {
+      Input.clear();
+      Output.clear();
+    }
+
+    void FuncLink::addInput(FuncLinkPair_T _Input) {
+      Input.push_back(_Input);
+    }
+
+    void FuncLink::addOutput(FuncLinkPair_T _Output) {
+      Output.push_back(_Output);
+    }
+
+    FuncLinkPair_T FuncLink::getInput(uint8_t _Index) {
+      return Input[_Index];
+    }
+
+    FuncLinkPair_T FuncLink::getOutput(uint8_t _Index) {
+      return Output[_Index];
+    }
+
     FuncHandler::FuncHandler (String _Name, String _SetupFilePath, String _FuncFilePath, String _ValueFilePath, String _LogFilePath) {
       SetupFilePath = _SetupFilePath;
       FuncFilePath = _FuncFilePath;
@@ -59,9 +86,9 @@ namespace JCA {
      * 
      */
     void FuncHandler::deleteLinks() {
-      for (FuncLink_T Link : Links) {
-        Link.Input.clear();
-        Link.Output.clear();
+      for (FuncLink *Link : Links) {
+        delete Link;
+
       }
       Links.clear();
     }
@@ -119,6 +146,7 @@ namespace JCA {
             JsonArray LogArray = LogDoc.createNestedArray ("Hardware");
             JsonArray SetupHwArr = SetupObj[JsonTagHardware].as<JsonArray>();
             for (JsonObject SetupHwObj : SetupHwArr) {
+              Debug.println (FLAG_SETUP, true, Name, __func__, SetupHwObj["type"].as<String>());
               JsonObject Log = LogArray.createNestedObject ();
               if (HardwareList.count(SetupHwObj["type"]) == 1) {
                 // Hardware found in creator List -> Call Creator and add to HardwareMapping
@@ -150,6 +178,7 @@ namespace JCA {
             JsonArray LogArray = LogDoc.createNestedArray ("Functions");
             JsonArray SetupFuncArr = SetupObj[JsonTagFunctions].as<JsonArray> ();
             for (JsonObject SetupFuncObj : SetupFuncArr) {
+              Debug.println (FLAG_SETUP, true, Name, __func__, SetupFuncObj["type"].as<String> ());
               JsonObject Log = LogArray.createNestedObject ();
               if (FunctionList.count (SetupFuncObj["type"]) == 1) {
                 // Function found in creator List -> Call Creator and add to Function Vector
@@ -178,12 +207,13 @@ namespace JCA {
             JsonArray LogArray = LogDoc.createNestedArray ("Links");
             JsonArray SetupLinkArr = SetupObj[JsonTagLinks].as<JsonArray> ();
             for (JsonObject SetupLinkObj : SetupLinkArr) {
+              Debug.println (FLAG_SETUP, true, Name, __func__, SetupLinkObj["type"].as<String> ());
               JsonObject Log = LogArray.createNestedObject ();
               if (LinkMapping.count (SetupLinkObj["type"]) == 1) {
                 // Create Link
-                Links.push_back(FuncLink_T());
-                size_t Link = Links.size();
-                Links[Link].Type = LinkMapping[SetupLinkObj["type"].as<String>()];
+                Links.push_back (new FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
+                Log["Type"] = SetupLinkObj["type"].as<String> ();
+                size_t Link = Links.size() - 1;
                 int16_t FuncIndex;
                 int16_t TagIndex;
 
@@ -193,7 +223,8 @@ namespace JCA {
                 JsonArray LogFrom = Log.createNestedArray("IN");
                 for (JsonObject FromObj : FromArr) {
                   if (checkLink (FromObj["func"].as<String> (), FuncIndex, FromObj["tag"].as<String> (), TagIndex, LogArray)) {
-                    Links[Link].Input.push_back ({ FuncIndex, TagIndex });
+                    Links[Link]->addInput ({ FuncIndex, TagIndex });
+                    LogFrom.add ("OK: FuncIndex=" + String(FuncIndex) + " TagIndex=" + String(TagIndex));
                   } else {
                     LogFrom.add ("FAIL: " + FromObj["func"].as<String> () + "_" + FromObj["tag"].as<String> ());
                     if (RetValue > FuncPatchRet_T::linkObjMissing) {
@@ -207,7 +238,8 @@ namespace JCA {
                 JsonArray LogTo = Log.createNestedArray ("OUT");
                 for (JsonObject ToObj : ToArr) {
                   if (checkLink (ToObj["func"].as<String> (), FuncIndex, ToObj["tag"].as<String> (), TagIndex, LogArray)) {
-                    Links[Link].Output.push_back ({ FuncIndex, TagIndex });
+                    Links[Link]->addOutput ({ FuncIndex, TagIndex });
+                    LogTo.add ("OK: FuncIndex=" + String (FuncIndex) + " TagIndex=" + String (TagIndex));
                   } else {
                     LogTo.add ("FAIL: " + ToObj["func"].as<String> () + "_" + ToObj["tag"].as<String> ());
                     if (RetValue > FuncPatchRet_T::linkObjMissing) {
@@ -265,7 +297,7 @@ namespace JCA {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       // Open Output File
-      File FuncFile = LittleFS.open (FuncFilePath, FILE_WRITE);
+      File FuncFile = LittleFS.open (FuncFilePath, FILE_WRITE, true);
       if (!FuncFile) {
         RetValue = FuncPatchRet_T::fileOpen;
       } else {
@@ -277,6 +309,13 @@ namespace JCA {
         }
         FuncFile.println ("}");
         // Close File
+        FuncFile.close ();
+      }
+      if (Debug.println (FLAG_DATA, true, "FuncHandler", __func__, "Functions-JSON")) {
+        File FuncFile = LittleFS.open (FuncFilePath, FILE_READ);
+        while (FuncFile.available ()) {
+          Debug.print (FLAG_DATA, true, "FuncHandler", __func__, (char)FuncFile.read ());
+        }
         FuncFile.close ();
       }
       return RetValue;
@@ -345,17 +384,18 @@ namespace JCA {
       DynamicJsonDocument LinkDoc (1000);
 
       // Update Links
-      for (FuncLink_T Link : Links) {
+      for (FuncLink *Link : Links) {
 
-        switch (Link.Type) {
+        switch (Link->Type) {
         case FuncLinkType_T::LinkDirect:
           // Direkt Link always read the first Input-Link and set it to all Output Links
-          if (Link.Input.size () > 0 && Link.Output.size () > 0) {
+          if (Link->getInputCount () > 0 && Link->getOutputCount () > 0) {
             JsonVariant Value = LinkDoc.to<JsonVariant> ();
-            FuncLinkPair_T Input = Link.Input[0];
+            FuncLinkPair_T Input = Link->getInput(0);
 
             if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value)) {
-              for (FuncLinkPair_T Output : Link.Output) {
+              for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount(); OutputIndex++) {
+                FuncLinkPair_T Output = Link->getOutput(0);
                 Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value);
               }
             }

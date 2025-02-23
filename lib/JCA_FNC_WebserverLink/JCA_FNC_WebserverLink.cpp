@@ -17,8 +17,8 @@ using namespace JCA::TAG;
 namespace JCA {
   namespace FNC {
     const char *WebserverLink::ClassName = "WebserverLink";
-    const char *WebserverLink::SetupTagType = "webserver";
-    const char *WebserverLink::SetupTagRefName = "WebServer";
+    const char *WebserverLink::SetupTagType = "webServer";
+    const char *WebserverLink::SetupTagRefName = "server";
 
     /**
      * @brief Construct a new DigitalOut::DigitalOut object
@@ -32,7 +32,7 @@ namespace JCA {
       // Create Tag-List
       Tags.push_back (new TagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, TagUsage_T::UseConfig, &Hostname));
       Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
-      Tags.push_back (new TagUInt32 ("TimeSync", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&WebserverLink::setTimeCB, this)));
+      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&WebserverLink::setTimeCB, this)));
 
       Tags.push_back (new TagString ("Time", "Systemzeit", "", false, TagUsage_T::UseData, &ActTime));
 

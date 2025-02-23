@@ -26,19 +26,14 @@
 
 namespace JCA {
   namespace IOT {
-    typedef struct {
+    struct FuncLinkPair_T{
       int16_t Func;
       int16_t Tag;
-    } FuncLinkPair_T;
+    };
     enum FuncLinkType_T : uint8_t {
       LinkNone = 0,
       LinkDirect = 1
     };
-    typedef struct {
-      std::vector<FuncLinkPair_T> Input;
-      std::vector<FuncLinkPair_T> Output;
-      FuncLinkType_T Type;
-    } FuncLink_T;
     enum FuncPatchRet_T : int8_t {
       done = 127,
       linkObjMissing = 35,
@@ -51,6 +46,25 @@ namespace JCA {
       modeUndef = -4,
       failed = -99
     };
+    
+    class FuncLink {
+    private:
+      std::vector<FuncLinkPair_T> Input;
+      std::vector<FuncLinkPair_T> Output;
+
+    public:
+      FuncLinkType_T Type;
+
+      FuncLink(FuncLinkType_T _Type);
+      ~FuncLink();
+      void addInput(FuncLinkPair_T _Input);
+      void addOutput(FuncLinkPair_T _Output);
+      FuncLinkPair_T getInput(uint8_t _Index);
+      FuncLinkPair_T getOutput(uint8_t _Index);
+      uint8_t getInputCount() { return Input.size(); };
+      uint8_t getOutputCount() { return Output.size(); };
+    };
+
     class FuncHandler {
     protected:
       // Json Tags
@@ -68,7 +82,7 @@ namespace JCA {
       unsigned long LastUpdate;
 
       // Controller Setup
-      std::vector<FuncLink_T> Links;
+      std::vector<FuncLink *> Links;
       std::map<String, FuncLinkType_T> LinkMapping;
 
       bool checkLink (String _FuncName, int16_t &_Func, String _TagName, int16_t &_Tag, JsonArray _LogArray);
@@ -87,7 +101,11 @@ namespace JCA {
       std::map<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
       std::vector<JCA::FNC::FuncParent *> Functions;
 
-      FuncHandler (String _Name, String _SetupFilePath = "/usrSetup.json", String _FuncFilePath = "/usrFunctions.json", String _ValueFilePath = "/usrValues.json", String _LogFilePath = "/usrLog.json");
+      FuncHandler (String _Name
+        , String _SetupFilePath = "/usrSetup.json"
+        , String _FuncFilePath = "/usrFunctions.json"
+        , String _ValueFilePath = "/usrValues.json"
+        , String _LogFilePath = "/usrLog.json");
       void update (struct tm &_Time);
       String patch(String _Command);
 

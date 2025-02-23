@@ -28,12 +28,12 @@ namespace JCA {
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
     TagUInt8::TagUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint8_t *_Value, String _Unit, SetCallback _CB)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage, _CB) {
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeUInt8, _Usage, _CB) {
       Unit = _Unit;
     }
 
     TagUInt8::TagUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint8_t *_Value, String _Unit)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeFloat, _Usage) {
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeUInt8, _Usage) {
       Unit = _Unit;
     }
 
