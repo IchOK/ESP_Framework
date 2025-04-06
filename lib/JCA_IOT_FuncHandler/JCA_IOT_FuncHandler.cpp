@@ -66,7 +66,7 @@ namespace JCA {
         } else {
           Debug.print (FLAG_ERROR, true, Name, __func__, "Tag to link not found : ");
           Debug.println (FLAG_ERROR, true, Name, __func__, _TagName);
-          JsonObject Log = _LogArray.createNestedObject ();
+          JsonObject Log = _LogArray.add<JsonObject>();
           Log["func"] = _FuncName;
           Log["tag"] = _TagName;
           return false;
@@ -75,7 +75,7 @@ namespace JCA {
         _Tag = -1;
         Debug.print (FLAG_ERROR, true, Name, __func__, "Function to link not found : ");
         Debug.println (FLAG_ERROR, true, Name, __func__, _FuncName);
-        JsonObject Log = _LogArray.createNestedObject ();
+        JsonObject Log = _LogArray.add<JsonObject>();
         Log["func"] = _FuncName;
         return false;
       }
@@ -112,11 +112,11 @@ namespace JCA {
     FuncPatchRet_T FuncHandler::setup () {
       Debug.println (FLAG_SETUP, true, Name, __func__, "Run");
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
-      DynamicJsonDocument SetupDoc (10000);
-      DynamicJsonDocument LogDoc(10000);
+      JsonDocument SetupDoc;
+      JsonDocument LogDoc;
 
       if (!LittleFS.exists(SetupFilePath)) {
-        JsonObject LogObj = LogDoc.createNestedObject ("File");
+        JsonObject LogObj = LogDoc["File"].to<JsonObject>();
         LogObj["Name"] = SetupFilePath;
         LogObj["Error"] = "not found";
         RetValue = FuncPatchRet_T::fileMissing;
@@ -128,7 +128,7 @@ namespace JCA {
         if (Error) {
           Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
           Debug.println (FLAG_ERROR, true, Name, __func__, Error.c_str());
-          JsonObject LogObj = LogDoc.createNestedObject ("File");
+          JsonObject LogObj = LogDoc["File"].to<JsonObject>();
           LogObj["Name"] = SetupFilePath;
           LogObj["Error"] = Error.c_str ();
           RetValue = FuncPatchRet_T::jsonSyntax;
@@ -141,13 +141,13 @@ namespace JCA {
           //-------------------------------------------------------
           // HardwareMapping 
           //-------------------------------------------------------
-          if (SetupObj.containsKey (JsonTagHardware)) {
+          if (SetupObj[JsonTagHardware].is<JsonArray>()) {
             Debug.println (FLAG_SETUP, true, Name, __func__, "Found Hardware");
-            JsonArray LogArray = LogDoc.createNestedArray ("Hardware");
+            JsonArray LogArray = LogDoc["Hardware"].to<JsonArray>();
             JsonArray SetupHwArr = SetupObj[JsonTagHardware].as<JsonArray>();
             for (JsonObject SetupHwObj : SetupHwArr) {
               Debug.println (FLAG_SETUP, true, Name, __func__, SetupHwObj["type"].as<String>());
-              JsonObject Log = LogArray.createNestedObject ();
+              JsonObject Log = LogArray.add<JsonObject>();
               if (HardwareList.count(SetupHwObj["type"]) == 1) {
                 // Hardware found in creator List -> Call Creator and add to HardwareMapping
                 if (HardwareMapping.count (SetupHwObj["type"]) == 0) {
@@ -173,13 +173,13 @@ namespace JCA {
           //-------------------------------------------------------
           // FunctionList
           //-------------------------------------------------------
-          if (SetupObj.containsKey (JsonTagFunctions)) {
+          if (SetupObj[JsonTagFunctions].is<JsonArray>()) {
             Debug.println (FLAG_SETUP, true, Name, __func__, "Found Functions");
-            JsonArray LogArray = LogDoc.createNestedArray ("Functions");
+            JsonArray LogArray = LogDoc["Functions"].to<JsonArray>();
             JsonArray SetupFuncArr = SetupObj[JsonTagFunctions].as<JsonArray> ();
             for (JsonObject SetupFuncObj : SetupFuncArr) {
               Debug.println (FLAG_SETUP, true, Name, __func__, SetupFuncObj["type"].as<String> ());
-              JsonObject Log = LogArray.createNestedObject ();
+              JsonObject Log = LogArray.add<JsonObject>();
               if (FunctionList.count (SetupFuncObj["type"]) == 1) {
                 // Function found in creator List -> Call Creator and add to Function Vector
                 FunctionList[SetupFuncObj["type"].as<String> ()](SetupFuncObj, Log, Functions, HardwareMapping);
@@ -202,13 +202,13 @@ namespace JCA {
           //-------------------------------------------------------
           // Links
           //-------------------------------------------------------
-          if (SetupObj.containsKey (JsonTagLinks)) {
+          if (SetupObj[JsonTagLinks].is<JsonArray>()) {
             Debug.println (FLAG_SETUP, true, Name, __func__, "Found Links");
-            JsonArray LogArray = LogDoc.createNestedArray ("Links");
+            JsonArray LogArray = LogDoc["Links"].to<JsonArray>();
             JsonArray SetupLinkArr = SetupObj[JsonTagLinks].as<JsonArray> ();
             for (JsonObject SetupLinkObj : SetupLinkArr) {
               Debug.println (FLAG_SETUP, true, Name, __func__, SetupLinkObj["type"].as<String> ());
-              JsonObject Log = LogArray.createNestedObject ();
+              JsonObject Log = LogArray.add<JsonObject>();
               if (LinkMapping.count (SetupLinkObj["type"]) == 1) {
                 // Create Link
                 Links.push_back (new FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
@@ -220,7 +220,7 @@ namespace JCA {
 
                 // Add all From Pointer
                 JsonArray FromArr = SetupLinkObj["from"].as<JsonArray> ();
-                JsonArray LogFrom = Log.createNestedArray("IN");
+                JsonArray LogFrom = Log["IN"].to<JsonArray>();
                 for (JsonObject FromObj : FromArr) {
                   if (checkLink (FromObj["func"].as<String> (), FuncIndex, FromObj["tag"].as<String> (), TagIndex, LogArray)) {
                     Links[Link]->addInput ({ FuncIndex, TagIndex });
@@ -235,7 +235,7 @@ namespace JCA {
 
                 // Add all To Pointer
                 JsonArray ToArr = SetupLinkObj["to"].as<JsonArray> ();
-                JsonArray LogTo = Log.createNestedArray ("OUT");
+                JsonArray LogTo = Log["OUT"].to<JsonArray>();
                 for (JsonObject ToObj : ToArr) {
                   if (checkLink (ToObj["func"].as<String> (), FuncIndex, ToObj["tag"].as<String> (), TagIndex, LogArray)) {
                     Links[Link]->addOutput ({ FuncIndex, TagIndex });
@@ -328,8 +328,8 @@ namespace JCA {
     FuncPatchRet_T FuncHandler::saveValues () {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
-      DynamicJsonDocument ValueDoc (10000);
-      JsonObject Values = ValueDoc.createNestedObject (JCA::FNC::FuncParent::JsonTagElements); //.as<JsonObject>();
+      JsonDocument ValueDoc;
+      JsonObject Values = ValueDoc[JCA::FNC::FuncParent::JsonTagElements].to<JsonObject>(); //.as<JsonObject>();
       getValues (Values);
       File ValuesFile = LittleFS.open (ValueFilePath, FILE_WRITE);
       if (!ValuesFile) {
@@ -352,7 +352,7 @@ namespace JCA {
     FuncPatchRet_T FuncHandler::loadValues () {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
-      DynamicJsonDocument ValueDoc (10000);
+      JsonDocument ValueDoc;
       if (!LittleFS.exists (ValueFilePath)) {
         Debug.print (FLAG_ERROR, true, Name, __func__, "File not found : ");
         Debug.println (FLAG_ERROR, true, Name, __func__, ValueFilePath);
@@ -364,7 +364,7 @@ namespace JCA {
           Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
           Debug.println (FLAG_ERROR, true, Name, __func__, Error.c_str ());
           RetValue = FuncPatchRet_T::jsonSyntax;
-        } else if (ValueDoc.containsKey (JCA::FNC::FuncParent::JsonTagElements)) {
+        } else if (ValueDoc[JCA::FNC::FuncParent::JsonTagElements].is<JsonObject>()) {
           JsonObject Values = ValueDoc[JCA::FNC::FuncParent::JsonTagElements].as<JsonObject> ();
           setValues (Values);
         }
@@ -381,7 +381,7 @@ namespace JCA {
     void FuncHandler::update (struct tm &_Time) {
       Debug.println (FLAG_LOOP, true, Name, __func__, "Run");
       // Create JsonDoc to hold variant Data
-      DynamicJsonDocument LinkDoc (1000);
+      JsonDocument LinkDoc;
 
       // Update Links
       for (FuncLink *Link : Links) {
@@ -526,7 +526,7 @@ namespace JCA {
     void FuncHandler::getValues (JsonObject &_Functions) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       for (int16_t i = 0; i < Functions.size (); i++) {
-        JsonObject Function = _Functions.createNestedObject(Functions[i]->getName());
+        JsonObject Function = _Functions[Functions[i]->getName()].to<JsonObject>();
         Functions[i]->addValues(Function);
       }
     }

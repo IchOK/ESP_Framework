@@ -20,13 +20,13 @@ namespace JCA {
      * @brief Construct a new Server::Server object
      *
      * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
-     * @param _Port Port of the Webserver if not defined in Config
+     * @param _WebServerPort Port of the Webserver if not defined in Config
      * @param _ConfUser Username for the System Sites
      * @param _ConfPassword Password for the System Sites
      * @param _Offset RTC Timeoffset in seconds
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
-        : WebServerObject (_Port), WebSocketObject ("/ws"), Rtc (_Offset) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
+        : WebServerObject (_WebServerPort), WebSocketObject ("/ws"), Rtc (_Offset) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
 
       String ChipID;
@@ -45,7 +45,8 @@ namespace JCA {
         Hostname += "0";
       }
       Hostname += ChipID;
-      Port = _Port;
+      WebServerPort = _WebServerPort;
+      UdpListenerPort = _UdpListenerPort;
       Reboot = false;
       strncpy (ConfUser, _ConfUser, sizeof (ConfUser));
       strncpy (ConfPassword, _ConfPassword, sizeof (ConfPassword));
@@ -58,30 +59,30 @@ namespace JCA {
      * @brief Construct a new Server::Server object
      * Username and Password for System Sites is set to Default
      * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
-     * @param _Port Port of the Webserver if not defined in Config
+     * @param _WebServerPort Port of the Webserver if not defined in Config
      * @param _ConfUser Username for the System Sites
      * @param _ConfPassword Password for the System Sites
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword) : Server (_HostnamePrefix, _Port, _ConfUser, _ConfPassword, JCA_IOT_SERVER_TIME_OFFSET) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, _ConfUser, _ConfPassword, JCA_IOT_SERVER_TIME_OFFSET) {
     }
 
     /**
      * @brief Construct a new Server::Server object
      * Username and Password for System Sites is set to Default
      * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
-     * @param _Port Port of the Webserver if not defined in Config
+     * @param _WebServerPort Port of the Webserver if not defined in Config
      * @param _Offset RTC Timeoffset in seconds
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset) : Server (_HostnamePrefix, _Port, JCA_IOT_SERVER_DEFAULT_CONF_USER, JCA_IOT_SERVER_DEFAULT_CONF_PASS, _Offset) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, unsigned long _Offset) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, JCA_IOT_SERVER_DEFAULT_CONF_USER, JCA_IOT_SERVER_DEFAULT_CONF_PASS, _Offset) {
     }
 
     /**
      * @brief Construct a new Server::Server object
      * Username and Password for System Sites is set to Default
      * @param _HostnamePrefix Prefix for default Hostname ist not defined in Config
-     * @param _Port Port of the Webserver if not defined in Config
+     * @param _WebServerPort Port of the Webserver if not defined in Config
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _Port) : Server (_HostnamePrefix, _Port, JCA_IOT_SERVER_DEFAULT_CONF_USER, JCA_IOT_SERVER_DEFAULT_CONF_PASS) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, JCA_IOT_SERVER_DEFAULT_CONF_USER, JCA_IOT_SERVER_DEFAULT_CONF_PASS) {
     }
 
     /**
@@ -90,7 +91,7 @@ namespace JCA {
      * Hostname-Prefix and Webserver-Port ist set to Default
      * @param _Offset RTC Timeoffset in seconds
      */
-    Server::Server (unsigned long _Offset) : Server (JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_SERVER_DEFAULT_PORT, _Offset) {
+    Server::Server (unsigned long _Offset) : Server (JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_SERVER_DEFAULT_WEBSERVERPORT, JCA_IOT_SERVER_DEFAULT_UDPLISTENERPORT, _Offset) {
     }
 
     /**
@@ -98,7 +99,7 @@ namespace JCA {
      * Username and Password for System Sites is set to Default
      * Hostname-Prefix and Webserver-Port ist set to Default
      */
-    Server::Server () : Server (JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_SERVER_DEFAULT_PORT) {
+    Server::Server () : Server (JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_SERVER_DEFAULT_WEBSERVERPORT, JCA_IOT_SERVER_DEFAULT_UDPLISTENERPORT) {
     }
 
     /**
@@ -170,15 +171,19 @@ namespace JCA {
           //------------------------------------------------------
           // Read Server Config
           //------------------------------------------------------
-          if (Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].is<JsonVariant>()) {
+          if (Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].is<JsonVariant> ()) {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Hostname");
             Hostname = Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].as<String> ();
           }
           if (Config[JCA_IOT_SERVER_CONFKEY_PORT].is<JsonVariant> ()) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Serverport");
-            Port = Config[JCA_IOT_SERVER_CONFKEY_PORT].as<uint16_t> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebServerPort");
+            WebServerPort = Config[JCA_IOT_SERVER_CONFKEY_PORT].as<uint16_t> ();
           }
-          if (Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].is<JsonVariant>()) {
+          if (Config[JCA_IOT_SERVER_CONFKEY_UDPPORT].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains UdpListenerPort");
+            UdpListenerPort = Config[JCA_IOT_SERVER_CONFKEY_UDPPORT].as<uint16_t> ();
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].is<JsonVariant> ()) {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebSocket Update");
             WsUpdateCycle = Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].as<uint32_t> ();
           }
@@ -210,6 +215,12 @@ namespace JCA {
       // WiFi Connection
       Connector.init ();
 
+      // UDP-Listener - Init
+      if (UdpListenerPort > 0) {
+        UpdListenerObject.listen (UdpListenerPort);
+        UpdListenerObject.onPacket ([this] (AsyncUDPPacket _Packet) { this->udpPacketHandler (_Packet); });
+      }
+      
       // WebSocket - Init
       WebSocketObject.onEvent ([this] (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) { this->onWsEvent (_Server, _Client, _Type, _Arg, _Data, _Len); });
       WebServerObject.addHandler (&WebSocketObject);

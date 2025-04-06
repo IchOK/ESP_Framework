@@ -1,0 +1,76 @@
+{
+  "hardware" : [],
+  "functions" : [
+    {
+      "type": "server",
+      "name": "Server",
+      "server": "IotServer"
+    }, {
+      "type": "clockValues",
+      "name": "Tageslich - A1",
+      "countClockPoints": 5
+    },
+    {
+      "type": "clockValues",
+      "name": "UV-Lampe - A2",
+      "countClockPoints": 5
+    },
+    {
+      "type": "clockValues",
+      "name": "IR-Lampe - A3",
+      "countClockPoints": 5
+    }, {
+      "type": "acDimmer",
+      "name": "LichtDimmer",
+      "pinZero": 4,
+      "pinsOutput": [8,11,12]
+    }
+  ],
+  "links": [
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Tageslich - A1",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "LichtDimmer",
+          "tag": "Value1"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "UV-Lampe - A2",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "LichtDimmer",
+          "tag": "Value2"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "IR-Lampe - A3",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "LichtDimmer",
+          "tag": "Value3"
+        }
+      ]
+    }
+  ]
+}

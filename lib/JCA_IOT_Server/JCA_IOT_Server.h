@@ -49,6 +49,7 @@
   #include <WiFi.h>
 #endif
 
+#include <AsyncUDP.h>
 #include <ESPAsyncWebServer.h>
 
 #if __has_include("ArduinoJson.h")
@@ -74,7 +75,8 @@
 
 // Default Config if not passt other Data to Contructor
 #define JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX "JCA_IOT_NODE_"
-#define JCA_IOT_SERVER_DEFAULT_PORT 80
+#define JCA_IOT_SERVER_DEFAULT_WEBSERVERPORT 80
+#define JCA_IOT_SERVER_DEFAULT_UDPLISTENERPORT 81
 #define JCA_IOT_SERVER_DEFAULT_CONF_USER "Admin"
 #define JCA_IOT_SERVER_DEFAULT_CONF_PASS "Admin"
 // Config File is readen on Init
@@ -91,6 +93,7 @@
 // JSON Keys for Server Config
 #define JCA_IOT_SERVER_CONFKEY_HOSTNAME "hostname"
 #define JCA_IOT_SERVER_CONFKEY_PORT "port"
+#define JCA_IOT_SERVER_CONFKEY_UDPPORT "udtPort"
 // JSON Keys for Web-Socket Config
 #define JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE "wsUpdate"
 // Website Config
@@ -125,14 +128,19 @@ namespace JCA {
       WiFiConnect Connector;
       AsyncWebServer WebServerObject;
       AsyncWebSocket WebSocketObject;
+      AsyncUDP UpdListenerObject;
       ESP32Time Rtc;
-      uint16_t Port;
+      uint16_t WebServerPort;
+      uint16_t UdpListenerPort;
       String WebConfigFile;
 
       SimpleCallback onSystemResetCB;
       SimpleCallback onSaveConfigCB;
       bool readConfig ();
 
+      // ...UdpListener.cpp
+      void udpPacketHandler (AsyncUDPPacket _Packet);
+    
       // ...Webserver_Web.cpp
       AwsTemplateProcessor replaceHomeWildcardsCB;
       AwsTemplateProcessor replaceConfigWildcardsCB;
@@ -170,10 +178,10 @@ namespace JCA {
     public:
       // ...Webserver_System.cpp
       String Hostname;
-      Server (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
-      Server (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword);
-      Server (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset);
-      Server (const char *_HostnamePrefix, uint16_t _Port);
+      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
+      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword);
+      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, unsigned long _Offset);
+      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort);
       Server (unsigned long _Offset);
       Server ();
       bool init ();
