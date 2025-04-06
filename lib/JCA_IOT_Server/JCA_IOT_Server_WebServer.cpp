@@ -29,7 +29,7 @@ namespace JCA {
      * @param _Request Request data from Web-Client
      */
     void Server::onWebConnectPost (AsyncWebServerRequest *_Request) {
-      DynamicJsonDocument JsonDoc (1000);
+      JsonDocument JsonDoc;
       JsonObject Config;
       JsonObject WiFiConfig;
 
@@ -40,32 +40,32 @@ namespace JCA {
         if (!Error) {
           Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Deserialize Done");
           Config = JsonDoc.as<JsonObject> ();
-          if (Config.containsKey (JCA_IOT_SERVER_CONFKEY_WIFI)) {
+          if (Config[JCA_IOT_SERVER_CONFKEY_WIFI].is<JsonObject>()) {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config Node Found");
             WiFiConfig = Config[JCA_IOT_SERVER_CONFKEY_WIFI].as<JsonObject> ();
           } else {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config Node Created");
-            WiFiConfig = JsonDoc.createNestedObject (JCA_IOT_SERVER_CONFKEY_WIFI);
+            WiFiConfig = JsonDoc[JCA_IOT_SERVER_CONFKEY_WIFI].to<JsonObject>();
           }
         } else {
           Debug.print (FLAG_ERROR, true, ObjectName, __func__, "deserializeJson() failed: ");
           Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
           Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Create new Konfig");
           JsonDoc.clear ();
-          WiFiConfig = Config.createNestedObject (JCA_IOT_SERVER_CONFKEY_WIFI);
+          WiFiConfig = Config[JCA_IOT_SERVER_CONFKEY_WIFI].to<JsonObject>();
         }
         ConfigFile.close ();
       } else {
         Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
         Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Create new Konfig");
         JsonDoc.clear ();
-        WiFiConfig = JsonDoc.createNestedObject (JCA_IOT_SERVER_CONFKEY_WIFI);
+        WiFiConfig = JsonDoc[JCA_IOT_SERVER_CONFKEY_WIFI].to<JsonObject>();
       }
 
       // Write Data to Config-Object
       int params = _Request->params ();
       for (int i = 0; i < params; i++) {
-        AsyncWebParameter *p = _Request->getParam (i);
+        const AsyncWebParameter *p = _Request->getParam (i);
         if (p->isPost ()) {
           if (p->name () == JCA_IOT_SERVER_CONFKEY_WIFI_DHCP) {
             if (p->value () == "on") {
@@ -107,7 +107,7 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
+      _Request->send (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
     }
 
     /**
@@ -119,7 +119,7 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceSystemWildcards (_Var); });
+      _Request->send (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceSystemWildcards (_Var); });
     }
 
     /**

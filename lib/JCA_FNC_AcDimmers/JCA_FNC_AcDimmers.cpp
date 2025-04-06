@@ -242,7 +242,7 @@ namespace JCA {
     bool AcDimmers::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
       Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
       bool Done = true;
-      JsonObject Log = _Log.createNestedObject (SetupTagType);
+      JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
       String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
       uint8_t PinZeroDetection = GetSetupValueUINT8 (SetupTagZeroPin, Done, _Setup, _Log);

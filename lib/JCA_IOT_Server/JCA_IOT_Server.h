@@ -31,23 +31,33 @@
 #include "FS.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <LittleFS.h>
 
-#ifdef ESP8266
-  #define SPIFFS LittleFS
-  #include <ESP8266WiFi.h>
-  #include <ESP8266mDNS.h>
-  #include <ESPAsyncTCP.h>
-#elif ESP32
+#ifdef ESP32
   #include <AsyncTCP.h>
+  #include <WiFi.h>
   #include <ESPmDNS.h>
   #include <FS.h>
   #include <SPIFFS.h>
-  #include <WiFi.h>
   #include <Update.h>
+#elif defined(ESP8266)
+  #define SPIFFS LittleFS
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+  #include <ESP8266mDNS.h>
+#elif defined(TARGET_RP2040)
+  #include <WebServer.h>
+  #include <WiFi.h>
 #endif
+
 #include <ESPAsyncWebServer.h>
+
+#if __has_include("ArduinoJson.h")
+  #include <ArduinoJson.h>
+  #include <AsyncJson.h>
+  #include <AsyncMessagePack.h>
+#endif
+
+#include <LittleFS.h>
 
 #include <ESP32Time.h>
 

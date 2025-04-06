@@ -105,16 +105,16 @@ void cbSaveConfig () {
 }
 
 void getAllValues (JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (FuncParent::JsonTagElements);
+  JsonObject Elements = _Out[FuncParent::JsonTagElements].to<JsonObject>();
   Handler.getValues(Elements);
 }
 
 void setAll (JsonVariant &_In) {
-  if (_In.containsKey (FuncParent::JsonTagElements)) {
-    JsonObject Elements = (_In.as<JsonObject> ())[FuncParent::JsonTagElements].as<JsonObject> ();
+  if (_In[FuncParent::JsonTagElements].is<JsonObject>()) {
+    JsonObject Elements = _In[FuncParent::JsonTagElements].as<JsonObject>();
     Handler.setValues(Elements);
   }
-  if (_In.containsKey ("mode")) {
+  if (_In["mode"].is<JsonVariant> ()) {
     Handler.patch (_In["mode"].as<String> ());
   }
 }
@@ -145,19 +145,18 @@ void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
 }
 
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
-  if (_In.containsKey ("mode")) {
+  if (_In["mode"].is<JsonVariant> ()) {
     String Mode = _In["mode"].as<String> ();
     _Out["mode"] = Mode;
     _Out["ret"] = Handler.patch (Mode);
   } else {
     _Out["ret"] = "mode Missing";
   }
-  if (_In.containsKey ("reboot")) {
-    if (_In["mode"].as<bool> ()) {
+  if (_In["reboot"].is<JsonVariant> ()) {
+    if (_In["reboot"].as<bool>()) {
       ESP.restart ();
     }
   }
-
 }
 
 void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
@@ -183,7 +182,7 @@ void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
 //  Setup
 // #######################################################
 void setup () {
-  DynamicJsonDocument JDoc (10000);
+  JsonDocument JDoc;
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;

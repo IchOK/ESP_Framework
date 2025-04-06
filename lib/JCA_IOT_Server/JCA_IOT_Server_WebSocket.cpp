@@ -50,8 +50,8 @@ namespace JCA {
         // Handle Message if last Frame ist received
         if (Info->final && Info->index + _Len == Info->len) {
           ((uint8_t *)(_Client->_tempObject))[Info->len] = 0;
-          DynamicJsonDocument JsonInDoc (1000);
-          DynamicJsonDocument JsonOutDoc (10000);
+          JsonDocument JsonInDoc;
+          JsonDocument JsonOutDoc;
           JsonVariant InData;
           JsonVariant OutData = JsonOutDoc.as<JsonVariant> ();
 
@@ -89,7 +89,7 @@ namespace JCA {
     }
 
     bool Server::doWsUpdate (AsyncWebSocketClient *_Client) {
-      DynamicJsonDocument JsonDoc (10000);
+      JsonDocument JsonDoc;
       JsonVariant InData;
       JsonVariant OutData = JsonDoc.as<JsonVariant> ();
 
