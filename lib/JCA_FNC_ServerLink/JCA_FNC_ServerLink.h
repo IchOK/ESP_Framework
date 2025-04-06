@@ -18,14 +18,14 @@
 
 #include <JCA_FNC_Parent.h>
 #include <JCA_IOT_FuncHandler.h>
-#include <JCA_IOT_Webserver.h>
+#include <JCA_IOT_Server.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagString.h>
 #include <JCA_TAG_TagUInt32.h>
 
 namespace JCA {
   namespace FNC {
-    class WebserverLink : public FuncParent {
+    class ServerLink : public FuncParent {
     private:
       static const char *ClassName;
 
@@ -34,7 +34,7 @@ namespace JCA {
       static const char *SetupTagRefName;
 
       // Hardware
-      JCA::IOT::Webserver *ServerRef;
+      JCA::IOT::Server *ServerRef;
       void setTimeCB();
 
       // Konfig
@@ -46,8 +46,8 @@ namespace JCA {
       String ActTime;
 
     public:
-      WebserverLink (JCA::IOT::Webserver *_ServerRef, String _Name);
-      ~WebserverLink () {;};
+      ServerLink (JCA::IOT::Server *_ServerRef, String _Name);
+      ~ServerLink () {;};
       void update (struct tm &_Time);
 
       // Function Handler Statics

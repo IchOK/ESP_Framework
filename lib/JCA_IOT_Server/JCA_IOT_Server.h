@@ -1,7 +1,7 @@
 /**
  * @file JCA_IOT_Webserver.h
  * @author JCA (https://github.com/ichok)
- * @brief The Class contains a Webserver (with WebSocket)
+ * @brief The Class contains a Server (with WebSocket)
  * It contains the folloing Modules
  * - Navigation
  *   - Home [/home.htm], to be define by User (Startpage)
@@ -26,8 +26,8 @@
  * Apache License
  *
  */
-#ifndef _JCA_IO_WEBSERVER_
-#define _JCA_IO_WEBSERVER_
+#ifndef _JCA_IOT_SERVER_
+#define _JCA_IOT_SERVER_
 #include "FS.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -51,9 +51,9 @@
 
 #include <ESP32Time.h>
 
-#include <JCA_IOT_Webserver_Boardinfo.h>
-#include <JCA_IOT_Webserver_SVGs.h>
-#include <JCA_IOT_Webserver_Sites.h>
+#include <JCA_IOT_Server_Boardinfo.h>
+#include <JCA_IOT_Server_WebSVGs.h>
+#include <JCA_IOT_Server_WebSites.h>
 #include <JCA_IOT_WiFiConnect.h>
 #include <JCA_SYS_DebugOut.h>
 
@@ -63,58 +63,58 @@
 #endif
 
 // Default Config if not passt other Data to Contructor
-#define JCA_IOT_WEBSERVER_DEFAULT_HOSTNAMEPREFIX "JCA_IOT_NODE_"
-#define JCA_IOT_WEBSERVER_DEFAULT_PORT 80
-#define JCA_IOT_WEBSERVER_DEFAULT_CONF_USER "Admin"
-#define JCA_IOT_WEBSERVER_DEFAULT_CONF_PASS "Admin"
+#define JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX "JCA_IOT_NODE_"
+#define JCA_IOT_SERVER_DEFAULT_PORT 80
+#define JCA_IOT_SERVER_DEFAULT_CONF_USER "Admin"
+#define JCA_IOT_SERVER_DEFAULT_CONF_PASS "Admin"
 // Config File is readen on Init
-#define JCA_IOT_WEBSERVER_CONFIGPATH "/sysConfig.json"
+#define JCA_IOT_SERVER_CONFIGPATH "/sysConfig.json"
 // JSON Keys for WiFi Config
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI "wifi"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_SSID "ssid"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_PASS "pass"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_IP "ip"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_GATEWAY "gateway"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_SUBNET "subnet"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_DHCP "dhcp"
-#define JCA_IOT_WEBSERVER_CONFKEY_WIFI_STATPIN "statpin"
+#define JCA_IOT_SERVER_CONFKEY_WIFI "wifi"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_SSID "ssid"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_PASS "pass"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_IP "ip"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_GATEWAY "gateway"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_SUBNET "subnet"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_DHCP "dhcp"
+#define JCA_IOT_SERVER_CONFKEY_WIFI_STATPIN "statpin"
 // JSON Keys for Server Config
-#define JCA_IOT_WEBSERVER_CONFKEY_HOSTNAME "hostname"
-#define JCA_IOT_WEBSERVER_CONFKEY_PORT "port"
+#define JCA_IOT_SERVER_CONFKEY_HOSTNAME "hostname"
+#define JCA_IOT_SERVER_CONFKEY_PORT "port"
 // JSON Keys for Web-Socket Config
-#define JCA_IOT_WEBSERVER_CONFKEY_SOCKETUPDATE "wsUpdate"
+#define JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE "wsUpdate"
 // Website Config
-#define JCA_IOT_WEBSERVER_PATH_CONNECT "/connect"
-#define JCA_IOT_WEBSERVER_PATH_SYS "/sys"
-#define JCA_IOT_WEBSERVER_PATH_SYS_UPLOAD "/upload"
-#define JCA_IOT_WEBSERVER_PATH_SYS_UPDATE "/update"
-#define JCA_IOT_WEBSERVER_PATH_SYS_RESET "/reset"
-#define JCA_IOT_WEBSERVER_PATH_HOME "/home.htm"
-#define JCA_IOT_WEBSERVER_PATH_CONFIG "/config.htm"
-#define JCA_IOT_WEBSERVER_PATH_CONFIGSAVE "/configSave"
+#define JCA_IOT_SERVER_PATH_CONNECT "/connect"
+#define JCA_IOT_SERVER_PATH_SYS "/sys"
+#define JCA_IOT_SERVER_PATH_SYS_UPLOAD "/upload"
+#define JCA_IOT_SERVER_PATH_SYS_UPDATE "/update"
+#define JCA_IOT_SERVER_PATH_SYS_RESET "/reset"
+#define JCA_IOT_SERVER_PATH_HOME "/home.htm"
+#define JCA_IOT_SERVER_PATH_CONFIG "/config.htm"
+#define JCA_IOT_SERVER_PATH_CONFIGSAVE "/configSave"
 // Time settings
-#define JCA_IOT_WEBSERVER_TIME_OFFSET 3600
-#define JCA_IOT_WEBSERVER_TIME_VALID 1609459200
-#define JCA_IOT_WEBSERVER_TIME_TIMEFORMAT "%d.%m.%G %H:%M:%S"
-#define JCA_IOT_WEBSERVER_TIME_DATEFORMAT "%d.%m.%G"
+#define JCA_IOT_SERVER_TIME_OFFSET 3600
+#define JCA_IOT_SERVER_TIME_VALID 1609459200
+#define JCA_IOT_SERVER_TIME_TIMEFORMAT "%d.%m.%G %H:%M:%S"
+#define JCA_IOT_SERVER_TIME_DATEFORMAT "%d.%m.%G"
 
 namespace JCA {
   namespace IOT {
     typedef std::function<void (JsonVariant &_In, JsonVariant &_Out)> JsonVariantCallback;
     typedef std::function<void (void)> SimpleCallback;
 
-    class Webserver {
+    class Server {
     private:
       // ...Webserver_System.cpp
       static const char *ElementName;
       char ConfUser[80];
       char ConfPassword[80];
       char Firmware[80];
-      const char *ObjectName = "IOT::Webserver";
+      const char *ObjectName = "IOT::Server";
       bool Reboot;
       WiFiConnect Connector;
-      AsyncWebServer Server;
-      AsyncWebSocket Websocket;
+      AsyncWebServer WebServerObject;
+      AsyncWebSocket WebSocketObject;
       ESP32Time Rtc;
       uint16_t Port;
       String WebConfigFile;
@@ -160,12 +160,12 @@ namespace JCA {
     public:
       // ...Webserver_System.cpp
       String Hostname;
-      Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
-      Webserver (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword);
-      Webserver (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset);
-      Webserver (const char *_HostnamePrefix, uint16_t _Port);
-      Webserver (unsigned long _Offset);
-      Webserver ();
+      Server (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
+      Server (const char *_HostnamePrefix, uint16_t _Port, const char *_ConfUser, const char *_ConfPassword);
+      Server (const char *_HostnamePrefix, uint16_t _Port, unsigned long _Offset);
+      Server (const char *_HostnamePrefix, uint16_t _Port);
+      Server (unsigned long _Offset);
+      Server ();
       bool init ();
       bool handle ();
       void onSystemReset (SimpleCallback _CB);

@@ -2,9 +2,9 @@
   "hardware" : [],
   "functions" : [
     {
-      "type": "webServer",
-      "name": "Webserver",
-      "server": "WebServer"
+      "type": "server",
+      "name": "Server",
+      "server": "IotServer"
     }, {
       "type": "clockValues",
       "name": "TestSchaltuhr",

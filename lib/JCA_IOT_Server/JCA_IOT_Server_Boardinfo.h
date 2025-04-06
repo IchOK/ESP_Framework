@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef _JCA_IOT_WEBSERVER_BOARDINFO_
-#define _JCA_IOT_WEBSERVER_BOARDINFO_
+#ifndef _JCA_IOT_SERVER_BOARDINFO_
+#define _JCA_IOT_SERVER_BOARDINFO_
 #if defined(ARDUINO_ESP8266_GENERIC)
   #define BOARD_VARIANT "generic"
   #define BOARD_MCU "esp8266"

@@ -1,7 +1,7 @@
 /**
  * @file JCA_IOT_Webserver_Socket.cpp
  * @author JCA (https://github.com/ichok)
- * @brief WebSocket-Functions of the Webserver
+ * @brief WebSocket-Functions of the Server
  * @version 0.1
  * @date 2022-09-23
  *
@@ -9,25 +9,25 @@
  * Apache License
  *
  */
-#include <JCA_IOT_Webserver.h>
+#include <JCA_IOT_Server.h>
 using namespace JCA::SYS;
 
 namespace JCA {
   namespace IOT {
-    void Webserver::onWsData (JsonVariantCallback _CB) {
+    void Server::onWsData (JsonVariantCallback _CB) {
       wsDataCB = _CB;
     }
-    void Webserver::onWsUpdate (JsonVariantCallback _CB) {
+    void Server::onWsUpdate (JsonVariantCallback _CB) {
       wsUpdateCB = _CB;
     }
-    void Webserver::setWsUpdateCycle (uint32_t _CycleTime) {
+    void Server::setWsUpdateCycle (uint32_t _CycleTime) {
       WsUpdateCycle = _CycleTime;
     }
-    bool Webserver::doWsUpdate () {
+    bool Server::doWsUpdate () {
       return doWsUpdate (nullptr);
     }
 
-    void Webserver::onWsEvent (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) {
+    void Server::onWsEvent (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) {
       Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, "Start");
       if (_Type == WS_EVT_CONNECT) {
         doWsUpdate (_Client);
@@ -36,7 +36,7 @@ namespace JCA {
       }
     }
 
-    void Webserver::wsHandleData (AsyncWebSocketClient *_Client, void *_Arg, uint8_t *_Data, size_t _Len) {
+    void Server::wsHandleData (AsyncWebSocketClient *_Client, void *_Arg, uint8_t *_Data, size_t _Len) {
       AwsFrameInfo *Info = (AwsFrameInfo *)_Arg;
       if (Info->opcode == WS_TEXT) {
         // Initialise Message-Buffer on first Frame
@@ -88,7 +88,7 @@ namespace JCA {
       }
     }
 
-    bool Webserver::doWsUpdate (AsyncWebSocketClient *_Client) {
+    bool Server::doWsUpdate (AsyncWebSocketClient *_Client) {
       DynamicJsonDocument JsonDoc (10000);
       JsonVariant InData;
       JsonVariant OutData = JsonDoc.as<JsonVariant> ();
@@ -100,7 +100,7 @@ namespace JCA {
         }
       } else {
         // check if selected Client can send Data
-        if (Websocket.count () == 0) {
+        if (WebSocketObject.count () == 0) {
           return false;
         }
       }
@@ -119,7 +119,7 @@ namespace JCA {
       if (_Client != nullptr) {
         _Client->text (Response);
       } else {
-        Websocket.textAll (Response);
+        WebSocketObject.textAll (Response);
       }
       return true;
     }

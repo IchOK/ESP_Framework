@@ -10,15 +10,15 @@
  *
  */
 
-#include <JCA_FNC_WebserverLink.h>
+#include <JCA_FNC_ServerLink.h>
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 
 namespace JCA {
   namespace FNC {
-    const char *WebserverLink::ClassName = "WebserverLink";
-    const char *WebserverLink::SetupTagType = "webServer";
-    const char *WebserverLink::SetupTagRefName = "server";
+    const char *ServerLink::ClassName = "ServerLink";
+    const char *ServerLink::SetupTagType = "server";
+    const char *ServerLink::SetupTagRefName = "server";
 
     /**
      * @brief Construct a new DigitalOut::DigitalOut object
@@ -26,13 +26,13 @@ namespace JCA {
      * @param _Pin Analog Pin conected to the DigitalOut-Sensor
      * @param _Name Element Name inside the Communication
      */
-    WebserverLink::WebserverLink (JCA::IOT::Webserver *_ServerRef, String _Name)
+    ServerLink::ServerLink (JCA::IOT::Server *_ServerRef, String _Name)
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
       Tags.push_back (new TagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, TagUsage_T::UseConfig, &Hostname));
       Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
-      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&WebserverLink::setTimeCB, this)));
+      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&ServerLink::setTimeCB, this)));
 
       Tags.push_back (new TagString ("Time", "Systemzeit", "", false, TagUsage_T::UseData, &ActTime));
 
@@ -44,7 +44,7 @@ namespace JCA {
       ActTime = ServerRef->getTime ();
     }
 
-    void WebserverLink::setTimeCB () {
+    void ServerLink::setTimeCB () {
       ServerRef->setTime (TimeSync);
       TimeSync = 0;
     }
@@ -54,7 +54,7 @@ namespace JCA {
      * Write the digital Output-Pin and check the AutoOff Delay
      * @param time Current Time to check the Samplerate
      */
-    void WebserverLink::update (struct tm &time) {
+    void ServerLink::update (struct tm &time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
       ServerRef->Hostname = Hostname;
       ServerRef->WsUpdateCycle = WsUpdateCycle;
@@ -66,7 +66,7 @@ namespace JCA {
      *
      * @param _Handler Function Handler
      */
-    void WebserverLink::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
+    void ServerLink::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
       _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
     }
 
@@ -80,18 +80,18 @@ namespace JCA {
      * @return true
      * @return false
      */
-    bool WebserverLink::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
+    bool ServerLink::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
       Debug.println (FLAG_SETUP, true, ClassName, __func__, "Start");
       bool Done = true;
       JsonObject Log = _Log.createNestedObject (SetupTagType);
 
       String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      String WebserverName;
-      JCA::IOT::Webserver *ServerRef = static_cast<JCA::IOT::Webserver *> (GetSetupHardwareRef (SetupTagRefName, WebserverName, Done, _Setup, _Log, _Hardware));
+      String ServerName;
+      JCA::IOT::Server *ServerRef = static_cast<JCA::IOT::Server *> (GetSetupHardwareRef (SetupTagRefName, ServerName, Done, _Setup, _Log, _Hardware));
 
       if (Done) {
-        _Functions.push_back (new WebserverLink(ServerRef, Name));
-        Log["done"] = Name + "(Webserver: " + WebserverName + ")";
+        _Functions.push_back (new ServerLink(ServerRef, Name));
+        Log["done"] = Name + "(Server: " + ServerName + ")";
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;

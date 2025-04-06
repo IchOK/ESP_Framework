@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef _JCA_IOT_WEBSERVER_SITES_
-#define _JCA_IOT_WEBSERVER_SITES_
+#ifndef _JCA_IOT_SERVER_SITES_
+#define _JCA_IOT_SERVER_SITES_
 
 #include <Arduino.h>
 

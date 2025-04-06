@@ -1,7 +1,7 @@
 /**
  * @file JCA_IOT_Webserver_RestApi.cpp
  * @author JCA (https://github.com/ichok)
- * @brief RestAPI-Functions of the Webserver
+ * @brief RestAPI-Functions of the Server
  * @version 0.1
  * @date 2022-09-07
  *
@@ -9,12 +9,12 @@
  * Apache License
  *
  */
-#include <JCA_IOT_Webserver.h>
+#include <JCA_IOT_Server.h>
 using namespace JCA::SYS;
 
 namespace JCA {
   namespace IOT {
-    void Webserver::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
+    void Server::onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json) {
       DynamicJsonDocument JsonDoc (10000);
       JsonVariant OutData = JsonDoc.as<JsonVariant> ();
 
@@ -72,23 +72,23 @@ namespace JCA {
       _Request->send (200, "application/json", response);
     }
 
-    void Webserver::onRestApiGet (JsonVariantCallback _CB) {
+    void Server::onRestApiGet (JsonVariantCallback _CB) {
       restApiGetCB = _CB;
     }
 
-    void Webserver::onRestApiPost (JsonVariantCallback _CB) {
+    void Server::onRestApiPost (JsonVariantCallback _CB) {
       restApiPostCB = _CB;
     }
 
-    void Webserver::onRestApiPut (JsonVariantCallback _CB) {
+    void Server::onRestApiPut (JsonVariantCallback _CB) {
       restApiPutCB = _CB;
     }
 
-    void Webserver::onRestApiPatch (JsonVariantCallback _CB) {
+    void Server::onRestApiPatch (JsonVariantCallback _CB) {
       restApiPatchCB = _CB;
     }
 
-    void Webserver::onRestApiDelete (JsonVariantCallback _CB) {
+    void Server::onRestApiDelete (JsonVariantCallback _CB) {
       restApiDeleteCB = _CB;
     }
   }

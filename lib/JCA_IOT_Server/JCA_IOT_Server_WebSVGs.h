@@ -9,8 +9,8 @@
  * Apache License
  *
  */
-#ifndef _JCA_IOT_WEBSERVER_SVGS_
-#define _JCA_IOT_WEBSERVER_SVGS_
+#ifndef _JCA_IOT_SERVER_SVGS_
+#define _JCA_IOT_SERVER_SVGS_
 
 #include <Arduino.h>
 

@@ -26,7 +26,7 @@
 #endif
 
 // Basics
-#include <JCA_IOT_Webserver.h>
+#include <JCA_IOT_Server.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
 #include <JCA_IOT_FuncHandler.h>
@@ -42,7 +42,7 @@
 #include <JCA_FNC_INA219.h>
 #include <JCA_FNC_LedStrip.h>
 #include <JCA_FNC_Level.h>
-#include <JCA_FNC_WebserverLink.h>
+#include <JCA_FNC_ServerLink.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -57,7 +57,7 @@ using namespace JCA::FNC;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Webserver Server;
+JCA::IOT::Server IotServer;
 FuncHandler Handler ("handler");
 
 //-------------------------------------------------------
@@ -70,7 +70,7 @@ FuncHandler Handler ("handler");
 //OneWire HwOneWire;
 //TwoWire HwTwoWire = TwoWire(TwoWireNum);
 void linkHardware() {
-  Handler.HardwareMapping.insert (std::pair<String, void *> ("WebServer", &Server));
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("IotServer", &IotServer));
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
   //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
@@ -91,7 +91,7 @@ void addFunctionsToHandler () {
   INA219::AddToHandler(Handler);
   LedStrip::AddToHandler(Handler);
   Level::AddToHandler(Handler);
-  WebserverLink::AddToHandler (Handler);
+  ServerLink::AddToHandler (Handler);
 }
 
 //-------------------------------------------------------
@@ -214,26 +214,26 @@ void setup () {
   // JCA IOT Functions
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // System
-  Server.init ();
-  Server.setStatePin (STATE_LED_PIN);
-  Server.onSystemReset (cbSystemReset);
-  Server.onSaveConfig (cbSaveConfig);
-  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-System Done");
+  IotServer.init ();
+  IotServer.setStatePin (STATE_LED_PIN);
+  IotServer.onSystemReset (cbSystemReset);
+  IotServer.onSaveConfig (cbSaveConfig);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-System Done");
   // Web
-  Server.onWebHomeReplace (cbWebHomeReplace);
-  Server.onWebConfigReplace (cbWebConfigReplace);
-  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-Web Done");
+  IotServer.onWebHomeReplace (cbWebHomeReplace);
+  IotServer.onWebConfigReplace (cbWebConfigReplace);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-Web Done");
   // RestAPI
-  Server.onRestApiGet (cbRestApiGet);
-  Server.onRestApiPost (cbRestApiPost);
-  Server.onRestApiPut (cbRestApiPut);
-  Server.onRestApiPatch (cbRestApiPatch);
-  Server.onRestApiDelete (cbRestApiDelete);
-  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-RestAPI Done");
+  IotServer.onRestApiGet (cbRestApiGet);
+  IotServer.onRestApiPost (cbRestApiPost);
+  IotServer.onRestApiPut (cbRestApiPut);
+  IotServer.onRestApiPatch (cbRestApiPatch);
+  IotServer.onRestApiDelete (cbRestApiDelete);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-RestAPI Done");
   // Web-Socket
-  Server.onWsData (cbWsData);
-  Server.onWsUpdate (cbWsUpdate);
-  Debug.println (FLAG_SETUP, false, "root", __func__, "Server-WebSocket Done");
+  IotServer.onWsData (cbWsData);
+  IotServer.onWsUpdate (cbWsUpdate);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-WebSocket Done");
 
   // Function-Handler
   addFunctionsToHandler();
@@ -251,7 +251,7 @@ void setup () {
 // #######################################################
 int8_t LastSeconds = 0;
 void loop () {
-  Server.handle ();
-  tm CurrentTime = Server.getTimeStruct ();
+  IotServer.handle ();
+  tm CurrentTime = IotServer.getTimeStruct ();
   Handler.update(CurrentTime);
 }
