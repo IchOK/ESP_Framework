@@ -35,13 +35,10 @@ namespace JCA {
       return Output[_Index];
     }
 
-    FuncHandler::FuncHandler (String _Name, String _SetupFilePath, String _FuncFilePath, String _ValueFilePath, String _LogFilePath) {
-      SetupFilePath = _SetupFilePath;
-      FuncFilePath = _FuncFilePath;
-      ValueFilePath = _ValueFilePath;
-      LogFilePath = _LogFilePath;
+    FuncHandler::FuncHandler (String _Name) {
       Name = _Name;
       LinkMapping["direct"] = FuncLinkType_T::LinkDirect;
+      LinkMapping["move"] = FuncLinkType_T::LinkMove;
     }
 
     /**
@@ -115,21 +112,21 @@ namespace JCA {
       JsonDocument SetupDoc;
       JsonDocument LogDoc;
 
-      if (!LittleFS.exists(SetupFilePath)) {
+      if (!LittleFS.exists(JCA_IOT_FILE_SETUP)) {
         JsonObject LogObj = LogDoc["File"].to<JsonObject>();
-        LogObj["Name"] = SetupFilePath;
+        LogObj["Name"] = JCA_IOT_FILE_SETUP;
         LogObj["Error"] = "not found";
         RetValue = FuncPatchRet_T::fileMissing;
       } else {
         // Open Setup File
-        File SetupFile = LittleFS.open (SetupFilePath, FILE_READ);
+        File SetupFile = LittleFS.open (JCA_IOT_FILE_SETUP, FILE_READ);
         DeserializationError Error = deserializeJson (SetupDoc, SetupFile);
 
         if (Error) {
           Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
           Debug.println (FLAG_ERROR, true, Name, __func__, Error.c_str());
           JsonObject LogObj = LogDoc["File"].to<JsonObject>();
-          LogObj["Name"] = SetupFilePath;
+          LogObj["Name"] = JCA_IOT_FILE_SETUP;
           LogObj["Error"] = Error.c_str ();
           RetValue = FuncPatchRet_T::jsonSyntax;
         } else {
@@ -270,7 +267,7 @@ namespace JCA {
       }
 
       // Write Logfile
-      File LogFile = LittleFS.open (LogFilePath, FILE_WRITE);
+      File LogFile = LittleFS.open (JCA_IOT_FILE_LOG, FILE_WRITE);
       serializeJson (LogDoc, LogFile);
       LogFile.close ();
 
@@ -285,7 +282,7 @@ namespace JCA {
     FuncPatchRet_T FuncHandler::remove () {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       deleteFunctions ();
-      LittleFS.remove(FuncFilePath);
+      LittleFS.remove(JCA_IOT_FILE_FUNCTIONS);
       return RetValue;
     }
 
@@ -297,7 +294,7 @@ namespace JCA {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       // Open Output File
-      File FuncFile = LittleFS.open (FuncFilePath, FILE_WRITE, true);
+      File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_WRITE, true);
       if (!FuncFile) {
         RetValue = FuncPatchRet_T::fileOpen;
       } else {
@@ -312,7 +309,7 @@ namespace JCA {
         FuncFile.close ();
       }
       if (Debug.println (FLAG_DATA, true, "FuncHandler", __func__, "Functions-JSON")) {
-        File FuncFile = LittleFS.open (FuncFilePath, FILE_READ);
+        File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_READ);
         while (FuncFile.available ()) {
           Debug.print (FLAG_DATA, true, "FuncHandler", __func__, (char)FuncFile.read ());
         }
@@ -331,10 +328,10 @@ namespace JCA {
       JsonDocument ValueDoc;
       JsonObject Values = ValueDoc[JCA::FNC::FuncParent::JsonTagElements].to<JsonObject>(); //.as<JsonObject>();
       getValues (Values);
-      File ValuesFile = LittleFS.open (ValueFilePath, FILE_WRITE);
+      File ValuesFile = LittleFS.open (JCA_IOT_FILE_VALUES, FILE_WRITE);
       if (!ValuesFile) {
         Debug.print (FLAG_ERROR, true, Name, __func__, "Failed to open File for write : ");
-        Debug.println (FLAG_ERROR, true, Name, __func__, ValueFilePath);
+        Debug.println (FLAG_ERROR, true, Name, __func__, JCA_IOT_FILE_VALUES);
         RetValue = FuncPatchRet_T::fileOpen;
       } else {
         size_t FileSize = serializeJson (ValueDoc, ValuesFile);
@@ -353,12 +350,12 @@ namespace JCA {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       JsonDocument ValueDoc;
-      if (!LittleFS.exists (ValueFilePath)) {
+      if (!LittleFS.exists (JCA_IOT_FILE_VALUES)) {
         Debug.print (FLAG_ERROR, true, Name, __func__, "File not found : ");
-        Debug.println (FLAG_ERROR, true, Name, __func__, ValueFilePath);
+        Debug.println (FLAG_ERROR, true, Name, __func__, JCA_IOT_FILE_VALUES);
         RetValue = FuncPatchRet_T::fileMissing;
       } else {
-        File ValuesFile = LittleFS.open (ValueFilePath, FILE_READ);
+        File ValuesFile = LittleFS.open (JCA_IOT_FILE_VALUES, FILE_READ);
         DeserializationError Error = deserializeJson (ValueDoc, ValuesFile);
         if (Error) {
           Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
@@ -388,15 +385,36 @@ namespace JCA {
 
         switch (Link->Type) {
         case FuncLinkType_T::LinkDirect:
-          // Direkt Link always read the first Input-Link and set it to all Output Links
+          // Direkt Link always read the first Input-Link and set it to all Output-Links
           if (Link->getInputCount () > 0 && Link->getOutputCount () > 0) {
             JsonVariant Value = LinkDoc.to<JsonVariant> ();
             FuncLinkPair_T Input = Link->getInput(0);
 
             if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value)) {
               for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount(); OutputIndex++) {
-                FuncLinkPair_T Output = Link->getOutput(0);
+                FuncLinkPair_T Output = Link->getOutput (OutputIndex);
                 Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value);
+              }
+            }
+          }
+          break;
+
+        case FuncLinkType_T::LinkMove:
+          // Move Link use the first Input-Link to decide if the second Input-Link should be set to all Output-Link
+          if (Link->getInputCount () > 1 && Link->getOutputCount () > 0) {
+            JsonVariant Value = LinkDoc.to<JsonVariant> ();
+            FuncLinkPair_T Selector = Link->getInput (0);
+            FuncLinkPair_T Input = Link->getInput (1);
+
+            if (Functions[Selector.Func]->getTagValueByIndex (Selector.Tag, Value)) {
+              bool SelectorValue = Value.as<bool> ();
+              if (SelectorValue) {
+                if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value)) {
+                  for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount (); OutputIndex++) {
+                    FuncLinkPair_T Output = Link->getOutput (OutputIndex);
+                    Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value);
+                  }
+                }
               }
             }
           }

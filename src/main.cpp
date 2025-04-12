@@ -32,7 +32,9 @@
 #include <JCA_IOT_FuncHandler.h>
 
 // Project function
-#include <JCA_FNC_AcDimmers.h>
+#ifdef ESP32
+  #include <JCA_FNC_AcDimmers.h>
+#endif
 #include <JCA_FNC_Charger.h>
 #include <JCA_FNC_ClockValues.h>
 #include <JCA_FNC_DigitalCounter.h>
@@ -43,6 +45,8 @@
 #include <JCA_FNC_LedStrip.h>
 #include <JCA_FNC_Level.h>
 #include <JCA_FNC_ServerLink.h>
+#include <JCA_FNC_ValueAnalog.h>
+#include <JCA_FNC_ValueDigital.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -81,7 +85,9 @@ void linkHardware() {
 // Functions
 //-------------------------------------------------------
 void addFunctionsToHandler () {
-  AcDimmers::AddToHandler (Handler);
+  #ifdef ESP32
+    AcDimmers::AddToHandler (Handler);
+  #endif
   Charger::AddToHandler (Handler);
   ClockValues::AddToHandler(Handler);
   DigitalCounter::AddToHandler(Handler);
@@ -92,6 +98,8 @@ void addFunctionsToHandler () {
   LedStrip::AddToHandler(Handler);
   Level::AddToHandler(Handler);
   ServerLink::AddToHandler (Handler);
+  ValueAnalog::AddToHandler(Handler);
+  ValueDigital::AddToHandler(Handler);
 }
 
 //-------------------------------------------------------

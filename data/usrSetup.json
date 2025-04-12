@@ -6,6 +6,17 @@
       "name": "Server",
       "server": "IotServer"
     }, {
+      "type": "valueDigital",
+      "name": "TestDigital"
+    }, {
+      "type": "valueAnalog",
+      "name": "TestAnalogDefault",
+      "unit": "°C"
+    }, {
+      "type": "valueAnalog",
+      "name": "TestAnalogMove",
+      "unit": "°C"
+    }, {
       "type": "clockValues",
       "name": "TestSchaltuhr",
       "countClockPoints": 5
@@ -21,7 +32,25 @@
       "type": "direct",
       "from": [
         {
-          "func": "TestSchaltuhr",
+          "func": "TestAnalogDefault",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "TestDimmer",
+          "tag": "Value1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "TestDigital",
+          "tag": "Value"
+        }, {
+          "func": "TestAnalogMove",
           "tag": "Value"
         }
       ],

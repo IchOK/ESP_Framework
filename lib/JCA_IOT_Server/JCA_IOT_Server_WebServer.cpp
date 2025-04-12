@@ -33,7 +33,7 @@ namespace JCA {
       JsonObject Config;
       JsonObject WiFiConfig;
 
-      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_WIFICONFIGFILE, "r");
+      File ConfigFile = LittleFS.open (JCA_IOT_FILE_WIFICONFIG, "r");
       if (ConfigFile) {
         Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
@@ -80,7 +80,7 @@ namespace JCA {
       }
 
       // Save Config Object
-      ConfigFile = LittleFS.open (JCA_IOT_SERVER_WIFICONFIGFILE, "w");
+      ConfigFile = LittleFS.open (JCA_IOT_FILE_WIFICONFIG, "w");
       if (ConfigFile) {
         size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
         ConfigFile.close ();
@@ -372,7 +372,7 @@ namespace JCA {
         return String (BOARD_MCU);
       }
       if (var == "CONFIGFILE") {
-        return String (JCA_IOT_SERVER_WIFICONFIGFILE);
+        return String (JCA_IOT_FILE_WIFICONFIG);
       }
       return String ();
     }

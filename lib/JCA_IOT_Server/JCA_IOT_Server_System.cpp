@@ -54,7 +54,7 @@ namespace JCA {
       strncpy (ConfPassword, _ConfPassword, sizeof (ConfPassword));
       WsUpdateCycle = 1000;
       WsLastUpdate = millis ();
-      WebConfigFile = "/usrFunctions.json";
+      WebConfigFile = JCA_IOT_FILE_FUNCTIONS;
       LocalTimeZone = _Offset;
       DaylightSavingTime = _DayLightSaving;
     }
@@ -119,7 +119,7 @@ namespace JCA {
       //------------------------------------------------------
       // Read WiFi Config
       //------------------------------------------------------
-      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_WIFICONFIGFILE, "r");
+      File ConfigFile = LittleFS.open (JCA_IOT_FILE_WIFICONFIG, "r");
       if (ConfigFile) {
         Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "WiFi - Config File Found");
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
@@ -185,7 +185,7 @@ namespace JCA {
       //------------------------------------------------------
       // Read Server Config
       //------------------------------------------------------
-      ConfigFile = LittleFS.open (JCA_IOT_SERVER_SYSTEMCONFIGFILE, "r");
+      ConfigFile = LittleFS.open (JCA_IOT_FILE_SYSTEMCONFIG, "r");
       if (ConfigFile) {
         Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "System - Config File Found");
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
@@ -414,7 +414,7 @@ namespace JCA {
       Config[JCA_IOT_SERVER_CONFKEY_DAYLIGHTSAVING] = DaylightSavingTime;
       Config[JCA_IOT_SERVER_CONFKEY_REBOOTCOUNTER] = RebootCounter;
 
-      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_SYSTEMCONFIGFILE, "w");
+      File ConfigFile = LittleFS.open (JCA_IOT_FILE_SYSTEMCONFIG, "w");
       if (ConfigFile) {
         size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
         ConfigFile.close ();

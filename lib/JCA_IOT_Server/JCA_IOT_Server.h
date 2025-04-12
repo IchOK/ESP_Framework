@@ -86,9 +86,16 @@
 #define JCA_IOT_SERVER_DEFAULT_UDPLISTENERPORT 81
 #define JCA_IOT_SERVER_DEFAULT_CONF_USER "Admin"
 #define JCA_IOT_SERVER_DEFAULT_CONF_PASS "Admin"
-// Config File is readen on Init
-#define JCA_IOT_SERVER_WIFICONFIGFILE "/sysWifi.json"
-#define JCA_IOT_SERVER_SYSTEMCONFIGFILE "/sysConfig.json"
+// JSON Files used by Server for Config and Data-Storage, only if not defines in main.cpp or somewhere else
+#ifndef JCA_IOT_FILE_WIFICONFIG
+  #define JCA_IOT_FILE_WIFICONFIG "/sysWifi.json"
+#endif
+#ifndef JCA_IOT_FILE_SYSTEMCONFIG
+  #define JCA_IOT_FILE_SYSTEMCONFIG "/sysConfig.json"
+#endif
+#ifndef JCA_IOT_FILE_FUNCTIONS
+  #define JCA_IOT_FILE_FUNCTIONS "/usrFunctions.json"
+#endif
 // JSON Keys for WiFi Config
 #define JCA_IOT_SERVER_CONFKEY_WIFI "wifi"
 #define JCA_IOT_SERVER_CONFKEY_WIFI_SSID "ssid"

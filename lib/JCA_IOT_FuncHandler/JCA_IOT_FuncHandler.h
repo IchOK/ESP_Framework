@@ -2,8 +2,11 @@
  * @file JCA_IOT_Handler.h
  * @author JCA (https://github.com/ichok)
  * @brief Handling class to create an handle functions.
- * @version 1.0
+ * @version 1.1
  * @date 2024-04-21
+ * @changelog
+ * - 1.0 2024-04-21: Initial version
+ * - 1.1 2024-04-21: Added new Link-Type Move
  *
  * Copyright Jochen Cabrera 2024
  * Apache License
@@ -23,6 +26,19 @@
 #include <JCA_SYS_DebugOut.h>
 
 #define JCA_IOT_FUNCHANDLER_SETUP_NAME "name"
+// JSON Files used Functionhandler for Config and Data-Storage, only if not defines in main.cpp or somewhere else
+#ifndef JCA_IOT_FILE_SETUP
+  #define JCA_IOT_FILE_SETUP "/usrSetup.json"
+#endif
+#ifndef JCA_IOT_FILE_FUNCTIONS
+  #define JCA_IOT_FILE_FUNCTIONS "/usrFunctions.json"
+#endif
+#ifndef JCA_IOT_FILE_VALUES
+  #define JCA_IOT_FILE_VALUES "/usrValues.json"
+#endif
+#ifndef JCA_IOT_FILE_LOG
+  #define JCA_IOT_FILE_LOG "/usrLog.json"
+#endif
 
 namespace JCA {
   namespace IOT {
@@ -32,7 +48,8 @@ namespace JCA {
     };
     enum FuncLinkType_T : uint8_t {
       LinkNone = 0,
-      LinkDirect = 1
+      LinkDirect = 1,
+      LinkMove = 2
     };
     enum FuncPatchRet_T : int8_t {
       done = 127,
@@ -72,11 +89,6 @@ namespace JCA {
       static const char *JsonTagFunctions;
       static const char *JsonTagLinks;
       String Name;
-      // Setup
-      String SetupFilePath;
-      String FuncFilePath;
-      String ValueFilePath;
-      String LogFilePath;
 
       // LoopData
       unsigned long LastUpdate;
@@ -101,11 +113,7 @@ namespace JCA {
       std::map<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
       std::vector<JCA::FNC::FuncParent *> Functions;
 
-      FuncHandler (String _Name
-        , String _SetupFilePath = "/usrSetup.json"
-        , String _FuncFilePath = "/usrFunctions.json"
-        , String _ValueFilePath = "/usrValues.json"
-        , String _LogFilePath = "/usrLog.json");
+      FuncHandler (String _Name);
       void update (struct tm &_Time);
       String patch(String _Command);
 
