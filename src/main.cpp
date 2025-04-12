@@ -47,6 +47,7 @@
 #include <JCA_FNC_ServerLink.h>
 #include <JCA_FNC_ValueAnalog.h>
 #include <JCA_FNC_ValueDigital.h>
+#include <JCA_FNC_DaySelect.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -100,6 +101,7 @@ void addFunctionsToHandler () {
   ServerLink::AddToHandler (Handler);
   ValueAnalog::AddToHandler(Handler);
   ValueDigital::AddToHandler(Handler);
+  DaySelect::AddToHandler(Handler);
 }
 
 //-------------------------------------------------------

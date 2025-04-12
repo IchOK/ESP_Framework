@@ -91,6 +91,7 @@ function createViewTag(ViewElement, DataTag) {
     case 51:
     case 52:
     case 53:
+    case 55:
       createViewTagInputNumber(ViewTagValue, DataTag);
       break;
 
@@ -115,18 +116,55 @@ function createViewTagInputNumber(ViewTagValue, DataTag) {
   ValueInput.setAttribute("style", "padding-right:54px;text-align:right;");
   ValueInput.setAttribute("step", "any");
   switch (DataTag.type) {
-    case 51:
+    case 51:  // Time-Picker
       ValueInput.type = "time";
       break;
-    case 52:
+    case 52:  // Date-Time Picker
       ValueInput.type = "datetime-local";
       break;
-    case 53:
+    case 53:  // Color-Picker
       ValueInput.type = "color";
       break;
-    default:  
+    default:  // Numeric Input
       ValueInput.type = "number";
       AddUnit = "unit" in DataTag;
+      break;
+    case 55: // Weekday-Buttons
+      ValueInput.type = "number";
+      ValueInput.setAttribute("hidden-type", "weekbuttons");
+      ValueInput.style.display = "none";
+      ValueInput.setAttribute("onchange", "onChange(this)");
+      ViewTagValue.appendChild(ValueInput);
+
+      // Add Weekdas buttons
+      const days = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+      days.forEach((day, index) => {
+        let dayButton = document.createElement("button");
+        dayButton.type = "button";
+        dayButton.innerText = day;
+        dayButton.setAttribute("data-bit", index);
+        dayButton.style.margin = "0 5px";
+        dayButton.classList = "primary outline";
+
+        // Event-Listener for button click
+        dayButton.addEventListener("click", function () {
+          let currentValue = parseInt(ValueInput.value, 10) || 0;
+          let bitMask = 1 << index;
+
+          // invert the bit
+          if (currentValue & bitMask) {
+            currentValue &= ~bitMask;
+          } else {
+            currentValue |= bitMask;
+          }
+
+          // update hidden value and trigger change event
+          ValueInput.value = currentValue;
+          ValueInput.dispatchEvent(new Event("change"));
+        });
+
+        ViewTagValue.appendChild(dayButton);
+      });
       break;
   }
   ValueInput.disabled = DataTag.readOnly;
@@ -171,7 +209,7 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
   } else {
     ValueInput.setAttribute("textOn", DataTag.on);
     ValueInput.setAttribute("textOff", DataTag.off);
-    ValueInput.classList = "secondary outline"
+    ValueInput.classList = "primary outline"
   }
   ValueInput.disabled = DataTag.readOnly;
   if (DataTag.readOnly == false) {
@@ -207,6 +245,22 @@ function updateViewTag(ViewTag, DataTagValue) {
         ValueInput.className = "primary outline";
       }
     }
+  } else if (ValueInput.type === "number" && ValueInput.getAttribute("hidden-type") === "weekbuttons") {
+    // Weekday-Buttons
+    const dayButtons = ViewTag.querySelectorAll("button[data-bit]");
+    let currentValue = parseInt(DataTagValue, 10) || 0;
+
+    dayButtons.forEach((button) => {
+      let bitIndex = parseInt(button.getAttribute("data-bit"), 10);
+      let bitMask = 1 << bitIndex;
+
+      if (currentValue & bitMask) {
+        button.className = "primary";
+      } else {
+        button.className = "primary outline";
+      }
+    });
+    ValueInput.value = currentValue;
   } else {
     if (ValueInput !== document.activeElement) {
       switch (ValueInput.type) {

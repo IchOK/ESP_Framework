@@ -6,11 +6,18 @@
       "name": "Server",
       "server": "IotServer"
     }, {
+      "type": "daySelect",
+      "name": "TestTagesauswahl"
+    }, {
       "type": "valueDigital",
       "name": "TestDigital"
     }, {
       "type": "valueAnalog",
       "name": "TestAnalogDefault",
+      "unit": "°C"
+    }, {
+      "type": "valueAnalog",
+      "name": "TestAnalogDay",
       "unit": "°C"
     }, {
       "type": "valueAnalog",
@@ -33,6 +40,25 @@
       "from": [
         {
           "func": "TestAnalogDefault",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "TestDimmer",
+          "tag": "Value1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "TestTagesauswahl",
+          "tag": "Value"
+        },
+        {
+          "func": "TestAnalogDay",
           "tag": "Value"
         }
       ],

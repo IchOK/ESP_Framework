@@ -49,6 +49,7 @@ namespace JCA {
       TypeDateTime = 52,
       TypeColor = 53,
       TypeBoolCmd = 54,
+      TypeDaySelect = 55,
       TypeListUInt8 = 101,
       TypeArrayUInt8 = 102
     };
