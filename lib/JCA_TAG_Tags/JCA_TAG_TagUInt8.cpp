@@ -2,7 +2,7 @@
  * @file JCA_TAG_TAGUInt8.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
- * @version 1.0
+ * @version 1.1
  * @date 2024-04-07
  *
  * Copyright Jochen Cabrera 2024
@@ -27,13 +27,13 @@ namespace JCA {
      * @param _Unit Unit of the Tag, showen on the website
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
-    TagUInt8::TagUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint8_t *_Value, String _Unit, SetCallback _CB)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeUInt8, _Usage, _CB) {
+    TagUInt8::TagUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint8_t *_Value, String _Unit, SetCallback _CB, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage, _CB) {
       Unit = _Unit;
     }
 
-    TagUInt8::TagUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint8_t *_Value, String _Unit)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeUInt8, _Usage) {
+    TagUInt8::TagUInt8 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint8_t *_Value, String _Unit, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage) {
       Unit = _Unit;
     }
 

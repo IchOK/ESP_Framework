@@ -36,7 +36,7 @@ namespace JCA {
       Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, TagUsage_T::UseConfig, &DelayAutoOff, "Min"));
 
       Tags.push_back (new TagBool ("OnOff", "Einschalten", "", false, TagUsage_T::UseData, &OnOff, "EIN", "AUS", std::bind (&LedStrip::updateColorCB, this)));
-      Tags.push_back (new TagUInt32 ("Value", "Farbwert", "", false, TagUsage_T::UseData, &Value, "COLOR", std::bind (&LedStrip::updateColorCB, this)));
+      Tags.push_back (new TagUInt32 ("Value", "Farbwert", "", false, TagUsage_T::UseData, &Value, "RGB", std::bind (&LedStrip::updateColorCB, this), TagTypes_T::TypeColor));
       Tags.push_back (new TagUInt16 ("DelayCounter", "Verzögerung bis AUS", "", false, TagUsage_T::UseData, &DelayCounter, "Min"));
 
       DelayAutoOff = 0;

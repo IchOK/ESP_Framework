@@ -19,8 +19,15 @@
  *   - Websockt use RestAPI Callback-Functions for Events if no other is defined
  *     - onWsEvent : Default = onRestApiPost
  *     - onWsUpdate : Default = onRestApiGet
- * @version 0.1
+ * - UdpListener
+ *   - Listen to UDP-Packets in JSON for Timesync and maybe more some times
+ * - LocaltimeZone
+ *   - Get Epoch of local Timezone with Daylight Saving Time
+ * @version 1.0
  * @date 2022-09-04
+ * @changelog
+ * - [0.1] 2022-09-04: First Version
+ * - [1.0] 2025-04-12: UdpListener added, Localtime Zone added
  *
  * Copyright Jochen Cabrera 2022
  * Apache License
@@ -80,7 +87,8 @@
 #define JCA_IOT_SERVER_DEFAULT_CONF_USER "Admin"
 #define JCA_IOT_SERVER_DEFAULT_CONF_PASS "Admin"
 // Config File is readen on Init
-#define JCA_IOT_SERVER_CONFIGPATH "/sysConfig.json"
+#define JCA_IOT_SERVER_WIFICONFIGFILE "/sysWifi.json"
+#define JCA_IOT_SERVER_SYSTEMCONFIGFILE "/sysConfig.json"
 // JSON Keys for WiFi Config
 #define JCA_IOT_SERVER_CONFKEY_WIFI "wifi"
 #define JCA_IOT_SERVER_CONFKEY_WIFI_SSID "ssid"
@@ -94,6 +102,9 @@
 #define JCA_IOT_SERVER_CONFKEY_HOSTNAME "hostname"
 #define JCA_IOT_SERVER_CONFKEY_PORT "port"
 #define JCA_IOT_SERVER_CONFKEY_UDPPORT "udtPort"
+#define JCA_IOT_SERVER_CONFKEY_LOCALTIMEZONE "localTimeZone"
+#define JCA_IOT_SERVER_CONFKEY_DAYLIGHTSAVING "dayLightSaving"
+#define JCA_IOT_SERVER_CONFKEY_REBOOTCOUNTER "rebootCounter"
 // JSON Keys for Web-Socket Config
 #define JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE "wsUpdate"
 // Website Config
@@ -108,8 +119,9 @@
 // Time settings
 #define JCA_IOT_SERVER_TIME_OFFSET 3600
 #define JCA_IOT_SERVER_TIME_VALID 1609459200
-#define JCA_IOT_SERVER_TIME_TIMEFORMAT "%d.%m.%G %H:%M:%S"
+#define JCA_IOT_SERVER_TIME_DATETIMEFORMAT "%d.%m.%G %H:%M:%S"
 #define JCA_IOT_SERVER_TIME_DATEFORMAT "%d.%m.%G"
+#define JCA_IOT_SERVER_TIME_TIMEFORMAT "%H:%M:%S"
 
 namespace JCA {
   namespace IOT {
@@ -130,13 +142,12 @@ namespace JCA {
       AsyncWebSocket WebSocketObject;
       AsyncUDP UpdListenerObject;
       ESP32Time Rtc;
-      uint16_t WebServerPort;
-      uint16_t UdpListenerPort;
       String WebConfigFile;
 
       SimpleCallback onSystemResetCB;
       SimpleCallback onSaveConfigCB;
       bool readConfig ();
+      int getLastSunday(int _Year, int _Month);
 
       // ...UdpListener.cpp
       void udpPacketHandler (AsyncUDPPacket _Packet);
@@ -178,11 +189,16 @@ namespace JCA {
     public:
       // ...Webserver_System.cpp
       String Hostname;
-      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset);
+      uint32_t LocalTimeZone;
+      bool DaylightSavingTime;
+      uint16_t WebServerPort;
+      uint16_t UdpListenerPort;
+      uint16_t RebootCounter;
+      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset, bool _DayLightSaving);
       Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword);
-      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, unsigned long _Offset);
+      Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, unsigned long _Offset, bool _DayLightSaving);
       Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort);
-      Server (unsigned long _Offset);
+      Server (unsigned long _Offset, bool _DayLightSaving);
       Server ();
       bool init ();
       bool handle ();
@@ -193,11 +209,15 @@ namespace JCA {
       void setStatePin (int8_t _Pin);
       void setTimeStruct (tm _Time);
       void setWebConfigFile (String _WebConfigFile);
+      bool writeSystemConfig ();
       bool timeIsValid ();
-      tm getTimeStruct ();
-      String getTime ();
-      String getDate ();
-      String getTimeString (String _Format);
+      tm getSystemTimeStruct ();
+      tm getLocalTimeStruct ();
+      String getTimeString ();
+      String getDateString ();
+      String getTimeFormated (String _Format, bool _LocalTime = false);
+      uint32_t getLocalTime();
+      uint32_t getSystemTime();
 
       // ...Webserver_Web.cpp
       void onWebHomeReplace (AwsTemplateProcessor _CB);
@@ -214,7 +234,6 @@ namespace JCA {
       uint32_t WsUpdateCycle;
       void onWsData (JsonVariantCallback _CB);
       void onWsUpdate (JsonVariantCallback _CB);
-      void setWsUpdateCycle (uint32_t _CycleTime);
       bool doWsUpdate ();
     };
   }

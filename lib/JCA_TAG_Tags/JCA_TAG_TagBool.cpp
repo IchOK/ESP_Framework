@@ -2,7 +2,7 @@
  * @file JCA_TAG_TAGBool.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
- * @version 1.0
+ * @version 1.1
  * @date 2024-04-07
  *
  * Copyright Jochen Cabrera 2024
@@ -28,14 +28,14 @@ namespace JCA {
      * @param _BtnOffText Button-Text ift the tag is false
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
-    TagBool::TagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText, SetCallback _CB)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeBool, _Usage, _CB) {
+    TagBool::TagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText, SetCallback _CB, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage, _CB) {
       BtnOnText = _BtnOnText;
       BtnOffText = _BtnOffText;
     }
 
-    TagBool::TagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeBool, _Usage) {
+    TagBool::TagBool (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, bool *_Value, String _BtnOnText, String _BtnOffText, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage) {
       BtnOnText = _BtnOnText;
       BtnOffText = _BtnOffText;
     }

@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef _JCA_FNC_WEBSERVERLINK_
-#define _JCA_FNC_WEBSERVERLINK_
+#ifndef _JCA_FNC_SERVERLINK_
+#define _JCA_FNC_SERVERLINK_
 
 #include <ArduinoJson.h>
 #include <time.h>
@@ -21,6 +21,8 @@
 #include <JCA_IOT_Server.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagString.h>
+#include <JCA_TAG_TagBool.h>
+#include <JCA_TAG_TagUInt16.h>
 #include <JCA_TAG_TagUInt32.h>
 
 namespace JCA {
@@ -36,14 +38,24 @@ namespace JCA {
       // Hardware
       JCA::IOT::Server *ServerRef;
       void setTimeCB();
+      void writeServerConfigCB();
+      void setServerDataCB ();
+      void getServerDataCB ();
 
       // Konfig
-      uint32_t WsUpdateCycle;
       String Hostname;
+      uint32_t WsUpdateCycle;
+      uint16_t WebServerPort;
+      uint16_t UdpListenerPort;
+      uint32_t LocalTimeZone;
+      bool DaylightSavingTime;
+      uint16_t RebootCounter;
 
       // Daten
+      bool SaveConfig;
       uint32_t TimeSync;
-      String ActTime;
+      String SystemTime;
+      String LocalTime;
 
     public:
       ServerLink (JCA::IOT::Server *_ServerRef, String _Name);

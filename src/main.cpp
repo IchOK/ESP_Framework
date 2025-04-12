@@ -186,9 +186,9 @@ void setup () {
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
-   DebugFlags |= FLAG_ERROR;
-   DebugFlags |= FLAG_SETUP;
-  // DebugFlags |= FLAG_CONFIG;
+  DebugFlags |= FLAG_ERROR;
+  DebugFlags |= FLAG_SETUP;
+  DebugFlags |= FLAG_CONFIG;
   DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
@@ -251,6 +251,6 @@ void setup () {
 int8_t LastSeconds = 0;
 void loop () {
   IotServer.handle ();
-  tm CurrentTime = IotServer.getTimeStruct ();
+  tm CurrentTime = IotServer.getLocalTimeStruct ();
   Handler.update(CurrentTime);
 }

@@ -2,7 +2,7 @@
  * @file JCA_TAG_TAGString.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
- * @version 1.0
+ * @version 1.1
  * @date 2024-04-07
  *
  * Copyright Jochen Cabrera 2024
@@ -26,12 +26,12 @@ namespace JCA {
      * @param _Value Pointer to the Value-Datapoint inside the Function-Object
      * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
      */
-    TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value, SetCallback _CB)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeString, _Usage, _CB) {
+    TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value, SetCallback _CB, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage, _CB) {
     }
 
-    TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value)
-        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, TagTypes_T::TypeString, _Usage) {
+    TagString::TagString (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, String *_Value, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage) {
     }
 
     /**

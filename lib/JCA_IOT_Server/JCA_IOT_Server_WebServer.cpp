@@ -33,7 +33,7 @@ namespace JCA {
       JsonObject Config;
       JsonObject WiFiConfig;
 
-      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_CONFIGPATH, "r");
+      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_WIFICONFIGFILE, "r");
       if (ConfigFile) {
         Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
@@ -80,12 +80,16 @@ namespace JCA {
       }
 
       // Save Config Object
-      ConfigFile = LittleFS.open (JCA_IOT_SERVER_CONFIGPATH, "w");
-      size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
-      ConfigFile.close ();
-      Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "Write Config File [");
-      Debug.print (FLAG_CONFIG, true, ObjectName, __func__, WrittenBytes);
-      Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "]");
+      ConfigFile = LittleFS.open (JCA_IOT_SERVER_WIFICONFIGFILE, "w");
+      if (ConfigFile) {
+        size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
+        ConfigFile.close ();
+        Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "Write Wifi-Config Done [");
+        Debug.print (FLAG_CONFIG, true, ObjectName, __func__, WrittenBytes);
+        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "]");
+      } else {
+        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Write Wifi-Config Error");
+      }
 
       // Read back Config-File
       readConfig ();
@@ -368,7 +372,7 @@ namespace JCA {
         return String (BOARD_MCU);
       }
       if (var == "CONFIGFILE") {
-        return String (JCA_IOT_SERVER_CONFIGPATH);
+        return String (JCA_IOT_SERVER_WIFICONFIGFILE);
       }
       return String ();
     }

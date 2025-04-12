@@ -45,6 +45,10 @@ namespace JCA {
       TypeInt32 = 7,
       TypeUInt32 = 8,
       TypeString = 9,
+      TypeTime = 51,
+      TypeDateTime = 52,
+      TypeColor = 53,
+      TypeBoolCmd = 54,
       TypeListUInt8 = 101,
       TypeArrayUInt8 = 102
     };

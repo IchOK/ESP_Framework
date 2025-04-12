@@ -20,9 +20,6 @@ namespace JCA {
     void Server::onWsUpdate (JsonVariantCallback _CB) {
       wsUpdateCB = _CB;
     }
-    void Server::setWsUpdateCycle (uint32_t _CycleTime) {
-      WsUpdateCycle = _CycleTime;
-    }
     bool Server::doWsUpdate () {
       return doWsUpdate (nullptr);
     }

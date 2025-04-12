@@ -55,7 +55,7 @@ namespace JCA {
       // Add new clock point tags
       for (uint8_t i = 0; i < CountClockPoints; i++) {
         String indexStr = String(i + 1);
-        Tags.push_back(new TagUInt32("Time" + indexStr, "Schaltpunkt " + indexStr, "", false, TagUsage_T::UseConfig, &ClockPoints[i].Time, "s"));
+        Tags.push_back(new TagUInt32("Time" + indexStr, "Schaltpunkt " + indexStr, "", false, TagUsage_T::UseConfig, &ClockPoints[i].Time, "s", TagTypes_T::TypeTime));
         Tags.push_back(new TagFloat("Value" + indexStr, "Wert " + indexStr, "", false, TagUsage_T::UseConfig, &ClockPoints[i].Value, ""));
         Tags.push_back(new TagBool("DoRamp" + indexStr, "Rampen " + indexStr, "", false, TagUsage_T::UseConfig, &ClockPoints[i].DoRamp, "EIN", "AUS"));
       }

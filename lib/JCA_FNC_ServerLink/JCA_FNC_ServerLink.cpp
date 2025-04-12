@@ -30,23 +30,56 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagString ("Hostname", "Hostname", "Hostname wirde erst nache dem Reboot aktiv", false, TagUsage_T::UseConfig, &Hostname));
-      Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms"));
-      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", false, TagUsage_T::UseConfig, &TimeSync, "s", std::bind (&ServerLink::setTimeCB, this)));
+      Tags.push_back (new TagString ("Hostname", "Hostname", "Reboot erforderlich", false, TagUsage_T::UseConfig, &Hostname, std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt16 ("WebServerPort", "Webserver Port", "Reboot erforderlich", false, TagUsage_T::UseConfig, &WebServerPort, "", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt16 ("UdpListenerPort", "UDP Port", "Reboot erforderlich", false, TagUsage_T::UseConfig, &UdpListenerPort, "", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt32 ("LocalTimeZone", "Zeitzone", "", false, TagUsage_T::UseConfig, &LocalTimeZone, "s", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagBool ("DaylightSavingTime", "Sommerzeit", "", false, TagUsage_T::UseConfig, &DaylightSavingTime, "EIN", "AUS", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt16 ("RebootCounter", "Reboot-Counter", "", false, TagUsage_T::UseConfig, &RebootCounter, "", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagBool ("SaveConfig", "Konfiguration speichern", "", false, TagUsage_T::UseConfig, &SaveConfig, "Saving", "Save", std::bind (&ServerLink::writeServerConfigCB, this)));
+      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", false, TagUsage_T::UseConfig, &TimeSync, "",std::bind (&ServerLink::setTimeCB, this), TagTypes_T::TypeDateTime));
+      Tags.push_back (new TagString ("UtcTime", "UTC-Zeit", "", true, TagUsage_T::UseConfig, &SystemTime));
 
-      Tags.push_back (new TagString ("Time", "Systemzeit", "", false, TagUsage_T::UseData, &ActTime));
+      Tags.push_back (new TagString ("LocalTime", "Lolak-Zeit", "", true, TagUsage_T::UseData, &LocalTime));
 
       // Init Data
       ServerRef = _ServerRef;
-      Hostname = ServerRef->Hostname;
-      WsUpdateCycle = ServerRef->WsUpdateCycle;
+      getServerDataCB ();
+      SaveConfig = false;
       TimeSync = 0;
-      ActTime = ServerRef->getTime ();
     }
 
     void ServerLink::setTimeCB () {
       ServerRef->setTime (TimeSync);
       TimeSync = 0;
+    }
+
+    void ServerLink::writeServerConfigCB () {
+      ServerRef->writeSystemConfig ();
+      SaveConfig = false;
+    }
+
+    void ServerLink::setServerDataCB () {
+      ServerRef->Hostname = Hostname;
+      ServerRef->WsUpdateCycle = WsUpdateCycle;
+      ServerRef->WebServerPort = WebServerPort;
+      ServerRef->UdpListenerPort = UdpListenerPort;
+      ServerRef->LocalTimeZone = LocalTimeZone;
+      ServerRef->DaylightSavingTime = DaylightSavingTime;
+      ServerRef->RebootCounter = RebootCounter;
+    }
+
+    void ServerLink::getServerDataCB () {
+      Hostname = ServerRef->Hostname;
+      WsUpdateCycle = ServerRef->WsUpdateCycle;
+      WebServerPort = ServerRef->WebServerPort;
+      UdpListenerPort = ServerRef->UdpListenerPort;
+      LocalTimeZone = ServerRef->LocalTimeZone;
+      DaylightSavingTime = ServerRef->DaylightSavingTime;
+      RebootCounter = ServerRef->RebootCounter;
+      SystemTime = ServerRef->getTimeFormated ("", false);
+      LocalTime = ServerRef->getTimeFormated ("", true);
     }
 
     /**
@@ -56,9 +89,7 @@ namespace JCA {
      */
     void ServerLink::update (struct tm &time) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
-      ServerRef->Hostname = Hostname;
-      ServerRef->WsUpdateCycle = WsUpdateCycle;
-      ActTime = ServerRef->getTime ();
+      getServerDataCB ();
     }
 
     /**

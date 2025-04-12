@@ -24,9 +24,10 @@ namespace JCA {
      * @param _ConfUser Username for the System Sites
      * @param _ConfPassword Password for the System Sites
      * @param _Offset RTC Timeoffset in seconds
+     * @param _DayLightSaving use Daylight Saving Time
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset)
-        : WebServerObject (_WebServerPort), WebSocketObject ("/ws"), Rtc (_Offset) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset, bool _DayLightSaving)
+        : WebServerObject (_WebServerPort), WebSocketObject ("/ws"), Rtc (0) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
 
       String ChipID;
@@ -48,11 +49,14 @@ namespace JCA {
       WebServerPort = _WebServerPort;
       UdpListenerPort = _UdpListenerPort;
       Reboot = false;
+      RebootCounter = 0;
       strncpy (ConfUser, _ConfUser, sizeof (ConfUser));
       strncpy (ConfPassword, _ConfPassword, sizeof (ConfPassword));
       WsUpdateCycle = 1000;
       WsLastUpdate = millis ();
       WebConfigFile = "/usrFunctions.json";
+      LocalTimeZone = _Offset;
+      DaylightSavingTime = _DayLightSaving;
     }
 
     /**
@@ -63,7 +67,7 @@ namespace JCA {
      * @param _ConfUser Username for the System Sites
      * @param _ConfPassword Password for the System Sites
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, _ConfUser, _ConfPassword, JCA_IOT_SERVER_TIME_OFFSET) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, _ConfUser, _ConfPassword, JCA_IOT_SERVER_TIME_OFFSET, true) {
     }
 
     /**
@@ -73,7 +77,7 @@ namespace JCA {
      * @param _WebServerPort Port of the Webserver if not defined in Config
      * @param _Offset RTC Timeoffset in seconds
      */
-    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, unsigned long _Offset) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, JCA_IOT_SERVER_DEFAULT_CONF_USER, JCA_IOT_SERVER_DEFAULT_CONF_PASS, _Offset) {
+    Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, unsigned long _Offset, bool _DayLightSaving) : Server (_HostnamePrefix, _WebServerPort, _UdpListenerPort, JCA_IOT_SERVER_DEFAULT_CONF_USER, JCA_IOT_SERVER_DEFAULT_CONF_PASS, _Offset, _DayLightSaving) {
     }
 
     /**
@@ -91,7 +95,7 @@ namespace JCA {
      * Hostname-Prefix and Webserver-Port ist set to Default
      * @param _Offset RTC Timeoffset in seconds
      */
-    Server::Server (unsigned long _Offset) : Server (JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_SERVER_DEFAULT_WEBSERVERPORT, JCA_IOT_SERVER_DEFAULT_UDPLISTENERPORT, _Offset) {
+    Server::Server (unsigned long _Offset, bool _DayLightSaving) : Server (JCA_IOT_SERVER_DEFAULT_HOSTNAMEPREFIX, JCA_IOT_SERVER_DEFAULT_WEBSERVERPORT, JCA_IOT_SERVER_DEFAULT_UDPLISTENERPORT, _Offset, _DayLightSaving) {
     }
 
     /**
@@ -111,17 +115,17 @@ namespace JCA {
     bool Server::readConfig () {
       Debug.println (FLAG_CONFIG, false, ObjectName, __func__, "Read");
       JsonDocument JsonDoc;
-      // Get Wifi-Config from File5
-      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_CONFIGPATH, "r");
+      bool RetValue = true;
+      //------------------------------------------------------
+      // Read WiFi Config
+      //------------------------------------------------------
+      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_WIFICONFIGFILE, "r");
       if (ConfigFile) {
-        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config File Found");
+        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "WiFi - Config File Found");
         DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
         if (!Error) {
-          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Deserialize Done");
+          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "WiFi - Deserialize Done");
           JsonObject Config = JsonDoc.as<JsonObject> ();
-          //------------------------------------------------------
-          // Read WiFi Config
-          //------------------------------------------------------
           if (Config[JCA_IOT_SERVER_CONFKEY_WIFI].is<JsonObject> ()) {
             Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WiFi");
             JsonObject WiFiConfig = Config[JCA_IOT_SERVER_CONFKEY_WIFI].as<JsonObject> ();
@@ -168,37 +172,99 @@ namespace JCA {
               }
             }
           }
-          //------------------------------------------------------
-          // Read Server Config
-          //------------------------------------------------------
-          if (Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].is<JsonVariant> ()) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Hostname");
-            Hostname = Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].as<String> ();
-          }
-          if (Config[JCA_IOT_SERVER_CONFKEY_PORT].is<JsonVariant> ()) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebServerPort");
-            WebServerPort = Config[JCA_IOT_SERVER_CONFKEY_PORT].as<uint16_t> ();
-          }
-          if (Config[JCA_IOT_SERVER_CONFKEY_UDPPORT].is<JsonVariant> ()) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains UdpListenerPort");
-            UdpListenerPort = Config[JCA_IOT_SERVER_CONFKEY_UDPPORT].as<uint16_t> ();
-          }
-          if (Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].is<JsonVariant> ()) {
-            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebSocket Update");
-            WsUpdateCycle = Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].as<uint32_t> ();
-          }
-
         } else {
-          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "deserializeJson() failed: ");
+          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "WiFi - deserializeJson() failed: ");
           Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
-          return false;
+          RetValue = false;
         }
         ConfigFile.close ();
       } else {
-        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Config File NOT found");
-        return false;
+        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "WiFi - Config File NOT found");
+        RetValue = false;
       }
-      return true;
+      //------------------------------------------------------
+      // Read Server Config
+      //------------------------------------------------------
+      ConfigFile = LittleFS.open (JCA_IOT_SERVER_SYSTEMCONFIGFILE, "r");
+      if (ConfigFile) {
+        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "System - Config File Found");
+        DeserializationError Error = deserializeJson (JsonDoc, ConfigFile);
+        if (!Error) {
+          Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "System - Deserialize Done");
+          JsonObject Config = JsonDoc.as<JsonObject> ();
+          if (Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].is<JsonVariant> ()) {
+            Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Hostname: ");
+            Hostname = Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME].as<String> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, Hostname);
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_PORT].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebServerPort: ");
+            WebServerPort = Config[JCA_IOT_SERVER_CONFKEY_PORT].as<uint16_t> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, WebServerPort);
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_UDPPORT].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains UdpListenerPort: ");
+            UdpListenerPort = Config[JCA_IOT_SERVER_CONFKEY_UDPPORT].as<uint16_t> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, UdpListenerPort);
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains WebSocket Update: ");
+            WsUpdateCycle = Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE].as<uint32_t> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, WsUpdateCycle);
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_LOCALTIMEZONE].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains local Timezone: ");
+            LocalTimeZone = Config[JCA_IOT_SERVER_CONFKEY_LOCALTIMEZONE].as<uint32_t> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, LocalTimeZone);
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_DAYLIGHTSAVING].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains dayligthsaving: ");
+            DaylightSavingTime = Config[JCA_IOT_SERVER_CONFKEY_DAYLIGHTSAVING].as<bool> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, DaylightSavingTime);
+          }
+          if (Config[JCA_IOT_SERVER_CONFKEY_REBOOTCOUNTER].is<JsonVariant> ()) {
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Config contains Reboot counter: ");
+            RebootCounter = Config[JCA_IOT_SERVER_CONFKEY_REBOOTCOUNTER].as<uint16_t> ();
+            Debug.println (FLAG_CONFIG, true, ObjectName, __func__, RebootCounter);
+          }
+        } else {
+          Debug.print (FLAG_ERROR, true, ObjectName, __func__, "System - deserializeJson() failed: ");
+          Debug.println (FLAG_ERROR, true, ObjectName, __func__, Error.c_str ());
+          RetValue = false;
+        }
+        ConfigFile.close ();
+      } else {
+        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "System - Config File NOT found");
+        RetValue = false;
+      }
+      return RetValue;
+    }
+
+    /**
+     * @brief Get the last Sunday of the month
+     *
+     * @param _TmYear Year to check, in tm.struct format starting at 0 = 1900
+     * @param _TmMonth Month to check, im tm.struct format starting at 0 = January
+     * @return int Last Sunday of the month
+     */
+    int Server::getLastSunday(int _TmYear, int _TmMonth) {
+      // Create a timestruct of the selected Month, Starting by the last Day of the Month
+      tm CheckTime = {0};
+      CheckTime.tm_year = _TmYear;
+      CheckTime.tm_mon = _TmMonth;
+      CheckTime.tm_mday = 31;
+      CheckTime.tm_hour = 12;
+
+      // Normalize the timestruct to get the last day of the month
+      mktime(&CheckTime);
+
+      // Search for the last Sunday of the month
+      while (CheckTime.tm_wday != 0) {
+        CheckTime.tm_mday--;
+        mktime(&CheckTime);
+      }
+
+      return CheckTime.tm_mday;
     }
 
     /**
@@ -211,6 +277,8 @@ namespace JCA {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Init");
       // Read Config
       readConfig ();
+      RebootCounter++;
+      writeSystemConfig ();
 
       // WiFi Connection
       Connector.init ();
@@ -334,23 +402,87 @@ namespace JCA {
     void Server::setWebConfigFile (String _WebConfigFile) {
       WebConfigFile = _WebConfigFile;
     }
+    bool Server::writeSystemConfig () {
+      Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Write Config");
+      JsonDocument JsonDoc;
+      JsonObject Config = JsonDoc.to<JsonObject> ();
+      Config[JCA_IOT_SERVER_CONFKEY_HOSTNAME] = Hostname;
+      Config[JCA_IOT_SERVER_CONFKEY_PORT] = WebServerPort;
+      Config[JCA_IOT_SERVER_CONFKEY_UDPPORT] = UdpListenerPort;
+      Config[JCA_IOT_SERVER_CONFKEY_LOCALTIMEZONE] = LocalTimeZone;
+      Config[JCA_IOT_SERVER_CONFKEY_SOCKETUPDATE] = WsUpdateCycle;
+      Config[JCA_IOT_SERVER_CONFKEY_DAYLIGHTSAVING] = DaylightSavingTime;
+      Config[JCA_IOT_SERVER_CONFKEY_REBOOTCOUNTER] = RebootCounter;
+
+      File ConfigFile = LittleFS.open (JCA_IOT_SERVER_SYSTEMCONFIGFILE, "w");
+      if (ConfigFile) {
+        size_t WrittenBytes = serializeJson (JsonDoc, ConfigFile);
+        ConfigFile.close ();
+        Debug.print (FLAG_CONFIG, true, ObjectName, __func__, "Write Done [");
+        Debug.print (FLAG_CONFIG, true, ObjectName, __func__, WrittenBytes);
+        Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "]");
+        return true;
+      } else {
+        Debug.println (FLAG_ERROR, true, ObjectName, __func__, "Write Error");
+        return false;
+      }
+    }
     bool Server::timeIsValid () {
       return Rtc.getEpoch () > JCA_IOT_SERVER_TIME_VALID;
     }
-    tm Server::getTimeStruct () {
+    tm Server::getSystemTimeStruct () {
       return Rtc.getTimeStruct ();
     }
-    String Server::getTime () {
-      return Rtc.getTime ();
+    tm Server::getLocalTimeStruct () {
+      uint32_t LocalEpoch = getLocalTime ();
+      tm LocalTime;
+      gmtime_r ((time_t *)&LocalEpoch, &LocalTime);
+      return LocalTime;
     }
-    String Server::getDate () {
+    String Server::getTimeString () {
+      return Rtc.getTime (JCA_IOT_SERVER_TIME_TIMEFORMAT);
+    }
+    String Server::getDateString () {
       return Rtc.getTime (JCA_IOT_SERVER_TIME_DATEFORMAT);
     }
-    String Server::getTimeString (String _Format) {
+    String Server::getTimeFormated (String _Format, bool _LocalTime) {
+      tm TimeInfo;
+      char TimeString[51];
+      if (_LocalTime) {
+        TimeInfo = getLocalTimeStruct();
+      } else  {
+        TimeInfo = getSystemTimeStruct();
+      }
       if (_Format.length () == 0) {
-        return Rtc.getTime (JCA_IOT_SERVER_TIME_TIMEFORMAT);
+        strftime (TimeString, 50, JCA_IOT_SERVER_TIME_DATETIMEFORMAT, &TimeInfo);
       } else {
-        return Rtc.getTime (_Format);
+        strftime (TimeString, 50, _Format.c_str(), &TimeInfo);
+      }
+      return String (TimeString);
+    }
+    uint32_t Server::getSystemTime () {
+      return Rtc.getEpoch ();
+    }
+    uint32_t Server::getLocalTime () {
+      if (DaylightSavingTime) {
+        tm Time = Rtc.getTimeStruct ();
+        int Month = Time.tm_mon + 1;
+        int Day = Time.tm_mday;
+        int LastOfMarch = getLastSunday (Time.tm_year, 2);
+        int LastOfOctober = getLastSunday (Time.tm_year, 9);
+        if (Month < 3) {
+          return Rtc.getEpoch () + LocalTimeZone;
+        } else if (Month > 10) {
+          return Rtc.getEpoch () + LocalTimeZone;
+        } else if (Month == 3 && Day >= LastOfMarch) {
+          return Rtc.getEpoch () + LocalTimeZone + 3600;
+        } else if (Month == 10 && Day >= LastOfOctober) {
+          return Rtc.getEpoch () + LocalTimeZone;
+        } else {
+          return Rtc.getEpoch () + LocalTimeZone + 3600;
+        }
+      } else {
+        return Rtc.getEpoch () + LocalTimeZone;
       }
     }
   }
