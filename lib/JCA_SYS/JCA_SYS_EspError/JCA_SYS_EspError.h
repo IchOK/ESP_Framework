@@ -13,13 +13,15 @@
 #ifndef _JCA_SYS_ESPERROR_
 #define _JCA_SYS_ESPERROR_
 
-#include <esp_err.h>
+#ifdef ESP32
+  #include <esp_err.h>
+#endif
 #include <JCA_SYS_DebugOut.h>
 
 namespace JCA {
   namespace SYS {
-    bool EspErrorIsOK (esp_err_t _Code);
-    void EspErrorDebugOut (esp_err_t _Code, JCA::SYS::DEBUGOUT_FLAGS _Flag);
+    bool EspErrorIsOK (int _Code);
+    void EspErrorDebugOut (int _Code, JCA::SYS::DEBUGOUT_FLAGS _Flag);
   }
 }
 

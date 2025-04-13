@@ -37,7 +37,7 @@
 #endif
 #include <JCA_FNC_Charger.h>
 #include <JCA_FNC_ClockValues.h>
-#include <JCA_FNC_DigitalCounter.h>
+#include <JCA_FNC_DigitalIn.h>
 #include <JCA_FNC_DigitalOut.h>
 #include <JCA_FNC_DS18B20.h>
 #include <JCA_FNC_Feeder.h>
@@ -48,6 +48,8 @@
 #include <JCA_FNC_ValueAnalog.h>
 #include <JCA_FNC_ValueDigital.h>
 #include <JCA_FNC_DaySelect.h>
+#include <JCA_FNC_PIDController.h>
+#include <JCA_FNC_Valve2DPosImp.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -91,7 +93,7 @@ void addFunctionsToHandler () {
   #endif
   Charger::AddToHandler (Handler);
   ClockValues::AddToHandler(Handler);
-  DigitalCounter::AddToHandler(Handler);
+  DigitalIn::AddToHandler(Handler);
   DigitalOut::AddToHandler(Handler);
   DS18B20::AddToHandler(Handler);
   Feeder::AddToHandler(Handler);
@@ -102,6 +104,8 @@ void addFunctionsToHandler () {
   ValueAnalog::AddToHandler(Handler);
   ValueDigital::AddToHandler(Handler);
   DaySelect::AddToHandler(Handler);
+  PIDController::AddToHandler(Handler);
+  Valve2DPosImp::AddToHandler(Handler);
 }
 
 //-------------------------------------------------------

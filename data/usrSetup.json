@@ -1,37 +1,51 @@
 {
-  "hardware" : [],
-  "functions" : [
+  "hardware": [],
+  "functions": [
     {
       "type": "server",
       "name": "Server",
       "server": "IotServer"
-    }, {
+    },
+    {
       "type": "daySelect",
       "name": "TestTagesauswahl"
-    }, {
+    },
+    {
       "type": "valueDigital",
       "name": "TestDigital"
-    }, {
+    },
+    {
       "type": "valueAnalog",
       "name": "TestAnalogDefault",
       "unit": "°C"
-    }, {
+    },
+    {
       "type": "valueAnalog",
       "name": "TestAnalogDay",
       "unit": "°C"
-    }, {
+    },
+    {
       "type": "valueAnalog",
       "name": "TestAnalogMove",
       "unit": "°C"
-    }, {
+    },
+    {
       "type": "clockValues",
       "name": "TestSchaltuhr",
       "countClockPoints": 5
-    }, {
-      "type": "acDimmer",
-      "name": "TestDimmer",
-      "pinZero": 4,
-      "pinsOutput": [2,3,5]
+    },
+    {
+      "type": "digitalIn",
+      "name": "TestCounter",
+      "pin": 27,
+      "pullup": "up",
+      "mode": "count"
+    },
+    {
+      "type": "valve2DPosImp",
+      "name": "TestValve",
+      "pinOpen": 16,
+      "pinClose": 17
     }
   ],
   "links": [
@@ -39,66 +53,14 @@
       "type": "direct",
       "from": [
         {
-          "func": "TestAnalogDefault",
+          "func": "TestCounter",
           "tag": "Value"
         }
       ],
       "to": [
         {
-          "func": "TestDimmer",
-          "tag": "Value1"
-        }
-      ]
-    },
-    {
-      "type": "move",
-      "from": [
-        {
-          "func": "TestTagesauswahl",
-          "tag": "Value"
-        },
-        {
-          "func": "TestAnalogDay",
-          "tag": "Value"
-        }
-      ],
-      "to": [
-        {
-          "func": "TestDimmer",
-          "tag": "Value1"
-        }
-      ]
-    },
-    {
-      "type": "move",
-      "from": [
-        {
-          "func": "TestDigital",
-          "tag": "Value"
-        }, {
-          "func": "TestAnalogMove",
-          "tag": "Value"
-        }
-      ],
-      "to": [
-        {
-          "func": "TestDimmer",
-          "tag": "Value1"
-        }
-      ]
-    },
-    {
-      "type": "direct",
-      "from": [
-        {
-          "func": "TestDimmer",
-          "tag": "Value2"
-        }
-      ],
-      "to": [
-        {
-          "func": "TestDimmer",
-          "tag": "Value3"
+          "func": "TestValve",
+          "tag": "PulseCount"
         }
       ]
     }

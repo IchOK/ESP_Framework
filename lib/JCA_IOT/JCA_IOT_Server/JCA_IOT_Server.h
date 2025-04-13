@@ -41,22 +41,23 @@
 
 #ifdef ESP32
   #include <AsyncTCP.h>
-  #include <WiFi.h>
+  #include <AsyncUDP.h>
   #include <ESPmDNS.h>
   #include <FS.h>
   #include <SPIFFS.h>
   #include <Update.h>
+  #include <WiFi.h>
 #elif defined(ESP8266)
   #define SPIFFS LittleFS
+  #include "ESPAsyncUDP.h"
   #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
   #include <ESP8266mDNS.h>
+  #include <ESPAsyncTCP.h>
 #elif defined(TARGET_RP2040)
   #include <WebServer.h>
   #include <WiFi.h>
 #endif
 
-#include <AsyncUDP.h>
 #include <ESPAsyncWebServer.h>
 
 #if __has_include("ArduinoJson.h")

@@ -16,11 +16,19 @@ namespace JCA {
   namespace SYS {
     
     bool EspErrorIsOK (esp_err_t _Code) {
-      return _Code == ESP_OK;
+      #ifdef ESP32
+        return _Code == ESP_OK;
+      #else
+        return _Code == 0;
+      #endif
 
     }
     void EspErrorDebugOut (esp_err_t _Code, JCA::SYS::DEBUGOUT_FLAGS _Flag) {
-      Debug.println (_Flag, true, "EspError", __func__, esp_err_to_name (_Code));
+      #ifdef ESP32
+        Debug.println (_Flag, true, "EspError", __func__, esp_err_to_name (_Code));
+      #else
+        Debug.println (_Flag, true, "EspError", __func__, "Error Code: " + String (_Code));
+      #endif
     }
   }
 }
