@@ -52,7 +52,6 @@ namespace JCA {
       uint16_t RebootCounter;
 
       // Daten
-      bool SaveConfig;
       uint32_t TimeSync;
       String SystemTime;
       String LocalTime;
@@ -61,6 +60,7 @@ namespace JCA {
       ServerLink (JCA::IOT::Server *_ServerRef, String _Name);
       ~ServerLink () {;};
       void update (struct tm &_Time);
+      
 
       // Function Handler Statics
       static void AddToHandler (JCA::IOT::FuncHandler &_Handler);

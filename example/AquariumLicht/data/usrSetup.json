@@ -5,33 +5,43 @@
       "type": "server",
       "name": "Server",
       "server": "IotServer"
-    }, {
+    },
+    {
       "type": "clockValues",
-      "name": "Tageslich - A1",
+      "name": "Infrarot - A1",
       "countClockPoints": 5
     },
     {
       "type": "clockValues",
-      "name": "UV-Lampe - A2",
+      "name": "Tageslicht - A2",
       "countClockPoints": 5
     },
     {
       "type": "clockValues",
-      "name": "IR-Lampe - A3",
+      "name": "Ultraviolett - A3",
       "countClockPoints": 5
-    }, {
+    },
+    {
+      "type": "valueDigital",
+      "name": "Autowerte"
+    },
+    {
       "type": "acDimmer",
       "name": "LichtDimmer",
       "pinZero": 4,
-      "pinsOutput": [8,11,12]
+      "pinsOutput": [8, 11, 12]
     }
   ],
   "links": [
     {
-      "type": "direct",
+      "type": "move",
       "from": [
         {
-          "func": "Tageslich - A1",
+          "func": "Autowerte",
+          "tag": "Value"
+        },
+        {
+          "func": "Infrarot - A1",
           "tag": "Value"
         }
       ],
@@ -43,10 +53,14 @@
       ]
     },
     {
-      "type": "direct",
+      "type": "move",
       "from": [
         {
-          "func": "UV-Lampe - A2",
+          "func": "Autowerte",
+          "tag": "Value"
+        },
+        {
+          "func": "Tageslicht - A2",
           "tag": "Value"
         }
       ],
@@ -58,10 +72,14 @@
       ]
     },
     {
-      "type": "direct",
+      "type": "move",
       "from": [
         {
-          "func": "IR-Lampe - A3",
+          "func": "Autowerte",
+          "tag": "Value"
+        },
+        {
+          "func": "Ultraviolett - A3",
           "tag": "Value"
         }
       ],

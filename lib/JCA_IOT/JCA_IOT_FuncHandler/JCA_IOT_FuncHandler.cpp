@@ -544,7 +544,7 @@ namespace JCA {
     void FuncHandler::getValues (JsonObject &_Functions) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       for (int16_t i = 0; i < Functions.size (); i++) {
-        JsonObject Function = _Functions[Functions[i]->getName()].to<JsonObject>();
+        JsonObject Function = _Functions[Functions[i]->getName ()].to<JsonObject> ();
         Functions[i]->addValues(Function);
       }
     }

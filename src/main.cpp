@@ -203,7 +203,7 @@ void setup () {
   DebugFlags |= FLAG_ERROR;
   DebugFlags |= FLAG_SETUP;
   DebugFlags |= FLAG_CONFIG;
-  DebugFlags |= FLAG_TRAFFIC;
+  // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
