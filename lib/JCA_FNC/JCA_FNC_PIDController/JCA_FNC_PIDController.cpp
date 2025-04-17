@@ -30,10 +30,10 @@ namespace JCA {
       Tags.push_back (new TagFloat ("OutputMin", "Minimaler Stellwert", "", false, TagUsage_T::UseConfig, &OutputMin, _OutputUnit));
       Tags.push_back (new TagFloat ("OutputMax", "Maximaler Stellwert", "", false, TagUsage_T::UseConfig, &OutputMax, _OutputUnit));
 
-      Tags.push_back (new TagFloat ("ProcessVar", "Istwert", "", true, TagUsage_T::UseData, &ProcessVar, _ProcessUnit));
-      Tags.push_back (new TagFloat ("Setpoint", "Sollwert", "", true, TagUsage_T::UseData, &Setpoint, _ProcessUnit));
+      Tags.push_back (new TagFloat ("ProcessVar", "Istwert", "", false, TagUsage_T::UseData, &ProcessVar, _ProcessUnit));
+      Tags.push_back (new TagFloat ("Setpoint", "Sollwert", "", false, TagUsage_T::UseData, &Setpoint, _ProcessUnit));
       Tags.push_back (new TagBool ("ManualSetpointMode", "Handmodus für den Sollwert", "", false, TagUsage_T::UseData, &ManualSetpointMode, "HAND", "AUTO"));
-      Tags.push_back (new TagFloat ("ManualSetpoint", "Manueller Sollwert", "", true, TagUsage_T::UseData, &ManualSetpoint, _ProcessUnit));
+      Tags.push_back (new TagFloat ("ManualSetpoint", "Manueller Sollwert", "", false, TagUsage_T::UseData, &ManualSetpoint, _ProcessUnit));
       Tags.push_back (new TagBool ("ManualOutputMode", "Handmodus für den Stellwert", "", false, TagUsage_T::UseData, &ManualOutputMode, "HAND", "AUTO"));
       Tags.push_back (new TagFloat ("Value", "Stellwert", "", true, TagUsage_T::UseData, &Value, _OutputUnit));
 

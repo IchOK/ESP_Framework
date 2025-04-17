@@ -1,0 +1,28 @@
+@media screen and (orientation: portrait) and (min-width: 576px) {
+  :root {
+    --font-size: 34px;
+    --spacing: 0.5rem;
+    --typography-spacing-vertical: 0rem;
+  }
+}
+@media screen and (orientation: portrait) and (min-width: 768px) {
+  :root {
+    --font-size: 36px;
+    --spacing: 0.5rem;
+    --typography-spacing-vertical: 0rem;
+  }
+}
+@media screen and (orientation: portrait) and (min-width: 992px) {
+  :root {
+    --font-size: 38px;
+    --spacing: 0.5rem;
+    --typography-spacing-vertical: 0rem;
+  }
+}
+@media screen and (orientation: portrait) and (min-width: 1200px) {
+  :root {
+    --font-size: 40px;
+    --spacing: 0.5rem;
+    --typography-spacing-vertical: 0rem;
+  }
+}

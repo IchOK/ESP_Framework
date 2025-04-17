@@ -1,0 +1,9 @@
+{
+  "hostname": "Heizung-Wohnbereich",
+  "port": 80,
+  "udtPort": 81,
+  "localTimeZone": 3600,
+  "wsUpdate": 1000,
+  "dayLightSaving": true,
+  "rebootCounter": 0
+}
