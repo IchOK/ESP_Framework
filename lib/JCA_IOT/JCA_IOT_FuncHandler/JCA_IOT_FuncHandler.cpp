@@ -294,14 +294,15 @@ namespace JCA {
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       // Open Output File
-      File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_WRITE, true);
+      File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_WRITE);
+//      File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_WRITE, true);
       if (!FuncFile) {
         RetValue = FuncPatchRet_T::fileOpen;
       } else {
         bool InitDone = false;
         // Create Object with all Functions inside
         FuncFile.println ("{");
-        for (int16_t i = 0; i < Functions.size (); i++) {
+        for (size_t i = 0; i < Functions.size (); i++) {
           Functions[i]->writeFunction (FuncFile, InitDone);
         }
         FuncFile.println ("}");
@@ -511,9 +512,9 @@ namespace JCA {
      * @return int16_t position of the Function or -1 if not found
      */
     int16_t FuncHandler::getFuncIndex (String _Name) {
-      for (int16_t i = 0; i < Functions.size (); i++) {
+      for (size_t i = 0; i < Functions.size (); i++) {
         if (Functions[i]->getName () == _Name) {
-          return i;
+          return (int16_t)i;
         }
       }
       // Tag was not found
@@ -543,7 +544,7 @@ namespace JCA {
      */
     void FuncHandler::getValues (JsonObject &_Functions) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
-      for (int16_t i = 0; i < Functions.size (); i++) {
+      for (size_t i = 0; i < Functions.size (); i++) {
         JsonObject Function = _Functions[Functions[i]->getName ()].to<JsonObject> ();
         Functions[i]->addValues(Function);
       }

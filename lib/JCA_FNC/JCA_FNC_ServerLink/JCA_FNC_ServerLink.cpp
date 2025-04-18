@@ -109,9 +109,9 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
       String ServerName;
-      JCA::IOT::Server *ServerRef = static_cast<JCA::IOT::Server *> (GetSetupHardwareRef (SetupTagRefName, ServerName, Done, _Setup, _Log, _Hardware));
+      JCA::IOT::Server *ServerRef = static_cast<JCA::IOT::Server *> (GetSetupHardwareRef (SetupTagRefName, ServerName, Done, _Setup, Log, _Hardware));
 
       if (Done) {
         _Functions.push_back (new ServerLink(ServerRef, Name));

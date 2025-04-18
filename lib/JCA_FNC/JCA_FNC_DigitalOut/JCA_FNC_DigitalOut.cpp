@@ -97,8 +97,8 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t PinOutput = GetSetupValueUINT8(SetupTagOutputPin, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t PinOutput = GetSetupValueUINT8(SetupTagOutputPin, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new DigitalOut(PinOutput, Name));

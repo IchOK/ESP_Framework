@@ -450,11 +450,11 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t PinCharge = GetSetupValueUINT8 (SetupTagChargePin, Done, _Setup, _Log);
-      uint8_t PinDischarge = GetSetupValueUINT8 (SetupTagDischargePin, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t PinCharge = GetSetupValueUINT8 (SetupTagChargePin, Done, _Setup, Log);
+      uint8_t PinDischarge = GetSetupValueUINT8 (SetupTagDischargePin, Done, _Setup, Log);
       String OutputName;
-      JCA::SYS::PwmOutput *Output = static_cast<JCA::SYS::PwmOutput *> (GetSetupHardwareRef (SetupTagRefName, OutputName, Done, _Setup, _Log, _Hardware));
+      JCA::SYS::PwmOutput *Output = static_cast<JCA::SYS::PwmOutput *> (GetSetupHardwareRef (SetupTagRefName, OutputName, Done, _Setup, Log, _Hardware));
 
       if (Done) {
         _Functions.push_back (new Charger (PinCharge, PinDischarge, Name, Output));

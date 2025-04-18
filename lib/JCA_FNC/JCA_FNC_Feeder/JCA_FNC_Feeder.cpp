@@ -139,10 +139,10 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject> ();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t PinEnable = GetSetupValueUINT8 (SetupTagEnablePin, Done, _Setup, _Log);
-      uint8_t PinStep = GetSetupValueUINT8 (SetupTagStepPin, Done, _Setup, _Log);
-      uint8_t PinDir = GetSetupValueUINT8 (SetupTagDirPin, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t PinEnable = GetSetupValueUINT8 (SetupTagEnablePin, Done, _Setup, Log);
+      uint8_t PinStep = GetSetupValueUINT8 (SetupTagStepPin, Done, _Setup, Log);
+      uint8_t PinDir = GetSetupValueUINT8 (SetupTagDirPin, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new Feeder (PinEnable, PinStep, PinDir, Name));

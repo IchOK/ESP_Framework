@@ -20,8 +20,14 @@
 
 namespace JCA {
   namespace SYS {
-    bool EspErrorIsOK (int _Code);
-    void EspErrorDebugOut (int _Code, JCA::SYS::DEBUGOUT_FLAGS _Flag);
+    #ifdef ESP32
+      bool EspErrorIsOK (esp_err_t _Code);
+      void EspErrorDebugOut (esp_err_t _Code, JCA::SYS::DEBUGOUT_FLAGS _Flag);
+    #else
+      bool EspErrorIsOK (int _Code);
+      void EspErrorDebugOut (int _Code, JCA::SYS::DEBUGOUT_FLAGS _Flag);
+    #endif
+
   }
 }
 

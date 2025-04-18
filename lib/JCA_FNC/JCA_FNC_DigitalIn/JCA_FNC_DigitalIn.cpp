@@ -52,9 +52,13 @@ namespace JCA {
       LastStableState = LOW;
       if (_Pullup == "up") {
         pinMode (Pin, INPUT_PULLUP);
-      } else if (_Pullup == "down") {
-        pinMode (Pin, INPUT_PULLDOWN);
-      } else {
+      }
+      #if !defined(ESP8266)
+        else if (_Pullup == "down") {
+          pinMode (Pin, INPUT_PULLDOWN);
+        }
+      #endif
+      else {
         pinMode (Pin, INPUT);
       }
       if (Mode == MODE_COUNT) {
@@ -122,14 +126,20 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t PinInput = GetSetupValueUINT8 (SetupTagInputPin, Done, _Setup, _Log);
-      String Pullup = GetSetupValueString (SetupTagPullup, Done, _Setup, _Log);
-      String Mode = GetSetupValueString (SetupTagMode, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t PinInput = GetSetupValueUINT8 (SetupTagInputPin, Done, _Setup, Log);
+      String Pullup = GetSetupValueString (SetupTagPullup, Done, _Setup, Log);
+      String Mode = GetSetupValueString (SetupTagMode, Done, _Setup, Log);
+
+      #if defined(ESP8266)
+        if (Pullup == "down") {
+          Log["error"] = "Invalid Pullup value: " + Pullup;
+        }
+      #endif
 
       if (Done) {
         _Functions.push_back (new DigitalIn (PinInput, Pullup, Mode, Name));
-        Log["done"] = Name + " (InputPin:" + String (PinInput) + ")";
+        Log["done"] = Name + " (InputPin:" + String (PinInput) + " ,Pullup:" + Pullup + " ,Mode:" + Mode + ")";
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;

@@ -166,10 +166,10 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject> ();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
       String TwoWireName;
-      TwoWire *TwoWireRef = static_cast<TwoWire *> (GetSetupHardwareRef (SetupTagRefName, TwoWireName, Done, _Setup, _Log, _Hardware));
-      uint8_t Addr = GetSetupValueUINT8 (SetupTagAddr, Done, _Setup, _Log);
+      TwoWire *TwoWireRef = static_cast<TwoWire *> (GetSetupHardwareRef (SetupTagRefName, TwoWireName, Done, _Setup, Log, _Hardware));
+      uint8_t Addr = GetSetupValueUINT8 (SetupTagAddr, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new INA219 (TwoWireRef, Addr, Name));

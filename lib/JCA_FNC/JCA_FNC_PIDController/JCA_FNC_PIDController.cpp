@@ -167,9 +167,9 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject> ();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      String ProcessUnit = GetSetupValueString (SetupTagProcessUnit, Done, _Setup, _Log);
-      String OutputUnit = GetSetupValueString (SetupTagOutputUnit, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      String ProcessUnit = GetSetupValueString (SetupTagProcessUnit, Done, _Setup, Log);
+      String OutputUnit = GetSetupValueString (SetupTagOutputUnit, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new PIDController (Name, ProcessUnit, OutputUnit));
