@@ -187,6 +187,8 @@ namespace JCA {
         break;
 
       case State_T::INPOSITION:
+        digitalWrite (PinClose, LOW);
+        digitalWrite (PinOpen, LOW);
         if (SetpointPulse > PositionPulse + PositionPulseHyst) {
           NextState = State_T::OPENING;
         } else if (SetpointPulse < PositionPulse - PositionPulseHyst) {
@@ -229,6 +231,11 @@ namespace JCA {
           }
         }
         break;
+
+      case State_T::FAULT:
+        digitalWrite (PinClose, LOW);
+        digitalWrite (PinOpen, LOW);
+        break;
       }
 
       if (CurrentState != NextState) {
@@ -264,9 +271,9 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject> ();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t PinOpen = GetSetupValueUINT8 (SetupTagOpenPin, Done, _Setup, _Log);
-      uint8_t PinClose = GetSetupValueUINT8 (SetupTagClosePin, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t PinOpen = GetSetupValueUINT8 (SetupTagOpenPin, Done, _Setup, Log);
+      uint8_t PinClose = GetSetupValueUINT8 (SetupTagClosePin, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new Valve2DPosImp (PinOpen, PinClose, Name));

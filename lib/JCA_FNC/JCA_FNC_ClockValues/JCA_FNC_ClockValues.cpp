@@ -130,8 +130,8 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString(JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t CountClockPoints = GetSetupValueUINT8(SetupTagCountClockPoints, Done, _Setup, _Log);
+      String Name = GetSetupValueString(JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t CountClockPoints = GetSetupValueUINT8(SetupTagCountClockPoints, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new ClockValues (CountClockPoints, Name));

@@ -66,11 +66,12 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      String Unit = GetSetupValueString (SetupTagUnit, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      String Unit = GetSetupValueString (SetupTagUnit, Done, _Setup, Log);
 
       if (Done) {
         _Functions.push_back (new ValueAnalog(Name, Unit));
+        Log["done"] = Name + "(Unit: " + Unit + ")";
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;

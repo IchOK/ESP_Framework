@@ -1,5 +1,6 @@
 import os
 from SCons.Script import Import
+from pathlib import Path
 
 Import("env")
 
@@ -23,7 +24,7 @@ def run_nm_analysis(source, target, env):
         return
 
     # Vollständigen Pfad zur nm-Executable ermitteln
-    toolchain_dir = os.path.join(os.environ["USERPROFILE"], ".platformio", "packages", f"toolchain-{nm_tool.split('-elf')[0]}")
+    toolchain_dir = os.path.join(Path.home(), ".platformio", "packages", f"toolchain-{nm_tool.split('-elf')[0]}")
     nm_path = os.path.join(toolchain_dir, "bin", nm_tool)
 
     # Überprüfen, ob die nm-Executable existiert

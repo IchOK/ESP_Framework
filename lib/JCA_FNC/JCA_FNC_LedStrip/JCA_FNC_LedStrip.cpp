@@ -124,12 +124,12 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject> ();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
-      uint8_t Pin = GetSetupValueUINT8 (SetupTagOutputPin, Done, _Setup, _Log);
-      uint8_t NumLeds = GetSetupValueUINT8 (SetupTagNumLeds, Done, _Setup, _Log);
-      String LedTypeName = GetSetupValueString (SetupTagPixelType, Done, _Setup, _Log);
-      uint16_t LedSpeed = GetSetupValueUINT16 (SetupTagPixelSpeed, Done, _Setup, _Log);
-      neoPixelType Type;
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
+      uint8_t Pin = GetSetupValueUINT8 (SetupTagOutputPin, Done, _Setup, Log);
+      uint8_t NumLeds = GetSetupValueUINT8 (SetupTagNumLeds, Done, _Setup, Log);
+      String LedTypeName = GetSetupValueString (SetupTagPixelType, Done, _Setup, Log);
+      uint16_t LedSpeed = GetSetupValueUINT16 (SetupTagPixelSpeed, Done, _Setup, Log);
+      neoPixelType Type = 0;
       switch (LedSpeed)
       {
       case 400:

@@ -145,9 +145,9 @@ namespace JCA {
       bool Done = true;
       JsonObject Log = _Log[SetupTagType].to<JsonObject>();
 
-      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, _Log);
+      String Name = GetSetupValueString (JCA_IOT_FUNCHANDLER_SETUP_NAME, Done, _Setup, Log);
       String OneWireName;
-      OneWire *OneWireRef = static_cast<OneWire *> (GetSetupHardwareRef(SetupTagRefName, OneWireName, Done, _Setup, _Log, _Hardware));
+      OneWire *OneWireRef = static_cast<OneWire *> (GetSetupHardwareRef(SetupTagRefName, OneWireName, Done, _Setup, Log, _Hardware));
 
       if (Done) {
         _Functions.push_back (new DS18B20(OneWireRef, Name));

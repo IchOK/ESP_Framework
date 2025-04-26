@@ -22,6 +22,14 @@
 #include <map>
 #include <vector>
 
+// Add LittleFS constants if not exists
+#ifndef FILE_READ
+  #define FILE_READ "r"
+#endif
+#ifndef FILE_WRITE
+  #define FILE_WRITE "w"
+#endif
+
 #include <JCA_FNC_Parent.h>
 #include <JCA_SYS_DebugOut.h>
 

@@ -93,7 +93,7 @@ namespace JCA {
       }
 
       if (ObjectKey.length () > 0) {
-        for (int16_t i = 0; i < Tags.size (); i++) {
+        for (size_t i = 0; i < Tags.size (); i++) {
           if (Tags[i]->Usage & _FilterUsage) {
             if (Counter == 0) {
               _FuncFile.println ("\"" + ObjectKey + "\":[");
