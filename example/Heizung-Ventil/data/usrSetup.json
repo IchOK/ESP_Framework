@@ -1,0 +1,155 @@
+{
+  "hardware": [],
+  "functions": [
+    {
+      "type": "valueDigital",
+      "name": "Heizung Festwert"
+    },
+    {
+      "type": "valueDigital",
+      "name": "Heizung Absenkung"
+    },
+    {
+      "type": "valueAnalog",
+      "name": "Festwert",
+      "unit": "°C"
+    },
+    {
+      "type": "valueAnalog",
+      "name": "Absenkung",
+      "unit": "°C"
+    },
+    {
+      "type": "ds18b20",
+      "name": "Ruecklauf Temperatur",
+      "refName": "??oneWirw??"
+    },
+    {
+      "type": "server",
+      "name": "Server",
+      "server": "IotServer"
+    },
+    {
+      "type": "daySelect",
+      "name": "Kurvenauswahl 2"
+    },
+    {
+      "type": "clockValues",
+      "name": "Standard Verlauf",
+      "countClockPoints": 5
+    },
+    {
+      "type": "clockValues",
+      "name": "Verlauf 2",
+      "countClockPoints": 5
+    },
+    {
+      "type": "pidController",
+      "name": "Regler",
+      "inUnit": "°C",
+      "outUnit": "%"
+    },
+    {
+      "type": "digitalIn",
+      "name": "Ventil Drehgeber",
+      "pin": 27,
+      "pullup": "up",
+      "mode": "count"
+    },
+    {
+      "type": "valve2DPosImp",
+      "name": "Ventil",
+      "pinOpen": 16,
+      "pinClose": 17
+    }
+  ],
+  "links": [
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Ruecklauf Temperatur",
+          "tag": "Temp"
+        }
+      ],
+      "to": [
+        {
+          "func": "Regler",
+          "tag": "ProcessVar"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Standard Verlauf",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Regler",
+          "tag": "Setpoint"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "Kurvenauswahl 2",
+          "tag": "Value"
+        },
+        {
+          "func": "Verlauf 2",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Regler",
+          "tag": "Setpoint"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "Heizung Festwert",
+          "tag": "Value"
+        },
+        {
+          "func": "Festwert",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Regler",
+          "tag": "Setpoint"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "Heizung Absenkung",
+          "tag": "Value"
+        },
+        {
+          "func": "Absenkung",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Regler",
+          "tag": "Setpoint"
+        }
+      ]
+    }
+  ]
+}

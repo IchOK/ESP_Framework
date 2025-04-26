@@ -11,9 +11,10 @@
  */
 
 // Firmware
-#include "FS.h"
 #include <Arduino.h>
+#include <FS.h>
 #include <LittleFS.h>
+#include <OneWire.h>
 #include <Wire.h>
 #include <time.h>
 
@@ -25,43 +26,88 @@
 #endif
 
 // Basics
-#include <JCA_IOT_Webserver.h>
+#include <JCA_IOT_Server.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_SYS_PwmOutput.h>
+#include <JCA_IOT_FuncHandler.h>
 
 // Project function
+#ifdef ESP32
+  #include <JCA_FNC_AcDimmers.h>
+#endif
+#include <JCA_FNC_Charger.h>
+#include <JCA_FNC_ClockValues.h>
+#include <JCA_FNC_DigitalIn.h>
 #include <JCA_FNC_DigitalOut.h>
+#include <JCA_FNC_DS18B20.h>
+#include <JCA_FNC_Feeder.h>
+#include <JCA_FNC_INA219.h>
 #include <JCA_FNC_LedStrip.h>
-#include <JCA_FNC_Parent.h>
+#include <JCA_FNC_Level.h>
+#include <JCA_FNC_ServerLink.h>
+#include <JCA_FNC_ValueAnalog.h>
+#include <JCA_FNC_ValueDigital.h>
+#include <JCA_FNC_DaySelect.h>
+#include <JCA_FNC_PIDController.h>
+#include <JCA_FNC_Valve2DPosImp.h>
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
 using namespace JCA::FNC;
-#define STAT_PIN LED_BUILTIN
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#define CONFIGPATH "/usrConfig.json"
-//-------------------------------------------------------
-// WS2812
-//-------------------------------------------------------
-#define WS2812_PIN 13      // Output-Pin WS2812 [D7]
-#define WS2812_CNT 72
-
-LedStrip Strip (WS2812_PIN, WS2812_CNT, NEO_GRB + NEO_KHZ800, "LED-Strip");
-
-//-------------------------------------------------------
-// Charger
-//-------------------------------------------------------
-#define SPOT_DO 16        // Output-Pin AC-Switch [D0]
-
-DigitalOut Spot (SPOT_DO, "LED-Spot");
+#define STATE_LED_PIN -1           // disable Status-LED
+//#define STATE_LED_PIN LED_BUILTIN  // set Status to onborad LED
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // JCA IOT Functions
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Webserver Server;
+JCA::IOT::Server IotServer;
+FuncHandler Handler ("handler");
+
+//-------------------------------------------------------
+// Hardware
+//-------------------------------------------------------
+//const uint8_t TwoWireNum = 1;
+//const int TwoWireSDA = -1;
+//const int TwoWireSCL = -1;
+//PwmOutput HwPWM;
+//OneWire HwOneWire;
+//TwoWire HwTwoWire = TwoWire(TwoWireNum);
+void linkHardware() {
+  Handler.HardwareMapping.insert (std::pair<String, void *> ("IotServer", &IotServer));
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("PWM", &HwPWM));
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("OneWire", &HwOneWire));
+  //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
+  //Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
+}
+
+//-------------------------------------------------------
+// Functions
+//-------------------------------------------------------
+void addFunctionsToHandler () {
+  #ifdef ESP32
+    AcDimmers::AddToHandler (Handler);
+  #endif
+  Charger::AddToHandler (Handler);
+  ClockValues::AddToHandler(Handler);
+  DigitalIn::AddToHandler(Handler);
+  DigitalOut::AddToHandler(Handler);
+  DS18B20::AddToHandler(Handler);
+  Feeder::AddToHandler(Handler);
+  INA219::AddToHandler(Handler);
+  LedStrip::AddToHandler(Handler);
+  Level::AddToHandler(Handler);
+  ServerLink::AddToHandler (Handler);
+  ValueAnalog::AddToHandler(Handler);
+  ValueDigital::AddToHandler(Handler);
+  DaySelect::AddToHandler(Handler);
+  PIDController::AddToHandler(Handler);
+  Valve2DPosImp::AddToHandler(Handler);
+}
+
 //-------------------------------------------------------
 // System Functions
 //-------------------------------------------------------
@@ -69,29 +115,21 @@ void cbSystemReset () {
   ESP.restart ();
 }
 void cbSaveConfig () {
-  File ConfigFile = LittleFS.open (CONFIGPATH, "w");
-  bool ElementInit = false;
-  ConfigFile.println ("{\"elements\":[");
-  Server.writeSetup (ConfigFile, ElementInit);
-  Spot.writeSetup (ConfigFile, ElementInit);
-  Strip.writeSetup (ConfigFile, ElementInit);
-  ConfigFile.println ("]}");
-  ConfigFile.close ();
+  Handler.patch ("savevalues");
 }
 
 void getAllValues (JsonVariant &_Out) {
-  JsonObject Elements = _Out.createNestedObject (Parent::JsonTagElements);
-  Server.getValues (Elements);
-  Spot.getValues (Elements);
-  Strip.getValues (Elements);
+  JsonObject Elements = _Out[FuncParent::JsonTagElements].to<JsonObject>();
+  Handler.getValues(Elements);
 }
 
 void setAll (JsonVariant &_In) {
-  if (_In.containsKey (Parent::JsonTagElements)) {
-    JsonArray Elements = (_In.as<JsonObject> ())[Parent::JsonTagElements].as<JsonArray> ();
-    Server.set (Elements);
-    Spot.set (Elements);
-    Strip.set (Elements);
+  if (_In[FuncParent::JsonTagElements].is<JsonObject>()) {
+    JsonObject Elements = _In[FuncParent::JsonTagElements].as<JsonObject>();
+    Handler.setValues(Elements);
+  }
+  if (_In["mode"].is<JsonVariant> ()) {
+    Handler.patch (_In["mode"].as<String> ());
   }
 }
 //-------------------------------------------------------
@@ -115,15 +153,30 @@ void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
 }
 
 void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
-  _Out["message"] = "PUT not Used";
+  _Out["freeHeap"] = ESP.getFreeHeap ();
+  _Out["functions"] = Handler.getFuncCount();
+  _Out["links"] = Handler.getFuncCount ();
 }
 
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
-  cbSaveConfig ();
+  if (_In["mode"].is<JsonVariant> ()) {
+    String Mode = _In["mode"].as<String> ();
+    _Out["mode"] = Mode;
+    _Out["ret"] = Handler.patch (Mode);
+  } else {
+    _Out["ret"] = "mode Missing";
+  }
+  if (_In["reboot"].is<JsonVariant> ()) {
+    if (_In["reboot"].as<bool>()) {
+      ESP.restart ();
+    }
+  }
 }
 
 void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
-  _Out["message"] = "DELETE not used";
+  String Mode = "delete";
+  _Out["mode"] = Mode;
+  _Out["ret"] = Handler.patch (Mode);
 }
 
 //-------------------------------------------------------
@@ -143,17 +196,14 @@ void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
 //  Setup
 // #######################################################
 void setup () {
-  DynamicJsonDocument JDoc (10000);
-
-  pinMode (STAT_PIN, OUTPUT);
-  digitalWrite (STAT_PIN, LOW);
+  JsonDocument JDoc;
 
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
   DebugFlags |= FLAG_ERROR;
   DebugFlags |= FLAG_SETUP;
   DebugFlags |= FLAG_CONFIG;
-  DebugFlags |= FLAG_TRAFFIC;
+  // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
@@ -174,51 +224,39 @@ void setup () {
   }
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  // JCA IOT Functions - WiFiConnect
+  // JCA IOT Functions
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // System
-  Server.init ();
-  Server.onSystemReset (cbSystemReset);
-  Server.onSaveConfig (cbSaveConfig);
+  IotServer.init ();
+  IotServer.setStatePin (STATE_LED_PIN);
+  IotServer.onSystemReset (cbSystemReset);
+  IotServer.onSaveConfig (cbSaveConfig);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-System Done");
   // Web
-  Server.onWebHomeReplace (cbWebHomeReplace);
-  Server.onWebConfigReplace (cbWebConfigReplace);
+  IotServer.onWebHomeReplace (cbWebHomeReplace);
+  IotServer.onWebConfigReplace (cbWebConfigReplace);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-Web Done");
   // RestAPI
-  Server.onRestApiGet (cbRestApiGet);
-  Server.onRestApiPost (cbRestApiPost);
-  Server.onRestApiPut (cbRestApiPut);
-  Server.onRestApiPatch (cbRestApiPatch);
+  IotServer.onRestApiGet (cbRestApiGet);
+  IotServer.onRestApiPost (cbRestApiPost);
+  IotServer.onRestApiPut (cbRestApiPut);
+  IotServer.onRestApiPatch (cbRestApiPatch);
+  IotServer.onRestApiDelete (cbRestApiDelete);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-RestAPI Done");
   // Web-Socket
-  Server.onWsData (cbWsData);
-  Server.onWsUpdate (cbWsUpdate);
+  IotServer.onWsData (cbWsData);
+  IotServer.onWsUpdate (cbWsUpdate);
+  Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-WebSocket Done");
+
+  // Function-Handler
+  addFunctionsToHandler();
+  linkHardware();
+  Handler.patch ("init");
+  Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Custom Code
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  //-------------------------------------------------------
-  // Init Elements
-  //-------------------------------------------------------
-  Strip.init();
-
-  //-------------------------------------------------------
-  // Read Config File
-  //-------------------------------------------------------
-  File ConfigFile = LittleFS.open (CONFIGPATH, "r");
-  if (ConfigFile) {
-    Debug.println (FLAG_CONFIG, false, "main", "setup", "Config File Found");
-    DeserializationError Error = deserializeJson (JDoc, ConfigFile);
-    if (!Error) {
-      Debug.println (FLAG_CONFIG, false, "main", "setup", "Deserialize Done");
-      JsonVariant InConfig = JDoc.as<JsonVariant> ();
-      setAll (InConfig);
-    } else {
-      Debug.print (FLAG_ERROR, false, "main", "setup", "deserializeJson() failed: ");
-      Debug.println (FLAG_ERROR, false, "main", "setup", Error.c_str ());
-    }
-    ConfigFile.close ();
-  } else {
-    Debug.println (FLAG_ERROR, false, "main", "setup", "Config File NOT found");
-  }
 }
 
 // #######################################################
@@ -226,15 +264,7 @@ void setup () {
 // #######################################################
 int8_t LastSeconds = 0;
 void loop () {
-  Server.handle ();
-  tm CurrentTime = Server.getTimeStruct ();
-  if (LastSeconds != CurrentTime.tm_sec) {
-    if (Debug.print (FLAG_LOOP, false, "main", "loop", "Current Time: ")) {
-      Debug.println (FLAG_LOOP, false, "main", "loop", Server.getTimeString (""));
-    }
-    LastSeconds = CurrentTime.tm_sec;
-  }
-
-  Spot.update (CurrentTime);
-  Strip.update (CurrentTime);
+  IotServer.handle ();
+  tm CurrentTime = IotServer.getLocalTimeStruct ();
+  Handler.update(CurrentTime);
 }

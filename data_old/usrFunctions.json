@@ -1,0 +1,257 @@
+{
+  "ExampleCharger": {
+    "config": [
+      {
+        "name": "AccuVoltageMax",
+        "text": "Maximale Akku Ladespannung",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "V"
+      },
+      {
+        "name": "AccuVoltageMin",
+        "text": "Grenzwert Akku Entladen",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "V"
+      },
+      {
+        "name": "AccuChargeCurrent",
+        "text": "Maximaler Akku Ladestrom",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "A"
+      },
+      {
+        "name": "AccuDischargeVoltage",
+        "text": "Minimale Akku Entladespannung",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "V"
+      },
+      {
+        "name": "AccuDischargeCurrent",
+        "text": "Maximaler Akku Entladestrom",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "A"
+      },
+      {
+        "name": "ChargeEndCurrent",
+        "text": "",
+        "type": 2,
+        "readOnly": 0,
+        "comment": "Laden Beendet Strom",
+        "unit": "A"
+      },
+      {
+        "name": "DischargeEndCurrent",
+        "text": "Genzwert Akku Entladen",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "A"
+      },
+      {
+        "name": "WaitDischarge",
+        "text": "Wartezeit für Entlade",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "s"
+      },
+      {
+        "name": "RechargeVoltage",
+        "text": "Spannungs Nachladen",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "V"
+      }
+    ],
+    "data": [
+      {
+        "name": "DoCheck",
+        "text": "Akku Prüfung aktiv",
+        "type": 1,
+        "readOnly": 0,
+        "on": "EIN",
+        "off": "AUS"
+      },
+      {
+        "name": "DoCharge",
+        "text": "Akku Laden aktiv",
+        "type": 1,
+        "readOnly": 0,
+        "on": "EIN",
+        "off": "AUS"
+      },
+      {
+        "name": "Fault",
+        "text": "Fehler aktiv",
+        "type": 1,
+        "readOnly": 1,
+        "on": "EIN",
+        "off": "AUS"
+      },
+      {
+        "name": "AccuVoltage",
+        "text": "Akku Spannung",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "V"
+      },
+      {
+        "name": "Current",
+        "text": "Akku Strom",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "A"
+      },
+      {
+        "name": "ChargedAH",
+        "text": "Geladener Strom",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "AH"
+      },
+      {
+        "name": "ChargedWH",
+        "text": "Geladene Leistung",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "WH"
+      },
+      {
+        "name": "DischargedAH",
+        "text": "Entladener Strom",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "AH"
+      },
+      {
+        "name": "DischargedWH",
+        "text": "Entledene Leistung",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "WH"
+      },
+      {
+        "name": "DischargeVoltage",
+        "text": "Entladespannung",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "V"
+      },
+      {
+        "name": "ChargeSP",
+        "text": "PWM Laden",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "%"
+      },
+      {
+        "name": "DischargeSP",
+        "text": "PWM Entladen",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "%"
+      },
+      {
+        "name": "ChargeState",
+        "text": "Status",
+        "type": 101,
+        "readOnly": 1,
+        "list": [
+          {
+            "i": "0",
+            "v": "Inaktiv"
+          },
+          {
+            "i": "1",
+            "v": "Laden Strom"
+          },
+          {
+            "i": "2",
+            "v": "Laden Spannung"
+          },
+          {
+            "i": "3",
+            "v": "Warten Laden"
+          },
+          {
+            "i": "4",
+            "v": "Warten Entladen"
+          },
+          {
+            "i": "5",
+            "v": "Entlade"
+          },
+          {
+            "i": "6",
+            "v": "Fehler"
+          }
+        ]
+      }
+    ]
+  },
+  "ExampleDimmer": {
+    "config": [
+      {
+        "name": "Delay1",
+        "text": "Verzögerung 1",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "us"
+      },
+      {
+        "name": "Delay2",
+        "text": "Verzögerung 2",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "us"
+      },
+      {
+        "name": "Delay3",
+        "text": "Verzögerung 3",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "us"
+      },
+      {
+        "name": "ZeroWidth",
+        "text": "Nullpunkt länge",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "us"
+      },
+      {
+        "name": "Period",
+        "text": "Dauer einer Sinuswelle",
+        "type": 2,
+        "readOnly": 1,
+        "unit": "us"
+      }
+    ],
+    "data": [
+      {
+        "name": "Value1",
+        "text": "Wert 1",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "%"
+      },
+      {
+        "name": "Value2",
+        "text": "Wert 2",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "%"
+      },
+      {
+        "name": "Value3",
+        "text": "Wert 3",
+        "type": 2,
+        "readOnly": 0,
+        "unit": "%"
+      }
+    ]
+  }
+}

@@ -1,0 +1,86 @@
+/**
+ * @file JCA_TAG_TAGUInt32.h
+ * @author JCA (https://github.com/ichok)
+ * @brief Collection of Tag-Classes to create an Element
+ * @version 1.1
+ * @date 2024-04-07
+ *
+ * Copyright Jochen Cabrera 2024
+ * Apache License
+ *
+ */
+
+#include <JCA_TAG_TagUInt32.h>
+using namespace JCA::SYS;
+
+namespace JCA {
+  namespace TAG {
+    /**
+     * @brief Construct a new TagUInt32::TagUInt32 object
+     *
+     * @param _Name Name of the Element (in JSON)
+     * @param _Text Text showen on the website
+     * @param _Comment Comment showen on the website if nedded
+     * @param _ReadOnly set the Tag to read only, can only write by the Function-Object
+     * @param _Usage Usage-Type to sort the Tag on teh website
+     * @param _Value Pointer to the Value-Datapoint inside the Function-Object
+     * @param _Unit Unit of the Tag, showen on the website
+     * @param _CB Optional Callback-Function, if defined it will execute after setting the new Value
+     */
+    TagUInt32::TagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint32_t *_Value, String _Unit, SetCallback _CB, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage, _CB) {
+      Unit = _Unit;
+    }
+
+    TagUInt32::TagUInt32 (String _Name, String _Text, String _Comment, bool _ReadOnly, TagUsage_T _Usage, uint32_t *_Value, String _Unit, TagTypes_T _Type)
+        : TagParent (_Name, _Text, _Comment, _ReadOnly, _Value, _Type, _Usage) {
+      Unit = _Unit;
+    }
+
+    /**
+     * @brief Create the complete Json-String of the Tag-Data
+     *
+     * @return String Json-String
+     */
+    String TagUInt32::writeTag () {
+      String SetupTag = writeTagBase ();
+      SetupTag += ",\"" + String (JCA_TAG_TAGS_JsonUnit) + "\":\"" + Unit + "\"";
+      return SetupTag;
+    }
+
+    /**
+     * @brief Get the Value into an JsonVariant
+     *
+     * @param _Value Reference to the JsonVariant to which the value is to be written
+     * @return true Value was successfully written to _Value
+     * @return false something failed
+     */
+    bool TagUInt32::getValue (JsonVariant _Value) {
+      return _Value.set (*(static_cast<uint32_t *> (Value)));
+    }
+
+    /**
+     * @brief Set the value of the Tag
+     *
+     * @param _Value Value that should be set
+     * @return true Tag-Value was successfully set
+     * @return false something failed
+     */
+    bool TagUInt32::setValue (JsonVariant _Value) {
+      *(static_cast<uint32_t *> (Value)) = _Value.as<uint32_t> ();
+      if (afterSetCB) {
+        afterSetCB ();
+      }
+      return true;
+    }
+
+    /**
+     * @brief Create a key-value-pair of the Tag inside an JsonObject
+     *
+     * @param _Values Reference to tha JsonObject
+     */
+    void TagUInt32::addValue (JsonObject &_Values) {
+      _Values[Name] = *(static_cast<uint32_t *> (Value));
+    }
+  }
+}

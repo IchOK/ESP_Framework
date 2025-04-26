@@ -1,0 +1,10 @@
+{
+  "wifi": {
+    "ssid": "Home Sweet Home 1",
+    "pass": "",
+    "dhcp": true,
+    "ip": "0.0.0.0",
+    "gateway": "0.0.0.0",
+    "subnet": "0.0.0.0"
+  }
+}

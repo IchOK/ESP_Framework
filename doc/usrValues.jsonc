@@ -1,0 +1,9 @@
+{
+  // Name of the Function
+  "ExampleFunction" : {
+    // Key-Value-Pairs for every Tag inside the Function
+    "ExampleTag_1": "Value_1",
+    "ExampleTag_2": "Value_2"
+  },
+  "MaybeOneMore" : {}
+}

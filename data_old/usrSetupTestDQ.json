@@ -1,0 +1,26 @@
+{
+  "hardware" : [],
+  "functions" : [
+    {
+      "type": "digitalOut",
+      "name": "Triac1",
+      "pinOutput": 11
+    },
+    {
+      "type": "digitalOut",
+      "name": "Triac2",
+      "pinOutput": 12
+    },
+    {
+      "type": "digitalOut",
+      "name": "Triac3",
+      "pinOutput": 8
+    },
+    {
+      "type": "digitalOut",
+      "name": "LedOnboard",
+      "pinOutput": 15
+    }
+  ],
+  "links" : []
+}

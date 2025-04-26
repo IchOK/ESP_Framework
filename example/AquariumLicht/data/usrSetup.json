@@ -1,0 +1,94 @@
+{
+  "hardware" : [],
+  "functions" : [
+    {
+      "type": "server",
+      "name": "Server",
+      "server": "IotServer"
+    },
+    {
+      "type": "clockValues",
+      "name": "Infrarot - A1",
+      "countClockPoints": 5
+    },
+    {
+      "type": "clockValues",
+      "name": "Tageslicht - A2",
+      "countClockPoints": 5
+    },
+    {
+      "type": "clockValues",
+      "name": "Ultraviolett - A3",
+      "countClockPoints": 5
+    },
+    {
+      "type": "valueDigital",
+      "name": "Autowerte"
+    },
+    {
+      "type": "acDimmer",
+      "name": "LichtDimmer",
+      "pinZero": 4,
+      "pinsOutput": [8, 11, 12]
+    }
+  ],
+  "links": [
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "Autowerte",
+          "tag": "Value"
+        },
+        {
+          "func": "Infrarot - A1",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "LichtDimmer",
+          "tag": "Value1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "Autowerte",
+          "tag": "Value"
+        },
+        {
+          "func": "Tageslicht - A2",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "LichtDimmer",
+          "tag": "Value2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "from": [
+        {
+          "func": "Autowerte",
+          "tag": "Value"
+        },
+        {
+          "func": "Ultraviolett - A3",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "LichtDimmer",
+          "tag": "Value3"
+        }
+      ]
+    }
+  ]
+}

@@ -78,9 +78,6 @@ function createViewTag(ViewElement, DataTag) {
     case 1:
       createViewTagInputBoolean(ViewTagValue, DataTag, false);
       break;
-    case 54:
-      createViewTagInputBoolean(ViewTagValue, DataTag, true);
-      break;
     case 2:
     case 3:
     case 4:
@@ -88,19 +85,15 @@ function createViewTag(ViewElement, DataTag) {
     case 6:
     case 7:
     case 8:
-    case 51:
-    case 52:
-    case 53:
-    case 55:
-      createViewTagInputNumber(ViewTagValue, DataTag);
+      createViewTagInputNumber(ViewTagValue, DataTag, false);
       break;
 
     case 9:
-      createViewTagInputString(ViewTagValue, DataTag);
+      createViewTagInputString(ViewTagValue, DataTag, false);
       break;
 
     default:
-      createViewTagInputString(ViewTagValue, DataTag);
+      createViewTagInputString(ViewTagValue, DataTag, false);
       break;
   }
   // add Tag to Element
@@ -108,81 +101,33 @@ function createViewTag(ViewElement, DataTag) {
   return ViewTag;
 }
 
-function createViewTagInputNumber(ViewTagValue, DataTag) {
+function createViewTagInputNumber(ViewTagValue, DataTag, IsCommand) {
   // create Number-Input Field
   let ValueInput = document.createElement("input");
-  let AddUnit = false;
   ValueInput.setAttribute("name", "value");
   ValueInput.setAttribute("style", "padding-right:54px;text-align:right;");
   ValueInput.setAttribute("step", "any");
-  switch (DataTag.type) {
-    case 51:  // Time-Picker
-      ValueInput.type = "time";
-      break;
-    case 52:  // Date-Time Picker
-      ValueInput.type = "datetime-local";
-      break;
-    case 53:  // Color-Picker
-      ValueInput.type = "color";
-      break;
-    default:  // Numeric Input
-      ValueInput.type = "number";
-      AddUnit = "unit" in DataTag;
-      break;
-    case 55: // Weekday-Buttons
-      ValueInput.type = "number";
-      ValueInput.setAttribute("hidden-type", "weekbuttons");
-      ValueInput.style.display = "none";
-      ValueInput.setAttribute("onchange", "onChange(this)");
-      ViewTagValue.appendChild(ValueInput);
-
-      // Add Weekdas buttons
-      const days = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-      days.forEach((day, index) => {
-        let dayButton = document.createElement("button");
-        dayButton.type = "button";
-        dayButton.innerText = day;
-        dayButton.setAttribute("data-bit", index);
-        dayButton.style.margin = "0 5px";
-        dayButton.classList = "primary outline";
-
-        // Event-Listener for button click
-        dayButton.addEventListener("click", function () {
-          let currentValue = parseInt(ValueInput.value, 10) || 0;
-          let bitMask = 1 << index;
-
-          // invert the bit
-          if (currentValue & bitMask) {
-            currentValue &= ~bitMask;
-          } else {
-            currentValue |= bitMask;
-          }
-
-          // update hidden value and trigger change event
-          ValueInput.value = currentValue;
-          ValueInput.dispatchEvent(new Event("change"));
-        });
-
-        ViewTagValue.appendChild(dayButton);
-      });
-      break;
-  }
+  ValueInput.type = "number";
   ValueInput.disabled = DataTag.readOnly;
   if (DataTag.readOnly == false) {
     ValueInput.setAttribute("onchange", "onChange(this)");
   }
   ViewTagValue.appendChild(ValueInput);
   // create Unit Field
-  if (AddUnit) {
-    let ValueUnit = document.createElement("span");
-    ValueUnit.setAttribute("name", "unit");
-    ValueUnit.setAttribute("style", "margin-left:-50px;text-align:left;");
-    ValueUnit.innerText = DataTag.unit;
-    ViewTagValue.appendChild(ValueUnit);
+  if ("unit" in DataTag) {
+    if (DataTag.unit == "COLOR") {
+      ValueInput.type = "color";
+    } else {
+      let ValueUnit = document.createElement("span");
+      ValueUnit.setAttribute("name", "unit");
+      ValueUnit.setAttribute("style", "margin-left:-50px;text-align:left;");
+      ValueUnit.innerText = DataTag.unit;
+      ViewTagValue.appendChild(ValueUnit);
+    }
   }
 }
 
-function createViewTagInputString(ViewTagValue, DataTag) {
+function createViewTagInputString(ViewTagValue, DataTag, IsCommand) {
   // - create String-Input Field
   let ValueInput = document.createElement("input");
   ValueInput.setAttribute("name", "value");
@@ -209,28 +154,13 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
   } else {
     ValueInput.setAttribute("textOn", DataTag.on);
     ValueInput.setAttribute("textOff", DataTag.off);
-    ValueInput.classList = "primary outline"
+    ValueInput.classList = "secondary outline"
   }
   ValueInput.disabled = DataTag.readOnly;
   if (DataTag.readOnly == false) {
     ValueInput.setAttribute("onclick", "onClick(this)");
   }
   ViewTagValue.appendChild(ValueInput);
-}
-
-function timestampToDatetimeLocal(timestamp) {
-  // Timestamp in Millisekunden umwandeln
-  const date = new Date(timestamp * 1000);
-
-  // Jahr, Monat, Tag, Stunden und Minuten extrahieren
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Monate von 0-11
-  const day = date.getDate().toString().padStart(2, '0');
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-
-  // Format für datetime-local: YYYY-MM-DDTHH:mm
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 function updateViewTag(ViewTag, DataTagValue) {
@@ -245,39 +175,12 @@ function updateViewTag(ViewTag, DataTagValue) {
         ValueInput.className = "primary outline";
       }
     }
-  } else if (ValueInput.type === "number" && ValueInput.getAttribute("hidden-type") === "weekbuttons") {
-    // Weekday-Buttons
-    const dayButtons = ViewTag.querySelectorAll("button[data-bit]");
-    let currentValue = parseInt(DataTagValue, 10) || 0;
-
-    dayButtons.forEach((button) => {
-      let bitIndex = parseInt(button.getAttribute("data-bit"), 10);
-      let bitMask = 1 << bitIndex;
-
-      if (currentValue & bitMask) {
-        button.className = "primary";
-      } else {
-        button.className = "primary outline";
-      }
-    });
-    ValueInput.value = currentValue;
   } else {
     if (ValueInput !== document.activeElement) {
-      switch (ValueInput.type) {
-        case "color":
-          ValueInput.value = intToRgb(DataTagValue);
-          break;
-        case "time":
-          const hours = Math.floor(DataTagValue / 3600).toString().padStart(2, '0');
-          const minutes = Math.floor((DataTagValue % 3600) / 60).toString().padStart(2, '0');
-          ValueInput.value = hours + ":" + minutes;
-          break;
-        case "datetime-local":
-          ValueInput.value = timestampToDatetimeLocal(DataTagValue);
-          break;
-        default:
-          ValueInput.value = DataTagValue;
-          break;
+      if (ValueInput.type == "color") {
+        ValueInput.value = intToRgb(DataTagValue);
+      } else {
+        ValueInput.value = DataTagValue;
       }
     }
   }
@@ -285,21 +188,10 @@ function updateViewTag(ViewTag, DataTagValue) {
 
 function getOnChangeObject (ValueInput) {
   var Value;
-  switch (ValueInput.type) {
-    case "color":
-      Value = rgbToInt(ValueInput.value);
-      break;
-    case "time":
-      const [hours, minutes] = ValueInput.value.split(":");
-      Value = (parseInt(hours) * 60 + parseInt(minutes)) * 60;
-      break;
-    case "datetime-local":
-      const date = new Date(ValueInput.value);
-      Value = Math.floor(date.getTime() / 1000);
-      break;
-    default:
-      Value = ValueInput.value;
-      break;
+  if (ValueInput.type == "color") {
+    Value = rgbToInt(ValueInput.value);
+  } else {
+    Value = ValueInput.value;
   }
   let ViewTag = ValueInput.parentElement.parentElement;
   let ViewElement = ViewTag.parentElement;
