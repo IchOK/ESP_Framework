@@ -29,10 +29,10 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", false, TagUsage_T::UseConfig, &DelayAutoOff, "Min", nullptr));
+      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DelayAutoOff, "Min", nullptr));
 
-      Tags.push_back (new TagBool ("Value", "Eingeschaltet", "", false, TagUsage_T::UseData, &Value, "EIN", "AUS"));
-      Tags.push_back(new TagUInt16("DelayCounter", "Verzögerung Zähler", "", true, TagUsage_T::UseData, &DelayCounter, "Min"));
+      Tags.push_back (new TagBool ("Value", "Eingeschaltet", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Value, "EIN", "AUS"));
+      Tags.push_back(new TagUInt16("DelayCounter", "Verzögerung Zähler", "", TagAccessType_T::Read, TagUsage_T::UseData, &DelayCounter, "Min"));
       // Init Data
       DelayAutoOff = 0;
       Pin = _Pin;

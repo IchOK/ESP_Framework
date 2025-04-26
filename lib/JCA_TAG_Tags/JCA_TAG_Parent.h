@@ -2,8 +2,9 @@
  * @file JCA_TAG_TAGs.h
  * @author JCA (https://github.com/ichok)
  * @brief Collection of Tag-Classes to create an Element
- * @version 1.0
+ * @version 1.2
  * @date 2024-04-07
+ * - [1.2] 2025-04-26: Change ReadOnly to AccessType
  *
  * Copyright Jochen Cabrera 2024
  * Apache License
@@ -64,6 +65,13 @@ namespace JCA {
       GetAll = 0xff        ///< get all tags
     };
 
+    enum TagAccessType_T : uint8_t {
+      Read = 0x01,
+      Write = 0x02,
+      ReadWrite = 0x03,
+      Save = 0x04
+    };
+
     typedef std::function<void (void)> SetCallback;
     class TagParent {
       protected:
@@ -77,16 +85,16 @@ namespace JCA {
         String Name;
         String Text;
         String Comment;
-        bool ReadOnly;
+        TagAccessType_T Access;
         void* Value;
 
-        TagParent (String _Name, String _Text, String _Comment, bool _ReadOnly, void* _Value, TagTypes_T _Type, TagUsage_T _Usage, SetCallback _CB);
-        TagParent (String _Name, String _Text, String _Comment, bool _ReadOnly, void *_Value, TagTypes_T _Type, TagUsage_T _Usage);
+        TagParent (String _Name, String _Text, String _Comment, TagAccessType_T _Access, void *_Value, TagTypes_T _Type, TagUsage_T _Usage, SetCallback _CB);
+        TagParent (String _Name, String _Text, String _Comment, TagAccessType_T _Access, void *_Value, TagTypes_T _Type, TagUsage_T _Usage);
         virtual ~TagParent() {;};
         virtual String writeTag () { return ""; };
-        virtual bool getValue (JsonVariant _Value) { return false; };
-        virtual bool setValue(JsonVariant _Value) {return false; };
-        virtual void addValue (JsonObject &_Values) {; };
+        virtual bool getValue (JsonVariant _Value, TagAccessType_T _Access) { return false; };
+        virtual bool setValue(JsonVariant _Value, TagAccessType_T _Access) {return false; };
+        virtual void addValue (JsonObject &_Values, TagAccessType_T _Access) { ; };
     };
   }
 }

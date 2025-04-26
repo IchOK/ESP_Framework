@@ -30,14 +30,14 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagInt16 ("RawEmpty", "Rohwert Leer", "", false, TagUsage_T::UseConfig, &RawEmpty, "#"));
-      Tags.push_back (new TagInt16 ("RawFull", "Rohwert Voll", "", false, TagUsage_T::UseConfig, &RawFull, "#"));
-      Tags.push_back (new TagFloat ("AlarmLevel", "Alarm Grenzwer", "", false, TagUsage_T::UseConfig, &AlarmLevel, "%"));
-      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagInt16 ("RawEmpty", "Rohwert Leer", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &RawEmpty, "#"));
+      Tags.push_back (new TagInt16 ("RawFull", "Rohwert Voll", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &RawFull, "#"));
+      Tags.push_back (new TagFloat ("AlarmLevel", "Alarm Grenzwer", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AlarmLevel, "%"));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new TagFloat ("Value", "Niveau", "", true, TagUsage_T::UseData, &Value, "%"));
-      Tags.push_back (new TagBool ("Alarm", "Alarm", "", true, TagUsage_T::UseData, &Alarm, "EIN", "AUS"));
-      Tags.push_back (new TagInt16 ("RawValue", "Rohwert", "", true, TagUsage_T::UseData, &RawValue, "#"));
+      Tags.push_back (new TagFloat ("Value", "Niveau", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, "%"));
+      Tags.push_back (new TagBool ("Alarm", "Alarm", "", TagAccessType_T::Read, TagUsage_T::UseData, &Alarm, "EIN", "AUS"));
+      Tags.push_back (new TagInt16 ("RawValue", "Rohwert", "", TagAccessType_T::Read, TagUsage_T::UseData, &RawValue, "#"));
 
       RawEmpty = 0;
       RawFull = 1024;

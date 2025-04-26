@@ -27,9 +27,9 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("Days", "Tage", "0 = Sonntag", false, TagUsage_T::UseConfig, &Days, "", TagTypes_T::TypeDaySelect));
+      Tags.push_back (new TagUInt16 ("Days", "Tage", "0 = Sonntag", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &Days, "", TagTypes_T::TypeDaySelect));
 
-      Tags.push_back (new TagBool ("Value", "Eingeschaltet", "", true, TagUsage_T::UseData, &Value, "EIN", "AUS"));
+      Tags.push_back (new TagBool ("Value", "Eingeschaltet", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, "EIN", "AUS"));
       // Init Data
       Days = 0;
       Value = false;

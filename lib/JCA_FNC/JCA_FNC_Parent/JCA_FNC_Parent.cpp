@@ -217,23 +217,25 @@ namespace JCA {
     /**
      * @brief Set Data, Config and execute Commands
      * Check if the Element in the Array and pass the Tag-Arrays to the Element Data
-     * @param _Elements Array of Elements that maybe const Tags for the Element
+     * @param _Function Array of Elements that maybe contains Tags for the Element
+     * @param _Access way to access the tag
      */
-    void FuncParent::setValues (JsonObject &_Function) {
+    void FuncParent::setValues (JsonObject &_Function, TagAccessType_T _Access) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
       for (JsonPair JsonTag : _Function) {
-        setTagValueByIndex(getTagIndex(JsonTag.key().c_str()), JsonTag.value());
+        setTagValueByIndex(getTagIndex(JsonTag.key().c_str()), JsonTag.value(), _Access);
       }
     }
 
     /**
      * @brief Add key-value-pairs for all tags to a JsonObject
-     * @param _Values Object the to add the tags
+     * @param _Function Object the to add the tags
+     * @param _Access way to access the tag
      */
-    void FuncParent::addValues (JsonObject &_Function) {
+    void FuncParent::addValues (JsonObject &_Function, TagAccessType_T _Access) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
       for (size_t i = 0; i < Tags.size (); i++) {
-        Tags[i]->addValue (_Function);
+        Tags[i]->addValue (_Function, _Access);
       }
     }
 
@@ -254,36 +256,37 @@ namespace JCA {
     }
 
     /**
+     * @brief Set the value of a tag inside the Tags-Vector
+     *
+     * @param _Index Position of the tag
+     * @param _Value value that should be set
+     * @param _Access way to access the tag
+     * @return true tag set successful
+     * @return false something failed
+     */
+    bool FuncParent::setTagValueByIndex (int16_t _Index, JsonVariant _Value, TagAccessType_T _Access) {
+      if (_Index < 0) {
+        return false;
+      } else {
+        return Tags[_Index]->setValue (_Value, _Access);
+      }
+    }
+
+    /**
      * @brief Get the value of a tag inside the Tags-Vector
      *
      * @param _Index Position of the tag
      * @param _Value datapoint to write the value
+     * @param _Access way to access the tag
      * @return true tag get successful
      * @return false something failed
      */
-    bool FuncParent::getTagValueByIndex (int16_t _Index, JsonVariant _Value) {
+    bool FuncParent::getTagValueByIndex (int16_t _Index, JsonVariant _Value, TagAccessType_T _Access) {
       if (_Index < 0) {
         return false;
+      } else {
+        return Tags[_Index]->getValue (_Value, _Access);
       }
-      return Tags[_Index]->getValue (_Value);
-    }
-
-    /**
-     * @brief Set the value of a tag inside the Tags-Vector
-     * 
-     * @param _Index Position of the tag
-     * @param _Value value that should be set
-     * @return true tag set successful
-     * @return false something failed
-     */
-    bool FuncParent::setTagValueByIndex (int16_t _Index, JsonVariant _Value) {
-      if (_Index < 0) {
-        return false;
-      }
-      if (Tags[_Index]->ReadOnly) {
-        return false;
-      }
-      return Tags[_Index]->setValue (_Value);
     }
   }
 }

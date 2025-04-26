@@ -126,8 +126,8 @@ namespace JCA {
       String patch(String _Command);
 
       int16_t getFuncIndex (String _Name);
-      void setValues (JsonObject &_Functions);
-      void getValues (JsonObject &_Functions);
+      void setValues (JsonObject &_Functions, TagAccessType_T _Access);
+      void getValues (JsonObject &_Functions, TagAccessType_T _Access);
       int16_t getLinkCount();
       int16_t getFuncCount();
     };

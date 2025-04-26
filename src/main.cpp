@@ -120,13 +120,13 @@ void cbSaveConfig () {
 
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out[FuncParent::JsonTagElements].to<JsonObject>();
-  Handler.getValues(Elements);
+  Handler.getValues (Elements, JCA::TAG::TagAccessType_T::Read);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In[FuncParent::JsonTagElements].is<JsonObject>()) {
     JsonObject Elements = _In[FuncParent::JsonTagElements].as<JsonObject>();
-    Handler.setValues(Elements);
+    Handler.setValues (Elements, JCA::TAG::TagAccessType_T::Write);
   }
   if (_In["mode"].is<JsonVariant> ()) {
     Handler.patch (_In["mode"].as<String> ());

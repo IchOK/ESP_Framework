@@ -328,7 +328,7 @@ namespace JCA {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       JsonDocument ValueDoc;
       JsonObject Values = ValueDoc[JCA::FNC::FuncParent::JsonTagElements].to<JsonObject>(); //.as<JsonObject>();
-      getValues (Values);
+      getValues (Values, TagAccessType_T::Save);
       File ValuesFile = LittleFS.open (JCA_IOT_FILE_VALUES, FILE_WRITE);
       if (!ValuesFile) {
         Debug.print (FLAG_ERROR, true, Name, __func__, "Failed to open File for write : ");
@@ -364,7 +364,7 @@ namespace JCA {
           RetValue = FuncPatchRet_T::jsonSyntax;
         } else if (ValueDoc[JCA::FNC::FuncParent::JsonTagElements].is<JsonObject>()) {
           JsonObject Values = ValueDoc[JCA::FNC::FuncParent::JsonTagElements].as<JsonObject> ();
-          setValues (Values);
+          setValues (Values, TagAccessType_T::Save);
         }
         ValuesFile.close ();
       }
@@ -391,10 +391,10 @@ namespace JCA {
             JsonVariant Value = LinkDoc.to<JsonVariant> ();
             FuncLinkPair_T Input = Link->getInput(0);
 
-            if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value)) {
+            if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value, TagAccessType_T::Read)) {
               for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount(); OutputIndex++) {
                 FuncLinkPair_T Output = Link->getOutput (OutputIndex);
-                Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value);
+                Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value, TagAccessType_T::Write);
               }
             }
           }
@@ -407,13 +407,13 @@ namespace JCA {
             FuncLinkPair_T Selector = Link->getInput (0);
             FuncLinkPair_T Input = Link->getInput (1);
 
-            if (Functions[Selector.Func]->getTagValueByIndex (Selector.Tag, Value)) {
+            if (Functions[Selector.Func]->getTagValueByIndex (Selector.Tag, Value, TagAccessType_T::Read)) {
               bool SelectorValue = Value.as<bool> ();
               if (SelectorValue) {
-                if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value)) {
+                if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value, TagAccessType_T::Read)) {
                   for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount (); OutputIndex++) {
                     FuncLinkPair_T Output = Link->getOutput (OutputIndex);
-                    Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value);
+                    Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value, TagAccessType_T::Write);
                   }
                 }
               }
@@ -526,13 +526,13 @@ namespace JCA {
      * 
      * @param _Functions REF to a Values-Object in format like the usrValues.json
      */
-    void FuncHandler::setValues( JsonObject &_Functions) {
+    void FuncHandler::setValues (JsonObject &_Functions, TagAccessType_T _Access) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       for (JsonPair Function : _Functions) {
         int16_t FuncIndex = getFuncIndex (Function.key ().c_str ());
         if (FuncIndex >= 0) {
           JsonObject FuncValues = Function.value ().as<JsonObject> ();
-          Functions[FuncIndex]->setValues(FuncValues);
+          Functions[FuncIndex]->setValues(FuncValues, _Access);
         }
       }
     }
@@ -542,11 +542,11 @@ namespace JCA {
      * 
      * @param _Functions REF where the data will returned
      */
-    void FuncHandler::getValues (JsonObject &_Functions) {
+    void FuncHandler::getValues (JsonObject &_Functions, TagAccessType_T _Access) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
       for (size_t i = 0; i < Functions.size (); i++) {
         JsonObject Function = _Functions[Functions[i]->getName ()].to<JsonObject> ();
-        Functions[i]->addValues(Function);
+        Functions[i]->addValues(Function, _Access);
       }
     }
 

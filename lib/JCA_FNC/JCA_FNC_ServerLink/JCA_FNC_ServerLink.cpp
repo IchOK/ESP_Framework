@@ -30,17 +30,17 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagString ("Hostname", "Hostname", "Reboot erforderlich", false, TagUsage_T::UseConfig, &Hostname, std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", false, TagUsage_T::UseConfig, &WsUpdateCycle, "ms", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt16 ("WebServerPort", "Webserver Port", "Reboot erforderlich", false, TagUsage_T::UseConfig, &WebServerPort, "", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt16 ("UdpListenerPort", "UDP Port", "Reboot erforderlich", false, TagUsage_T::UseConfig, &UdpListenerPort, "", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt32 ("LocalTimeZone", "Zeitzone", "", false, TagUsage_T::UseConfig, &LocalTimeZone, "s", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagBool ("DaylightSavingTime", "Sommerzeit", "", false, TagUsage_T::UseConfig, &DaylightSavingTime, "EIN", "AUS", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt16 ("RebootCounter", "Reboot-Counter", "", false, TagUsage_T::UseConfig, &RebootCounter, "", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", false, TagUsage_T::UseConfig, &TimeSync, "",std::bind (&ServerLink::setTimeCB, this), TagTypes_T::TypeDateTime));
-      Tags.push_back (new TagString ("UtcTime", "UTC-Zeit", "", true, TagUsage_T::UseConfig, &SystemTime));
+      Tags.push_back (new TagString ("Hostname", "Hostname", "Reboot erforderlich", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &Hostname, std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt32 ("WsUpdateCycle", "Websocket Updatezyklus", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WsUpdateCycle, "ms", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt16 ("WebServerPort", "Webserver Port", "Reboot erforderlich", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WebServerPort, "", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt16 ("UdpListenerPort", "UDP Port", "Reboot erforderlich", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &UdpListenerPort, "", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt32 ("LocalTimeZone", "Zeitzone", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &LocalTimeZone, "s", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagBool ("DaylightSavingTime", "Sommerzeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DaylightSavingTime, "EIN", "AUS", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt16 ("RebootCounter", "Reboot-Counter", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &RebootCounter, "", std::bind (&ServerLink::setServerDataCB, this)));
+      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &TimeSync, "",std::bind (&ServerLink::setTimeCB, this), TagTypes_T::TypeDateTime));
+      Tags.push_back (new TagString ("UtcTime", "UTC-Zeit", "", TagAccessType_T::Read, TagUsage_T::UseConfig, &SystemTime));
 
-      Tags.push_back (new TagString ("LocalTime", "Lolak-Zeit", "", true, TagUsage_T::UseData, &LocalTime));
+      Tags.push_back (new TagString ("LocalTime", "Lolak-Zeit", "", TagAccessType_T::Read, TagUsage_T::UseData, &LocalTime));
 
       // Init Data
       ServerRef = _ServerRef;

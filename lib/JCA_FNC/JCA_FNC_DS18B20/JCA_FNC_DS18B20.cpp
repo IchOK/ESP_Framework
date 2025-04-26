@@ -29,11 +29,11 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagFloat ("Filter", "Filterkonstante", "", false, TagUsage_T::UseConfig, &Filter, "s"));
-      Tags.push_back (new TagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", false, TagUsage_T::UseConfig, &Addr[0], 8));
-      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagFloat ("Filter", "Filterkonstante", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &Filter, "s"));
+      Tags.push_back (new TagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &Addr[0], 8));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new TagFloat ("Temp", "Temperatur", "", true, TagUsage_T::UseData, &Value, "°C"));
+      Tags.push_back (new TagFloat ("Temp", "Temperatur", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, "°C"));
       // Init Data
       Wire = _Wire;
       Addr[0] = 0;

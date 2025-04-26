@@ -63,13 +63,13 @@ namespace JCA {
 
     void INA219::createTags() {
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", false, TagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new TagFloat ("PowerPlus", "Leistung Eingang", "", true, TagUsage_T::UseData, &PowerPlus, "W"));
-      Tags.push_back (new TagFloat ("VoltagePlus", "Spannung Eingang", "", true, TagUsage_T::UseData, &VoltagePlus, "V"));
-      Tags.push_back (new TagFloat ("PowerMinus", "Leistung Ausgang", "", true, TagUsage_T::UseData, &PowerMinus, "W"));
-      Tags.push_back (new TagFloat ("VoltageMinus", "Spannung Ausgang", "", true, TagUsage_T::UseData, &VoltageMinus, "V"));
-      Tags.push_back (new TagFloat ("Current", "Strom", "", true, TagUsage_T::UseData, &Current, "A"));
+      Tags.push_back (new TagFloat ("PowerPlus", "Leistung Eingang", "", TagAccessType_T::Read, TagUsage_T::UseData, &PowerPlus, "W"));
+      Tags.push_back (new TagFloat ("VoltagePlus", "Spannung Eingang", "", TagAccessType_T::Read, TagUsage_T::UseData, &VoltagePlus, "V"));
+      Tags.push_back (new TagFloat ("PowerMinus", "Leistung Ausgang", "", TagAccessType_T::Read, TagUsage_T::UseData, &PowerMinus, "W"));
+      Tags.push_back (new TagFloat ("VoltageMinus", "Spannung Ausgang", "", TagAccessType_T::Read, TagUsage_T::UseData, &VoltageMinus, "V"));
+      Tags.push_back (new TagFloat ("Current", "Strom", "", TagAccessType_T::Read, TagUsage_T::UseData, &Current, "A"));
     }
 
     /**

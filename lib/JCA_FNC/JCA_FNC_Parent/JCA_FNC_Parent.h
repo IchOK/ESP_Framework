@@ -49,6 +49,7 @@ namespace JCA {
       static String GetSetupValueString (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
       static void *GetSetupHardwareRef (const char *_TagName, String &_HwName, bool &_Done, JsonObject _Setup, JsonObject _Log, std::map<String, void *> _Hardware);
 
+      // 
     public :
       // Json Tags
       static const char *JsonTagElements;
@@ -73,11 +74,11 @@ namespace JCA {
       virtual ~FuncParent();
       String getName ();
       void writeFunction (File _FuncFile, bool &_Init);
-      void setValues (JsonObject &_Function);
-      void addValues (JsonObject &_Function);
+      void setValues (JsonObject &_Function, TagAccessType_T _Access);
+      void addValues (JsonObject &_Function, TagAccessType_T _Access);
       int16_t getTagIndex (String _Name);
-      bool setTagValueByIndex (int16_t _Index, JsonVariant _Value);
-      bool getTagValueByIndex (int16_t _Index, JsonVariant _Value);
+      bool setTagValueByIndex (int16_t _Index, JsonVariant _Value, TagAccessType_T _Access);
+      bool getTagValueByIndex (int16_t _Index, JsonVariant _Value, TagAccessType_T _Access);
       virtual void update (struct tm &_Time) { ; };
     };
   }

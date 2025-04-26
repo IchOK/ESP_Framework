@@ -39,30 +39,30 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagFloat ("AccuVoltageMax", "Maximale Akku Ladespannung", "", false, TagUsage_T::UseConfig, &AccuVoltageMax, "V"));
-      Tags.push_back (new TagFloat ("AccuVoltageMin", "Grenzwert Akku Entladen", "", false, TagUsage_T::UseConfig, &AccuVoltageMin, "V"));
-      Tags.push_back (new TagFloat ("AccuChargeCurrent", "Maximaler Akku Ladestrom", "", false, TagUsage_T::UseConfig, &AccuChargeCurrent, "A"));
-      Tags.push_back (new TagFloat ("AccuDischargeVoltage", "Minimale Akku Entladespannung", "", false, TagUsage_T::UseConfig, &AccuDischargeVoltage, "V"));
-      Tags.push_back (new TagFloat ("AccuDischargeCurrent", "Maximaler Akku Entladestrom", "", false, TagUsage_T::UseConfig, &AccuDischargeCurrent, "A"));
-      Tags.push_back (new TagFloat ("ChargeEndCurrent", "", "Laden Beendet Strom", false, TagUsage_T::UseConfig, &ChargeEndCurrent, "A"));
-      Tags.push_back (new TagFloat ("DischargeEndCurrent", "Genzwert Akku Entladen", "", false, TagUsage_T::UseConfig, &DischargeEndCurrent, "A"));
-      Tags.push_back (new TagUInt16 ("WaitDischarge", "Wartezeit für Entlade", "", false, TagUsage_T::UseConfig, &WaitDischarge, "s"));
-      Tags.push_back (new TagFloat ("RechargeVoltage", "Spannungs Nachladen", "", false, TagUsage_T::UseConfig, &RechargeVoltage, "V"));
+      Tags.push_back (new TagFloat ("AccuVoltageMax", "Maximale Akku Ladespannung", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuVoltageMax, "V"));
+      Tags.push_back (new TagFloat ("AccuVoltageMin", "Grenzwert Akku Entladen", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuVoltageMin, "V"));
+      Tags.push_back (new TagFloat ("AccuChargeCurrent", "Maximaler Akku Ladestrom", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuChargeCurrent, "A"));
+      Tags.push_back (new TagFloat ("AccuDischargeVoltage", "Minimale Akku Entladespannung", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuDischargeVoltage, "V"));
+      Tags.push_back (new TagFloat ("AccuDischargeCurrent", "Maximaler Akku Entladestrom", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuDischargeCurrent, "A"));
+      Tags.push_back (new TagFloat ("ChargeEndCurrent", "", "Laden Beendet Strom", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ChargeEndCurrent, "A"));
+      Tags.push_back (new TagFloat ("DischargeEndCurrent", "Genzwert Akku Entladen", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DischargeEndCurrent, "A"));
+      Tags.push_back (new TagUInt16 ("WaitDischarge", "Wartezeit für Entlade", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WaitDischarge, "s"));
+      Tags.push_back (new TagFloat ("RechargeVoltage", "Spannungs Nachladen", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &RechargeVoltage, "V"));
 
-      Tags.push_back (new TagBool ("DoCheck", "Akku Prüfung aktiv", "", false, TagUsage_T::UseData, &DoCheck, "EIN", "AUS"));
-      Tags.push_back (new TagBool ("DoCharge", "Akku Laden aktiv", "", false, TagUsage_T::UseData, &DoCharge, "EIN", "AUS"));
-      Tags.push_back (new TagBool ("Fault", "Fehler aktiv", "", true, TagUsage_T::UseData, &Fault, "EIN", "AUS"));
-      Tags.push_back (new TagFloat ("AccuVoltage", "Akku Spannung", "", true, TagUsage_T::UseData, &AccuVoltage, "V"));
-      Tags.push_back (new TagFloat ("Current", "Akku Strom", "", true, TagUsage_T::UseData, &Current, "A"));
-      Tags.push_back (new TagFloat ("ChargedAH", "Geladener Strom", "", true, TagUsage_T::UseData, &ChargedAH, "AH"));
-      Tags.push_back (new TagFloat ("ChargedWH", "Geladene Leistung", "", true, TagUsage_T::UseData, &ChargedWH, "WH"));
-      Tags.push_back (new TagFloat ("DischargedAH", "Entladener Strom", "", true, TagUsage_T::UseData, &DischargedAH, "AH"));
-      Tags.push_back (new TagFloat ("DischargedWH", "Entledene Leistung", "", true, TagUsage_T::UseData, &DischargedWH, "WH"));
-      Tags.push_back (new TagFloat ("DischargeVoltage", "Entladespannung", "", true, TagUsage_T::UseData, &DischargeVoltage, "V"));
-      Tags.push_back (new TagFloat ("ChargeSP", "PWM Laden", "", true, TagUsage_T::UseData, &ChargeSP, "%"));
-      Tags.push_back (new TagFloat ("DischargeSP", "PWM Entladen", "", true, TagUsage_T::UseData, &DischargeSP, "%"));
+      Tags.push_back (new TagBool ("DoCheck", "Akku Prüfung aktiv", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &DoCheck, "EIN", "AUS"));
+      Tags.push_back (new TagBool ("DoCharge", "Akku Laden aktiv", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &DoCharge, "EIN", "AUS"));
+      Tags.push_back (new TagBool ("Fault", "Fehler aktiv", "", TagAccessType_T::Read, TagUsage_T::UseData, &Fault, "EIN", "AUS"));
+      Tags.push_back (new TagFloat ("AccuVoltage", "Akku Spannung", "", TagAccessType_T::Read, TagUsage_T::UseData, &AccuVoltage, "V"));
+      Tags.push_back (new TagFloat ("Current", "Akku Strom", "", TagAccessType_T::Read, TagUsage_T::UseData, &Current, "A"));
+      Tags.push_back (new TagFloat ("ChargedAH", "Geladener Strom", "", TagAccessType_T::Read, TagUsage_T::UseData, &ChargedAH, "AH"));
+      Tags.push_back (new TagFloat ("ChargedWH", "Geladene Leistung", "", TagAccessType_T::Read, TagUsage_T::UseData, &ChargedWH, "WH"));
+      Tags.push_back (new TagFloat ("DischargedAH", "Entladener Strom", "", TagAccessType_T::Read, TagUsage_T::UseData, &DischargedAH, "AH"));
+      Tags.push_back (new TagFloat ("DischargedWH", "Entledene Leistung", "", TagAccessType_T::Read, TagUsage_T::UseData, &DischargedWH, "WH"));
+      Tags.push_back (new TagFloat ("DischargeVoltage", "Entladespannung", "", TagAccessType_T::Read, TagUsage_T::UseData, &DischargeVoltage, "V"));
+      Tags.push_back (new TagFloat ("ChargeSP", "PWM Laden", "", TagAccessType_T::Read, TagUsage_T::UseData, &ChargeSP, "%"));
+      Tags.push_back (new TagFloat ("DischargeSP", "PWM Entladen", "", TagAccessType_T::Read, TagUsage_T::UseData, &DischargeSP, "%"));
 
-      Tags.push_back (new TagListUInt8 ("ChargeState", "Status", "", true, TagUsage_T::UseData, (uint8_t *)&ChargeState));
+      Tags.push_back (new TagListUInt8 ("ChargeState", "Status", "", TagAccessType_T::Read, TagUsage_T::UseData, (uint8_t *)&ChargeState));
       TagListUInt8 *ChargeStateElement = static_cast<TagListUInt8 *> (Tags[Tags.size () - 1]);
       ChargeStateElement->List.insert ({Charger_State_T::IDLE, "Inaktiv"});
       ChargeStateElement->List.insert ({ Charger_State_T::CHARGE_CURRENT, "Laden Strom" });
@@ -73,9 +73,9 @@ namespace JCA {
       ChargeStateElement->List.insert ({ Charger_State_T::FAULT, "Fehler" });
 
       // Tags only used for in-/output
-      Tags.push_back (new TagFloat ("AccuVoltage", "INA219.getVoltagePlus", "", false, TagUsage_T::UseInOut, &AccuVoltage, ""));
-      Tags.push_back (new TagFloat ("Current", "abs(INA219.getCurrent)", "", false, TagUsage_T::UseInOut, &Current, ""));
-      Tags.push_back (new TagFloat ("Power", "abs(INA219.getPowerPlus)", "", false, TagUsage_T::UseInOut, &Power, ""));
+      Tags.push_back (new TagFloat ("AccuVoltage", "INA219.getVoltagePlus", "", TagAccessType_T::ReadWrite, TagUsage_T::UseInOut, &AccuVoltage, ""));
+      Tags.push_back (new TagFloat ("Current", "abs(INA219.getCurrent)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseInOut, &Current, ""));
+      Tags.push_back (new TagFloat ("Power", "abs(INA219.getPowerPlus)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseInOut, &Power, ""));
 
       // Intern
       ChargeState = Charger_State_T::IDLE;

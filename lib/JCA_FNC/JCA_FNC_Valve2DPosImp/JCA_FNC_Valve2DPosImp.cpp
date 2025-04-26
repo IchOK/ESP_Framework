@@ -31,18 +31,18 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("NoPulseTimeout", "Wartezeit Impules", "", false, TagUsage_T::UseConfig, &NoPulseTimeout, "ms"));
-      Tags.push_back (new TagUInt16 ("PositionPulseHyst", "Positions Hysterese", "", false, TagUsage_T::UseConfig, &PositionPulseHyst, ""));
-      Tags.push_back (new TagUInt16 ("StepTimeout", "Schritt Maxzeit", "", false, TagUsage_T::UseConfig, &StepTimeout, "s"));
-      Tags.push_back (new TagUInt16 ("WaitTime", "Wartezeit Umschaltung", "", false, TagUsage_T::UseConfig, &WaitTime, "ms"));
-      Tags.push_back (new TagString ("FaultCode", "Fehler Code", "", true, TagUsage_T::UseConfig, &FaultCode));
+      Tags.push_back (new TagUInt16 ("NoPulseTimeout", "Wartezeit Impules", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &NoPulseTimeout, "ms"));
+      Tags.push_back (new TagUInt16 ("PositionPulseHyst", "Positions Hysterese", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &PositionPulseHyst, ""));
+      Tags.push_back (new TagUInt16 ("StepTimeout", "Schritt Maxzeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &StepTimeout, "s"));
+      Tags.push_back (new TagUInt16 ("WaitTime", "Wartezeit Umschaltung", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WaitTime, "ms"));
+      Tags.push_back (new TagString ("FaultCode", "Fehler Code", "", TagAccessType_T::Read, TagUsage_T::UseConfig, &FaultCode));
 
-      Tags.push_back (new TagFloat ("Setpoint", "Sollposition", "", false, TagUsage_T::UseData, &Setpoint, "%"));
-      Tags.push_back (new TagFloat ("Position", "Istposition", "", true, TagUsage_T::UseData, &Position, "%"));
-      Tags.push_back (new TagBool ("InitRequest", "Initialisierung anfordern", "", false, TagUsage_T::UseData, &InitRequest, "Run", "Init"));
-      Tags.push_back (new TagString ("StateCode", "Status", "", true, TagUsage_T::UseData, &StateCode));
-      Tags.push_back (new TagInt32 ("PositionPulse", "Impuls Position", "", true, TagUsage_T::UseData, &PositionPulse, ""));
-      Tags.push_back (new TagUInt16 ("PulseCount", "Impuls Eingang", "", false, TagUsage_T::UseData, &PulseCount, ""));
+      Tags.push_back (new TagFloat ("Setpoint", "Sollposition", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Setpoint, "%"));
+      Tags.push_back (new TagFloat ("Position", "Istposition", "", TagAccessType_T::Read, TagUsage_T::UseData, &Position, "%"));
+      Tags.push_back (new TagBool ("InitRequest", "Initialisierung anfordern", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &InitRequest, "Run", "Init"));
+      Tags.push_back (new TagString ("StateCode", "Status", "", TagAccessType_T::Read, TagUsage_T::UseData, &StateCode));
+      Tags.push_back (new TagInt32 ("PositionPulse", "Impuls Position", "", TagAccessType_T::Read, TagUsage_T::UseData, &PositionPulse, ""));
+      Tags.push_back (new TagUInt16 ("PulseCount", "Impuls Eingang", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &PulseCount, ""));
 
       // Init Hardware
       PinOpen

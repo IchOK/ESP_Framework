@@ -65,14 +65,14 @@
 
             // Create Tag-List
             String NumStr = String (i + 1);
-            Tags.push_back (new TagInt32 ("Delay" + NumStr, "Verzögerung " + NumStr, "", true, TagUsage_T::UseConfig, &(Triggers->Pairs[i].Delay), "us"));
-            Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", false, TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
+            Tags.push_back (new TagInt32 ("Delay" + NumStr, "Verzögerung " + NumStr, "", TagAccessType_T::Read, TagUsage_T::UseConfig, &(Triggers->Pairs[i].Delay), "us"));
+            Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
             Debug.println (FLAG_SETUP, false, Name, __func__, " > Tags Done");
           }
         }
         // Create Tag-List
-        Tags.push_back (new TagUInt16 ("ZeroWidth", "Nullpunkt länge", "", true, TagUsage_T::UseConfig, &ZeroWidth, "us"));
-        Tags.push_back (new TagUInt16 ("Period", "Dauer einer Sinuswelle", "", true, TagUsage_T::UseConfig, &Period, "us"));
+        Tags.push_back (new TagUInt16 ("ZeroWidth", "Nullpunkt länge", "", TagAccessType_T::Read, TagUsage_T::UseConfig, &ZeroWidth, "us"));
+        Tags.push_back (new TagUInt16 ("Period", "Dauer einer Sinuswelle", "", TagAccessType_T::Read, TagUsage_T::UseConfig, &Period, "us"));
         Debug.println (FLAG_SETUP, false, Name, __func__, "General Tags Done");
 
         // Init Data
