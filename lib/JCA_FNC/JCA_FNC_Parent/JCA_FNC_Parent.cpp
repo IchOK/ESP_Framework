@@ -232,7 +232,7 @@ namespace JCA {
      */
     void FuncParent::addValues (JsonObject &_Function) {
       Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
-      for (int16_t i = 0; i < Tags.size (); i++) {
+      for (size_t i = 0; i < Tags.size (); i++) {
         Tags[i]->addValue (_Function);
       }
     }
@@ -244,7 +244,7 @@ namespace JCA {
      * @return int16_t position of the tag or -1 if not found
      */
     int16_t FuncParent::getTagIndex (String _Name) {
-      for (int16_t i = 0; i < Tags.size (); i++) {
+      for (size_t i = 0; i < Tags.size (); i++) {
         if (Tags[i]->Name == _Name) {
           return i;
         }
