@@ -33,10 +33,10 @@ namespace JCA {
         : FuncParent (_Name), Strip (_NumLeds, _Pin, _Type) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DelayAutoOff, "Min"));
+      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &DelayAutoOff, "Min"));
 
-      Tags.push_back (new TagBool ("OnOff", "Einschalten", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &OnOff, "EIN", "AUS", std::bind (&LedStrip::updateColorCB, this)));
-      Tags.push_back (new TagUInt32 ("Value", "Farbwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Value, "RGB", std::bind (&LedStrip::updateColorCB, this), TagTypes_T::TypeColor));
+      Tags.push_back (new TagBool ("OnOff", "Einschalten", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &OnOff, "EIN", "AUS", std::bind (&LedStrip::updateColorCB, this)));
+      Tags.push_back (new TagUInt32 ("Value", "Farbwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &Value, "RGB", std::bind (&LedStrip::updateColorCB, this), TagTypes_T::TypeColor));
       Tags.push_back (new TagUInt16 ("DelayCounter", "Verzögerung bis AUS", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &DelayCounter, "Min"));
 
       DelayAutoOff = 0;

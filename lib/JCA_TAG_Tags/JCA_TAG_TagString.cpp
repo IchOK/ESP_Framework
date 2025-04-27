@@ -54,6 +54,9 @@ namespace JCA {
     bool TagString::getValue (JsonVariant _Value, TagAccessType_T _Access) {
       if ((Access & ~TagAccessType_T::Write & _Access) == 0) {
         // Access-Type is not allowed
+        if (Debug.print (FLAG_DATA, true, Name, __func__, "Access-Type not allowed: Access=")) {
+          Debug.println (FLAG_DATA, true, Name, __func__, Access);
+        }
         return false;
       }
       return _Value.set (*(static_cast<String *> (Value)));
@@ -69,6 +72,9 @@ namespace JCA {
     bool TagString::setValue (JsonVariant _Value, TagAccessType_T _Access) {
       if ((Access & ~TagAccessType_T::Read & _Access) == 0) {
         // Access-Type is not allowed
+        if (Debug.print (FLAG_DATA, true, Name, __func__, "Access-Type not allowed: Access=")) {
+          Debug.println (FLAG_DATA, true, Name, __func__, Access);
+        }
         return false;
       }
       *(static_cast<String *> (Value)) = _Value.as<String> ();
@@ -84,8 +90,11 @@ namespace JCA {
      * @param _Values Reference to tha JsonObject
      */
     void TagString::addValue (JsonObject &_Values, TagAccessType_T _Access) {
-      if ((Access & ~TagAccessType_T::Read & _Access) == 0) {
+      if ((Access & ~TagAccessType_T::Write & _Access) == 0) {
         // Access-Type is not allowed
+        if (Debug.print (FLAG_DATA, true, Name, __func__, "Access-Type not allowed: Access=")) {
+          Debug.println (FLAG_DATA, true, Name, __func__, Access);
+        }
         return;
       }
       _Values[Name] = *(static_cast<String *> (Value));

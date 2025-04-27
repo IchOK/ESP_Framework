@@ -52,6 +52,7 @@ namespace JCA {
       uint16_t RebootCounter;
 
       // Daten
+      bool WriteConfig;
       uint32_t TimeSync;
       String SystemTime;
       String LocalTime;

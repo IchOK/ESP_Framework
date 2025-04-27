@@ -59,6 +59,9 @@ namespace JCA {
     bool TagUInt32::getValue (JsonVariant _Value, TagAccessType_T _Access) {
       if ((Access & ~TagAccessType_T::Write & _Access) == 0) {
         // Access-Type is not allowed
+        if (Debug.print (FLAG_DATA, true, Name, __func__, "Access-Type not allowed: Access=")) {
+          Debug.println (FLAG_DATA, true, Name, __func__, Access);
+        }
         return false;
       }
       return _Value.set (*(static_cast<uint32_t *> (Value)));
@@ -74,6 +77,9 @@ namespace JCA {
     bool TagUInt32::setValue (JsonVariant _Value, TagAccessType_T _Access) {
       if ((Access & ~TagAccessType_T::Read & _Access) == 0) {
         // Access-Type is not allowed
+        if (Debug.print (FLAG_DATA, true, Name, __func__, "Access-Type not allowed: Access=")) {
+          Debug.println (FLAG_DATA, true, Name, __func__, Access);
+        }
         return false;
       }
       *(static_cast<uint32_t *> (Value)) = _Value.as<uint32_t> ();
@@ -89,8 +95,11 @@ namespace JCA {
      * @param _Values Reference to tha JsonObject
      */
     void TagUInt32::addValue (JsonObject &_Values, TagAccessType_T _Access) {
-      if ((Access & ~TagAccessType_T::Read & _Access) == 0) {
+      if ((Access & ~TagAccessType_T::Write & _Access) == 0) {
         // Access-Type is not allowed
+        if (Debug.print (FLAG_DATA, true, Name, __func__, "Access-Type not allowed: Access=")) {
+          Debug.println (FLAG_DATA, true, Name, __func__, Access);
+        }
         return;
       }
       _Values[Name] = *(static_cast<uint32_t *> (Value));

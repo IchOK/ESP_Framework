@@ -27,7 +27,7 @@ namespace JCA {
      * @param _DayLightSaving use Daylight Saving Time
      */
     Server::Server (const char *_HostnamePrefix, uint16_t _WebServerPort, uint16_t _UdpListenerPort, const char *_ConfUser, const char *_ConfPassword, unsigned long _Offset, bool _DayLightSaving)
-        : WebServerObject (_WebServerPort), WebSocketObject ("/ws"), Rtc (0) {
+        : Rtc (0) {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Create");
 
       String ChipID;
@@ -54,7 +54,6 @@ namespace JCA {
       strncpy (ConfPassword, _ConfPassword, sizeof (ConfPassword));
       WsUpdateCycle = 1000;
       WsLastUpdate = millis ();
-      WebConfigFile = JCA_IOT_FILE_FUNCTIONS;
       LocalTimeZone = _Offset;
       DaylightSavingTime = _DayLightSaving;
     }
@@ -137,7 +136,7 @@ namespace JCA {
             }
             if (WiFiConfig[JCA_IOT_SERVER_CONFKEY_WIFI_PASS].is<JsonVariant> ()) {
               Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "[WiFi] Found Password");
-              if (!Connector.setPassword (WiFiConfig[JCA_IOT_SERVER_CONFKEY_WIFI_PASS].as<const char *> ())) {
+              if (!Connector.setPassword ( JCA::SYS::Crypt::decode(WiFiConfig[JCA_IOT_SERVER_CONFKEY_WIFI_PASS].as<String> ()).c_str ())) {
                 Debug.println (FLAG_ERROR, true, ObjectName, __func__, "[WiFi] Password invalid");
               }
             }
@@ -277,6 +276,11 @@ namespace JCA {
       Debug.println (FLAG_SETUP, false, ObjectName, __func__, "Init");
       // Read Config
       readConfig ();
+      
+      // WebServer/-Socket - Init
+      WebServerObject = new AsyncWebServer (WebServerPort);
+      WebSocketObject = new AsyncWebSocket ("/ws");
+
       RebootCounter++;
       writeSystemConfig ();
 
@@ -290,33 +294,33 @@ namespace JCA {
       }
       
       // WebSocket - Init
-      WebSocketObject.onEvent ([this] (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) { this->onWsEvent (_Server, _Client, _Type, _Arg, _Data, _Len); });
-      WebServerObject.addHandler (&WebSocketObject);
+      WebSocketObject->onEvent ([this] (AsyncWebSocket *_Server, AsyncWebSocketClient *_Client, AwsEventType _Type, void *_Arg, uint8_t *_Data, size_t _Len) { this->onWsEvent (_Server, _Client, _Type, _Arg, _Data, _Len); });
+      WebServerObject->addHandler (WebSocketObject);
 
       // Server - WiFi Config
-      WebServerObject.on (JCA_IOT_SERVER_PATH_CONNECT, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectGet (_Request); });
-      WebServerObject.on (JCA_IOT_SERVER_PATH_CONNECT, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectPost (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_CONNECT, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectGet (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_CONNECT, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebConnectPost (_Request); });
 
       // Server - System Config
-      WebServerObject.on (JCA_IOT_SERVER_PATH_SYS, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemGet (_Request); });
-      WebServerObject.on (
+      WebServerObject->on (JCA_IOT_SERVER_PATH_SYS, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemGet (_Request); });
+      WebServerObject->on (
           JCA_IOT_SERVER_PATH_SYS_UPLOAD, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { _Request->redirect (JCA_IOT_SERVER_PATH_SYS); },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) { this->onWebSystemUploadData (_Request, _Filename, _Index, _Data, _Len, _Final); });
-      WebServerObject.on (
+      WebServerObject->on (
           JCA_IOT_SERVER_PATH_SYS_UPDATE, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemUpdate (_Request); },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) { this->onWebSystemUpdateData (_Request, _Filename, _Index, _Data, _Len, _Final); });
-      WebServerObject.on (JCA_IOT_SERVER_PATH_SYS_RESET, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemReset (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_SYS_RESET, HTTP_POST, [this] (AsyncWebServerRequest *_Request) { this->onWebSystemReset (_Request); });
 
       // Server - Custom Pages
-      WebServerObject.on ("/", HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
-      WebServerObject.on (JCA_IOT_SERVER_PATH_HOME, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
-      WebServerObject.on (JCA_IOT_SERVER_PATH_CONFIG, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConfigGet (_Request); });
+      WebServerObject->on ("/", HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_HOME, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_CONFIG, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConfigGet (_Request); });
 
       // Save WebConfig
-      WebServerObject.on (JCA_IOT_SERVER_PATH_CONFIGSAVE, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSaveConfigCB(); this->onWebConfigGet (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_CONFIGSAVE, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSaveConfigCB(); this->onWebConfigGet (_Request); });
 
       // RestAPI
-      WebServerObject.on (
+      WebServerObject->on (
           "/api", HTTP_ANY,
           [this] (AsyncWebServerRequest *_Request) {
             Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Request");
@@ -350,10 +354,10 @@ namespace JCA {
           });
 
       // Server - If not defined
-      WebServerObject.serveStatic ("/", LittleFS, "/")
+      WebServerObject->serveStatic ("/", LittleFS, "/")
           .setDefaultFile (JCA_IOT_SERVER_PATH_HOME);
-      WebServerObject.onNotFound ([] (AsyncWebServerRequest *_Request) { _Request->redirect (JCA_IOT_SERVER_PATH_SYS); });
-      WebServerObject.begin ();
+      WebServerObject->onNotFound ([] (AsyncWebServerRequest *_Request) { _Request->redirect (JCA_IOT_SERVER_PATH_SYS); });
+      WebServerObject->begin ();
 
       Debug.println (FLAG_SETUP, true, ObjectName, __func__, "Done");
       return Connector.isConnected ();
@@ -398,9 +402,6 @@ namespace JCA {
 
     void Server::setTimeStruct (tm _Time) {
       Rtc.setTimeStruct (_Time);
-    }
-    void Server::setWebConfigFile (String _WebConfigFile) {
-      WebConfigFile = _WebConfigFile;
     }
     bool Server::writeSystemConfig () {
       Debug.println (FLAG_CONFIG, true, ObjectName, __func__, "Write Config");

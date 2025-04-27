@@ -37,15 +37,22 @@ namespace JCA {
       Tags.push_back (new TagUInt32 ("LocalTimeZone", "Zeitzone", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &LocalTimeZone, "s", std::bind (&ServerLink::setServerDataCB, this)));
       Tags.push_back (new TagBool ("DaylightSavingTime", "Sommerzeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DaylightSavingTime, "EIN", "AUS", std::bind (&ServerLink::setServerDataCB, this)));
       Tags.push_back (new TagUInt16 ("RebootCounter", "Reboot-Counter", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &RebootCounter, "", std::bind (&ServerLink::setServerDataCB, this)));
-      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &TimeSync, "",std::bind (&ServerLink::setTimeCB, this), TagTypes_T::TypeDateTime));
+      Tags.push_back (new TagBool ("WriteConfig", "Daten speichern", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WriteConfig, "Save", "Save", std::bind (&ServerLink::writeServerConfigCB, this)));
+      Tags.push_back (new TagUInt32 ("TimeSync", "Zeit-Sync (01.01.1970)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &TimeSync, "", std::bind (&ServerLink::setTimeCB, this), TagTypes_T::TypeDateTime));
       Tags.push_back (new TagString ("UtcTime", "UTC-Zeit", "", TagAccessType_T::Read, TagUsage_T::UseConfig, &SystemTime));
 
       Tags.push_back (new TagString ("LocalTime", "Lolak-Zeit", "", TagAccessType_T::Read, TagUsage_T::UseData, &LocalTime));
 
       // Init Data
+      WriteConfig = false;
       ServerRef = _ServerRef;
       getServerDataCB ();
       TimeSync = 0;
+    }
+
+    void ServerLink::writeServerConfigCB () {
+      ServerRef->writeSystemConfig ();
+      WriteConfig = false;
     }
 
     void ServerLink::setTimeCB () {

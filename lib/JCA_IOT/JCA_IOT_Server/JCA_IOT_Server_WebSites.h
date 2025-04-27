@@ -80,13 +80,14 @@ Board Name: %BOARD_NAME%<br/>
 Board Version: %BOARD_VERSION%<br/>
 Board Variant: %BOARD_VARIANT%<br/>
 Board MCU: %BOARD_MCU%<br/>
+%SYSTEMCONFIG_LINK%
+%SETUP_LINK%
+%FUNCTIONS_LINK%
+%VALUES_LINK%
+%LOG_LINK%
 </article>
 <article>
-<header>Save Config</header>
-<a href="%CONFIGFILE%" download="%CONFIGFILE%"><button>Download Config</button></a>
-</article>
-<article>
-<header>Upload Web-Content</header>
+<header>Upload Files</header>
 <form method="POST" action="/upload" enctype="multipart/form-data">
 <label for="jsonUpload">Choose a config file or web content:<input type="file" id="jsonUpload" name="jsonUpload" accept=".json, .htm, .html, .js, .css"></label>
 <button type="submit">Upload</button>

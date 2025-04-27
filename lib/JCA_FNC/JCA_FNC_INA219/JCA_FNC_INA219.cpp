@@ -63,7 +63,7 @@ namespace JCA {
 
     void INA219::createTags() {
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ReadInterval, "s"));
+      Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ReadInterval, "s"));
 
       Tags.push_back (new TagFloat ("PowerPlus", "Leistung Eingang", "", TagAccessType_T::Read, TagUsage_T::UseData, &PowerPlus, "W"));
       Tags.push_back (new TagFloat ("VoltagePlus", "Spannung Eingang", "", TagAccessType_T::Read, TagUsage_T::UseData, &VoltagePlus, "V"));

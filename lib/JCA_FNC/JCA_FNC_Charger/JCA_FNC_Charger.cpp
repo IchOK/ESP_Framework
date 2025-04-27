@@ -39,15 +39,15 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagFloat ("AccuVoltageMax", "Maximale Akku Ladespannung", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuVoltageMax, "V"));
-      Tags.push_back (new TagFloat ("AccuVoltageMin", "Grenzwert Akku Entladen", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuVoltageMin, "V"));
-      Tags.push_back (new TagFloat ("AccuChargeCurrent", "Maximaler Akku Ladestrom", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuChargeCurrent, "A"));
-      Tags.push_back (new TagFloat ("AccuDischargeVoltage", "Minimale Akku Entladespannung", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuDischargeVoltage, "V"));
-      Tags.push_back (new TagFloat ("AccuDischargeCurrent", "Maximaler Akku Entladestrom", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &AccuDischargeCurrent, "A"));
-      Tags.push_back (new TagFloat ("ChargeEndCurrent", "", "Laden Beendet Strom", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ChargeEndCurrent, "A"));
-      Tags.push_back (new TagFloat ("DischargeEndCurrent", "Genzwert Akku Entladen", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DischargeEndCurrent, "A"));
-      Tags.push_back (new TagUInt16 ("WaitDischarge", "Wartezeit für Entlade", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WaitDischarge, "s"));
-      Tags.push_back (new TagFloat ("RechargeVoltage", "Spannungs Nachladen", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &RechargeVoltage, "V"));
+      Tags.push_back (new TagFloat ("AccuVoltageMax", "Maximale Akku Ladespannung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &AccuVoltageMax, "V"));
+      Tags.push_back (new TagFloat ("AccuVoltageMin", "Grenzwert Akku Entladen", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &AccuVoltageMin, "V"));
+      Tags.push_back (new TagFloat ("AccuChargeCurrent", "Maximaler Akku Ladestrom", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &AccuChargeCurrent, "A"));
+      Tags.push_back (new TagFloat ("AccuDischargeVoltage", "Minimale Akku Entladespannung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &AccuDischargeVoltage, "V"));
+      Tags.push_back (new TagFloat ("AccuDischargeCurrent", "Maximaler Akku Entladestrom", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &AccuDischargeCurrent, "A"));
+      Tags.push_back (new TagFloat ("ChargeEndCurrent", "", "Laden Beendet Strom", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ChargeEndCurrent, "A"));
+      Tags.push_back (new TagFloat ("DischargeEndCurrent", "Genzwert Akku Entladen", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &DischargeEndCurrent, "A"));
+      Tags.push_back (new TagUInt16 ("WaitDischarge", "Wartezeit für Entlade", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &WaitDischarge, "s"));
+      Tags.push_back (new TagFloat ("RechargeVoltage", "Spannungs Nachladen", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &RechargeVoltage, "V"));
 
       Tags.push_back (new TagBool ("DoCheck", "Akku Prüfung aktiv", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &DoCheck, "EIN", "AUS"));
       Tags.push_back (new TagBool ("DoCharge", "Akku Laden aktiv", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &DoCharge, "EIN", "AUS"));
@@ -73,9 +73,9 @@ namespace JCA {
       ChargeStateElement->List.insert ({ Charger_State_T::FAULT, "Fehler" });
 
       // Tags only used for in-/output
-      Tags.push_back (new TagFloat ("AccuVoltage", "INA219.getVoltagePlus", "", TagAccessType_T::ReadWrite, TagUsage_T::UseInOut, &AccuVoltage, ""));
-      Tags.push_back (new TagFloat ("Current", "abs(INA219.getCurrent)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseInOut, &Current, ""));
-      Tags.push_back (new TagFloat ("Power", "abs(INA219.getPowerPlus)", "", TagAccessType_T::ReadWrite, TagUsage_T::UseInOut, &Power, ""));
+      Tags.push_back (new TagFloat ("AccuVoltage", "INA219.getVoltagePlus", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseInOut, &AccuVoltage, ""));
+      Tags.push_back (new TagFloat ("Current", "abs(INA219.getCurrent)", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseInOut, &Current, ""));
+      Tags.push_back (new TagFloat ("Power", "abs(INA219.getPowerPlus)", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseInOut, &Power, ""));
 
       // Intern
       ChargeState = Charger_State_T::IDLE;

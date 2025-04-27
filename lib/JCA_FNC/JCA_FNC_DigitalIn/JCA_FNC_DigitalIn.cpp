@@ -34,15 +34,15 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt32 ("DebounceTime", "Entpressel Zeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &DebounceTime, "us"));
+      Tags.push_back (new TagUInt32 ("DebounceTime", "Entpressel Zeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &DebounceTime, "us"));
 
       // Init Hardware
       if (_Mode == "count") {
         Mode = MODE_COUNT;
-        Tags.push_back (new TagUInt16 ("Value", "Zähler", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &ValueCount, ""));
+        Tags.push_back (new TagUInt16 ("Value", "Zähler", "", TagAccessType_T::Read, TagUsage_T::UseData, &ValueCount, ""));
       } else {
         Mode = MODE_INPUT;
-        Tags.push_back (new TagBool ("Value", "Eingang", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &ValueInput, "EIN", "AUS"));
+        Tags.push_back (new TagBool ("Value", "Eingang", "", TagAccessType_T::Read, TagUsage_T::UseData, &ValueInput, "EIN", "AUS"));
 
       }
       Pin = _Pin;

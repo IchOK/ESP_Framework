@@ -97,7 +97,7 @@ namespace JCA {
         }
       } else {
         // check if selected Client can send Data
-        if (WebSocketObject.count () == 0) {
+        if (WebSocketObject->count () == 0) {
           return false;
         }
       }
@@ -116,7 +116,7 @@ namespace JCA {
       if (_Client != nullptr) {
         _Client->text (Response);
       } else {
-        WebSocketObject.textAll (Response);
+        WebSocketObject->textAll (Response);
       }
       return true;
     }

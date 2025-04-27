@@ -28,7 +28,7 @@ namespace JCA {
       CountClockPoints = Count;
 
       // Create Tag-List
-      Tags.push_back(new TagUInt8("CountClockPoints", "Anzahl Schaltpunkte", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &CountClockPoints, "#", [this]() { updateTags(); }));
+      Tags.push_back(new TagUInt8("CountClockPoints", "Anzahl Schaltpunkte", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &CountClockPoints, "#", [this]() { updateTags(); }));
       Tags.push_back(new TagFloat("Value", "Aktueller Schaltwert", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, ""));
 
       updateTags();
@@ -55,9 +55,9 @@ namespace JCA {
       // Add new clock point tags
       for (uint8_t i = 0; i < CountClockPoints; i++) {
         String indexStr = String(i + 1);
-        Tags.push_back(new TagUInt32("Time" + indexStr, "Schaltpunkt " + indexStr, "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ClockPoints[i].Time, "s", TagTypes_T::TypeTime));
-        Tags.push_back(new TagFloat("Value" + indexStr, "Wert " + indexStr, "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ClockPoints[i].Value, ""));
-        Tags.push_back(new TagBool("DoRamp" + indexStr, "Rampen " + indexStr, "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &ClockPoints[i].DoRamp, "EIN", "AUS"));
+        Tags.push_back(new TagUInt32("Time" + indexStr, "Schaltpunkt " + indexStr, "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ClockPoints[i].Time, "s", TagTypes_T::TypeTime));
+        Tags.push_back(new TagFloat("Value" + indexStr, "Wert " + indexStr, "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ClockPoints[i].Value, ""));
+        Tags.push_back(new TagBool("DoRamp" + indexStr, "Rampen " + indexStr, "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ClockPoints[i].DoRamp, "EIN", "AUS"));
       }
     }
 

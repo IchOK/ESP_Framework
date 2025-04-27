@@ -222,6 +222,9 @@ namespace JCA {
      */
     void FuncParent::setValues (JsonObject &_Function, TagAccessType_T _Access) {
       Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Start");
+      if (Debug.print (FLAG_DATA, true, Name, __func__, "CallAccess=")) {
+        Debug.print (FLAG_DATA, true, Name, __func__, _Access);
+      }
       for (JsonPair JsonTag : _Function) {
         setTagValueByIndex(getTagIndex(JsonTag.key().c_str()), JsonTag.value(), _Access);
       }
@@ -233,7 +236,10 @@ namespace JCA {
      * @param _Access way to access the tag
      */
     void FuncParent::addValues (JsonObject &_Function, TagAccessType_T _Access) {
-      Debug.println (FLAG_LOOP, false, Name, __func__, "Get");
+      Debug.println (FLAG_LOOP, false, Name, __func__, "Start");
+      if (Debug.print (FLAG_DATA, true, Name, __func__, "CallAccess=")) {
+        Debug.print (FLAG_DATA, true, Name, __func__, _Access);
+      }
       for (size_t i = 0; i < Tags.size (); i++) {
         Tags[i]->addValue (_Function, _Access);
       }

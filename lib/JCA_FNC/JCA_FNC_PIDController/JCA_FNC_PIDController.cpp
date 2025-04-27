@@ -21,20 +21,20 @@ namespace JCA {
       Debug.println(FLAG_SETUP, false, Name, __func__, "Create");
 
       // Create Tag-List
-      Tags.push_back (new TagFloat ("P", "Proportionaler Verstärkungsfaktor", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &P, ""));
-      Tags.push_back (new TagFloat ("Ti", "Integrationszeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &Ti, "s"));
-      Tags.push_back (new TagFloat ("Td", "Differentialzeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &Td, "s"));
-      Tags.push_back (new TagFloat ("TdLag", "Abklingkonstante für D-Anteil", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &TdLag, "s"));
-      Tags.push_back (new TagFloat ("SetpointMin", "Minimaler Sollwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &SetpointMin, _ProcessUnit));
-      Tags.push_back (new TagFloat ("SetpointMax", "Maximaler Sollwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &SetpointMax, _ProcessUnit));
-      Tags.push_back (new TagFloat ("OutputMin", "Minimaler Stellwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &OutputMin, _OutputUnit));
-      Tags.push_back (new TagFloat ("OutputMax", "Maximaler Stellwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &OutputMax, _OutputUnit));
+      Tags.push_back (new TagFloat ("P", "Proportionaler Verstärkungsfaktor", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &P, ""));
+      Tags.push_back (new TagFloat ("Ti", "Integrationszeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Ti, "s"));
+      Tags.push_back (new TagFloat ("Td", "Differentialzeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Td, "s"));
+      Tags.push_back (new TagFloat ("TdLag", "Abklingkonstante für D-Anteil", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &TdLag, "s"));
+      Tags.push_back (new TagFloat ("SetpointMin", "Minimaler Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &SetpointMin, _ProcessUnit));
+      Tags.push_back (new TagFloat ("SetpointMax", "Maximaler Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &SetpointMax, _ProcessUnit));
+      Tags.push_back (new TagFloat ("OutputMin", "Minimaler Stellwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &OutputMin, _OutputUnit));
+      Tags.push_back (new TagFloat ("OutputMax", "Maximaler Stellwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &OutputMax, _OutputUnit));
 
-      Tags.push_back (new TagFloat ("ProcessVar", "Istwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &ProcessVar, _ProcessUnit));
-      Tags.push_back (new TagFloat ("Setpoint", "Sollwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Setpoint, _ProcessUnit));
-      Tags.push_back (new TagBool ("ManualSetpointMode", "Handmodus für den Sollwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &ManualSetpointMode, "HAND", "AUTO"));
-      Tags.push_back (new TagFloat ("ManualSetpoint", "Manueller Sollwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &ManualSetpoint, _ProcessUnit));
-      Tags.push_back (new TagBool ("ManualOutputMode", "Handmodus für den Stellwert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &ManualOutputMode, "HAND", "AUTO"));
+      Tags.push_back (new TagFloat ("ProcessVar", "Istwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ProcessVar, _ProcessUnit));
+      Tags.push_back (new TagFloat ("Setpoint", "Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &Setpoint, _ProcessUnit));
+      Tags.push_back (new TagBool ("ManualSetpointMode", "Handmodus für den Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualSetpointMode, "HAND", "AUTO"));
+      Tags.push_back (new TagFloat ("ManualSetpoint", "Manueller Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualSetpoint, _ProcessUnit));
+      Tags.push_back (new TagBool ("ManualOutputMode", "Handmodus für den Stellwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualOutputMode, "HAND", "AUTO"));
       Tags.push_back (new TagFloat ("Value", "Stellwert", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, _OutputUnit));
 
       P = 1.0;

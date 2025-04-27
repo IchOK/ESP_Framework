@@ -66,7 +66,7 @@
             // Create Tag-List
             String NumStr = String (i + 1);
             Tags.push_back (new TagInt32 ("Delay" + NumStr, "Verzögerung " + NumStr, "", TagAccessType_T::Read, TagUsage_T::UseConfig, &(Triggers->Pairs[i].Delay), "us"));
-            Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
+            Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
             Debug.println (FLAG_SETUP, false, Name, __func__, " > Tags Done");
           }
         }

@@ -28,7 +28,7 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagFloat ("Value", "Wert", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Value, _Unit));
+      Tags.push_back (new TagFloat ("Value", "Wert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &Value, _Unit));
       // Init Data
       Value = false;
     }

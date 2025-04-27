@@ -23,11 +23,12 @@
  *   - Listen to UDP-Packets in JSON for Timesync and maybe more some times
  * - LocaltimeZone
  *   - Get Epoch of local Timezone with Daylight Saving Time
- * @version 1.0
+ * @version 1.1
  * @date 2022-09-04
  * @changelog
  * - [0.1] 2022-09-04: First Version
  * - [1.0] 2025-04-12: UdpListener added, Localtime Zone added
+ * - [1.1] 2025-04-27: WLAN Password 'encryption' added
  *
  * Copyright Jochen Cabrera 2022
  * Apache License
@@ -75,6 +76,7 @@
 #include <JCA_IOT_Server_WebSites.h>
 #include <JCA_IOT_WiFiConnect.h>
 #include <JCA_SYS_DebugOut.h>
+#include <JCA_SYS_Crypt.h>
 
 // Manual setting Firmware withpout Git
 #ifndef AUTO_VERSION
@@ -146,11 +148,10 @@ namespace JCA {
       const char *ObjectName = "IOT::Server";
       bool Reboot;
       WiFiConnect Connector;
-      AsyncWebServer WebServerObject;
-      AsyncWebSocket WebSocketObject;
+      AsyncWebServer* WebServerObject;
+      AsyncWebSocket* WebSocketObject;
       AsyncUDP UpdListenerObject;
       ESP32Time Rtc;
-      String WebConfigFile;
 
       SimpleCallback onSystemResetCB;
       SimpleCallback onSaveConfigCB;
@@ -161,8 +162,7 @@ namespace JCA {
       void udpPacketHandler (AsyncUDPPacket _Packet);
     
       // ...Webserver_Web.cpp
-      AwsTemplateProcessor replaceHomeWildcardsCB;
-      AwsTemplateProcessor replaceConfigWildcardsCB;
+      AwsTemplateProcessor replaceUserWildcardsCB;
       void onWebConnectPost (AsyncWebServerRequest *_Request);
       void onWebConnectGet (AsyncWebServerRequest *_Request);
       void onWebSystemGet (AsyncWebServerRequest *_Request);
@@ -216,7 +216,6 @@ namespace JCA {
       void setTime (int _Second, int _Minute, int _Hour, int _Day, int _Month, int _Year, int _Millis = 0);
       void setStatePin (int8_t _Pin);
       void setTimeStruct (tm _Time);
-      void setWebConfigFile (String _WebConfigFile);
       bool writeSystemConfig ();
       bool timeIsValid ();
       tm getSystemTimeStruct ();
@@ -228,8 +227,7 @@ namespace JCA {
       uint32_t getSystemTime();
 
       // ...Webserver_Web.cpp
-      void onWebHomeReplace (AwsTemplateProcessor _CB);
-      void onWebConfigReplace (AwsTemplateProcessor _CB);
+      void onWebUserReplace (AwsTemplateProcessor _CB);
 
       // ...Webserver_RestApi.cpp
       void onRestApiGet (JsonVariantCallback _CB);

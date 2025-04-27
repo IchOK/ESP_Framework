@@ -15,12 +15,8 @@ using namespace JCA::SYS;
 namespace JCA {
   namespace IOT {
 
-    void Server::onWebHomeReplace (AwsTemplateProcessor _CB) {
-      replaceHomeWildcardsCB = _CB;
-    }
-
-    void Server::onWebConfigReplace (AwsTemplateProcessor _CB) {
-      replaceConfigWildcardsCB = _CB;
+    void Server::onWebUserReplace (AwsTemplateProcessor _CB) {
+      replaceUserWildcardsCB = _CB;
     }
 
     /**
@@ -73,6 +69,8 @@ namespace JCA {
             } else {
               WiFiConfig[p->name ()] = false;
             }
+          } else if (p->name () == JCA_IOT_SERVER_CONFKEY_WIFI_PASS) {
+            WiFiConfig[p->name ()] = JCA::SYS::Crypt::encode (p->value ());
           } else {
             WiFiConfig[p->name ()] = p->value ().c_str ();
           }
@@ -268,6 +266,13 @@ namespace JCA {
      * @return String Replace String
      */
     String Server::replaceDefaultWildcards (const String &var) {
+      String RetVal;
+      if (replaceUserWildcardsCB) {
+        RetVal = replaceUserWildcardsCB (var);
+        if (!RetVal.isEmpty ()) {
+          return RetVal;
+        }
+      }
       if (var == "TITLE") {
         return String (Hostname);
       }
@@ -287,7 +292,7 @@ namespace JCA {
         return String (SvgSystem);
       }
       if (var == "CONF_FILE") {
-        return WebConfigFile;
+        return JCA_IOT_FILE_FUNCTIONS;
       }
       return String ();
     }
@@ -300,12 +305,6 @@ namespace JCA {
      */
     String Server::replaceHomeWildcards (const String &var) {
       String RetVal;
-      if (replaceConfigWildcardsCB) {
-        RetVal = replaceConfigWildcardsCB (var);
-        if (!RetVal.isEmpty ()) {
-          return RetVal;
-        }
-      }
       RetVal = replaceDefaultWildcards (var);
       if (!RetVal.isEmpty ()) {
         return RetVal;
@@ -321,12 +320,6 @@ namespace JCA {
      */
     String Server::replaceConfigWildcards (const String &var) {
       String RetVal;
-      if (replaceConfigWildcardsCB) {
-        RetVal = replaceConfigWildcardsCB (var);
-        if (!RetVal.isEmpty ()) {
-          return RetVal;
-        }
-      }
       RetVal = replaceDefaultWildcards (var);
       if (!RetVal.isEmpty ()) {
         return RetVal;
@@ -370,9 +363,6 @@ namespace JCA {
       }
       if (var == "BOARD_MCU") {
         return String (BOARD_MCU);
-      }
-      if (var == "CONFIGFILE") {
-        return String (JCA_IOT_FILE_WIFICONFIG);
       }
       return String ();
     }

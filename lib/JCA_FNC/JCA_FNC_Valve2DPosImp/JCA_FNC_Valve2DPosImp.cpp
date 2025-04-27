@@ -31,13 +31,13 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("NoPulseTimeout", "Wartezeit Impules", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &NoPulseTimeout, "ms"));
-      Tags.push_back (new TagUInt16 ("PositionPulseHyst", "Positions Hysterese", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &PositionPulseHyst, ""));
-      Tags.push_back (new TagUInt16 ("StepTimeout", "Schritt Maxzeit", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &StepTimeout, "s"));
-      Tags.push_back (new TagUInt16 ("WaitTime", "Wartezeit Umschaltung", "", TagAccessType_T::ReadWrite, TagUsage_T::UseConfig, &WaitTime, "ms"));
+      Tags.push_back (new TagUInt16 ("NoPulseTimeout", "Wartezeit Impules", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &NoPulseTimeout, "ms"));
+      Tags.push_back (new TagUInt16 ("PositionPulseHyst", "Positions Hysterese", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &PositionPulseHyst, ""));
+      Tags.push_back (new TagUInt16 ("StepTimeout", "Schritt Maxzeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &StepTimeout, "s"));
+      Tags.push_back (new TagUInt16 ("WaitTime", "Wartezeit Umschaltung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &WaitTime, "ms"));
       Tags.push_back (new TagString ("FaultCode", "Fehler Code", "", TagAccessType_T::Read, TagUsage_T::UseConfig, &FaultCode));
 
-      Tags.push_back (new TagFloat ("Setpoint", "Sollposition", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Setpoint, "%"));
+      Tags.push_back (new TagFloat ("Setpoint", "Sollposition", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &Setpoint, "%"));
       Tags.push_back (new TagFloat ("Position", "Istposition", "", TagAccessType_T::Read, TagUsage_T::UseData, &Position, "%"));
       Tags.push_back (new TagBool ("InitRequest", "Initialisierung anfordern", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &InitRequest, "Run", "Init"));
       Tags.push_back (new TagString ("StateCode", "Status", "", TagAccessType_T::Read, TagUsage_T::UseData, &StateCode));
