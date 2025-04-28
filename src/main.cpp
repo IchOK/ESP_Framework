@@ -144,6 +144,11 @@ String cbWebUserReplace (const String &var) {
     return createConfigHRef (JCA_IOT_FILE_SYSTEMCONFIG, "System Config");
   }
 #endif
+#ifdef JCA_IOT_FILE_SYSTEMCONFIG
+  if (var == "WIFICONFIG_LINK") {
+    return createConfigHRef (JCA_IOT_FILE_WIFICONFIG, "WiFi Config");
+  }
+#endif
 #ifdef JCA_IOT_FILE_SETUP
   if (var == "SETUP_LINK") {
     return createConfigHRef (JCA_IOT_FILE_SETUP, "Function Setup");

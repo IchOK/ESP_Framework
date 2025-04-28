@@ -81,6 +81,7 @@ Board Version: %BOARD_VERSION%<br/>
 Board Variant: %BOARD_VARIANT%<br/>
 Board MCU: %BOARD_MCU%<br/>
 %SYSTEMCONFIG_LINK%
+%WIFICONFIG_LINK%
 %SETUP_LINK%
 %FUNCTIONS_LINK%
 %VALUES_LINK%
@@ -92,9 +93,6 @@ Board MCU: %BOARD_MCU%<br/>
 <label for="jsonUpload">Choose a config file or web content:<input type="file" id="jsonUpload" name="jsonUpload" accept=".json, .htm, .html, .js, .css"></label>
 <button type="submit">Upload</button>
 </form>
-</article>
-<article>
-<header>Firmware</header>
 <form method="POST" action="/update" enctype="multipart/form-data">
 <label for="update">Choose a Firmware file:<input type="file" id="update" name="update" accept=".bin"></label>
 <button type="submit">Update</button>
