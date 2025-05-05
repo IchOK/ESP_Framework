@@ -9,17 +9,17 @@
     {
       "type": "clockValues",
       "name": "Infrarot - A1",
-      "countClockPoints": 5
+      "countClockPoints": 9
     },
     {
       "type": "clockValues",
       "name": "Tageslicht - A2",
-      "countClockPoints": 5
+      "countClockPoints": 9
     },
     {
       "type": "clockValues",
       "name": "Ultraviolett - A3",
-      "countClockPoints": 5
+      "countClockPoints": 9
     },
     {
       "type": "valueDigital",

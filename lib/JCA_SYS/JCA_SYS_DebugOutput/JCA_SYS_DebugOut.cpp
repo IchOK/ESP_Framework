@@ -21,7 +21,7 @@ namespace JCA {
      *
      * @param _Serial The Serial-Interface to use for Debug output
      */
-    DebugOut::DebugOut (const HardwareSerial &_Serial) : DebugSerial (_Serial) {
+    DebugOut::DebugOut (const SerialType &_Serial) : DebugSerial (_Serial) {
       NewLine = true;
     }
 
@@ -116,6 +116,7 @@ namespace JCA {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
+        DebugSerial.flush ();
         return true;
       } else {
         return false;
@@ -159,6 +160,7 @@ namespace JCA {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
+        DebugSerial.flush ();
         return true;
       } else {
         return false;
@@ -202,6 +204,7 @@ namespace JCA {
       if (_Flag & Flags) {
         DebugSerial.print (getPrefix (_Flag, _Framework, _ElementName, _Function));
         DebugSerial.print (_Message);
+        DebugSerial.flush ();
         return true;
       } else {
         return false;

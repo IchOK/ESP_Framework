@@ -33,6 +33,7 @@
       typedef struct {
         int32_t Delay;
         uint8_t Pin;
+        uint8_t MinValue;
       } AcDimmersTriggerPair_T;
 
       typedef struct {

@@ -7,62 +7,11 @@
       "server": "IotServer"
     },
     {
-      "type": "daySelect",
-      "name": "TestTagesauswahl"
-    },
-    {
-      "type": "valueDigital",
-      "name": "TestDigital"
-    },
-    {
-      "type": "valueAnalog",
-      "name": "TestAnalogDefault",
-      "unit": "°C"
-    },
-    {
-      "type": "valueAnalog",
-      "name": "TestAnalogDay",
-      "unit": "°C"
-    },
-    {
-      "type": "valueAnalog",
-      "name": "TestAnalogMove",
-      "unit": "°C"
-    },
-    {
-      "type": "clockValues",
-      "name": "TestSchaltuhr",
-      "countClockPoints": 5
-    },
-    {
-      "type": "digitalIn",
-      "name": "TestCounter",
-      "pin": 27,
-      "pullup": "up",
-      "mode": "count"
-    },
-    {
-      "type": "valve2DPosImp",
-      "name": "TestValve",
-      "pinOpen": 16,
-      "pinClose": 17
+      "type": "digitalOut",
+      "name": "BulidInLED",
+      "pinOutput": 8
     }
   ],
   "links": [
-    {
-      "type": "direct",
-      "from": [
-        {
-          "func": "TestCounter",
-          "tag": "Value"
-        }
-      ],
-      "to": [
-        {
-          "func": "TestValve",
-          "tag": "PulseCount"
-        }
-      ]
-    }
   ]
 }

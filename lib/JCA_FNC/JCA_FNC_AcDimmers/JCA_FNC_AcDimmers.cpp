@@ -66,7 +66,8 @@
             // Create Tag-List
             String NumStr = String (i + 1);
             Tags.push_back (new TagInt32 ("Delay" + NumStr, "Verzögerung " + NumStr, "", TagAccessType_T::Read, TagUsage_T::UseConfig, &(Triggers->Pairs[i].Delay), "us"));
-            Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &(Values[i]), "%", std::bind (&AcDimmers::calc, this)));
+            Tags.push_back (new TagUInt8 ("MinValue" + NumStr, "Minimal-Wert " + NumStr, "", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &(Triggers->Pairs[i].MinValue), "%"));
+            Tags.push_back (new TagUInt8 ("Value" + NumStr, "Wert " + NumStr, "", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &(Values[i]), "%"));
             Debug.println (FLAG_SETUP, false, Name, __func__, " > Tags Done");
           }
         }
@@ -119,6 +120,7 @@
        */
       void AcDimmers::update (struct tm &_Time) {
         Debug.println (FLAG_LOOP, false, Name, __func__, "Run");
+        calc ();
       }
 
       /**
@@ -131,11 +133,11 @@
           for (size_t i = 0; i < Triggers->Count; i++) {
             float Value = static_cast<float> (Values[i]) / 100.0;
             // Convert Value to Time-Delay
-            if (Value < 0.1) {
-              // lower than 20% is OFF
+            if (Value < static_cast<float> (Triggers->Pairs[i].MinValue / 100.0)) {
+              // lower than Min-Value is OFF
               Triggers->Pairs[i].Delay = -1;
-            } else if (Value > 0.9) {
-              // higher than 90% is ON
+            } else if (Value >= 1.0) {
+              // higher than 100% is ON
               Triggers->Pairs[i].Delay = 0;
             } else {
               // between calc the ON-Delay and turn off the Output for retrigger
