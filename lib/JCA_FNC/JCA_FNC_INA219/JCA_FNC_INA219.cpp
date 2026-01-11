@@ -79,7 +79,7 @@ namespace JCA {
       LastMillis = millis ();
       UpdateMillis = 0;
       if (Sensor.init ()) {
-        Sensor.setADCMode(SAMPLE_MODE_64);
+        Sensor.setADCMode(INA219_ADC_MODE::INA219_SAMPLE_MODE_64);
         return true;
       } else {
         return false;
