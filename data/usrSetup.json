@@ -102,6 +102,36 @@
       ]
     },
     {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Regler",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Ventil",
+          "tag": "Setpoint"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Ventil Drehgeber",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Ventil",
+          "tag": "PulseCount"
+        }
+      ]
+    },
+    {
       "type": "move",
       "from": [
         {
