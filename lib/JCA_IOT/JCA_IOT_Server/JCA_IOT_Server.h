@@ -184,6 +184,7 @@ namespace JCA {
       JsonVariantCallback restApiPutCB;
       JsonVariantCallback restApiPatchCB;
       JsonVariantCallback restApiDeleteCB;
+      JsonVariantCallback restApiTagsCB;
       void onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json);
 
       // ...Webserver_Socket.cpp
@@ -235,6 +236,7 @@ namespace JCA {
       void onRestApiPut (JsonVariantCallback _CB);
       void onRestApiPatch (JsonVariantCallback _CB);
       void onRestApiDelete (JsonVariantCallback _CB);
+      void onRestApiTags (JsonVariantCallback _CB);
 
       // ...Webserver_Socket.cpp
       uint32_t WsUpdateCycle;

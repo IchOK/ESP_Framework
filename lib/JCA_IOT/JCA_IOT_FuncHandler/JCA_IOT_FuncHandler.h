@@ -128,6 +128,7 @@ namespace JCA {
       int16_t getFuncIndex (String _Name);
       void setValues (JsonObject &_Functions, TagAccessType_T _Access);
       void getValues (JsonObject &_Functions, TagAccessType_T _Access);
+      void getTagStructures (JsonObject &_Functions, TagUsage_T _FilterUsage);
       int16_t getLinkCount();
       int16_t getFuncCount();
     };

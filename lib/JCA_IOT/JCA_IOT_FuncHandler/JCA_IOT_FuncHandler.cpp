@@ -551,6 +551,21 @@ namespace JCA {
     }
 
     /**
+     * @brief returns Tag-Structures (with readOnly) of all the Functions Tags
+     * 
+     * @param _Functions REF where the tag structures will be returned
+     * @param _FilterUsage Filter tags by usage type (GetWebData or GetWebConfig)
+     */
+    void FuncHandler::getTagStructures (JsonObject &_Functions, TagUsage_T _FilterUsage) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      for (size_t i = 0; i < Functions.size (); i++) {
+        // Create or get the function object using modern ArduinoJson API
+        JsonObject Function = _Functions[Functions[i]->getName().c_str()].to<JsonObject>();
+        Functions[i]->addTagStructures(Function, _FilterUsage);
+      }
+    }
+
+    /**
      * @brief get the Amount of Links in the Links-Vector
      * 
      * @return int16_t size of the Vector

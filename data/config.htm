@@ -29,23 +29,21 @@
     }
     function onChange(ValueInput) {
       let OutData = getOnChangeObject(ValueInput);
-      if (ws.readyState !== WebSocket.OPEN) {
-        connectWS();
-      }
-      ws.send(JSON.stringify(OutData));
+      ensureWebSocketConnected(() => {
+        ws.send(JSON.stringify(OutData));
+      });
     }
     function onClick(ValueInput) {
       let OutData = getOnClickObject(ValueInput);
-      if (ws.readyState !== WebSocket.OPEN) {
-        connectWS();
-      }
-      ws.send(JSON.stringify(OutData));
+      ensureWebSocketConnected(() => {
+        ws.send(JSON.stringify(OutData));
+      });
     }
     function onSaveConfig() {
       location.href = '/configSave';
     }
 
-    fetch("http://" + location.host + "%CONF_FILE%")
+    fetch("http://" + location.host + "/api/tags")
       .then(response => {
         return response.json();
       })

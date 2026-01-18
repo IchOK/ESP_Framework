@@ -283,6 +283,80 @@ function updateViewTag(ViewTag, DataTagValue) {
   }
 }
 
+/**
+ * Ensures WebSocket is connected, reconnects if necessary
+ * @param {Function} callback - Function to call once WebSocket is ready
+ */
+function ensureWebSocketConnected(callback) {
+  // Check if ws is defined (should be defined in home.htm)
+  if (typeof ws === 'undefined') {
+    console.error('WebSocket not initialized');
+    return;
+  }
+
+  // If WebSocket is already open, call callback immediately
+  if (ws.readyState === WebSocket.OPEN) {
+    callback();
+    return;
+  }
+
+  // If WebSocket is connecting, wait for it to open
+  if (ws.readyState === WebSocket.CONNECTING) {
+    const checkConnection = () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        callback();
+      } else if (ws.readyState === WebSocket.CONNECTING) {
+        setTimeout(checkConnection, 50);
+      } else {
+        // Connection failed, try to reconnect
+        reconnectWebSocket(callback);
+      }
+    };
+    setTimeout(checkConnection, 50);
+    return;
+  }
+
+  // WebSocket is closed or closing, reconnect
+  reconnectWebSocket(callback);
+}
+
+/**
+ * Reconnects WebSocket and sets up event handlers
+ * @param {Function} callback - Function to call once WebSocket is ready
+ */
+function reconnectWebSocket(callback) {
+  // Check if connectWS function exists (should be defined in home.htm)
+  if (typeof connectWS === 'undefined') {
+    console.error('connectWS function not found');
+    return;
+  }
+  
+  // Store existing onmessage handler if it exists
+  const existingOnMessage = (typeof ws !== 'undefined' && ws.onmessage) ? ws.onmessage : null;
+  
+  // Reconnect
+  connectWS();
+  
+  // Set up onopen handler to call callback
+  ws.onopen = () => {
+    callback();
+  };
+  
+  // Restore onmessage handler if it existed
+  if (existingOnMessage) {
+    ws.onmessage = existingOnMessage;
+  }
+  
+  // Handle connection errors
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
+  
+  ws.onclose = () => {
+    console.warn('WebSocket closed, will reconnect on next action');
+  };
+}
+
 function getOnChangeObject (ValueInput) {
   var Value;
   switch (ValueInput.type) {

@@ -10,7 +10,9 @@
  *
  */
 #include <JCA_IOT_Server.h>
+#include <JCA_FNC_Parent.h>
 using namespace JCA::SYS;
+using namespace JCA::FNC;
 
 namespace JCA {
   namespace IOT {
@@ -318,6 +320,27 @@ namespace JCA {
 
       // Save WebConfig
       WebServerObject->on (JCA_IOT_SERVER_PATH_CONFIGSAVE, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSaveConfigCB(); this->onWebConfigGet (_Request); });
+
+      // RestAPI - Tags endpoint for dynamic tag structures (must be registered before /api)
+      // This endpoint returns tag structures with current readOnly status
+      WebServerObject->on ("/api/tags", HTTP_GET, [this] (AsyncWebServerRequest *_Request) {
+        Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Tags Request");
+        JsonDocument JsonDoc;
+        JsonVariant OutData = JsonDoc.as<JsonVariant> ();
+        
+        // Call callback function if registered
+        if (restApiTagsCB) {
+          JsonVariant InData;
+          restApiTagsCB (InData, OutData);
+        }
+        
+        // Create Response
+        String response;
+        serializeJson (OutData, response);
+        Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Tags Response:");
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
+        _Request->send (200, "application/json", response);
+      });
 
       // RestAPI
       WebServerObject->on (

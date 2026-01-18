@@ -91,5 +91,9 @@ namespace JCA {
     void Server::onRestApiDelete (JsonVariantCallback _CB) {
       restApiDeleteCB = _CB;
     }
+
+    void Server::onRestApiTags (JsonVariantCallback _CB) {
+      restApiTagsCB = _CB;
+    }
   }
 }

@@ -199,6 +199,12 @@ void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
   _Out["links"] = Handler.getFuncCount ();
 }
 
+void cbRestApiTags (JsonVariant &_In, JsonVariant &_Out) {
+  // Write tag structures directly to _Out without nested "elements" object
+  JsonObject Elements = _Out.to<JsonObject>();
+  Handler.getTagStructures (Elements, JCA::TAG::TagUsage_T::GetAll);
+}
+
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {
   if (_In["mode"].is<JsonVariant> ()) {
     String Mode = _In["mode"].as<String> ();
@@ -282,6 +288,7 @@ void setup () {
   IotServer.onRestApiPut (cbRestApiPut);
   IotServer.onRestApiPatch (cbRestApiPatch);
   IotServer.onRestApiDelete (cbRestApiDelete);
+  IotServer.onRestApiTags (cbRestApiTags);
   Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-RestAPI Done");
   // Web-Socket
   IotServer.onWsData (cbWsData);

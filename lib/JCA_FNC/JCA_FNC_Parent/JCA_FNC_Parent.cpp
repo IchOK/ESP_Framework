@@ -246,6 +246,42 @@ namespace JCA {
     }
 
     /**
+     * @brief Add tag structures (with readOnly) for all tags to a JsonObject
+     * @param _Function Object to add the tag structures
+     * @param _FilterUsage Filter tags by usage type
+     */
+    void FuncParent::addTagStructures (JsonObject &_Function, TagUsage_T _FilterUsage) {
+      Debug.println (FLAG_PROTOCOL, false, Name, __func__, "Start");
+      String ObjectKey;
+      if (_FilterUsage & TagUsage_T::GetWebData == TagUsage_T::GetWebData) {
+        addTagStructures (_Function, _FilterUsage, String (JsonTagData));
+      }
+      if (_FilterUsage & TagUsage_T::GetWebConfig == TagUsage_T::GetWebConfig) {
+        addTagStructures (_Function, _FilterUsage, String (JsonTagConfig));
+      }
+    }
+
+    void FuncParent::addTagStructures (JsonObject &_Function, TagUsage_T _FilterUsage, String _ObjectKey) {
+      JsonArray TagArray = _Function[_ObjectKey.c_str()].to<JsonArray>();
+      TagArray.clear();
+      
+      for (size_t i = 0; i < Tags.size (); i++) {
+        if (Tags[i]->Usage & _FilterUsage) {
+          JsonObject TagObj = TagArray.add<JsonObject>();
+          String TagJson = "{" + Tags[i]->writeTag() + "}";
+          JsonDocument TagDoc;
+          DeserializationError error = deserializeJson(TagDoc, TagJson);
+          if (!error) {
+            JsonObject TagJsonObj = TagDoc.as<JsonObject>();
+            for (JsonPair kv : TagJsonObj) {
+              TagObj[kv.key().c_str()] = kv.value();
+            }
+          }
+        }
+      }
+    }
+
+    /**
      * @brief Returns the position of a tag inside the Tags-Vector
      *
      * @param _Name Name of the searched tag
