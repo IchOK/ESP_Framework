@@ -34,8 +34,9 @@ namespace JCA {
       Tags.push_back (new TagFloat ("Setpoint", "Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &Setpoint, _ProcessUnit));
       Tags.push_back (new TagBool ("ManualSetpointMode", "Handmodus für den Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualSetpointMode, "HAND", "AUTO"));
       Tags.push_back (new TagFloat ("ManualSetpoint", "Manueller Sollwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualSetpoint, _ProcessUnit));
-      Tags.push_back (new TagBool ("ManualOutputMode", "Handmodus für den Stellwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualOutputMode, "HAND", "AUTO"));
-      Tags.push_back (new TagFloat ("Value", "Stellwert", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, _OutputUnit));
+      Tags.push_back (new TagBool ("ManualOutputMode", "Handmodus für den Stellwert", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &ManualOutputMode, "HAND", "AUTO", std::bind (&PIDController::updateValueAccess, this)));
+      ValueTag = new TagFloat ("Value", "Stellwert", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, _OutputUnit);
+      Tags.push_back (ValueTag);
 
       P = 1.0;
       Ti = 1.0;
@@ -52,6 +53,9 @@ namespace JCA {
       Value = 0.0;
       ManualSetpointMode = false;
       ManualOutputMode = false;
+      
+      // Initialisiere das Access-Feld des Value-Tags basierend auf ManualOutputMode
+      updateValueAccess();
 
       Proportional = 0.0;
       Integral = 0.0;
@@ -141,6 +145,26 @@ namespace JCA {
 
       Debug.print(FLAG_LOOP, false, Name, __func__, "Output: ");
       Debug.println(FLAG_LOOP, false, Name, __func__, Value);
+    }
+
+    /**
+     * @brief Aktualisiert das Access-Feld des Value-Tags basierend auf ManualOutputMode
+     * 
+     * Wenn ManualOutputMode aktiv ist (true), wird Value schreibbar (ReadWrite).
+     * Wenn ManualOutputMode inaktiv ist (false), wird Value nur lesbar (Read).
+     */
+    void PIDController::updateValueAccess() {
+      if (ValueTag != nullptr) {
+        if (ManualOutputMode) {
+          // Im Handmodus: Value ist schreibbar
+          ValueTag->Access = static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save);
+          Debug.println(FLAG_DATA, false, Name, __func__, "Value-Tag ist jetzt schreibbar (ManualOutputMode aktiv)");
+        } else {
+          // Im Automatikmodus: Value ist nur lesbar
+          ValueTag->Access = TagAccessType_T::Read;
+          Debug.println(FLAG_DATA, false, Name, __func__, "Value-Tag ist jetzt nur lesbar (ManualOutputMode inaktiv)");
+        }
+      }
     }
 
     /**

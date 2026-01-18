@@ -41,6 +41,8 @@ namespace JCA {
       Tags.push_back (new TagFloat ("Position", "Istposition", "", TagAccessType_T::Read, TagUsage_T::UseData, &Position, "%"));
       Tags.push_back (new TagBool ("InitRequest", "Initialisierung anfordern", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &InitRequest, "Run", "Init"));
       Tags.push_back (new TagString ("StateCode", "Status", "", TagAccessType_T::Read, TagUsage_T::UseData, &StateCode));
+      AcknowledgeTag = new TagBool ("Acknowledge", "Fehler quittieren", "", TagAccessType_T::Read, TagUsage_T::UseData, &Acknowledge, "Quittieren", "Quittiert", std::bind (&Valve2DPosImp::acknowledgeFault, this));
+      Tags.push_back (AcknowledgeTag);
       Tags.push_back (new TagInt32 ("PositionPulse", "Impuls Position", "", TagAccessType_T::Read, TagUsage_T::UseData, &PositionPulse, ""));
       Tags.push_back (new TagUInt16 ("PulseCount", "Impuls Eingang", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &PulseCount, ""));
 
@@ -67,6 +69,7 @@ namespace JCA {
       InitRequest = false;
       CurrentState = State_T::INIT_OPEN;
       FaultCode = "";
+      Acknowledge = false;
 
       NextState = State_T::INIT_OPEN;
       MaxPositionPulse = 0;
@@ -126,6 +129,7 @@ namespace JCA {
         InitRequest = false;
         NextState = State_T::INIT_OPEN;
         FaultCode = "";
+        Acknowledge = false;
       }
       if (CurrentState != NextState) {
         if (NextState == State_T::FAULT) {
@@ -255,6 +259,45 @@ namespace JCA {
       }
       StepTime += DiffMillis;
       Position = (float)PositionPulse / (float)MaxPositionPulse * 100.0;
+      
+      // Aktualisiere die Zugriffsrechte für den Acknowledge-Tag basierend auf FaultCode
+      updateAcknowledgeAccess();
+    }
+
+    /**
+     * @brief Quittiert den Fehler, wenn Acknowledge auf true gesetzt wird
+     * 
+     * Setzt den FaultCode zurück und setzt Acknowledge wieder auf false
+     */
+    void Valve2DPosImp::acknowledgeFault() {
+      if (Acknowledge && FaultCode.length() > 0) {
+        FaultCode = "";
+        NextState = State_T::INPOSITION;
+        Acknowledge = false;
+        Debug.println(FLAG_DATA, false, Name, __func__, "Fehler quittiert");
+      }
+    }
+
+    /**
+     * @brief Aktualisiert das Access-Feld des Acknowledge-Tags basierend auf FaultCode
+     * 
+     * Wenn ein Fehler vorliegt (FaultCode nicht leer), wird Acknowledge schreibbar (ReadWrite).
+     * Wenn kein Fehler vorliegt (FaultCode leer), ist Acknowledge nur lesbar (Read).
+     */
+    void Valve2DPosImp::updateAcknowledgeAccess() {
+      if (AcknowledgeTag != nullptr) {
+        if (FaultCode.length() > 0) {
+          // Fehler vorhanden: Acknowledge ist schreibbar
+          AcknowledgeTag->Access = TagAccessType_T::ReadWrite;
+        } else {
+          // Kein Fehler: Acknowledge ist nur lesbar
+          AcknowledgeTag->Access = TagAccessType_T::Read;
+          // Setze Acknowledge zurück, falls es noch true ist
+          if (Acknowledge) {
+            Acknowledge = false;
+          }
+        }
+      }
     }
 
     /**

@@ -63,6 +63,7 @@ namespace JCA {
       State_T CurrentState;
       String FaultCode;
       String StateCode;
+      bool Acknowledge;
 
       // Intern
       State_T NextState;
@@ -72,8 +73,15 @@ namespace JCA {
       uint16_t LastPulseTime;
       uint32_t StepTime;
       uint32_t LastMillis;
+      
+      // Tag-Referenzen für dynamische Zugriffssteuerung
+      TAG::TagBool* AcknowledgeTag;
 
       String getStateString (State_T _State);
+      
+      // Callback-Funktionen für Fehlerquittierung
+      void acknowledgeFault();
+      void updateAcknowledgeAccess();
 
     public:
       Valve2DPosImp (uint8_t _PinOpen, uint8_t _PinClose, uint8_t _PinEnable, String _Name);

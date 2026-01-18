@@ -56,6 +56,12 @@ namespace JCA {
       float LastDerivative;
       float LastProcessVar;
       unsigned long LastUpdateMillis;
+      
+      // Tag-Referenzen für dynamische Zugriffssteuerung
+      TAG::TagFloat* ValueTag;
+
+      // Callback-Funktion zur Aktualisierung des Access-Feldes des Value-Tags
+      void updateValueAccess();
 
     public:
       PIDController(String _Name, String _ProcessUnit, String _OutputUnit);
