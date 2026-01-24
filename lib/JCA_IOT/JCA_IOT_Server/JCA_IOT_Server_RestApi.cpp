@@ -95,5 +95,21 @@ namespace JCA {
     void Server::onRestApiTags (JsonVariantCallback _CB) {
       restApiTagsCB = _CB;
     }
+
+    void Server::onRestApiSetupMetadata (JsonVariantCallback _CB) {
+      restApiSetupMetadataCB = _CB;
+    }
+
+    void Server::onRestApiSetupGet (JsonVariantCallback _CB) {
+      restApiSetupGetCB = _CB;
+    }
+
+    void Server::onRestApiSetupPut (JsonVariantCallback _CB) {
+      restApiSetupPutCB = _CB;
+    }
+
+    void Server::onRestApiSetupFunctions (JsonVariantCallback _CB) {
+      restApiSetupFunctionsCB = _CB;
+    }
   }
 }

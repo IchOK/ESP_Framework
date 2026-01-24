@@ -1,6 +1,10 @@
 #include <JCA_IOT_FuncHandler.h>
+#include <JCA_FNC_Parent.h>
+#include <FS.h>
+#include <LittleFS.h>
 using namespace JCA::SYS;
 using namespace JCA::TAG;
+using namespace JCA::LNK;
 
 namespace JCA {
   namespace IOT {
@@ -8,37 +12,10 @@ namespace JCA {
     const char *FuncHandler::JsonTagFunctions = "functions";
     const char *FuncHandler::JsonTagLinks = "links";
 
-    FuncLink::FuncLink(FuncLinkType_T _Type) {
-      Input = std::vector<FuncLinkPair_T>();
-      Output = std::vector<FuncLinkPair_T>();
-      Type = _Type;
-    }
-
-    FuncLink::~FuncLink() {
-      Input.clear();
-      Output.clear();
-    }
-
-    void FuncLink::addInput(FuncLinkPair_T _Input) {
-      Input.push_back(_Input);
-    }
-
-    void FuncLink::addOutput(FuncLinkPair_T _Output) {
-      Output.push_back(_Output);
-    }
-
-    FuncLinkPair_T FuncLink::getInput(uint8_t _Index) {
-      return Input[_Index];
-    }
-
-    FuncLinkPair_T FuncLink::getOutput(uint8_t _Index) {
-      return Output[_Index];
-    }
-
     FuncHandler::FuncHandler (String _Name) {
       Name = _Name;
-      LinkMapping["direct"] = FuncLinkType_T::LinkDirect;
-      LinkMapping["move"] = FuncLinkType_T::LinkMove;
+      // Link types are registered via AddToHandler functions (similar to functions)
+      // This is done in main.cpp in addLinksToHandler()
     }
 
     /**
@@ -83,9 +60,8 @@ namespace JCA {
      * 
      */
     void FuncHandler::deleteLinks() {
-      for (FuncLink *Link : Links) {
+      for (LNK::FuncLink *Link : Links) {
         delete Link;
-
       }
       Links.clear();
     }
@@ -208,7 +184,7 @@ namespace JCA {
               JsonObject Log = LogArray.add<JsonObject>();
               if (LinkMapping.count (SetupLinkObj["type"]) == 1) {
                 // Create Link
-                Links.push_back (new FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
+                Links.push_back (new LNK::FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
                 Log["Type"] = SetupLinkObj["type"].as<String> ();
                 size_t Link = Links.size() - 1;
                 int16_t FuncIndex;
@@ -259,9 +235,6 @@ namespace JCA {
               Debug.println (FLAG_SETUP, true, Name, __func__, "]");
             }
           }
-
-          // write Functions File to used by Webpage
-          saveFunctions ();
         }
         SetupFile.close ();
       }
@@ -272,50 +245,6 @@ namespace JCA {
       LogFile.close ();
 
       Debug.println (FLAG_SETUP, true, Name, __func__, "Done");
-      return RetValue;
-    }
-
-    /**
-     * @brief clear all Setup-Data and delete the Functio
-     * 
-     */
-    FuncPatchRet_T FuncHandler::remove () {
-      FuncPatchRet_T RetValue = FuncPatchRet_T::done;
-      deleteFunctions ();
-      LittleFS.remove(JCA_IOT_FILE_FUNCTIONS);
-      return RetValue;
-    }
-
-    /**
-     * @brief Save the FunctionList in JSON to Setup the Webpage
-     * (Default: usrFunctions.json)
-     */
-    FuncPatchRet_T FuncHandler::saveFunctions () {
-      FuncPatchRet_T RetValue = FuncPatchRet_T::done;
-      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
-      // Open Output File
-      File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_WRITE);
-//      File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_WRITE, true);
-      if (!FuncFile) {
-        RetValue = FuncPatchRet_T::fileOpen;
-      } else {
-        bool InitDone = false;
-        // Create Object with all Functions inside
-        FuncFile.println ("{");
-        for (size_t i = 0; i < Functions.size (); i++) {
-          Functions[i]->writeFunction (FuncFile, InitDone);
-        }
-        FuncFile.println ("}");
-        // Close File
-        FuncFile.close ();
-      }
-      if (Debug.println (FLAG_DATA, true, "FuncHandler", __func__, "Functions-JSON")) {
-        File FuncFile = LittleFS.open (JCA_IOT_FILE_FUNCTIONS, FILE_READ);
-        while (FuncFile.available ()) {
-          Debug.print (FLAG_DATA, true, "FuncHandler", __func__, (char)FuncFile.read ());
-        }
-        FuncFile.close ();
-      }
       return RetValue;
     }
 
@@ -382,47 +311,10 @@ namespace JCA {
       JsonDocument LinkDoc;
 
       // Update Links
-      for (FuncLink *Link : Links) {
-
-        switch (Link->Type) {
-        case FuncLinkType_T::LinkDirect:
-          // Direkt Link always read the first Input-Link and set it to all Output-Links
-          if (Link->getInputCount () > 0 && Link->getOutputCount () > 0) {
-            JsonVariant Value = LinkDoc.to<JsonVariant> ();
-            FuncLinkPair_T Input = Link->getInput(0);
-
-            if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value, TagAccessType_T::Read)) {
-              for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount(); OutputIndex++) {
-                FuncLinkPair_T Output = Link->getOutput (OutputIndex);
-                Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value, TagAccessType_T::Write);
-              }
-            }
-          }
-          break;
-
-        case FuncLinkType_T::LinkMove:
-          // Move Link use the first Input-Link to decide if the second Input-Link should be set to all Output-Link
-          if (Link->getInputCount () > 1 && Link->getOutputCount () > 0) {
-            JsonVariant Value = LinkDoc.to<JsonVariant> ();
-            FuncLinkPair_T Selector = Link->getInput (0);
-            FuncLinkPair_T Input = Link->getInput (1);
-
-            if (Functions[Selector.Func]->getTagValueByIndex (Selector.Tag, Value, TagAccessType_T::Read)) {
-              bool SelectorValue = Value.as<bool> ();
-              if (SelectorValue) {
-                if (Functions[Input.Func]->getTagValueByIndex (Input.Tag, Value, TagAccessType_T::Read)) {
-                  for (uint8_t OutputIndex = 0; OutputIndex < Link->getInputCount (); OutputIndex++) {
-                    FuncLinkPair_T Output = Link->getOutput (OutputIndex);
-                    Functions[Output.Func]->setTagValueByIndex (Output.Tag, Value, TagAccessType_T::Write);
-                  }
-                }
-              }
-            }
-          }
-          break;
-
-        default:
-          break;
+      for (LNK::FuncLink *Link : Links) {
+        // Look up update function in map
+        if (LinkUpdateList.count(Link->Type) == 1) {
+          LinkUpdateList[Link->Type](Link, Functions, LinkDoc);
         }
       }
 
@@ -435,9 +327,7 @@ namespace JCA {
     String FuncHandler::patch(String _Command) {
       _Command.toLowerCase ();
       FuncPatchRet_T RetValue = FuncPatchRet_T::modeUndef;
-      if (_Command == "saveconfig") {
-        RetValue = saveFunctions ();
-      } else if (_Command == "savevalues") {
+      if (_Command == "savevalues") {
         RetValue = saveValues ();
       } else if (_Command == "loadvalues") {
         RetValue = loadValues ();
@@ -454,8 +344,6 @@ namespace JCA {
         if (RetValue > 0) {
           RetValue = loadValues ();
         }
-      } else if (_Command == "delete") {
-        RetValue = remove ();
       }
       switch (RetValue)
       {
@@ -581,6 +469,224 @@ namespace JCA {
      */
     int16_t FuncHandler::getFuncCount () {
       return Functions.size ();
+    }
+
+    /**
+     * @brief Get setup metadata including hardware types, function types with schemas, and link types
+     * 
+     * @param _Out JSON object to fill with metadata
+     */
+    void FuncHandler::getSetupMetadata (JsonObject &_Out) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      
+      // Return available hardware types with their schemas
+      JsonObject HardwareSchemas = _Out["hardwareSchemas"].to<JsonObject>();
+      for (auto const& pair : HardwareList) {
+        String HwType = pair.first;
+        JsonObject HwSchema = HardwareSchemas[HwType].to<JsonObject>();
+        
+        // Get schema from HardwareSchemaList if available
+        if (HardwareSchemaList.count(HwType) == 1) {
+          HardwareSchemaList[HwType](HwSchema);
+        }
+      }
+      
+      // Also return simple hardware types list for backward compatibility
+      JsonArray HardwareTypes = _Out["hardwareTypes"].to<JsonArray>();
+      for (auto const& pair : HardwareList) {
+        HardwareTypes.add(pair.first);
+      }
+      
+      // Return available function types with their schemas
+      JsonObject FunctionSchemas = _Out["functionSchemas"].to<JsonObject>();
+      for (auto const& pair : FunctionList) {
+        String FuncType = pair.first;
+        JsonObject FuncSchema = FunctionSchemas[FuncType].to<JsonObject>();
+        
+        // Get schema from FunctionSchemaList if available
+        if (FunctionSchemaList.count(FuncType) == 1) {
+          FunctionSchemaList[FuncType](FuncSchema);
+        }
+      }
+      
+      // Also return simple function types list for backward compatibility
+      JsonArray FunctionTypes = _Out["functionTypes"].to<JsonArray>();
+      for (auto const& pair : FunctionList) {
+        FunctionTypes.add(pair.first);
+      }
+      
+      // Return available link types with their schemas
+      JsonObject LinkSchemas = _Out["linkSchemas"].to<JsonObject>();
+      for (auto const& pair : LinkMapping) {
+        String LinkType = pair.first;
+        JsonObject LinkSchema = LinkSchemas[LinkType].to<JsonObject>();
+        
+        // Get schema from LinkSchemaList if available
+        if (LinkSchemaList.count(LinkType) == 1) {
+          LinkSchemaList[LinkType](LinkSchema);
+        }
+      }
+      
+      // Also return simple link types list for backward compatibility
+      JsonArray LinkTypes = _Out["linkTypes"].to<JsonArray>();
+      LinkTypes.add("direct");
+      LinkTypes.add("move");
+    }
+
+    /**
+     * @brief Load setup configuration from file
+     * 
+     * @param _Out JSON object to fill with loaded setup data
+     * @return true if successful, false otherwise
+     */
+    bool FuncHandler::loadSetup (JsonObject &_Out) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      
+      if (LittleFS.exists(JCA_IOT_FILE_SETUP)) {
+        File SetupFile = LittleFS.open(JCA_IOT_FILE_SETUP, FILE_READ);
+        if (SetupFile) {
+          JsonDocument SetupDoc;
+          DeserializationError Error = deserializeJson(SetupDoc, SetupFile);
+          SetupFile.close();
+          
+          if (Error) {
+            _Out.clear();
+            _Out["error"] = "Failed to parse setup file";
+            Debug.print(FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
+            Debug.println(FLAG_ERROR, true, Name, __func__, Error.c_str());
+            return false;
+          }
+          
+          // Copy data from document to output object
+          JsonObject SetupObj = SetupDoc.as<JsonObject>();
+          for (JsonPair pair : SetupObj) {
+            _Out[pair.key()] = pair.value();
+          }
+          return true;
+        } else {
+          _Out["error"] = "Failed to open setup file";
+          Debug.println(FLAG_ERROR, true, Name, __func__, "Failed to open setup file");
+          return false;
+        }
+      } else {
+        // Return empty structure if file doesn't exist
+        _Out["hardware"] = JsonArray();
+        _Out["functions"] = JsonArray();
+        _Out["links"] = JsonArray();
+        return true;
+      }
+    }
+
+    /**
+     * @brief Save setup configuration to file
+     * 
+     * @param _In JSON object containing setup data to save
+     * @return true if successful, false otherwise
+     */
+    bool FuncHandler::saveSetup (JsonObject &_In) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      
+      File SetupFile = LittleFS.open(JCA_IOT_FILE_SETUP, FILE_WRITE);
+      if (SetupFile) {
+        size_t WrittenBytes = serializeJson(_In, SetupFile);
+        SetupFile.close();
+        Debug.print(FLAG_SETUP, true, Name, __func__, "Setup file saved, bytes: ");
+        Debug.println(FLAG_SETUP, true, Name, __func__, WrittenBytes);
+        return true;
+      } else {
+        Debug.println(FLAG_ERROR, true, Name, __func__, "Failed to open setup file for writing");
+        return false;
+      }
+    }
+
+    /**
+     * @brief Get list of all functions with their available tags
+     * 
+     * @param _Out JSON object to fill with functions and tags
+     */
+    void FuncHandler::getFunctionsList (JsonObject &_Out) {
+      Debug.println (FLAG_PROTOCOL, true, Name, __func__, "Run");
+      
+      JsonArray FunctionsArray = _Out["functions"].to<JsonArray>();
+      
+      for (size_t i = 0; i < Functions.size (); i++) {
+        JsonObject FuncObj = FunctionsArray.add<JsonObject>();
+        FuncObj["name"] = Functions[i]->getName();
+        
+        // Get all tag names with access types for this function
+        JsonArray TagsArray = FuncObj["tags"].to<JsonArray>();
+        
+        // Use getTagStructures to get tag info (since Tags is protected)
+        JsonDocument TempDoc;
+        JsonObject TempFunc = TempDoc.to<JsonObject>();
+        Functions[i]->addTagStructures(TempFunc, JCA::TAG::TagUsage_T::GetAll);
+        
+        // Use a Map to store tag info (name -> accessType) to avoid duplicates
+        std::map<String, uint8_t> TagInfoMap;
+        
+        // Extract tag names and access types from data tags
+        if (TempFunc["data"].is<JsonArray>()) {
+          JsonArray DataTags = TempFunc["data"].as<JsonArray>();
+          for (JsonObject TagObj : DataTags) {
+            if (TagObj["name"].is<String>()) {
+              String TagName = TagObj["name"].as<String>();
+              // Get accessType from readOnly field
+              // readOnly: 0 = writable (Access contains Write), 1 = read-only (Access is Read only)
+              // readOnly = 0 means (Access & Write) != 0, so accessType includes Write
+              // readOnly = 1 means (Access & Write) == 0, so accessType is Read only
+              bool ReadOnly = true; // default to read-only if not found
+              if (TagObj["readOnly"].is<bool>()) {
+                ReadOnly = TagObj["readOnly"].as<bool>();
+              } else if (TagObj["readOnly"].is<int>()) {
+                ReadOnly = TagObj["readOnly"].as<int>() != 0;
+              } else if (TagObj["readOnly"].is<String>()) {
+                ReadOnly = TagObj["readOnly"].as<String>() != "0";
+              }
+              
+              // Calculate accessType: ReadOnly=0 means ReadWrite, ReadOnly=1 means Read only
+              uint8_t AccessType = ReadOnly ? static_cast<uint8_t>(JCA::TAG::TagAccessType_T::Read) : 
+                                   static_cast<uint8_t>(JCA::TAG::TagAccessType_T::ReadWrite);
+              TagInfoMap[TagName] = AccessType;
+            }
+          }
+        }
+        
+        // Extract tag names and access types from config tags
+        if (TempFunc["config"].is<JsonArray>()) {
+          JsonArray ConfigTags = TempFunc["config"].as<JsonArray>();
+          for (JsonObject TagObj : ConfigTags) {
+            if (TagObj["name"].is<String>()) {
+              String TagName = TagObj["name"].as<String>();
+              bool ReadOnly = true; // default to read-only if not found
+              if (TagObj["readOnly"].is<bool>()) {
+                ReadOnly = TagObj["readOnly"].as<bool>();
+              } else if (TagObj["readOnly"].is<int>()) {
+                ReadOnly = TagObj["readOnly"].as<int>() != 0;
+              } else if (TagObj["readOnly"].is<String>()) {
+                ReadOnly = TagObj["readOnly"].as<String>() != "0";
+              }
+              
+              uint8_t AccessType = ReadOnly ? static_cast<uint8_t>(JCA::TAG::TagAccessType_T::Read) : 
+                                   static_cast<uint8_t>(JCA::TAG::TagAccessType_T::ReadWrite);
+              // If tag already exists, merge access types (use ReadWrite if either is writable)
+              if (TagInfoMap.count(TagName) > 0) {
+                if (!ReadOnly) {
+                  TagInfoMap[TagName] = static_cast<uint8_t>(JCA::TAG::TagAccessType_T::ReadWrite);
+                }
+              } else {
+                TagInfoMap[TagName] = AccessType;
+              }
+            }
+          }
+        }
+        
+        // Add all unique tags with their access types to the array
+        for (auto const& pair : TagInfoMap) {
+          JsonObject TagInfo = TagsArray.add<JsonObject>();
+          TagInfo["name"] = pair.first;
+          TagInfo["accessType"] = pair.second;
+        }
+      }
     }
   }
 }

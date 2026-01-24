@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>%TITLE% - Setup Editor</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="stylesheet" type="text/css" href="/style/style.css">
+  <link rel="stylesheet" type="text/css" href="/style/styleMobile.css">
+  <link rel="stylesheet" type="text/css" href="/style/styleAddon.css">
+  <style>
+    :root {
+      --ColorHome: var(--secondary);
+      --ColorConfig: var(--secondary);
+      --ColorSetup: var(--contrast);
+      --ColorWiFi: var(--secondary);
+      --ColorSystem: var(--secondary)
+    }
+    .setup-section {
+      margin-bottom: 2rem;
+    }
+    .item-card {
+      border: 1px solid var(--muted-border-color);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: var(--card-background-color);
+    }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .item-header h4 {
+      margin: 0;
+    }
+    .item-properties {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .btn-small {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    .add-button {
+      margin-top: 1rem;
+    }
+    .json-editor {
+      font-family: monospace;
+      font-size: 0.875rem;
+      min-height: 300px;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--muted-border-color);
+      margin-bottom: 1rem;
+    }
+    .tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+  <script type="text/javascript">
+    let metadata = {};
+    let functionsList = [];
+    let setupData = {
+      hardware: [],
+      functions: [],
+      links: []
+    };
+
+    // Load metadata and setup data
+    async function loadData() {
+      try {
+        // Load metadata
+        const metadataResponse = await fetch("http://" + location.host + "/api/setup/metadata");
+        metadata = await metadataResponse.json();
+        console.log("Metadata loaded:", metadata);
+
+        // Load functions list
+        const functionsResponse = await fetch("http://" + location.host + "/api/setup/functions");
+        const functionsData = await functionsResponse.json();
+        functionsList = functionsData.functions || [];
+        console.log("Functions list loaded:", functionsList);
+
+        // Load current setup
+        const setupResponse = await fetch("http://" + location.host + "/api/setup");
+        const loadedSetup = await setupResponse.json();
+        if (loadedSetup.hardware) setupData.hardware = loadedSetup.hardware;
+        if (loadedSetup.functions) setupData.functions = loadedSetup.functions;
+        if (loadedSetup.links) setupData.links = loadedSetup.links;
+        console.log("Setup data loaded:", setupData);
+
+        renderAll();
+      } catch (error) {
+        console.error("Error loading data:", error);
+        alert("Fehler beim Laden der Daten: " + error.message);
+      }
+    }
+
+    // Get tags for a specific function with optional access filter
+    function getTagsForFunction(funcName, accessFilter) {
+      const func = functionsList.find(f => f.name === funcName);
+      if (!func || !func.tags) return [];
+      
+      // If no filter, return all tags
+      if (!accessFilter) return func.tags;
+      
+      // Filter by access type
+      // accessFilter: 'read' for From (needs Read), 'write' for To (needs Write)
+      return func.tags.filter(tag => {
+        const accessType = typeof tag === 'object' ? tag.accessType : 0;
+        if (accessFilter === 'read') {
+          // From: needs Read (0x01)
+          return (accessType & 0x01) !== 0;
+        } else if (accessFilter === 'write') {
+          // To: needs Write (0x02)
+          return (accessType & 0x02) !== 0;
+        }
+        return true;
+      });
+    }
+
+    // Get tag name (handle both string and object format)
+    function getTagName(tag) {
+      return typeof tag === 'object' ? tag.name : tag;
+    }
+
+    // Render all sections
+    function renderAll() {
+      renderHardware();
+      renderFunctions();
+      renderLinks();
+      renderJsonView();
+    }
+
+    // Render hardware section
+    function renderHardware() {
+      const container = document.getElementById('hardware-list');
+      container.innerHTML = '';
+
+      setupData.hardware.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        
+        // Get schema for this hardware type
+        const schema = metadata.hardwareSchemas && metadata.hardwareSchemas[item.type] ? metadata.hardwareSchemas[item.type] : null;
+        const paramMap = {};
+        if (schema && schema.parameters) {
+          schema.parameters.forEach(param => {
+            paramMap[param.name] = param;
+          });
+        }
+        
+        // Build properties HTML with schema information
+        let propertiesHtml = '';
+        Object.entries(item).forEach(([key, value]) => {
+          const param = paramMap[key];
+          let inputType = 'text';
+          let inputValue = value;
+          let comment = param ? param.comment : '';
+          
+          if (key === 'type') {
+            // Type selector
+            propertiesHtml += `
+              <label>${key}: 
+                <select onchange="updateHardware(${index}, '${key}', this.value)">
+                  ${metadata.hardwareTypes ? metadata.hardwareTypes.map(ht => 
+                    `<option value="${ht}" ${ht === value ? 'selected' : ''}>${ht}</option>`
+                  ).join('') : ''}
+                </select>
+                ${comment ? `<small>${comment}</small>` : ''}
+              </label>
+            `;
+          } else if (param) {
+            // Use schema information
+            if (param.type === 'uint8' || param.type === 'uint16' || param.type === 'int32') {
+              inputType = 'number';
+              inputValue = value || 0;
+              propertiesHtml += `
+                <label>${key} (${param.type}): 
+                  <input type="${inputType}" value="${inputValue}" onchange="updateHardware(${index}, '${key}', parseInt(this.value) || 0)">
+                  ${comment ? `<small>${comment}</small>` : ''}
+                </label>
+              `;
+            } else if (param.type === 'uint8[]' || param.type === 'array') {
+              propertiesHtml += `
+                <label>${key} (${param.type}): 
+                  <input type="text" value="${JSON.stringify(value || [])}" placeholder="[1,2,3]" onchange="try { updateHardware(${index}, '${key}', JSON.parse(this.value)); } catch(e) { alert('Ungültiges Array'); }">
+                  ${comment ? `<small>${comment}</small>` : ''}
+                </label>
+              `;
+            } else {
+              // String type
+              propertiesHtml += `
+                <label>${key} (${param.type}): 
+                  <input type="text" value="${value || ''}" onchange="updateHardware(${index}, '${key}', this.value)">
+                  ${comment ? `<small>${comment}</small>` : ''}
+                </label>
+              `;
+            }
+          } else {
+            // No schema info, use default
+            if (typeof value === 'number') {
+              inputType = 'number';
+              propertiesHtml += `<label>${key}: <input type="${inputType}" value="${inputValue}" onchange="updateHardware(${index}, '${key}', parseInt(this.value) || 0)"></label>`;
+            } else if (Array.isArray(value)) {
+              propertiesHtml += `<label>${key}: <input type="text" value="${JSON.stringify(value)}" placeholder="[1,2,3]" onchange="try { updateHardware(${index}, '${key}', JSON.parse(this.value)); } catch(e) { alert('Ungültiges Array'); }"></label>`;
+            } else {
+              propertiesHtml += `<label>${key}: <input type="${inputType}" value="${value || ''}" onchange="updateHardware(${index}, '${key}', this.value)"></label>`;
+            }
+          }
+        });
+        
+        card.innerHTML = `
+          <div class="item-header">
+            <h4>${item.name || item.type || 'Unnamed'}</h4>
+            <button class="btn-small" onclick="removeHardware(${index})">Entfernen</button>
+          </div>
+          <div class="item-properties">
+            ${propertiesHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render functions section
+    function renderFunctions() {
+      const container = document.getElementById('functions-list');
+      container.innerHTML = '';
+
+      setupData.functions.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        
+        // Get schema for this function type
+        const schema = metadata.functionSchemas && metadata.functionSchemas[item.type] ? metadata.functionSchemas[item.type] : null;
+        const paramMap = {};
+        if (schema && schema.parameters) {
+          schema.parameters.forEach(param => {
+            paramMap[param.name] = param;
+          });
+        }
+        
+        // Build properties HTML with schema information
+        let propertiesHtml = '';
+        Object.entries(item).forEach(([key, value]) => {
+          const param = paramMap[key];
+          let inputType = 'text';
+          let inputValue = value;
+          let comment = param ? param.comment : '';
+          
+          if (key === 'type') {
+            // Type selector
+            propertiesHtml += `
+              <label>${key}: 
+                <select onchange="updateFunction(${index}, '${key}', this.value)">
+                  ${metadata.functionTypes ? metadata.functionTypes.map(ft => 
+                    `<option value="${ft}" ${ft === value ? 'selected' : ''}>${ft}</option>`
+                  ).join('') : ''}
+                </select>
+                ${comment ? `<small>${comment}</small>` : ''}
+              </label>
+            `;
+          } else if (param) {
+            // Use schema information
+            if (param.type === 'uint8' || param.type === 'uint16' || param.type === 'int32') {
+              inputType = 'number';
+              inputValue = value || 0;
+              propertiesHtml += `
+                <label>${key} (${param.type}): 
+                  <input type="${inputType}" value="${inputValue}" onchange="updateFunction(${index}, '${key}', parseInt(this.value) || 0)">
+                  ${comment ? `<small>${comment}</small>` : ''}
+                </label>
+              `;
+            } else if (param.type === 'uint8[]' || param.type === 'array') {
+              propertiesHtml += `
+                <label>${key} (${param.type}): 
+                  <input type="text" value="${JSON.stringify(value || [])}" placeholder="[1,2,3]" onchange="try { updateFunction(${index}, '${key}', JSON.parse(this.value)); } catch(e) { alert('Ungültiges Array'); }">
+                  ${comment ? `<small>${comment}</small>` : ''}
+                </label>
+              `;
+            } else {
+              // String type
+              propertiesHtml += `
+                <label>${key} (${param.type}): 
+                  <input type="text" value="${value || ''}" onchange="updateFunction(${index}, '${key}', this.value)">
+                  ${comment ? `<small>${comment}</small>` : ''}
+                </label>
+              `;
+            }
+          } else {
+            // No schema info, use default
+            if (typeof value === 'number') {
+              inputType = 'number';
+            } else if (Array.isArray(value)) {
+              propertiesHtml += `<label>${key}: <input type="text" value="${JSON.stringify(value)}" placeholder="[1,2,3]" onchange="try { updateFunction(${index}, '${key}', JSON.parse(this.value)); } catch(e) { alert('Ungültiges Array'); }"></label>`;
+            } else {
+              propertiesHtml += `<label>${key}: <input type="${inputType}" value="${value || ''}" onchange="updateFunction(${index}, '${key}', this.value)"></label>`;
+            }
+          }
+        });
+        
+        card.innerHTML = `
+          <div class="item-header">
+            <h4>${item.name || item.type || 'Unnamed'}</h4>
+            <button class="btn-small" onclick="removeFunction(${index})">Entfernen</button>
+          </div>
+          <div class="item-properties">
+            ${propertiesHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render links section
+    function renderLinks() {
+      const container = document.getElementById('links-list');
+      container.innerHTML = '';
+
+      setupData.links.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div class="item-header">
+            <h4>Link ${index + 1} (${item.type || 'direct'})</h4>
+            <button class="btn-small" onclick="removeLink(${index})">Entfernen</button>
+          </div>
+          <div class="item-properties">
+            <label>Type: 
+              <select onchange="updateLinkType(${index}, this.value)">
+                ${metadata.linkTypes ? metadata.linkTypes.map(lt => 
+                  `<option value="${lt}" ${lt === item.type ? 'selected' : ''}>${lt}</option>`
+                ).join('') : ''}
+              </select>
+              ${metadata.linkSchemas && metadata.linkSchemas[item.type] ? 
+                `<small>${metadata.linkSchemas[item.type].comment || ''}</small>` : ''}
+            </label>
+          </div>
+          <div>
+            <strong>From:</strong>
+            ${metadata.linkSchemas && metadata.linkSchemas[item.type] && metadata.linkSchemas[item.type].fromDescription ? 
+              `<small style="display: block; margin-left: 1rem; color: var(--muted-color);">
+                ${metadata.linkSchemas[item.type].fromDescription.map((desc, di) => 
+                  item.from && item.from[di] ? `${di + 1}. ${desc}` : ''
+                ).filter(d => d).join(' | ')}
+              </small>` : ''}
+            ${item.from ? item.from.map((f, fi) => {
+              const schema = metadata.linkSchemas && metadata.linkSchemas[item.type] ? metadata.linkSchemas[item.type] : null;
+              const fromMax = schema && schema.fromMax ? schema.fromMax : -1;
+              const canRemove = !schema || (schema.fromMin === undefined || item.from.length > schema.fromMin);
+              const description = schema && schema.fromDescription && schema.fromDescription[fi] ? 
+                `<small style="display: block; color: var(--muted-color);">${schema.fromDescription[fi]}</small>` : '';
+              
+              return `
+              <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                ${description}
+                <label>Function: 
+                  <select onchange="updateLinkFrom(${index}, ${fi}, 'func', this.value); updateTagsForLinkFrom(${index}, ${fi}, this.value);">
+                    <option value="">-- Auswählen --</option>
+                    ${functionsList.map(func => 
+                      `<option value="${func.name}" ${func.name === f.func ? 'selected' : ''}>${func.name}</option>`
+                    ).join('')}
+                  </select>
+                </label>
+                <label>Tag: 
+                  <select onchange="updateLinkFrom(${index}, ${fi}, 'tag', this.value)">
+                    <option value="">-- Auswählen --</option>
+                    ${getTagsForFunction(f.func, 'read').map(tag => {
+                      const tagName = getTagName(tag);
+                      return `<option value="${tagName}" ${tagName === f.tag ? 'selected' : ''}>${tagName}</option>`;
+                    }).join('')}
+                  </select>
+                </label>
+                ${canRemove ? `<button class="btn-small" onclick="removeLinkFrom(${index}, ${fi})">Entfernen</button>` : ''}
+              </div>
+            `;
+            }).join('') : ''}
+            ${(() => {
+              const schema = metadata.linkSchemas && metadata.linkSchemas[item.type] ? metadata.linkSchemas[item.type] : null;
+              const fromMax = schema && schema.fromMax ? schema.fromMax : -1;
+              const canAdd = !schema || fromMax < 0 || (item.from ? item.from.length < fromMax : true);
+              return canAdd ? `<button class="btn-small" onclick="addLinkFrom(${index})" style="margin-top: 0.5rem;">From hinzufügen</button>` : '';
+            })()}
+          </div>
+          <div style="margin-top: 1rem;">
+            <strong>To:</strong>
+            ${metadata.linkSchemas && metadata.linkSchemas[item.type] && metadata.linkSchemas[item.type].toDescription ? 
+              `<small style="display: block; margin-left: 1rem; color: var(--muted-color);">
+                ${metadata.linkSchemas[item.type].toDescription.join(' | ')}
+              </small>` : ''}
+            ${item.to ? item.to.map((t, ti) => {
+              const schema = metadata.linkSchemas && metadata.linkSchemas[item.type] ? metadata.linkSchemas[item.type] : null;
+              const toMax = schema && schema.toMax ? schema.toMax : -1;
+              const canRemove = !schema || (schema.toMin === undefined || item.to.length > schema.toMin);
+              
+              return `
+              <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                <label>Function: 
+                  <select onchange="updateLinkTo(${index}, ${ti}, 'func', this.value); updateTagsForLinkTo(${index}, ${ti}, this.value);">
+                    <option value="">-- Auswählen --</option>
+                    ${functionsList.map(func => 
+                      `<option value="${func.name}" ${func.name === t.func ? 'selected' : ''}>${func.name}</option>`
+                    ).join('')}
+                  </select>
+                </label>
+                <label>Tag: 
+                  <select onchange="updateLinkTo(${index}, ${ti}, 'tag', this.value)">
+                    <option value="">-- Auswählen --</option>
+                    ${getTagsForFunction(t.func, 'write').map(tag => {
+                      const tagName = getTagName(tag);
+                      return `<option value="${tagName}" ${tagName === t.tag ? 'selected' : ''}>${tagName}</option>`;
+                    }).join('')}
+                  </select>
+                </label>
+                ${canRemove ? `<button class="btn-small" onclick="removeLinkTo(${index}, ${ti})">Entfernen</button>` : ''}
+              </div>
+            `;
+            }).join('') : ''}
+            ${(() => {
+              const schema = metadata.linkSchemas && metadata.linkSchemas[item.type] ? metadata.linkSchemas[item.type] : null;
+              const toMax = schema && schema.toMax ? schema.toMax : -1;
+              const canAdd = !schema || toMax < 0 || (item.to ? item.to.length < toMax : true);
+              return canAdd ? `<button class="btn-small" onclick="addLinkTo(${index})" style="margin-top: 0.5rem;">To hinzufügen</button>` : '';
+            })()}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Render JSON view
+    function renderJsonView() {
+      const container = document.getElementById('json-view');
+      container.value = JSON.stringify(setupData, null, 2);
+    }
+
+    // Hardware functions
+    function addHardware() {
+      if (!metadata.hardwareTypes || metadata.hardwareTypes.length === 0) {
+        alert('Keine Hardware-Typen verfügbar');
+        return;
+      }
+      const type = prompt('Hardware-Typ auswählen:', metadata.hardwareTypes[0]);
+      if (type) {
+        const newItem = { type: type, name: 'newHardware' };
+        
+        // Get schema for this hardware type and add default values
+        if (metadata.hardwareSchemas && metadata.hardwareSchemas[type]) {
+          const schema = metadata.hardwareSchemas[type];
+          if (schema.parameters) {
+            schema.parameters.forEach(param => {
+              if (param.name === 'name') {
+                newItem[param.name] = 'newHardware';
+              } else if (param.type === 'string') {
+                newItem[param.name] = '';
+              } else if (param.type === 'uint8' || param.type === 'uint16' || param.type === 'int32') {
+                newItem[param.name] = 0;
+              } else if (param.type === 'uint8[]' || param.type === 'array') {
+                newItem[param.name] = [];
+              } else {
+                newItem[param.name] = '';
+              }
+            });
+          }
+        }
+        
+        setupData.hardware.push(newItem);
+        renderAll();
+      }
+    }
+
+    function updateHardware(index, key, value) {
+      // Try to preserve type
+      const currentValue = setupData.hardware[index][key];
+      if (typeof currentValue === 'number' && typeof value === 'string') {
+        setupData.hardware[index][key] = parseInt(value) || 0;
+      } else if (Array.isArray(currentValue) && typeof value === 'string') {
+        try {
+          setupData.hardware[index][key] = JSON.parse(value);
+        } catch(e) {
+          // Keep old value if parsing fails
+          return;
+        }
+      } else {
+        setupData.hardware[index][key] = value;
+      }
+      renderJsonView();
+    }
+
+    function removeHardware(index) {
+      if (confirm('Hardware wirklich entfernen?')) {
+        setupData.hardware.splice(index, 1);
+        renderAll();
+      }
+    }
+
+    // Function functions
+    function addFunction() {
+      if (!metadata.functionTypes || metadata.functionTypes.length === 0) {
+        alert('Keine Funktions-Typen verfügbar');
+        return;
+      }
+      const type = prompt('Funktions-Typ auswählen:', metadata.functionTypes[0]);
+      if (type) {
+        const newItem = { type: type, name: 'newFunction' };
+        
+        // Get schema for this function type and add default values
+        if (metadata.functionSchemas && metadata.functionSchemas[type]) {
+          const schema = metadata.functionSchemas[type];
+          if (schema.parameters) {
+            schema.parameters.forEach(param => {
+              if (param.name === 'name') {
+                newItem[param.name] = 'newFunction';
+              } else if (param.type === 'string') {
+                newItem[param.name] = '';
+              } else if (param.type === 'uint8' || param.type === 'uint16' || param.type === 'int32') {
+                newItem[param.name] = 0;
+              } else if (param.type === 'uint8[]' || param.type === 'array') {
+                newItem[param.name] = [];
+              } else {
+                newItem[param.name] = '';
+              }
+            });
+          }
+        }
+        
+        setupData.functions.push(newItem);
+        renderAll();
+      }
+    }
+
+    function updateFunction(index, key, value) {
+      // Try to preserve type based on schema
+      const item = setupData.functions[index];
+      const schema = metadata.functionSchemas && metadata.functionSchemas[item.type] ? metadata.functionSchemas[item.type] : null;
+      const param = schema && schema.parameters ? schema.parameters.find(p => p.name === key) : null;
+      
+      if (param) {
+        if (param.type === 'uint8' || param.type === 'uint16' || param.type === 'int32') {
+          setupData.functions[index][key] = parseInt(value) || 0;
+        } else if (param.type === 'uint8[]' || param.type === 'array') {
+          if (typeof value === 'string') {
+            try {
+              setupData.functions[index][key] = JSON.parse(value);
+            } catch(e) {
+              // Keep old value if parsing fails
+              return;
+            }
+          } else {
+            setupData.functions[index][key] = value;
+          }
+        } else {
+          setupData.functions[index][key] = value;
+        }
+      } else {
+        // No schema, try to preserve type
+        const currentValue = setupData.functions[index][key];
+        if (typeof currentValue === 'number' && typeof value === 'string') {
+          setupData.functions[index][key] = parseInt(value) || 0;
+        } else if (Array.isArray(currentValue) && typeof value === 'string') {
+          try {
+            setupData.functions[index][key] = JSON.parse(value);
+          } catch(e) {
+            // Keep old value if parsing fails
+            return;
+          }
+        } else {
+          setupData.functions[index][key] = value;
+        }
+      }
+      renderJsonView();
+    }
+
+    function removeFunction(index) {
+      if (confirm('Funktion wirklich entfernen?')) {
+        setupData.functions.splice(index, 1);
+        renderAll();
+      }
+    }
+
+    // Link functions
+    function addLink() {
+      setupData.links.push({ type: 'direct', from: [], to: [] });
+      renderAll();
+    }
+
+    function updateLink(index, key, value) {
+      setupData.links[index][key] = value;
+      renderJsonView();
+    }
+    
+    function updateLinkType(index, newType) {
+      const link = setupData.links[index];
+      link.type = newType;
+      
+      // Get schema for new link type and adjust structure
+      if (metadata.linkSchemas && metadata.linkSchemas[newType]) {
+        const schema = metadata.linkSchemas[newType];
+        const fromMin = schema.fromMin || 1;
+        const toMin = schema.toMin || 1;
+        const fromMax = schema.fromMax || -1;
+        const toMax = schema.toMax || -1;
+        
+        // Adjust from array
+        if (!link.from) link.from = [];
+        while (link.from.length < fromMin) {
+          link.from.push({ func: '', tag: '' });
+        }
+        if (fromMax > 0 && link.from.length > fromMax) {
+          link.from = link.from.slice(0, fromMax);
+        }
+        
+        // Adjust to array
+        if (!link.to) link.to = [];
+        while (link.to.length < toMin) {
+          link.to.push({ func: '', tag: '' });
+        }
+        if (toMax > 0 && link.to.length > toMax) {
+          link.to = link.to.slice(0, toMax);
+        }
+      }
+      
+      renderAll();
+    }
+
+    function addLinkFrom(index) {
+      if (!setupData.links[index].from) {
+        setupData.links[index].from = [];
+      }
+      const link = setupData.links[index];
+      const schema = metadata.linkSchemas && metadata.linkSchemas[link.type] ? metadata.linkSchemas[link.type] : null;
+      const fromMax = schema && schema.fromMax ? schema.fromMax : -1;
+      
+      // Check if we can add more
+      if (fromMax > 0 && link.from.length >= fromMax) {
+        alert(`Maximale Anzahl von From-Einträgen (${fromMax}) erreicht`);
+        return;
+      }
+      
+      setupData.links[index].from.push({ func: '', tag: '' });
+      renderAll();
+    }
+
+    function updateLinkFrom(index, fromIndex, key, value) {
+      setupData.links[index].from[fromIndex][key] = value;
+      renderJsonView();
+    }
+
+    function removeLinkFrom(index, fromIndex) {
+      const link = setupData.links[index];
+      const schema = metadata.linkSchemas && metadata.linkSchemas[link.type] ? metadata.linkSchemas[link.type] : null;
+      const fromMin = schema && schema.fromMin ? schema.fromMin : 1;
+      
+      // Check if we can remove (must keep minimum)
+      if (link.from.length <= fromMin) {
+        alert(`Mindestens ${fromMin} From-Einträge erforderlich`);
+        return;
+      }
+      
+      setupData.links[index].from.splice(fromIndex, 1);
+      renderAll();
+    }
+
+    function addLinkTo(index) {
+      if (!setupData.links[index].to) {
+        setupData.links[index].to = [];
+      }
+      const link = setupData.links[index];
+      const schema = metadata.linkSchemas && metadata.linkSchemas[link.type] ? metadata.linkSchemas[link.type] : null;
+      const toMax = schema && schema.toMax ? schema.toMax : -1;
+      
+      // Check if we can add more
+      if (toMax > 0 && link.to.length >= toMax) {
+        alert(`Maximale Anzahl von To-Einträgen (${toMax}) erreicht`);
+        return;
+      }
+      
+      setupData.links[index].to.push({ func: '', tag: '' });
+      renderAll();
+    }
+
+    function updateLinkTo(index, toIndex, key, value) {
+      setupData.links[index].to[toIndex][key] = value;
+      renderJsonView();
+    }
+
+    function removeLinkTo(index, toIndex) {
+      const link = setupData.links[index];
+      const schema = metadata.linkSchemas && metadata.linkSchemas[link.type] ? metadata.linkSchemas[link.type] : null;
+      const toMin = schema && schema.toMin ? schema.toMin : 1;
+      
+      // Check if we can remove (must keep minimum)
+      if (link.to.length <= toMin) {
+        alert(`Mindestens ${toMin} To-Einträge erforderlich`);
+        return;
+      }
+      
+      setupData.links[index].to.splice(toIndex, 1);
+      renderAll();
+    }
+
+    function removeLink(index) {
+      if (confirm('Link wirklich entfernen?')) {
+        setupData.links.splice(index, 1);
+        renderAll();
+      }
+    }
+
+    // Update tags dropdown when function changes
+    function updateTagsForLinkFrom(index, fromIndex, funcName) {
+      const link = setupData.links[index];
+      if (link.from && link.from[fromIndex]) {
+        link.from[fromIndex].func = funcName;
+        link.from[fromIndex].tag = ''; // Reset tag when function changes
+        renderAll();
+      }
+    }
+
+    function updateTagsForLinkTo(index, toIndex, funcName) {
+      const link = setupData.links[index];
+      if (link.to && link.to[toIndex]) {
+        link.to[toIndex].func = funcName;
+        link.to[toIndex].tag = ''; // Reset tag when function changes
+        renderAll();
+      }
+    }
+
+    // Save function
+    async function saveSetup() {
+      try {
+        // Update from JSON view if it was edited
+        try {
+          const jsonText = document.getElementById('json-view').value;
+          setupData = JSON.parse(jsonText);
+        } catch (e) {
+          // If JSON is invalid, use current setupData
+        }
+
+        const response = await fetch("http://" + location.host + "/api/setup", {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(setupData)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Setup erfolgreich gespeichert!');
+          loadData(); // Reload to get fresh data
+        } else {
+          alert('Fehler beim Speichern: ' + (result.error || 'Unbekannter Fehler'));
+        }
+      } catch (error) {
+        console.error("Error saving setup:", error);
+        alert("Fehler beim Speichern: " + error.message);
+      }
+    }
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      // Show selected tab
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    // Load data on page load
+    window.onload = function() {
+      loadData();
+    };
+  </script>
+</head>
+
+<body>
+  <nav class="container-fluid">
+    <ul>
+      <li>%SVG_LOGO%</li>
+      <li>Setup Editor</li>
+    </ul>
+    <ul>
+      <li><a href="/home.htm">%SVG_HOME%</a></li>
+      <li><a href="/config.htm">%SVG_CONFIG%</a></li>
+      <li><a href="/setup.htm">%SVG_SETUP%</a></li>
+      <li><a href="/connect">%SVG_WIFI%</a></li>
+      <li><a href="/sys">%SVG_SYSTEM%</a></li>
+    </ul>
+  </nav>
+  <main class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('hardware-tab')">Hardware</button>
+      <button class="tab" onclick="switchTab('functions-tab')">Funktionen</button>
+      <button class="tab" onclick="switchTab('links-tab')">Links</button>
+      <button class="tab" onclick="switchTab('json-tab')">JSON</button>
+    </div>
+
+    <div id="hardware-tab" class="tab-content active">
+      <section class="setup-section">
+        <header>
+          <h2>Hardware</h2>
+        </header>
+        <div id="hardware-list"></div>
+        <button class="add-button" onclick="addHardware()">Hardware hinzufügen</button>
+      </section>
+    </div>
+
+    <div id="functions-tab" class="tab-content">
+      <section class="setup-section">
+        <header>
+          <h2>Funktionen</h2>
+        </header>
+        <div id="functions-list"></div>
+        <button class="add-button" onclick="addFunction()">Funktion hinzufügen</button>
+      </section>
+    </div>
+
+    <div id="links-tab" class="tab-content">
+      <section class="setup-section">
+        <header>
+          <h2>Links</h2>
+        </header>
+        <div id="links-list"></div>
+        <button class="add-button" onclick="addLink()">Link hinzufügen</button>
+      </section>
+    </div>
+
+    <div id="json-tab" class="tab-content">
+      <section class="setup-section">
+        <header>
+          <h2>JSON Editor</h2>
+        </header>
+        <textarea id="json-view" class="json-editor" onchange="try { setupData = JSON.parse(this.value); } catch(e) { alert('Ungültiges JSON: ' + e.message); }"></textarea>
+      </section>
+    </div>
+
+    <section>
+      <button onclick="saveSetup()" style="margin-top: 2rem;">Setup speichern</button>
+    </section>
+  </main>
+</body>
+</html>

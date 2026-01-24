@@ -17,8 +17,6 @@
 #define _JCA_IOT_FUNCHANDLER_
 
 #include <ArduinoJson.h>
-#include <FS.h>
-#include <LittleFS.h>
 #include <map>
 #include <vector>
 
@@ -30,8 +28,16 @@
   #define FILE_WRITE "w"
 #endif
 
-#include <JCA_FNC_Parent.h>
+#include <JCA_LNK_FuncLink.h>
+#include <JCA_TAG_Parent.h>
 #include <JCA_SYS_DebugOut.h>
+
+// Forward declaration
+namespace JCA {
+  namespace FNC {
+    class FuncParent;
+  }
+}
 
 #define JCA_IOT_FUNCHANDLER_SETUP_NAME "name"
 // JSON Files used Functionhandler for Config and Data-Storage, only if not defines in main.cpp or somewhere else
@@ -50,15 +56,6 @@
 
 namespace JCA {
   namespace IOT {
-    struct FuncLinkPair_T{
-      int16_t Func;
-      int16_t Tag;
-    };
-    enum FuncLinkType_T : uint8_t {
-      LinkNone = 0,
-      LinkDirect = 1,
-      LinkMove = 2
-    };
     enum FuncPatchRet_T : int8_t {
       done = 127,
       linkObjMissing = 35,
@@ -72,24 +69,6 @@ namespace JCA {
       failed = -99
     };
     
-    class FuncLink {
-    private:
-      std::vector<FuncLinkPair_T> Input;
-      std::vector<FuncLinkPair_T> Output;
-
-    public:
-      FuncLinkType_T Type;
-
-      FuncLink(FuncLinkType_T _Type);
-      ~FuncLink();
-      void addInput(FuncLinkPair_T _Input);
-      void addOutput(FuncLinkPair_T _Output);
-      FuncLinkPair_T getInput(uint8_t _Index);
-      FuncLinkPair_T getOutput(uint8_t _Index);
-      uint8_t getInputCount() { return Input.size(); };
-      uint8_t getOutputCount() { return Output.size(); };
-    };
-
     class FuncHandler {
     protected:
       // Json Tags
@@ -101,36 +80,46 @@ namespace JCA {
       // LoopData
       unsigned long LastUpdate;
 
-      // Controller Setup
-      std::vector<FuncLink *> Links;
-      std::map<String, FuncLinkType_T> LinkMapping;
 
       bool checkLink (String _FuncName, int16_t &_Func, String _TagName, int16_t &_Tag, JsonArray _LogArray);
       void deleteLinks();
       void deleteFunctions();
       FuncPatchRet_T setup ();
-      FuncPatchRet_T remove ();
-      FuncPatchRet_T saveFunctions ();
       FuncPatchRet_T saveValues ();
       FuncPatchRet_T loadValues ();
 
     public:
-      // Map with the initialisation callbacks for all functions
+      
+      // Map with the initialisation callbacks for all hardware
       std::map<String, std::function<bool (JsonObject, JsonObject, std::map<String, void *>&)>> HardwareList;
+      std::map<String, std::function<void (JsonObject &)>> HardwareSchemaList;
       std::map<String, void *> HardwareMapping;
+      // Map with the initialisation callbacks for all functions
       std::map<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> FunctionList;
+      std::map<String, std::function<void (JsonObject &)>> FunctionSchemaList;
       std::vector<JCA::FNC::FuncParent *> Functions;
+      // Controller Setup
+      std::map<String, LNK::FuncLinkType_T> LinkMapping;
+      std::map<String, std::function<void (JsonObject &)>> LinkSchemaList;
+      std::map<LNK::FuncLinkType_T, std::function<void (LNK::FuncLink *, std::vector<JCA::FNC::FuncParent *> &, JsonDocument &)>> LinkUpdateList;
+      std::vector<LNK::FuncLink *> Links;
 
       FuncHandler (String _Name);
       void update (struct tm &_Time);
       String patch(String _Command);
 
       int16_t getFuncIndex (String _Name);
-      void setValues (JsonObject &_Functions, TagAccessType_T _Access);
-      void getValues (JsonObject &_Functions, TagAccessType_T _Access);
-      void getTagStructures (JsonObject &_Functions, TagUsage_T _FilterUsage);
+      void setValues (JsonObject &_Functions, TAG::TagAccessType_T _Access);
+      void getValues (JsonObject &_Functions, TAG::TagAccessType_T _Access);
+      void getTagStructures (JsonObject &_Functions, TAG::TagUsage_T _FilterUsage);
       int16_t getLinkCount();
       int16_t getFuncCount();
+      
+      // Setup Metadata and File Operations
+      void getSetupMetadata (JsonObject &_Out);
+      bool loadSetup (JsonObject &_Out);
+      bool saveSetup (JsonObject &_In);
+      void getFunctionsList (JsonObject &_Out);
     };
   }
 }

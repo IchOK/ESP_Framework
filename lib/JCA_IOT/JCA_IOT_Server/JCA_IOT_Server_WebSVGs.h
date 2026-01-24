@@ -68,6 +68,19 @@ const char SvgWiFi[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 /**
+ * @brief Setup button
+ *
+ */
+const char SvgSetup[] PROGMEM = R"rawliteral(
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 200 200">
+  <g id="Setup"
+    style="display:inline;fill:var(--ColorSetup);stroke:var(--ColorSetup);stroke-width:0;stroke-linecap:round;stroke-linejoin:round">
+    <path d="m40 22-2 4 21 12c0 10-4 18-13 23l-21-12-1 2c5 15 15 25 35 25 5 0 20 15 28 23l16-16c-8-8-26-26-26-31 0-18-5-30-37-30zm125 5-20 14-2 8-58 58-8-5-4 4c0 12-14 18-20 18l-33 33c0 10 11 21 21 21l33-33c0-6 6-20 18-20l4-4-5-8 58-58 8-2 14-20zm-50 68-16 16c12 12 28 28 28 33 0 18 5 30 37 30l2-4-21-12c0-10 4-18 13-23l21 12 1-2c-5-15-15-25-35-25-5 0-18-13-30-25z"/>
+  </g>
+</svg>
+)rawliteral";
+
+/**
  * @brief System button
  *
  */

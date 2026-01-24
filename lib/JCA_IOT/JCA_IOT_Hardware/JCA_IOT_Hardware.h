@@ -27,10 +27,12 @@ namespace JCA {
     // OneWire Interface
     void AddOneWire (FuncHandler &_Handler);
     bool CreateOneWire (JsonObject _Setup, JsonObject _Log, std::map<String, void *> &HardwareMapping);
+    void GetOneWireSchema (JsonObject &_Schema);
 
     // SYS_PwmOutput Interface
     void AddPwmOutput (FuncHandler &_Handler);
     bool CreatePwmOutput (JsonObject _Setup, JsonObject _Log, std::map<String, void *> &HardwareMapping);
+    void GetPwmOutputSchema (JsonObject &_Schema);
   }
 } // namespace JCA
 

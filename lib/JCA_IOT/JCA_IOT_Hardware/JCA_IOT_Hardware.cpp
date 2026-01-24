@@ -23,6 +23,7 @@ namespace JCA {
      */
     void AddOneWire (FuncHandler &_Handler) {
       _Handler.HardwareList.insert(std::pair<String, std::function<bool (JsonObject, JsonObject, std::map<String, void *>&)>>("onewire", CreateOneWire));
+      _Handler.HardwareSchemaList.insert(std::pair<String, std::function<void (JsonObject &)>>("onewire", GetOneWireSchema));
     }
 
     /**
@@ -56,6 +57,7 @@ namespace JCA {
      */
     void AddPwmOutput(FuncHandler &_Handler) {
       _Handler.HardwareList.insert(std::pair<String, std::function<bool (JsonObject, JsonObject, std::map<String, void *>&)>>("pwmoutput", CreatePwmOutput));
+      _Handler.HardwareSchemaList.insert(std::pair<String, std::function<void (JsonObject &)>>("pwmoutput", GetPwmOutputSchema));
     }
 
     /**
@@ -80,6 +82,42 @@ namespace JCA {
         _Log["Fault"] = "No Name given for PwmOutput Interface";
       }
       return Done;
+    }
+
+    /**
+     * @brief Get setup schema for OneWire hardware
+     * 
+     * @param _Schema JSON object to fill with schema information
+     */
+    void GetOneWireSchema (JsonObject &_Schema) {
+      JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+      
+      // name parameter
+      JsonObject NameParam = Parameters.add<JsonObject>();
+      NameParam["name"] = "name";
+      NameParam["type"] = "string";
+      NameParam["comment"] = "Name der Hardware-Instanz";
+      
+      // pin parameter
+      JsonObject PinParam = Parameters.add<JsonObject>();
+      PinParam["name"] = "pin";
+      PinParam["type"] = "uint8";
+      PinParam["comment"] = "GPIO-Pin für OneWire-Bus";
+    }
+
+    /**
+     * @brief Get setup schema for PwmOutput hardware
+     * 
+     * @param _Schema JSON object to fill with schema information
+     */
+    void GetPwmOutputSchema (JsonObject &_Schema) {
+      JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+      
+      // name parameter
+      JsonObject NameParam = Parameters.add<JsonObject>();
+      NameParam["name"] = "name";
+      NameParam["type"] = "string";
+      NameParam["comment"] = "Name der Hardware-Instanz";
     }
   }
 }

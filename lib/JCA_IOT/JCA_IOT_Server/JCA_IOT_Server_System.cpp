@@ -317,6 +317,7 @@ namespace JCA {
       WebServerObject->on ("/", HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
       WebServerObject->on (JCA_IOT_SERVER_PATH_HOME, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebHomeGet (_Request); });
       WebServerObject->on (JCA_IOT_SERVER_PATH_CONFIG, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebConfigGet (_Request); });
+      WebServerObject->on (JCA_IOT_SERVER_PATH_SETUP, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onWebSetupGet (_Request); });
 
       // Save WebConfig
       WebServerObject->on (JCA_IOT_SERVER_PATH_CONFIGSAVE, HTTP_GET, [this] (AsyncWebServerRequest *_Request) { this->onSaveConfigCB(); this->onWebConfigGet (_Request); });
@@ -341,6 +342,117 @@ namespace JCA {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
         _Request->send (200, "application/json", response);
       });
+
+      // RestAPI - Setup Metadata endpoint (must be registered before /api)
+      // This endpoint returns available hardware types, function types, and link types
+      WebServerObject->on ("/api/setup/metadata", HTTP_GET, [this] (AsyncWebServerRequest *_Request) {
+        Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup Metadata Request");
+        JsonDocument JsonDoc;
+        JsonVariant OutData = JsonDoc.as<JsonVariant> ();
+        
+        // Call callback function if registered
+        if (restApiSetupMetadataCB) {
+          JsonVariant InData;
+          restApiSetupMetadataCB (InData, OutData);
+        }
+        
+        // Create Response
+        String response;
+        serializeJson (OutData, response);
+        Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup Metadata Response:");
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
+        _Request->send (200, "application/json", response);
+      });
+
+      // RestAPI - Setup Functions endpoint (must be registered before /api)
+      // This endpoint returns all currently loaded functions with their tags
+      WebServerObject->on ("/api/setup/functions", HTTP_GET, [this] (AsyncWebServerRequest *_Request) {
+        Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup Functions Request");
+        JsonDocument JsonDoc;
+        JsonVariant OutData = JsonDoc.as<JsonVariant> ();
+        
+        // Call callback function if registered
+        if (restApiSetupFunctionsCB) {
+          JsonVariant InData;
+          restApiSetupFunctionsCB (InData, OutData);
+        }
+        
+        // Create Response
+        String response;
+        serializeJson (OutData, response);
+        Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup Functions Response:");
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
+        _Request->send (200, "application/json", response);
+      });
+
+      // RestAPI - Setup GET endpoint (must be registered before /api)
+      // This endpoint returns the current usrSetup.json
+      WebServerObject->on ("/api/setup", HTTP_GET, [this] (AsyncWebServerRequest *_Request) {
+        Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup GET Request");
+        JsonDocument JsonDoc;
+        JsonVariant OutData = JsonDoc.as<JsonVariant> ();
+        
+        // Call callback function if registered
+        if (restApiSetupGetCB) {
+          JsonVariant InData;
+          restApiSetupGetCB (InData, OutData);
+        }
+        
+        // Create Response
+        String response;
+        serializeJson (OutData, response);
+        Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup GET Response:");
+        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
+        _Request->send (200, "application/json", response);
+      });
+
+      // RestAPI - Setup PUT endpoint (must be registered before /api)
+      // This endpoint saves the usrSetup.json
+      WebServerObject->on (
+          "/api/setup", HTTP_PUT,
+          [this] (AsyncWebServerRequest *_Request) {
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup PUT Request");
+            JsonDocument JsonDoc;
+            JsonVariant OutData = JsonDoc.as<JsonVariant> ();
+            JsonVariant InData;
+            
+            // Parse request body
+            if (_Request->_tempObject != nullptr) {
+              DeserializationError Error = deserializeJson (JsonDoc, (char *)(_Request->_tempObject));
+              if (!Error) {
+                InData = JsonDoc.as<JsonVariant> ();
+              } else {
+                Debug.print (FLAG_ERROR, true, ObjectName, "RestAPI", "+ Setup PUT deserializeJson() failed: ");
+                Debug.println (FLAG_ERROR, true, ObjectName, "RestAPI", Error.c_str ());
+                OutData["error"] = "Invalid JSON";
+              }
+            }
+            
+            // Call callback function if registered
+            if (restApiSetupPutCB) {
+              restApiSetupPutCB (InData, OutData);
+            }
+            
+            // Create Response
+            String response;
+            serializeJson (OutData, response);
+            Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup PUT Response:");
+            Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
+            _Request->send (200, "application/json", response);
+          },
+          [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) {
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup PUT File");
+          },
+          [this] (AsyncWebServerRequest *_Request, uint8_t *_Data, size_t _Len, size_t _Index, size_t _Total) {
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup PUT Data");
+
+            if (_Total > 0 && _Request->_tempObject == nullptr) {
+              _Request->_tempObject = malloc (_Total + 10);
+            }
+            if (_Request->_tempObject != nullptr) {
+              memcpy ((uint8_t *)(_Request->_tempObject) + _Index, _Data, _Len);
+            }
+          });
 
       // RestAPI
       WebServerObject->on (

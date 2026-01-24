@@ -28,7 +28,7 @@ const char PageFrame[] PROGMEM = R"rawliteral(
 <link rel="stylesheet" type="text/css" href="/style/style.css">
 <link rel="stylesheet" type="text/css" href="/style/styleMobile.css">
 <link rel="stylesheet" type="text/css" href="/style/styleAddon.css">
-<style>:root{--ColorHome:var(--secondary);--ColorConfig:var(--secondary);--ColorWiFi:var(--secondary);--ColorSystem:var(--secondary)}</style>
+<style>:root{--ColorHome:var(--secondary);--ColorConfig:var(--secondary);--ColorSetup:var(--secondary);--ColorWiFi:var(--secondary);--ColorSystem:var(--secondary)}</style>
 <style>%STYLE%</style>
 </head>
 <body>
@@ -39,6 +39,7 @@ const char PageFrame[] PROGMEM = R"rawliteral(
 </ul><ul>
 <li><a href="/home.htm">%SVG_HOME%</a></li>
 <li><a href="/config.htm">%SVG_CONFIG%</a></li>
+<li><a href="/setup.htm">%SVG_SETUP%</a></li>
 <li><a href="/connect">%SVG_WIFI%</a></li>
 <li><a href="/sys">%SVG_SYSTEM%</a></li>
 </ul>

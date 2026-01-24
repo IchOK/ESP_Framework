@@ -125,6 +125,7 @@
 #define JCA_IOT_SERVER_PATH_SYS_RESET "/reset"
 #define JCA_IOT_SERVER_PATH_HOME "/home.htm"
 #define JCA_IOT_SERVER_PATH_CONFIG "/config.htm"
+#define JCA_IOT_SERVER_PATH_SETUP "/setup.htm"
 #define JCA_IOT_SERVER_PATH_CONFIGSAVE "/configSave"
 // Time settings
 #define JCA_IOT_SERVER_TIME_OFFSET 3600
@@ -172,6 +173,7 @@ namespace JCA {
       void onWebSystemReset (AsyncWebServerRequest *_Request);
       void onWebHomeGet (AsyncWebServerRequest *_Request);
       void onWebConfigGet (AsyncWebServerRequest *_Request);
+      void onWebSetupGet (AsyncWebServerRequest *_Request);
       String replaceDefaultWildcards (const String &var);
       String replaceHomeWildcards (const String &var);
       String replaceConfigWildcards (const String &var);
@@ -185,6 +187,10 @@ namespace JCA {
       JsonVariantCallback restApiPatchCB;
       JsonVariantCallback restApiDeleteCB;
       JsonVariantCallback restApiTagsCB;
+      JsonVariantCallback restApiSetupMetadataCB;
+      JsonVariantCallback restApiSetupGetCB;
+      JsonVariantCallback restApiSetupPutCB;
+      JsonVariantCallback restApiSetupFunctionsCB;
       void onRestApiRequest (AsyncWebServerRequest *_Request, JsonVariant &_Json);
 
       // ...Webserver_Socket.cpp
@@ -237,6 +243,10 @@ namespace JCA {
       void onRestApiPatch (JsonVariantCallback _CB);
       void onRestApiDelete (JsonVariantCallback _CB);
       void onRestApiTags (JsonVariantCallback _CB);
+      void onRestApiSetupMetadata (JsonVariantCallback _CB);
+      void onRestApiSetupGet (JsonVariantCallback _CB);
+      void onRestApiSetupPut (JsonVariantCallback _CB);
+      void onRestApiSetupFunctions (JsonVariantCallback _CB);
 
       // ...Webserver_Socket.cpp
       uint32_t WsUpdateCycle;

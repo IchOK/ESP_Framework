@@ -34,6 +34,10 @@
 // Project Hardware
 #include <JCA_IOT_Hardware.h>
 
+// Project Links
+#include <JCA_LNK_LinkDirect.h>
+#include <JCA_LNK_LinkMove.h>
+
 // Project function
 #ifdef ESP32
   #include <JCA_FNC_AcDimmers.h>
@@ -88,6 +92,14 @@ void addHardwareToHandler() {
   JCA::IOT::AddPwmOutput (Handler);
   //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
   //Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
+}
+
+//-------------------------------------------------------
+// Links
+//-------------------------------------------------------
+void addLinksToHandler() {
+  JCA::LNK::LinkDirect::AddToHandler(Handler);
+  JCA::LNK::LinkMove::AddToHandler(Handler);
 }
 
 //-------------------------------------------------------
@@ -196,7 +208,7 @@ void cbRestApiPost (JsonVariant &_In, JsonVariant &_Out) {
 void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
   _Out["freeHeap"] = ESP.getFreeHeap ();
   _Out["functions"] = Handler.getFuncCount();
-  _Out["links"] = Handler.getFuncCount ();
+  _Out["links"] = Handler.getLinkCount();
 }
 
 void cbRestApiTags (JsonVariant &_In, JsonVariant &_Out) {
@@ -224,6 +236,33 @@ void cbRestApiDelete (JsonVariant &_In, JsonVariant &_Out) {
   String Mode = "delete";
   _Out["mode"] = Mode;
   _Out["ret"] = Handler.patch (Mode);
+}
+
+void cbRestApiSetupMetadata (JsonVariant &_In, JsonVariant &_Out) {
+  JsonObject OutObj = _Out.to<JsonObject>();
+  Handler.getSetupMetadata(OutObj);
+}
+
+void cbRestApiSetupGet (JsonVariant &_In, JsonVariant &_Out) {
+  JsonObject OutObj = _Out.to<JsonObject>();
+  if (!Handler.loadSetup(OutObj)) {
+    // Error already set in loadSetup
+  }
+}
+
+void cbRestApiSetupPut (JsonVariant &_In, JsonVariant &_Out) {
+  JsonObject InObj = _In.as<JsonObject>();
+  if (Handler.saveSetup(InObj)) {
+    _Out["success"] = true;
+  } else {
+    _Out["success"] = false;
+    _Out["error"] = "Failed to save setup file";
+  }
+}
+
+void cbRestApiSetupFunctions (JsonVariant &_In, JsonVariant &_Out) {
+  JsonObject OutObj = _Out.to<JsonObject>();
+  Handler.getFunctionsList(OutObj);
 }
 
 //-------------------------------------------------------
@@ -289,6 +328,10 @@ void setup () {
   IotServer.onRestApiPatch (cbRestApiPatch);
   IotServer.onRestApiDelete (cbRestApiDelete);
   IotServer.onRestApiTags (cbRestApiTags);
+  IotServer.onRestApiSetupMetadata (cbRestApiSetupMetadata);
+  IotServer.onRestApiSetupGet (cbRestApiSetupGet);
+  IotServer.onRestApiSetupPut (cbRestApiSetupPut);
+  IotServer.onRestApiSetupFunctions (cbRestApiSetupFunctions);
   Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-RestAPI Done");
   // Web-Socket
   IotServer.onWsData (cbWsData);
@@ -296,6 +339,7 @@ void setup () {
   Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-WebSocket Done");
 
   // Function-Handler
+  addLinksToHandler();
   addFunctionsToHandler();
   addHardwareToHandler();
   Handler.patch ("init");

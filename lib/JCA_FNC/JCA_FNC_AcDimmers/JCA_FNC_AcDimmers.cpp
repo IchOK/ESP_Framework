@@ -240,6 +240,7 @@
        */
       void AcDimmers::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
         _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+        _Handler.FunctionSchemaList.insert (std::pair<String, std::function<void (JsonObject &)>> (SetupTagType, GetSetupSchema));
       }
 
       bool AcDimmers::Create (JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware) {
@@ -259,6 +260,28 @@
         }
         //delete[] PinsOutput;
         return Done;
+      }
+
+      void AcDimmers::GetSetupSchema (JsonObject &_Schema) {
+        JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+        
+        // name parameter
+        JsonObject NameParam = Parameters.add<JsonObject>();
+        NameParam["name"] = JCA_IOT_FUNCHANDLER_SETUP_NAME;
+        NameParam["type"] = "string";
+        NameParam["comment"] = "Name der Funktion für die Kommunikation";
+        
+        // pinZero parameter
+        JsonObject PinZeroParam = Parameters.add<JsonObject>();
+        PinZeroParam["name"] = SetupTagZeroPin;
+        PinZeroParam["type"] = "uint8";
+        PinZeroParam["comment"] = "Pin für Zero-Cross Erkennung";
+        
+        // pinsOutput parameter
+        JsonObject PinsOutputParam = Parameters.add<JsonObject>();
+        PinsOutputParam["name"] = SetupTagOutputPins;
+        PinsOutputParam["type"] = "uint8[]";
+        PinsOutputParam["comment"] = "Array von Ausgabe-Pins für die AC-Dimmer";
       }
     }
   }

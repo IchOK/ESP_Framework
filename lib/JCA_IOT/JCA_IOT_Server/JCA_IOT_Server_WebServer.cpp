@@ -259,6 +259,14 @@ namespace JCA {
       }
     }
 
+    void Server::onWebSetupGet (AsyncWebServerRequest *_Request) {
+      if (LittleFS.exists (JCA_IOT_SERVER_PATH_SETUP)) {
+        _Request->send (LittleFS, JCA_IOT_SERVER_PATH_SETUP, String (), false, [this] (const String &_Var) -> String { return this->replaceDefaultWildcards (_Var); });
+      } else {
+        _Request->redirect (JCA_IOT_SERVER_PATH_SYS);
+      }
+    }
+
     /**
      * @brief Replace Default Wildcards in Websites
      *
@@ -287,6 +295,9 @@ namespace JCA {
       }
       if (var == "SVG_WIFI") {
         return String (SvgWiFi);
+      }
+      if (var == "SVG_SETUP") {
+        return String (SvgSetup);
       }
       if (var == "SVG_SYSTEM") {
         return String (SvgSystem);
