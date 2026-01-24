@@ -1,8 +1,13 @@
 {
     "files.associations": {
-      "*.tcc": "cpp",
-      "variant": "cpp",
-      "vector": "cpp"
-    },
-    "cmake.configureOnOpen": false
+        "*.tcc": "cpp",
+        "variant": "cpp",
+        "vector": "cpp"
+      },
+    "cmake.configureOnOpen": false,
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}",
+        "--query-driver=**"
+    ]
 }

@@ -56,7 +56,7 @@ namespace JCA {
     String FuncParent::getName () {
       return Name;
     }
-    
+
     /**
      * @brief Destroy the FuncParent::FuncParent object
      * including the Tags-Vector
@@ -65,21 +65,20 @@ namespace JCA {
       for (TagParent *Tag : Tags) {
         delete Tag;
       }
-      Tags.clear();
+      Tags.clear ();
     }
 
     /**
-     * @brief 
-     * 
-     * @param _FuncFile 
-     * @param _FilterUsage 
+     * @brief
+     *
+     * @param _FuncFile
+     * @param _FilterUsage
      */
     bool FuncParent::writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage) {
       Debug.println (FLAG_CONFIG, false, Name, __func__, "Write");
       int16_t Counter = 0;
       String ObjectKey;
-      switch (_FilterUsage)
-      {
+      switch (_FilterUsage) {
       case TagUsage_T::GetWebData:
         ObjectKey = String (JsonTagData);
         break;
@@ -171,7 +170,7 @@ namespace JCA {
       return "";
     }
 
-    void* FuncParent::GetSetupHardwareRef (const char *_TagName, String &_HwName, bool &_Done, JsonObject _Setup, JsonObject _Log, std::map<String, void *> _Hardware) {
+    void *FuncParent::GetSetupHardwareRef (const char *_TagName, String &_HwName, bool &_Done, JsonObject _Setup, JsonObject _Log, std::map<String, void *> _Hardware) {
       void *HwRef;
       if (_Setup[_TagName].is<JsonVariant> ()) {
         _HwName = _Setup[_TagName].as<String> ();
@@ -226,7 +225,7 @@ namespace JCA {
         Debug.print (FLAG_DATA, true, Name, __func__, _Access);
       }
       for (JsonPair JsonTag : _Function) {
-        setTagValueByIndex(getTagIndex(JsonTag.key().c_str()), JsonTag.value(), _Access);
+        setTagValueByIndex (getTagIndex (JsonTag.key ().c_str ()), JsonTag.value (), _Access);
       }
     }
 
@@ -253,28 +252,28 @@ namespace JCA {
     void FuncParent::addTagStructures (JsonObject &_Function, TagUsage_T _FilterUsage) {
       Debug.println (FLAG_PROTOCOL, false, Name, __func__, "Start");
       String ObjectKey;
-      if (_FilterUsage & TagUsage_T::GetWebData == TagUsage_T::GetWebData) {
+      if ((_FilterUsage & TagUsage_T::GetWebData) == TagUsage_T::GetWebData) {
         addTagStructures (_Function, _FilterUsage, String (JsonTagData));
       }
-      if (_FilterUsage & TagUsage_T::GetWebConfig == TagUsage_T::GetWebConfig) {
+      if ((_FilterUsage & TagUsage_T::GetWebConfig) == TagUsage_T::GetWebConfig) {
         addTagStructures (_Function, _FilterUsage, String (JsonTagConfig));
       }
     }
 
     void FuncParent::addTagStructures (JsonObject &_Function, TagUsage_T _FilterUsage, String _ObjectKey) {
-      JsonArray TagArray = _Function[_ObjectKey.c_str()].to<JsonArray>();
-      TagArray.clear();
-      
+      JsonArray TagArray = _Function[_ObjectKey.c_str ()].to<JsonArray> ();
+      TagArray.clear ();
+
       for (size_t i = 0; i < Tags.size (); i++) {
         if (Tags[i]->Usage & _FilterUsage) {
-          JsonObject TagObj = TagArray.add<JsonObject>();
-          String TagJson = "{" + Tags[i]->writeTag() + "}";
+          JsonObject TagObj = TagArray.add<JsonObject> ();
+          String TagJson = "{" + Tags[i]->writeTag () + "}";
           JsonDocument TagDoc;
-          DeserializationError error = deserializeJson(TagDoc, TagJson);
+          DeserializationError error = deserializeJson (TagDoc, TagJson);
           if (!error) {
-            JsonObject TagJsonObj = TagDoc.as<JsonObject>();
+            JsonObject TagJsonObj = TagDoc.as<JsonObject> ();
             for (JsonPair kv : TagJsonObj) {
-              TagObj[kv.key().c_str()] = kv.value();
+              TagObj[kv.key ().c_str ()] = kv.value ();
             }
           }
         }
