@@ -1,16 +1,41 @@
+#include "ArduinoJson/Variant/JsonVariant.hpp"
 #include <JCA_IOT_FuncHandler.h>
-#include <JCA_FNC_Parent.h>
-#include <FS.h>
-#include <LittleFS.h>
 using namespace JCA::SYS;
 using namespace JCA::TAG;
-using namespace JCA::LNK;
 
 namespace JCA {
   namespace IOT {
     const char *FuncHandler::JsonTagHardware = "hardware";
     const char *FuncHandler::JsonTagFunctions = "functions";
     const char *FuncHandler::JsonTagLinks = "links";
+
+
+    FuncLink::FuncLink(std::function<bool (JsonArray, JsonVariant &)> _UpdateFunction) {
+      Input = std::vector<FuncLinkPair_T>();
+      Output = std::vector<FuncLinkPair_T>();
+      UpdateFunction = _UpdateFunction;
+    }
+
+    FuncLink::~FuncLink() {
+      Input.clear();
+      Output.clear();
+    }
+
+    void FuncLink::addInput(FuncLinkPair_T _Input) {
+      Input.push_back(_Input);
+    }
+
+    void FuncLink::addOutput(FuncLinkPair_T _Output) {
+      Output.push_back(_Output);
+    }
+
+    FuncLinkPair_T FuncLink::getInput(uint8_t _Index) {
+      return Input[_Index];
+    }
+
+    FuncLinkPair_T FuncLink::getOutput(uint8_t _Index) {
+      return Output[_Index];
+    }
 
     FuncHandler::FuncHandler (String _Name) {
       Name = _Name;
@@ -60,7 +85,7 @@ namespace JCA {
      * 
      */
     void FuncHandler::deleteLinks() {
-      for (LNK::FuncLink *Link : Links) {
+      for (FuncLink *Link : Links) {
         delete Link;
       }
       Links.clear();
@@ -184,7 +209,7 @@ namespace JCA {
               JsonObject Log = LogArray.add<JsonObject>();
               if (LinkMapping.count (SetupLinkObj["type"]) == 1) {
                 // Create Link
-                Links.push_back (new LNK::FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
+                Links.push_back (new FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
                 Log["Type"] = SetupLinkObj["type"].as<String> ();
                 size_t Link = Links.size() - 1;
                 int16_t FuncIndex;
@@ -311,10 +336,28 @@ namespace JCA {
       JsonDocument LinkDoc;
 
       // Update Links
-      for (LNK::FuncLink *Link : Links) {
+      for (FuncLink *Link : Links) {
         // Look up update function in map
-        if (LinkUpdateList.count(Link->Type) == 1) {
-          LinkUpdateList[Link->Type](Link, Functions, LinkDoc);
+        if (Link->UpdateFunction != nullptr) {
+          // Collect all Input-Links in one JsonArray
+          JsonArray Inputs = LinkDoc["inputs"].to<JsonArray>();
+          for (uint8_t i = 0; i < Link->getInputCount(); i++) {
+            FuncLinkPair_T LinkPair = Link->getInput(i);
+            JsonVariant Input = LinkDoc["input"].to<JsonVariant>();
+            if (Functions[LinkPair.Func]->getTagValueByIndex(LinkPair.Tag, Input, TagAccessType_T::Read)) {
+              Inputs.add(Input);
+            }
+          }
+
+          // Call update function
+          JsonVariant Output = LinkDoc["output"].to<JsonVariant>();
+          if (Link->UpdateFunction(Inputs, Output)) {
+            // Write output to Tags
+            for (uint8_t i = 0; i < Link->getOutputCount(); i++) {
+              FuncLinkPair_T LinkPair = Link->getOutput(i);
+              Functions[LinkPair.Func]->setTagValueByIndex(LinkPair.Tag, Output, TagAccessType_T::Write);
+            }
+          }
         }
       }
 

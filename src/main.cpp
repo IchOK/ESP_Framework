@@ -61,6 +61,7 @@
 using namespace JCA::IOT;
 using namespace JCA::SYS;
 using namespace JCA::FNC;
+using namespace JCA::TAG;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Custom Code
@@ -138,13 +139,13 @@ void cbSaveConfig () {
 
 void getAllValues (JsonVariant &_Out) {
   JsonObject Elements = _Out[FuncParent::JsonTagElements].to<JsonObject>();
-  Handler.getValues (Elements, JCA::TAG::TagAccessType_T::Read);
+  Handler.getValues (Elements, TagAccessType_T::Read);
 }
 
 void setAll (JsonVariant &_In) {
   if (_In[FuncParent::JsonTagElements].is<JsonObject>()) {
     JsonObject Elements = _In[FuncParent::JsonTagElements].as<JsonObject>();
-    Handler.setValues (Elements, JCA::TAG::TagAccessType_T::Write);
+    Handler.setValues (Elements, TagAccessType_T::Write);
   }
   if (_In["mode"].is<JsonVariant> ()) {
     Handler.patch (_In["mode"].as<String> ());
@@ -214,7 +215,7 @@ void cbRestApiPut (JsonVariant &_In, JsonVariant &_Out) {
 void cbRestApiTags (JsonVariant &_In, JsonVariant &_Out) {
   // Write tag structures directly to _Out without nested "elements" object
   JsonObject Elements = _Out.to<JsonObject>();
-  Handler.getTagStructures (Elements, JCA::TAG::TagUsage_T::GetAll);
+  Handler.getTagStructures (Elements, TagUsage_T::GetAll);
 }
 
 void cbRestApiPatch (JsonVariant &_In, JsonVariant &_Out) {

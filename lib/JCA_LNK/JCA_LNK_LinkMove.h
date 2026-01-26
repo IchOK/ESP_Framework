@@ -13,10 +13,10 @@
 #ifndef _JCA_LNK_LINKMOVE_
 #define _JCA_LNK_LINKMOVE_
 
-#include <JCA_LNK_FuncLink.h>
+#include "ArduinoJson/Variant/JsonVariant.hpp"
+#include <JCA_IOT_FuncHandler.h>
 #include <ArduinoJson.h>
 #include <JCA_TAG_Parent.h>
-#include <vector>
 
 // Forward declaration
 namespace JCA {
@@ -58,7 +58,7 @@ namespace JCA {
        * @param _Functions Reference to the functions vector
        * @param _LinkDoc Reference to JsonDocument for temporary values
        */
-      static void Update(JCA::LNK::FuncLink *_Link, std::vector<JCA::FNC::FuncParent *> &_Functions, JsonDocument &_LinkDoc);
+      static bool Update(JsonArray _Inputs, JsonVariant &_Output);
     };
   }
 }
