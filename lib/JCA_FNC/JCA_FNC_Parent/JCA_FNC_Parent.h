@@ -77,7 +77,6 @@ namespace JCA {
       void setValues (JsonObject &_Function, TagAccessType_T _Access);
       void addValues (JsonObject &_Function, TagAccessType_T _Access);
       void addTagStructures (JsonObject &_Function, TagUsage_T _FilterUsage);
-      void addTagStructures (JsonObject &_Function, TagUsage_T _FilterUsage, String _ObjectKey);
       int16_t getTagIndex (String _Name);
       bool setTagValueByIndex (int16_t _Index, JsonVariant _Value, TagAccessType_T _Access);
       bool getTagValueByIndex (int16_t _Index, JsonVariant _Value, TagAccessType_T _Access);

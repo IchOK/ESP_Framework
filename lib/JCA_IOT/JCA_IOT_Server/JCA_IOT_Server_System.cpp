@@ -336,11 +336,10 @@ namespace JCA {
         }
         
         // Create Response
-        String response;
-        serializeJson (OutData, response);
         Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Tags Response:");
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
-        _Request->send (200, "application/json", response);
+        AsyncResponseStream *ResponseStream = _Request->beginResponseStream("application/json");
+        serializeJsonPretty (OutData, *ResponseStream);
+        _Request->send (ResponseStream);
       });
 
       // RestAPI - Setup Metadata endpoint (must be registered before /api)
@@ -357,11 +356,10 @@ namespace JCA {
         }
         
         // Create Response
-        String response;
-        serializeJson (OutData, response);
         Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup Metadata Response:");
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
-        _Request->send (200, "application/json", response);
+        AsyncResponseStream *ResponseStream = _Request->beginResponseStream("application/json");
+        serializeJsonPretty (OutData, *ResponseStream);
+        _Request->send (ResponseStream);
       });
 
       // RestAPI - Setup Functions endpoint (must be registered before /api)
@@ -378,11 +376,10 @@ namespace JCA {
         }
         
         // Create Response
-        String response;
-        serializeJson (OutData, response);
         Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup Functions Response:");
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
-        _Request->send (200, "application/json", response);
+        AsyncResponseStream *ResponseStream = _Request->beginResponseStream("application/json");
+        serializeJsonPretty (OutData, *ResponseStream);
+        _Request->send (ResponseStream);
       });
 
       // RestAPI - Setup GET endpoint (must be registered before /api)
@@ -399,11 +396,10 @@ namespace JCA {
         }
         
         // Create Response
-        String response;
-        serializeJson (OutData, response);
         Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup GET Response:");
-        Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
-        _Request->send (200, "application/json", response);
+        AsyncResponseStream *ResponseStream = _Request->beginResponseStream("application/json");
+        serializeJsonPretty (OutData, *ResponseStream);
+        _Request->send (ResponseStream);
       });
 
       // RestAPI - Setup PUT endpoint (must be registered before /api)
@@ -434,11 +430,10 @@ namespace JCA {
             }
             
             // Create Response
-            String response;
-            serializeJson (OutData, response);
             Debug.print (FLAG_TRAFFIC, true, ObjectName, "RestAPI", "+ Setup PUT Response:");
-            Debug.println (FLAG_TRAFFIC, true, ObjectName, "RestAPI", response);
-            _Request->send (200, "application/json", response);
+            AsyncResponseStream *ResponseStream = _Request->beginResponseStream("application/json");
+            serializeJsonPretty (OutData, *ResponseStream);
+            _Request->send (ResponseStream);
           },
           [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) {
             Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "Setup PUT File");

@@ -1,19 +1,36 @@
-function createView(DataElements, ViewType) {
+const TagUsage_T = {
+  GetWebData: 0x05,
+  GetWebConfig: 0x02,
+  GetAll: 0xff
+};
+
+function createView(DataElements, ViewUsage) {
   //Loop Elements
   let ViewElements = document.getElementById("elements");
   for (const [DataElementName, DataElementValue] of Object.entries(DataElements)) {
     if ((typeof DataElementValue === "object") && (DataElementValue !== null)) {
-      if (ViewType in DataElementValue) {
-        let DataTags = DataElementValue[ViewType];
-        if (DataTags.length > 0) {
+      let ContainsUsage = "tags" in DataElementValue;
+      if ("tags" in DataElementValue) {
+        // Prüfen ob ein Tag enhalten ist, der das ViewUsage enthält
+        let ContainsViewUsage = false;
+        let DataTags = DataElementValue["tags"];
+        DataTags.forEach((DataTag, DIndex) => {
+          if ((DataTag.usage & ViewUsage) > 0) {
+            ContainsViewUsage = true;
+            return;
+          }
+        });
+        if (ContainsViewUsage) {
           let ViewElement = ViewElements.querySelector("article[name='" + DataElementName + "']");
           if (ViewElement === null) {
             ViewElement = createViewElement(ViewElements, DataElementName, DataElementValue);
           }
           DataTags.forEach((DataTag, DIndex) => {
-            let ViewTag = ViewElement.querySelector("div[name='" + DataTag.name + "']");
-            if (ViewTag === null) {
-              ViewTag = createViewTag(ViewElement, DataTag, ViewType);
+            if ((DataTag.usage & ViewUsage) > 0) {
+              let ViewTag = ViewElement.querySelector("div[name='" + DataTag.name + "']");
+              if (ViewTag === null) {
+                ViewTag = createViewTag(ViewElement, DataTag);
+              }
             }
           });
         }

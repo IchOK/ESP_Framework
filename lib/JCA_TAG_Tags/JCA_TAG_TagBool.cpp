@@ -52,6 +52,14 @@ namespace JCA {
       return SetupTag;
     }
 
+    bool TagBool::writeTag (JsonObject &_Tag) {
+      if (!TagParent::writeTagBase (_Tag)) {
+        return false;
+      }
+      _Tag[String (JCA_TAG_TAGS_JsonOn)] = BtnOnText;
+      _Tag[String (JCA_TAG_TAGS_JsonOff)] = BtnOffText;
+      return true;
+    }
     /**
      * @brief Get the Value into an JsonVariant
      *

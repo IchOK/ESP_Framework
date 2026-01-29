@@ -63,6 +63,7 @@ namespace JCA {
       // Function Handler Statics
       static void AddToHandler(JCA::IOT::FuncHandler &_Handler);
       static bool Create(JsonObject _Setup, JsonObject _Log, std::vector<FuncParent *> &_Functions, std::map<String, void *> _Hardware);
+      static void GetSetupSchema (JsonObject &_Schema);
     };
   }
 }

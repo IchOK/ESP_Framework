@@ -149,6 +149,7 @@ namespace JCA {
      */
     void INA219::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
       _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+      _Handler.FunctionSchemaList.insert (std::pair<String, std::function<void (JsonObject &)>> (SetupTagType, GetSetupSchema));
     }
 
     /**
@@ -177,6 +178,28 @@ namespace JCA {
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;
+    }
+
+    void INA219::GetSetupSchema(JsonObject &_Schema) {
+      JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+      
+      // name parameter
+      JsonObject NameParam = Parameters.add<JsonObject>();
+      NameParam["name"] = JCA_IOT_FUNCHANDLER_SETUP_NAME;
+      NameParam["type"] = "string";
+      NameParam["comment"] = "Name der Funktion für die Kommunikation";
+
+      // refName parameter
+      JsonObject RefNameParam = Parameters.add<JsonObject>();
+      RefNameParam["name"] = SetupTagRefName;
+      RefNameParam["type"] = "string";
+      RefNameParam["comment"] = "Name der Hardware-Instanz";
+
+      // addr parameter
+      JsonObject AddrParam = Parameters.add<JsonObject>();
+      AddrParam["name"] = SetupTagAddr;
+      AddrParam["type"] = "uint8";
+      AddrParam["comment"] = "Adresse des INA219 Sensors";
     }
   }
 }

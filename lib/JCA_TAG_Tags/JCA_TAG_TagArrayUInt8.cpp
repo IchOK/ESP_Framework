@@ -47,6 +47,13 @@ namespace JCA {
       return SetupTag;
     }
 
+    bool TagArrayUInt8::writeTag (JsonObject &_Tag) {
+      if (!TagParent::writeTagBase (_Tag)) {
+        return false;
+      }
+      return true;
+    }
+
     /**
      * @brief Get the Value into an JsonVariant
      *

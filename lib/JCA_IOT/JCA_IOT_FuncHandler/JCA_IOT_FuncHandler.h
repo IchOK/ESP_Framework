@@ -38,9 +38,6 @@
 #ifndef JCA_IOT_FILE_SETUP
   #define JCA_IOT_FILE_SETUP "/usrSetup.json"
 #endif
-#ifndef JCA_IOT_FILE_FUNCTIONS
-  #define JCA_IOT_FILE_FUNCTIONS "/usrFunctions.json"
-#endif
 #ifndef JCA_IOT_FILE_VALUES
   #define JCA_IOT_FILE_VALUES "/usrValues.json"
 #endif

@@ -63,6 +63,19 @@ namespace JCA {
       return SetupTag;
     }
 
+    bool TagListUInt8::writeTag (JsonObject &_Tag) {
+      if (!TagParent::writeTagBase (_Tag)) {
+        return false;
+      }
+      JsonArray ListArray = _Tag[String (JCA_TAG_TAGS_JsonList)].to<JsonArray> ();
+      for (const auto &[Index, Text] : List) {
+        JsonObject ListObj = ListArray.add<JsonObject> ();
+        ListObj[String (JCA_TAG_TAGS_JsonListIndex)] = Index;
+        ListObj[String (JCA_TAG_TAGS_JsonListValue)] = Text;
+      }
+      return true;
+    }
+
     /**
      * @brief Get the Value into an JsonVariant
      *

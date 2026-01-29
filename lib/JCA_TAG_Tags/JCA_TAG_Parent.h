@@ -29,6 +29,8 @@
 #define JCA_TAG_TAGS_JsonOff "off"
 #define JCA_TAG_TAGS_JsonType "type"
 #define JCA_TAG_TAGS_JsonReadOnly "readOnly"
+#define JCA_TAG_TAGS_JsonUsage "usage"
+#define JCA_TAG_TAGS_JsonAccess "access"
 #define JCA_TAG_TAGS_JsonList "list"
 #define JCA_TAG_TAGS_JsonListIndex "i"
 #define JCA_TAG_TAGS_JsonListValue "v"
@@ -77,6 +79,7 @@ namespace JCA {
       protected:
         SetCallback afterSetCB;
         String writeTagBase ();
+        bool writeTagBase (JsonObject &_Tag);
 
       public:
         // Default Informations
@@ -92,6 +95,7 @@ namespace JCA {
         TagParent (String _Name, String _Text, String _Comment, TagAccessType_T _Access, void *_Value, TagTypes_T _Type, TagUsage_T _Usage);
         virtual ~TagParent() {;};
         virtual String writeTag () { return ""; };
+        virtual bool writeTag (JsonObject &_Tag) { return false; };
         virtual bool getValue (JsonVariant _Value, TagAccessType_T _Access) { return false; };
         virtual bool setValue(JsonVariant _Value, TagAccessType_T _Access) {return false; };
         virtual void addValue (JsonObject &_Values, TagAccessType_T _Access) { ; };

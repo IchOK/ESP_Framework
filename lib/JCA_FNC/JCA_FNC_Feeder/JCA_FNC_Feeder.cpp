@@ -122,6 +122,7 @@ namespace JCA {
      */
     void Feeder::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
       _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+      _Handler.FunctionSchemaList.insert (std::pair<String, std::function<void (JsonObject &)>> (SetupTagType, GetSetupSchema));
     }
 
     /**
@@ -150,6 +151,34 @@ namespace JCA {
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;
+    }
+
+    void Feeder::GetSetupSchema(JsonObject &_Schema) {
+      JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+      
+      // name parameter
+      JsonObject NameParam = Parameters.add<JsonObject>();
+      NameParam["name"] = JCA_IOT_FUNCHANDLER_SETUP_NAME;
+      NameParam["type"] = "string";
+      NameParam["comment"] = "Name der Funktion für die Kommunikation";
+
+      // enablePin parameter
+      JsonObject EnablePinParam = Parameters.add<JsonObject>();
+      EnablePinParam["name"] = SetupTagEnablePin;
+      EnablePinParam["type"] = "uint8";
+      EnablePinParam["comment"] = "Pin für den Enable";
+
+      // stepPin parameter
+      JsonObject StepPinParam = Parameters.add<JsonObject>();
+      StepPinParam["name"] = SetupTagStepPin;
+      StepPinParam["type"] = "uint8";
+      StepPinParam["comment"] = "Pin für den Step";
+
+      // dirPin parameter
+      JsonObject DirPinParam = Parameters.add<JsonObject>();
+      DirPinParam["name"] = SetupTagDirPin;
+      DirPinParam["type"] = "uint8";
+      DirPinParam["comment"] = "Pin für den Direction";
     }
   }
 }

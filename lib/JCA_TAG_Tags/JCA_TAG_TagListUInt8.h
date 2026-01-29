@@ -28,6 +28,7 @@ namespace JCA {
         TagListUInt8 (String _Name, String _Text, String _Comment, TagAccessType_T _Access, TagUsage_T _Usage, uint8_t *_Value);
         ~TagListUInt8 ();
         String writeTag ();
+        bool writeTag (JsonObject &_Tag);
         bool getValue (JsonVariant _Value, TagAccessType_T _Access);
         bool setValue (JsonVariant _Value, TagAccessType_T _Access);
         void addValue (JsonObject &_Values, TagAccessType_T _Access);

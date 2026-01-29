@@ -656,6 +656,9 @@ namespace JCA {
         JsonObject FuncObj = FunctionsArray.add<JsonObject>();
         FuncObj["name"] = Functions[i]->getName();
         
+        Functions[i]->addTagStructures(FuncObj, TagUsage_T::GetAll);
+
+        /*
         // Get all tag names with access types for this function
         JsonArray TagsArray = FuncObj["tags"].to<JsonArray>();
         
@@ -729,6 +732,7 @@ namespace JCA {
           TagInfo["name"] = pair.first;
           TagInfo["accessType"] = pair.second;
         }
+          */
       }
     }
   }

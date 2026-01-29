@@ -48,6 +48,14 @@ namespace JCA {
       return SetupTag;
     }
 
+    bool TagInt32::writeTag (JsonObject &_Tag) {
+      if (!TagParent::writeTagBase (_Tag)) {
+        return false;
+      }
+      _Tag[String (JCA_TAG_TAGS_JsonUnit)] = Unit;
+      return true;
+    }
+
     /**
      * @brief Get the Value into an JsonVariant
      *

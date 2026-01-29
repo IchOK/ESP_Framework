@@ -163,21 +163,6 @@ String cbWebUserReplace (const String &var) {
     return createConfigHRef (JCA_IOT_FILE_SYSTEMCONFIG, "System Config");
   }
 #endif
-#ifdef JCA_IOT_FILE_SYSTEMCONFIG
-  if (var == "WIFICONFIG_LINK") {
-    return createConfigHRef (JCA_IOT_FILE_WIFICONFIG, "WiFi Config");
-  }
-#endif
-#ifdef JCA_IOT_FILE_SETUP
-  if (var == "SETUP_LINK") {
-    return createConfigHRef (JCA_IOT_FILE_SETUP, "Function Setup");
-  }
-#endif
-#ifdef JCA_IOT_FILE_FUNCTIONS
-  if (var == "FUNCTIONS_LINK") {
-    return createConfigHRef (JCA_IOT_FILE_FUNCTIONS, "Function Listing");
-  }
-#endif
 #ifdef JCA_IOT_FILE_VALUES
   if (var == "VALUES_LINK") {
     return createConfigHRef (JCA_IOT_FILE_VALUES, "Value Listing");
@@ -189,7 +174,7 @@ String cbWebUserReplace (const String &var) {
   }
 #endif
 #ifdef JCA_IOT_FILE_WIFICONFIG
-  if (var == "LOG_LINK") {
+  if (var == "WIFICONFIG_LINK") {
     return createConfigHRef (JCA_IOT_FILE_WIFICONFIG, "WiFi Config");
   }
 #endif

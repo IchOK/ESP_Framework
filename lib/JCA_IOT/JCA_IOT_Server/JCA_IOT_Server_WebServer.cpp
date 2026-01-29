@@ -302,9 +302,6 @@ namespace JCA {
       if (var == "SVG_SYSTEM") {
         return String (SvgSystem);
       }
-      if (var == "CONF_FILE") {
-        return JCA_IOT_FILE_FUNCTIONS;
-      }
       return String ();
     }
 

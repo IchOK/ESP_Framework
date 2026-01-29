@@ -96,9 +96,6 @@
 #ifndef JCA_IOT_FILE_SYSTEMCONFIG
   #define JCA_IOT_FILE_SYSTEMCONFIG "/sysConfig.json"
 #endif
-#ifndef JCA_IOT_FILE_FUNCTIONS
-  #define JCA_IOT_FILE_FUNCTIONS "/usrFunctions.json"
-#endif
 // JSON Keys for WiFi Config
 #define JCA_IOT_SERVER_CONFKEY_WIFI "wifi"
 #define JCA_IOT_SERVER_CONFKEY_WIFI_SSID "ssid"

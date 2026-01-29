@@ -83,8 +83,8 @@ Board Variant: %BOARD_VARIANT%<br/>
 Board MCU: %BOARD_MCU%<br/>
 %SYSTEMCONFIG_LINK%
 %WIFICONFIG_LINK%
-%SETUP_LINK%
-%FUNCTIONS_LINK%
+<a href="/api/setup">Function Setup</a><br/>
+<a href="/api/tags">Function-Tag Listing</a><br/>
 %VALUES_LINK%
 %LOG_LINK%
 </article>

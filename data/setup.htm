@@ -125,7 +125,7 @@
       // Filter by access type
       // accessFilter: 'read' for From (needs Read), 'write' for To (needs Write)
       return func.tags.filter(tag => {
-        const accessType = typeof tag === 'object' ? tag.accessType : 0;
+        const accessType = typeof tag === 'object' ? tag.access : 0;
         if (accessFilter === 'read') {
           // From: needs Read (0x01)
           return (accessType & 0x01) !== 0;
@@ -357,12 +357,6 @@
           </div>
           <div>
             <strong>From:</strong>
-            ${metadata.linkSchemas && metadata.linkSchemas[item.type] && metadata.linkSchemas[item.type].fromDescription ? 
-              `<small style="display: block; margin-left: 1rem; color: var(--muted-color);">
-                ${metadata.linkSchemas[item.type].fromDescription.map((desc, di) => 
-                  item.from && item.from[di] ? `${di + 1}. ${desc}` : ''
-                ).filter(d => d).join(' | ')}
-              </small>` : ''}
             ${item.from ? item.from.map((f, fi) => {
               const schema = metadata.linkSchemas && metadata.linkSchemas[item.type] ? metadata.linkSchemas[item.type] : null;
               const fromMax = schema && schema.fromMax ? schema.fromMax : -1;

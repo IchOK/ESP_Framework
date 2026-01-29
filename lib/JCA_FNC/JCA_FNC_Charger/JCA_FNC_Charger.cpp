@@ -433,6 +433,7 @@ namespace JCA {
      */
     void Charger::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
       _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+      _Handler.FunctionSchemaList.insert (std::pair<String, std::function<void (JsonObject &)>> (SetupTagType, GetSetupSchema));
     }
 
     /**
@@ -462,6 +463,35 @@ namespace JCA {
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;
+    }
+
+    void Charger::GetSetupSchema (JsonObject &_Schema) {
+      JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+      
+      // name parameter
+      JsonObject NameParam = Parameters.add<JsonObject>();
+      NameParam["name"] = JCA_IOT_FUNCHANDLER_SETUP_NAME;
+      NameParam["type"] = "string";
+      NameParam["comment"] = "Name der Funktion für die Kommunikation";
+      
+      // charge pin parameter
+      JsonObject ChargePinParam = Parameters.add<JsonObject>();
+      ChargePinParam["name"] = SetupTagChargePin;
+      ChargePinParam["type"] = "uint8";
+      ChargePinParam["comment"] = "Pin für die Ladung";
+      
+      // discharge pin parameter
+      JsonObject DischargePinParam = Parameters.add<JsonObject>();
+      DischargePinParam["name"] = SetupTagDischargePin;
+      DischargePinParam["type"] = "uint8";
+      DischargePinParam["comment"] = "Pin für die Entladung";
+      
+      // output parameter
+      JsonObject OutputParam = Parameters.add<JsonObject>();
+      OutputParam["name"] = SetupTagRefName;
+      OutputParam["type"] = "string";
+      OutputParam["comment"] = "Name der Hardware-Instanz";
+
     }
   }
 }

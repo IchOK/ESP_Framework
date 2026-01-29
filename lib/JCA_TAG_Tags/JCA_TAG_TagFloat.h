@@ -29,6 +29,7 @@ namespace JCA {
         TagFloat (String _Name, String _Text, String _Comment, TagAccessType_T _Access, TagUsage_T _Usage, float *_Value, String _Unit, TagTypes_T _Type = TypeFloat);
         ~TagFloat () { ; };
         String writeTag ();
+        bool writeTag (JsonObject &_Tag);
         bool getValue (JsonVariant _Value, TagAccessType_T _Access);
         bool setValue (JsonVariant _Value, TagAccessType_T _Access);
         void addValue (JsonObject &_Values, TagAccessType_T _Access);

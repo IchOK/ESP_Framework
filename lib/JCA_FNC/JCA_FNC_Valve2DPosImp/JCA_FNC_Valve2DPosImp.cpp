@@ -307,6 +307,7 @@ namespace JCA {
      */
     void Valve2DPosImp::AddToHandler (JCA::IOT::FuncHandler &_Handler) {
       _Handler.FunctionList.insert (std::pair<String, std::function<bool (JsonObject, JsonObject, std::vector<JCA::FNC::FuncParent *> &, std::map<String, void *>)>> (SetupTagType, Create));
+      _Handler.FunctionSchemaList.insert (std::pair<String, std::function<void (JsonObject &)>> (SetupTagType, GetSetupSchema));
     }
 
     /**
@@ -334,6 +335,34 @@ namespace JCA {
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;
+    }
+
+    void Valve2DPosImp::GetSetupSchema(JsonObject &_Schema) {
+      JsonArray Parameters = _Schema["parameters"].to<JsonArray>();
+      
+      // name parameter
+      JsonObject NameParam = Parameters.add<JsonObject>();
+      NameParam["name"] = JCA_IOT_FUNCHANDLER_SETUP_NAME;
+      NameParam["type"] = "string";
+      NameParam["comment"] = "Name der Funktion für die Kommunikation";
+
+      // pinOpen parameter
+      JsonObject PinOpenParam = Parameters.add<JsonObject>();
+      PinOpenParam["name"] = SetupTagOpenPin;
+      PinOpenParam["type"] = "uint8";
+      PinOpenParam["comment"] = "Pin für den Öffnen";
+
+      // pinClose parameter
+      JsonObject PinCloseParam = Parameters.add<JsonObject>();
+      PinCloseParam["name"] = SetupTagClosePin;
+      PinCloseParam["type"] = "uint8";
+      PinCloseParam["comment"] = "Pin für den Schließen";
+
+      // pinEnable parameter
+      JsonObject PinEnableParam = Parameters.add<JsonObject>();
+      PinEnableParam["name"] = SetupTagEnablePin;
+      PinEnableParam["type"] = "uint8";
+      PinEnableParam["comment"] = "Pin für den Enable";
     }
   }
 }

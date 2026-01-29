@@ -52,5 +52,17 @@ namespace JCA {
       }
       return SetupTag;
     }
+
+    bool TagParent::writeTagBase (JsonObject &_Tag) {
+      _Tag[String (JCA_TAG_TAGS_JsonName)] = Name;
+      _Tag[String (JCA_TAG_TAGS_JsonText)] = Text;
+      _Tag[String (JCA_TAG_TAGS_JsonType)] = Type;
+      _Tag[String (JCA_TAG_TAGS_JsonAccess)] = Access;
+      _Tag[String (JCA_TAG_TAGS_JsonUsage)] = Usage;
+      if (Comment.length() > 0) {
+        _Tag[String (JCA_TAG_TAGS_JsonComment)] = Comment;
+      }
+      return true;
+    }
   }
 }
