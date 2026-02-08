@@ -64,6 +64,10 @@ namespace JCA {
           RetVal += "[DATA] ";
           break;
 
+        case FLAG_SYSTEM:
+          RetVal += "[SYS] ";
+          break;
+
         default:
           RetVal += "[---] ";
           break;

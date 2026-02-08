@@ -36,6 +36,7 @@ namespace JCA {
       Tags.push_back (new TagInt16 ("FeedingMinute", "Fütterung Minute", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &FeedingMinute, "m"));
       Tags.push_back (new TagFloat ("SteppsPerRotation", "Schritte pro Umdrehung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &SteppsPerRotation, "st/rot"));
       Tags.push_back (new TagFloat ("FeedingRotations", "Umdrehungen je Fütterung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &FeedingRotations, "rot"));
+      Tags.push_back (new TagBool ("Direction", "Richtung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Direction, "Rechts", "Links"));
       Tags.push_back (new TagFloat ("Acceleration", "Beschleuningung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Acceleration, "st/s2"));
       Tags.push_back (new TagFloat ("MaxSpeed", "Maximale Geschwindigkeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &MaxSpeed, "st/s"));
       Tags.push_back (new TagFloat ("ConstSpeed", "Konstant Geschwindigkeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ConstSpeed, "st/s"));
@@ -90,14 +91,14 @@ namespace JCA {
       // Run const Speed
       if (RunConst) {
         // Constant Mode
-        Stepper.setSpeed (ConstSpeed);
+        Stepper.setSpeed (abs(ConstSpeed) * (Direction ? 1 : -1));
         Stepper.runSpeed ();
         DoFeed = false;
       } else {
         // Dosing Mode
         if ((AutoFeed && !AutoFeedDone) || DoFeed) {
           Debug.println (FLAG_LOOP, false, Name, __func__, "Start Feeding");
-          Stepper.move ((long)(SteppsPerRotation * FeedingRotations));
+          Stepper.move ((long)(SteppsPerRotation * FeedingRotations * (Direction ? 1 : -1)));
           Stepper.enableOutputs ();
           Feeding = true;
           DoFeed = false;
@@ -111,8 +112,8 @@ namespace JCA {
         Stepper.run ();
       }
       AutoFeedDone = AutoFeed;
-      DistanceToGo = Stepper.distanceToGo ();
-      Speed = Stepper.speed ();
+      DistanceToGo = Stepper.distanceToGo () * (Direction ? 1 : -1);
+      Speed = Stepper.speed () * (Direction ? 1 : -1);
     }
 
     /**

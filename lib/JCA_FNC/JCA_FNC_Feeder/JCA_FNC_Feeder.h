@@ -48,6 +48,7 @@ namespace JCA {
       float Acceleration;
       float MaxSpeed;
       float ConstSpeed;
+      bool Direction;
 
       // Daten
       bool RunConst;

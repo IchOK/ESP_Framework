@@ -4,6 +4,12 @@ const TagUsage_T = {
   GetAll: 0xff
 };
 
+const TagAccessType_T = {
+  Read: 0x01,
+  Write: 0x02,
+  Save: 0x04
+};
+
 function createView(DataElements, ViewUsage) {
   //Loop Elements
   let ViewElements = document.getElementById("elements");
@@ -184,8 +190,8 @@ function createViewTagInputNumber(ViewTagValue, DataTag) {
       });
       break;
   }
-  ValueInput.disabled = DataTag.readOnly;
-  if (DataTag.readOnly == false) {
+  ValueInput.disabled = (DataTag.access & TagAccessType_T.Write) == 0;
+  if ((DataTag.access & TagAccessType_T.Write) == TagAccessType_T.Write) {
     ValueInput.setAttribute("onchange", "onChange(this)");
   }
   ViewTagValue.appendChild(ValueInput);
@@ -205,8 +211,8 @@ function createViewTagInputString(ViewTagValue, DataTag) {
   ValueInput.setAttribute("name", "value");
   ValueInput.setAttribute("style", "padding-right:54px;text-align:right;");
   ValueInput.type = "text";
-  ValueInput.disabled = DataTag.readOnly;
-  if (DataTag.readOnly == false) {
+  ValueInput.disabled = (DataTag.access & TagAccessType_T.Write) == 0;
+  if ((DataTag.access & TagAccessType_T.Write) == TagAccessType_T.Write) {
     ValueInput.setAttribute("onchange", "onChange(this)");
   }
   ViewTagValue.appendChild(ValueInput);
@@ -228,8 +234,8 @@ function createViewTagInputBoolean(ViewTagValue, DataTag, IsCommand) {
     ValueInput.setAttribute("textOff", DataTag.off);
     ValueInput.classList = "primary outline"
   }
-  ValueInput.disabled = DataTag.readOnly;
-  if (DataTag.readOnly == false) {
+  ValueInput.disabled = (DataTag.access & TagAccessType_T.Write) == 0;
+  if ((DataTag.access & TagAccessType_T.Write) == TagAccessType_T.Write) {
     ValueInput.setAttribute("onclick", "onClick(this)");
   }
   ViewTagValue.appendChild(ValueInput);

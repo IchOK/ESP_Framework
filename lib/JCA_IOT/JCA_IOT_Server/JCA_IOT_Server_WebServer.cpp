@@ -109,7 +109,7 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
+      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
     }
 
     /**
@@ -121,7 +121,7 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceSystemWildcards (_Var); });
+      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceSystemWildcards (_Var); });
     }
 
     /**
@@ -285,22 +285,22 @@ namespace JCA {
         return String (Hostname);
       }
       if (var == "SVG_LOGO") {
-        return String (SvgLogo);
+        return String (FPSTR (SvgLogo));
       }
       if (var == "SVG_HOME") {
-        return String (SvgHome);
+        return String (FPSTR (SvgHome));
       }
       if (var == "SVG_CONFIG") {
-        return String (SvgConfig);
+        return String (FPSTR (SvgConfig));
       }
       if (var == "SVG_WIFI") {
-        return String (SvgWiFi);
+        return String (FPSTR (SvgWiFi));
       }
       if (var == "SVG_SETUP") {
-        return String (SvgSetup);
+        return String (FPSTR (SvgSetup));
       }
       if (var == "SVG_SYSTEM") {
-        return String (SvgSystem);
+        return String (FPSTR (SvgSystem));
       }
       return String ();
     }
@@ -355,22 +355,22 @@ namespace JCA {
         return F (":root{--ColorSystem:var(--contrast)}");
       }
       if (var == "SECTION") {
-        return String (SectionSys);
+        return String (FPSTR (SectionSys));
       }
       if (var == "FW_VERSION") {
-        return String (AUTO_VERSION);
+        return String (F (AUTO_VERSION));
       }
       if (var == "BOARD_NAME") {
-        return String (ARDUINO_BOARD);
+        return String (F (ARDUINO_BOARD));
       }
       if (var == "BOARD_VERSION") {
-        return String ("");
+        return String ();
       }
       if (var == "BOARD_VARIANT") {
-        return String (BOARD_VARIANT);
+        return String (F (BOARD_VARIANT));
       }
       if (var == "BOARD_MCU") {
-        return String (BOARD_MCU);
+        return String (F (BOARD_MCU));
       }
       return String ();
     }
@@ -395,7 +395,7 @@ namespace JCA {
       }
       if (var == "SECTION") {
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, var);
-        return String (SectionConnect);
+        return String (FPSTR (SectionConnect));
       }
       return String ();
     }

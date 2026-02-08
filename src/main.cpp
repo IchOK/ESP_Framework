@@ -38,25 +38,57 @@
 #include <JCA_LNK_LinkDirect.h>
 #include <JCA_LNK_LinkMove.h>
 
-// Project function
+// Project function - conditional compilation for memory-constrained targets
+// Define JCA_IGNORE_xxx build flags in platformio.ini to exclude specific modules.
+// By default all modules are included. Use -DJCA_IGNORE_xxx to exclude heavy modules on ESP8266.
 #ifdef ESP32
   #include <JCA_FNC_AcDimmers.h>
 #endif
-#include <JCA_FNC_Charger.h>
-#include <JCA_FNC_ClockValues.h>
-#include <JCA_FNC_DigitalIn.h>
-#include <JCA_FNC_DigitalOut.h>
-#include <JCA_FNC_DS18B20.h>
-#include <JCA_FNC_Feeder.h>
-#include <JCA_FNC_INA219.h>
-#include <JCA_FNC_LedStrip.h>
-#include <JCA_FNC_Level.h>
-#include <JCA_FNC_ServerLink.h>
-#include <JCA_FNC_ValueAnalog.h>
-#include <JCA_FNC_ValueDigital.h>
-#include <JCA_FNC_DaySelect.h>
-#include <JCA_FNC_PIDController.h>
-#include <JCA_FNC_Valve2DPosImp.h>
+#ifndef JCA_IGNORE_CHARGER
+  #include <JCA_FNC_Charger.h>
+#endif
+#ifndef JCA_IGNORE_CLOCKVALUES
+  #include <JCA_FNC_ClockValues.h>
+#endif
+#ifndef JCA_IGNORE_DIGITALIN
+  #include <JCA_FNC_DigitalIn.h>
+#endif
+#ifndef JCA_IGNORE_DIGITALOUT
+  #include <JCA_FNC_DigitalOut.h>
+#endif
+#ifndef JCA_IGNORE_DS18B20
+  #include <JCA_FNC_DS18B20.h>
+#endif
+#ifndef JCA_IGNORE_FEEDER
+  #include <JCA_FNC_Feeder.h>
+#endif
+#ifndef JCA_IGNORE_INA219
+  #include <JCA_FNC_INA219.h>
+#endif
+#ifndef JCA_IGNORE_LEDSTRIP
+  #include <JCA_FNC_LedStrip.h>
+#endif
+#ifndef JCA_IGNORE_LEVEL
+  #include <JCA_FNC_Level.h>
+#endif
+#ifndef JCA_IGNORE_SERVERLINK
+  #include <JCA_FNC_ServerLink.h>
+#endif
+#ifndef JCA_IGNORE_VALUEANALOG
+  #include <JCA_FNC_ValueAnalog.h>
+#endif
+#ifndef JCA_IGNORE_VALUEDIGITAL
+  #include <JCA_FNC_ValueDigital.h>
+#endif
+#ifndef JCA_IGNORE_DAYSELECT
+  #include <JCA_FNC_DaySelect.h>
+#endif
+#ifndef JCA_IGNORE_PIDCONTROLLER
+  #include <JCA_FNC_PIDController.h>
+#endif
+#ifndef JCA_IGNORE_VALVE2DPOSIMP
+  #include <JCA_FNC_Valve2DPosImp.h>
+#endif
 
 using namespace JCA::IOT;
 using namespace JCA::SYS;
@@ -110,21 +142,51 @@ void addFunctionsToHandler () {
   #ifdef ESP32
     AcDimmers::AddToHandler (Handler);
   #endif
-  Charger::AddToHandler (Handler);
-  ClockValues::AddToHandler(Handler);
-  DigitalIn::AddToHandler(Handler);
-  DigitalOut::AddToHandler(Handler);
-  DS18B20::AddToHandler(Handler);
-  Feeder::AddToHandler(Handler);
-  INA219::AddToHandler(Handler);
-  LedStrip::AddToHandler(Handler);
-  Level::AddToHandler(Handler);
-  ServerLink::AddToHandler (Handler);
-  ValueAnalog::AddToHandler(Handler);
-  ValueDigital::AddToHandler(Handler);
-  DaySelect::AddToHandler(Handler);
-  PIDController::AddToHandler(Handler);
-  Valve2DPosImp::AddToHandler(Handler);
+  #ifndef JCA_IGNORE_CHARGER
+    Charger::AddToHandler (Handler);
+  #endif
+  #ifndef JCA_IGNORE_CLOCKVALUES
+    ClockValues::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_DIGITALIN
+    DigitalIn::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_DIGITALOUT
+    DigitalOut::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_DS18B20
+    DS18B20::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_FEEDER
+    Feeder::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_INA219
+    INA219::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LEDSTRIP
+    LedStrip::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LEVEL
+    Level::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_SERVERLINK
+    ServerLink::AddToHandler (Handler);
+  #endif
+  #ifndef JCA_IGNORE_VALUEANALOG
+    ValueAnalog::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_VALUEDIGITAL
+    ValueDigital::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_DAYSELECT
+    DaySelect::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_PIDCONTROLLER
+    PIDController::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_VALVE2DPOSIMP
+    Valve2DPosImp::AddToHandler(Handler);
+  #endif
 }
 
 //-------------------------------------------------------
@@ -268,8 +330,6 @@ void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
 //  Setup
 // #######################################################
 void setup () {
-  JsonDocument JDoc;
-
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
    DebugFlags |= FLAG_ERROR;
@@ -279,6 +339,7 @@ void setup () {
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
+  DebugFlags |= FLAG_SYSTEM;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -325,10 +386,17 @@ void setup () {
   Debug.println (FLAG_SETUP, false, "root", __func__, "IotServer-WebSocket Done");
 
   // Function-Handler
+  Debug.print (FLAG_SYSTEM, false, "root", __func__, "[DBG-HEAP] Before handler.patch init: ");
+  Debug.println (FLAG_SYSTEM, false, "root", __func__, ESP.getFreeHeap());
   addLinksToHandler();
   addFunctionsToHandler();
   addHardwareToHandler();
+  Debug.print (FLAG_SYSTEM, false, "root", __func__, "[DBG-HEAP] After handler.patch init: ");
+  Debug.println (FLAG_SYSTEM, false, "root", __func__, ESP.getFreeHeap());
+  // #region agent log - Heap monitoring before handler init
   Handler.patch ("init");
+  Debug.print (FLAG_SYSTEM, false, "root", __func__, "[DBG-HEAP] After handler.patch init: ");
+  Debug.println (FLAG_SYSTEM, false, "root", __func__, ESP.getFreeHeap());
   Debug.println (FLAG_SETUP, false, "root", __func__, "FunctionHandler Done");
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -340,8 +408,30 @@ void setup () {
 //  Loop
 // #######################################################
 int8_t LastSeconds = 0;
+uint32_t MinHeap = -1;
+uint32_t MaxHeap = 0;
 void loop () {
   IotServer.handle ();
   tm CurrentTime = IotServer.getLocalTimeStruct ();
   Handler.update(CurrentTime);
+  // #region agent log - Periodic heap monitoring
+  uint32_t CurrentHeap = ESP.getFreeHeap();
+  if (CurrentHeap < MinHeap) {
+    MinHeap = CurrentHeap;
+  }
+  if (CurrentHeap > MaxHeap) {
+    MaxHeap = CurrentHeap;
+  }
+  if (CurrentTime.tm_sec != LastSeconds && CurrentTime.tm_sec % 10 == 0) {
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, "[DBG-HEAP] Loop FreeHeap Act / Min / Max: ");
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, CurrentHeap);
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, " / ");
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, MinHeap);
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, " / ");
+    Debug.println (FLAG_SYSTEM, false, "root", __func__, MaxHeap);
+    MinHeap = -1;
+    MaxHeap = 0;
+  }
+  // #endregion
+  LastSeconds = CurrentTime.tm_sec;
 }
