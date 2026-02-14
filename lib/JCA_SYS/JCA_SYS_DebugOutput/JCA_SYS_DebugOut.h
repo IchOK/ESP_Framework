@@ -62,6 +62,8 @@ namespace JCA {
       void init (uint16_t _Flags, unsigned long _Baud);
       void init (uint16_t _Flags);
 
+      bool isFlagSet(DEBUGOUT_FLAGS _Flag);
+
       bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message);
       bool print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message);
       bool println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message);

@@ -21,25 +21,30 @@ namespace JCA {
     const char *Feeder::SetupTagEnablePin = "pinEnable";
     const char *Feeder::SetupTagStepPin = "pinStep";
     const char *Feeder::SetupTagDirPin = "pinDir";
+    const char *Feeder::SetupTagInvertEnable = "invertEnable";
+    const char *Feeder::SetupTagInvertStep = "invertStep";
+    const char *Feeder::SetupTagInvertDir = "invertDir";
     /**
      * @brief Construct a new Feeder::Feeder object
      *
      * @param _PinEnable Pin that is connected to the Enable in on the Stepper-Driver
+     * @param _InvertEnable True if the Enable is inverted
      * @param _PinStep Pin that is connected to the Step in on the Stepper-Driver
+     * @param _InvertStep True if the Step is inverted
      * @param _PinDir Pin that is connected to the Direction in on the Stepper-Driver
+     * @param _InvertDir True if the Direction is inverted
      * @param _Name Element Name inside the Communication
      */
-    Feeder::Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, String _Name)
+    Feeder::Feeder (uint8_t _PinEnable, bool _InvertEnable, uint8_t _PinStep, bool _InvertStep, uint8_t _PinDir, bool _InvertDir, String _Name)
         : FuncParent (_Name), Stepper (AccelStepper::DRIVER, _PinStep, _PinDir) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       Tags.push_back (new TagInt16 ("FeedingHour", "Fütterung Stunde", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &FeedingHour, "h"));
       Tags.push_back (new TagInt16 ("FeedingMinute", "Fütterung Minute", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &FeedingMinute, "m"));
       Tags.push_back (new TagFloat ("SteppsPerRotation", "Schritte pro Umdrehung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &SteppsPerRotation, "st/rot"));
       Tags.push_back (new TagFloat ("FeedingRotations", "Umdrehungen je Fütterung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &FeedingRotations, "rot"));
-      Tags.push_back (new TagBool ("Direction", "Richtung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Direction, "Rechts", "Links"));
-      Tags.push_back (new TagFloat ("Acceleration", "Beschleuningung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Acceleration, "st/s2"));
-      Tags.push_back (new TagFloat ("MaxSpeed", "Maximale Geschwindigkeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &MaxSpeed, "st/s"));
-      Tags.push_back (new TagFloat ("ConstSpeed", "Konstant Geschwindigkeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ConstSpeed, "st/s"));
+      Tags.push_back (new TagFloat ("Acceleration", "Beschleuningung", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Acceleration, "st/s2", std::bind (&Feeder::accelerationCB, this)));
+      Tags.push_back (new TagFloat ("MaxSpeed", "Maximale Geschwindigkeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &MaxSpeed, "st/s", std::bind (&Feeder::maxSpeedCB, this)));
+      Tags.push_back (new TagFloat ("ConstSpeed", "Konstant Geschwindigkeit", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ConstSpeed, "st/s", std::bind (&Feeder::constSpeedCB, this)));
 
       Tags.push_back (new TagBool ("Feeding", "Fütterung aktiv", "", TagAccessType_T::ReadWrite, TagUsage_T::UseData, &Feeding, "EIN", "AUS"));
       Tags.push_back (new TagInt32 ("DistanceToGo", "Verbleibende Schritte", "", TagAccessType_T::Read, TagUsage_T::UseData, &DistanceToGo, "st"));
@@ -69,7 +74,7 @@ namespace JCA {
 
       // Hardware
       Stepper.setEnablePin (_PinEnable);
-      Stepper.setPinsInverted (false, false, true);
+      Stepper.setPinsInverted (_InvertDir, _InvertStep, _InvertEnable);
       Stepper.disableOutputs ();
     }
 
@@ -77,6 +82,18 @@ namespace JCA {
       if (DoFeed) {
         RunConst = false;
       }
+    }
+
+    void Feeder::accelerationCB() {
+      Stepper.setAcceleration (Acceleration);
+    }
+
+    void Feeder::maxSpeedCB() {
+      Stepper.setMaxSpeed (MaxSpeed);
+    }
+
+    void Feeder::constSpeedCB() {
+      Stepper.setSpeed (ConstSpeed);
     }
 
     /**
@@ -91,29 +108,35 @@ namespace JCA {
       // Run const Speed
       if (RunConst) {
         // Constant Mode
-        Stepper.setSpeed (abs(ConstSpeed) * (Direction ? 1 : -1));
+        Stepper.setSpeed (ConstSpeed);
+        Stepper.enableOutputs ();
         Stepper.runSpeed ();
         DoFeed = false;
+        Feeding = false;
       } else {
         // Dosing Mode
         if ((AutoFeed && !AutoFeedDone) || DoFeed) {
           Debug.println (FLAG_LOOP, false, Name, __func__, "Start Feeding");
-          Stepper.move ((long)(SteppsPerRotation * FeedingRotations * (Direction ? 1 : -1)));
+          Stepper.move ((long)(SteppsPerRotation * FeedingRotations));
           Stepper.enableOutputs ();
           Feeding = true;
           DoFeed = false;
         }
-        if (Stepper.distanceToGo () == 0 && Feeding) {
-          Debug.println (FLAG_LOOP, false, Name, __func__, "Done Feeding");
+        if (Feeding) {
+          if (Stepper.distanceToGo () == 0) {
+            Debug.println (FLAG_LOOP, false, Name, __func__, "Done Feeding");
+            Feeding = false;
+          }
+        } else {
+          Stepper.stop ();
           Stepper.disableOutputs ();
-          Feeding = false;
         }
 
         Stepper.run ();
       }
       AutoFeedDone = AutoFeed;
-      DistanceToGo = Stepper.distanceToGo () * (Direction ? 1 : -1);
-      Speed = Stepper.speed () * (Direction ? 1 : -1);
+      DistanceToGo = Stepper.distanceToGo ();
+      Speed = Stepper.speed ();
     }
 
     /**
@@ -145,10 +168,13 @@ namespace JCA {
       uint8_t PinEnable = GetSetupValueUINT8 (SetupTagEnablePin, Done, _Setup, Log);
       uint8_t PinStep = GetSetupValueUINT8 (SetupTagStepPin, Done, _Setup, Log);
       uint8_t PinDir = GetSetupValueUINT8 (SetupTagDirPin, Done, _Setup, Log);
+      bool InvertEnable = GetSetupValueBOOL (SetupTagInvertEnable, Done, _Setup, Log);
+      bool InvertStep = GetSetupValueBOOL (SetupTagInvertStep, Done, _Setup, Log);
+      bool InvertDir = GetSetupValueBOOL (SetupTagInvertDir, Done, _Setup, Log);
 
       if (Done) {
-        _Functions.push_back (new Feeder (PinEnable, PinStep, PinDir, Name));
-        Log["done"] = Name + " (EnablePin:" + String (PinEnable) + ", StepPin: " + String (PinStep) + ", DirPin: " + String (PinDir) + ")";
+        _Functions.push_back (new Feeder (PinEnable, InvertEnable, PinStep, InvertStep, PinDir, InvertDir, Name));
+        Log["done"] = Name + " (EnablePin:" + String (PinEnable) + ", InvertEnable:" + String (InvertEnable) + ", StepPin: " + String (PinStep) + ", InvertStep:" + String (InvertStep) + ", DirPin: " + String (PinDir) + ", InvertDir:" + String (InvertDir) + ")";
         Debug.println (FLAG_SETUP, true, ClassName, __func__, "Done");
       }
       return Done;
@@ -169,17 +195,35 @@ namespace JCA {
       EnablePinParam["type"] = "uint8";
       EnablePinParam["comment"] = "Pin für den Enable";
 
+      // invertEnable parameter
+      JsonObject InvertEnableParam = Parameters.add<JsonObject>();
+      InvertEnableParam["name"] = SetupTagInvertEnable;
+      InvertEnableParam["type"] = "bool";
+      InvertEnableParam["comment"] = "Invert Enable";
+
       // stepPin parameter
       JsonObject StepPinParam = Parameters.add<JsonObject>();
       StepPinParam["name"] = SetupTagStepPin;
       StepPinParam["type"] = "uint8";
       StepPinParam["comment"] = "Pin für den Step";
 
+      // invertStep parameter
+      JsonObject InvertStepParam = Parameters.add<JsonObject>();
+      InvertStepParam["name"] = SetupTagInvertStep;
+      InvertStepParam["type"] = "bool";
+      InvertStepParam["comment"] = "Invert Step";
+
       // dirPin parameter
       JsonObject DirPinParam = Parameters.add<JsonObject>();
       DirPinParam["name"] = SetupTagDirPin;
       DirPinParam["type"] = "uint8";
       DirPinParam["comment"] = "Pin für den Direction";
+
+      // invertDir parameter
+      JsonObject InvertDirParam = Parameters.add<JsonObject>();
+      InvertDirParam["name"] = SetupTagInvertDir;
+      InvertDirParam["type"] = "bool";
+      InvertDirParam["comment"] = "Invert Direction";
     }
   }
 }

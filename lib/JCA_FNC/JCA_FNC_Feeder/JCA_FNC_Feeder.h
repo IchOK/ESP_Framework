@@ -36,6 +36,9 @@ namespace JCA {
       static const char *SetupTagEnablePin;
       static const char *SetupTagStepPin;
       static const char *SetupTagDirPin;
+      static const char *SetupTagInvertEnable;
+      static const char *SetupTagInvertStep;
+      static const char *SetupTagInvertDir;
 
       // Hardware
       AccelStepper Stepper;
@@ -48,7 +51,6 @@ namespace JCA {
       float Acceleration;
       float MaxSpeed;
       float ConstSpeed;
-      bool Direction;
 
       // Daten
       bool RunConst;
@@ -60,9 +62,12 @@ namespace JCA {
       int32_t DistanceToGo;
       float Speed;
       void doFeedCB();
+      void accelerationCB();
+      void maxSpeedCB();
+      void constSpeedCB();
 
     public:
-      Feeder (uint8_t _PinEnable, uint8_t _PinStep, uint8_t _PinDir, String _Name);
+      Feeder (uint8_t _PinEnable, bool _InvertEnable, uint8_t _PinStep, bool _InvertStep, uint8_t _PinDir, bool _InvertDir, String _Name);
       ~Feeder () {;};
       void update (struct tm &_Time);
 

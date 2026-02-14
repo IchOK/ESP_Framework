@@ -7,12 +7,15 @@
       "name": "Spindel",
       "pinEnable": 5,
       "pinStep": 4,
-      "pinDir": 0
+      "pinDir": 0,
+      "invertEnable": true,
+      "invertStep": false,
+      "invertDir": false
     },
     {
       "type": "level",
       "name": "Futter",
-      "pinInput": 1
+      "pinInput": 17
     },
     {
       "type": "server",

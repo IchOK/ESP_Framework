@@ -105,6 +105,17 @@ namespace JCA {
     }
 
     /**
+     * @brief Check if a Flag is set
+     *
+     * @param _Flag Flag to check
+     * @return true Flag is set
+     * @return false Flag is not set
+     */
+    bool DebugOut::isFlagSet(DEBUGOUT_FLAGS _Flag) {
+      return Flags & _Flag;
+    }
+
+    /**
      * @brief Generate a Debug-Output depends on the selected Falgs on init, without line break.
      * "[JCA::IOT::]Object::Function - Message"
      *

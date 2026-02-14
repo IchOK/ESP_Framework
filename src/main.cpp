@@ -332,14 +332,14 @@ void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
 void setup () {
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
-   DebugFlags |= FLAG_ERROR;
-   DebugFlags |= FLAG_SETUP;
-   DebugFlags |= FLAG_CONFIG;
+  // DebugFlags |= FLAG_ERROR;
+  // DebugFlags |= FLAG_SETUP;
+  // DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;
   // DebugFlags |= FLAG_PROTOCOL;
   // DebugFlags |= FLAG_DATA;
-  DebugFlags |= FLAG_SYSTEM;
+  // DebugFlags |= FLAG_SYSTEM;
   Debug.init (DebugFlags, SERIAL_BAUD);
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -402,19 +402,24 @@ void setup () {
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Custom Code
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  Debug.print (FLAG_SETUP, false, "root", __func__, "A0: ");
+  Debug.println (FLAG_SYSTEM, false, "root", __func__, A0);
+  
 }
 
 // #######################################################
-//  Loop
+//  System Analysis
 // #######################################################
-int8_t LastSeconds = 0;
 uint32_t MinHeap = -1;
 uint32_t MaxHeap = 0;
-void loop () {
-  IotServer.handle ();
-  tm CurrentTime = IotServer.getLocalTimeStruct ();
-  Handler.update(CurrentTime);
-  // #region agent log - Periodic heap monitoring
+uint32_t MinLoopMillis = -1;
+uint32_t MaxLoopMillis = 0;
+uint32_t LoopCount = 0;
+uint32_t LastMillis = 0;
+uint32_t LastUpdateMillis = 0;
+void printLoopSystemInfo () {
+
+  // Get Heap
   uint32_t CurrentHeap = ESP.getFreeHeap();
   if (CurrentHeap < MinHeap) {
     MinHeap = CurrentHeap;
@@ -422,7 +427,20 @@ void loop () {
   if (CurrentHeap > MaxHeap) {
     MaxHeap = CurrentHeap;
   }
-  if (CurrentTime.tm_sec != LastSeconds && CurrentTime.tm_sec % 10 == 0) {
+
+  // Get Loop Time
+  uint32_t ActMillis = millis();
+  if (ActMillis - LastMillis < MinLoopMillis) {
+    MinLoopMillis = ActMillis - LastMillis;
+  }
+  if (ActMillis - LastMillis > MaxLoopMillis) {
+    MaxLoopMillis = ActMillis - LastMillis;
+  }
+  LoopCount++;
+  LastMillis = ActMillis;
+
+  // Print System Info
+  if (ActMillis - LastUpdateMillis > 1000) {
     Debug.print (FLAG_SYSTEM, false, "root", __func__, "[DBG-HEAP] Loop FreeHeap Act / Min / Max: ");
     Debug.print (FLAG_SYSTEM, false, "root", __func__, CurrentHeap);
     Debug.print (FLAG_SYSTEM, false, "root", __func__, " / ");
@@ -431,7 +449,32 @@ void loop () {
     Debug.println (FLAG_SYSTEM, false, "root", __func__, MaxHeap);
     MinHeap = -1;
     MaxHeap = 0;
+    uint32_t MeanLoopMillis = (ActMillis - LastUpdateMillis) / LoopCount;
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, "[DBG-TIME] Loop Time Min / Mean/ Max: ");
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, MinLoopMillis);
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, " / ");
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, MeanLoopMillis);
+    Debug.print (FLAG_SYSTEM, false, "root", __func__, " / ");
+    Debug.println (FLAG_SYSTEM, false, "root", __func__, MaxLoopMillis);
+    MinLoopMillis = -1;
+    MaxLoopMillis = 0;
+    LoopCount = 0;
+    LastUpdateMillis = ActMillis;
   }
-  // #endregion
-  LastSeconds = CurrentTime.tm_sec;
 }
+
+// #######################################################
+//  Loop
+// #######################################################
+int8_t LastSeconds = 0;
+void loop () {
+  IotServer.handle ();
+  tm CurrentTime = IotServer.getLocalTimeStruct ();
+  Handler.update(CurrentTime);
+  LastSeconds = CurrentTime.tm_sec;
+
+  if (Debug.isFlagSet(FLAG_SYSTEM)) {
+    printLoopSystemInfo();
+  }
+}
+

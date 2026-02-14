@@ -43,6 +43,7 @@ namespace JCA {
       bool writeFunctionTags (File _FuncFile, TagUsage_T _FilterUsage);
 
       // Creation Sub-Functions
+      static bool GetSetupValueBOOL (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
       static uint8_t GetSetupValueUINT8 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
       static uint16_t GetSetupValueUINT16 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log);
       static uint8_t GetSetupValueUINT8Arr (const char *_TagName, uint8_t *&_Values, bool &_Done, JsonObject _Setup, JsonObject _Log);

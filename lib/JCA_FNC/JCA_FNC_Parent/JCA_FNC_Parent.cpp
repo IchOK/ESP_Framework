@@ -110,6 +110,24 @@ namespace JCA {
       return Counter > 0;
     }
 
+
+    bool FuncParent::GetSetupValueBOOL (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log) {
+      if (_Setup[_TagName].is<bool> ()) {
+        bool Value = _Setup[_TagName].as<bool> ();
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + String (Value));
+        return Value;
+      } else if (_Setup[_TagName].is<int> ()) {
+        bool Value = _Setup[_TagName].as<int> () != 0;
+        Debug.println (FLAG_SETUP, true, ClassName, __func__, String (_TagName) + " > " + String (Value));
+        return Value;
+      } else {
+        _Log[_TagName] = "wrong datatype or missing";
+        Debug.println (FLAG_ERROR, true, ClassName, __func__, String (_TagName) + " > wrong datatype");
+      }
+      _Done = false;
+      return false;
+    }
+
     uint8_t FuncParent::GetSetupValueUINT8 (const char *_TagName, bool &_Done, JsonObject _Setup, JsonObject _Log) {
       if (_Setup[_TagName].is<int> ()) {
         uint8_t Value = _Setup[_TagName].as<uint8_t> ();
