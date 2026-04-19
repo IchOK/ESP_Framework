@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <OneWire.h>
+#include <Wire.h>
 
 namespace JCA {
   namespace IOT {
@@ -33,6 +34,11 @@ namespace JCA {
     void AddPwmOutput (FuncHandler &_Handler);
     bool CreatePwmOutput (JsonObject _Setup, JsonObject _Log, std::map<String, void *> &HardwareMapping);
     void GetPwmOutputSchema (JsonObject &_Schema);
+
+    // TwoWire (I2C) Interface
+    void AddTwoWire (FuncHandler &_Handler);
+    bool CreateTwoWire (JsonObject _Setup, JsonObject _Log, std::map<String, void *> &HardwareMapping);
+    void GetTwoWireSchema (JsonObject &_Schema);
   }
 } // namespace JCA
 

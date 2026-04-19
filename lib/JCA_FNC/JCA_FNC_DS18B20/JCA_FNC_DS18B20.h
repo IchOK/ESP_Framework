@@ -24,6 +24,7 @@
 #include <JCA_IOT_FuncHandler.h>
 #include <JCA_SYS_DebugOut.h>
 #include <JCA_TAG_TagArrayUInt8.h>
+#include <JCA_TAG_TagBool.h>
 #include <JCA_TAG_TagFloat.h>
 #include <JCA_TAG_TagUInt16.h>
 
@@ -60,9 +61,16 @@ namespace JCA {
       float Filter;
       uint8_t Addr[ONEWIRE_ADDRSIZE];
       uint16_t ReadInterval;
+      // Zwei-Punkt-Kalibrierung (linear): Value = CalRefLow + (RawValue - CalRawLow) * (CalRefHigh - CalRefLow) / (CalRawHigh - CalRawLow)
+      bool CalEnable;
+      float CalRawLow;
+      float CalRefLow;
+      float CalRawHigh;
+      float CalRefHigh;
 
       // Daten
       float Value;
+      float RawValue;
 
       // Intern
       uint8_t Raw[12];
@@ -74,6 +82,7 @@ namespace JCA {
       void addrChanged ();
       bool validFamily (uint8_t _Addr[ONEWIRE_ADDRSIZE]);
       bool validAddr (uint8_t _Addr[ONEWIRE_ADDRSIZE]);
+      float applyCalibration (float _Raw) const;
 
     public:
       DS18B20 (OneWire *_Wire, String _Name);

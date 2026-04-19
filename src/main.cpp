@@ -86,8 +86,17 @@
 #ifndef JCA_IGNORE_PIDCONTROLLER
   #include <JCA_FNC_PIDController.h>
 #endif
+#ifndef JCA_IGNORE_MULTISWITCHCONTROLLER
+  #include <JCA_FNC_MultiSwitchController.h>
+#endif
+#ifndef JCA_IGNORE_OLED128X64
+  #include <JCA_FNC_OLED128x64.h>
+#endif
 #ifndef JCA_IGNORE_VALVE2DPOSIMP
   #include <JCA_FNC_Valve2DPosImp.h>
+#endif
+#ifndef JCA_IGNORE_BUTTONVALUE
+  #include <JCA_FNC_ButtonValue.h>
 #endif
 
 using namespace JCA::IOT;
@@ -123,8 +132,7 @@ void addHardwareToHandler() {
   // Add Hardware Interfaces
   JCA::IOT::AddOneWire (Handler);
   JCA::IOT::AddPwmOutput (Handler);
-  //HwTwoWire.setPins(TwoWireSDA,TwoWireSCL);
-  //Handler.HardwareMapping.insert (std::pair<String, void *> ("TwoWire", &HwTwoWire));
+  JCA::IOT::AddTwoWire (Handler);
 }
 
 //-------------------------------------------------------
@@ -184,8 +192,17 @@ void addFunctionsToHandler () {
   #ifndef JCA_IGNORE_PIDCONTROLLER
     PIDController::AddToHandler(Handler);
   #endif
+  #ifndef JCA_IGNORE_MULTISWITCHCONTROLLER
+    MultiSwitchController::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_OLED128X64
+    OLED128x64::AddToHandler(Handler);
+  #endif
   #ifndef JCA_IGNORE_VALVE2DPOSIMP
     Valve2DPosImp::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_BUTTONVALUE
+    ButtonValue::AddToHandler(Handler);
   #endif
 }
 
@@ -332,8 +349,8 @@ void cbWsData (JsonVariant &_In, JsonVariant &_Out) {
 void setup () {
   // Config Debug-Output
   uint16_t DebugFlags = FLAG_NONE;
-  // DebugFlags |= FLAG_ERROR;
-  // DebugFlags |= FLAG_SETUP;
+   DebugFlags |= FLAG_ERROR;
+   DebugFlags |= FLAG_SETUP;
   // DebugFlags |= FLAG_CONFIG;
   // DebugFlags |= FLAG_TRAFFIC;
   // DebugFlags |= FLAG_LOOP;

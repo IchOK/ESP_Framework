@@ -33,7 +33,15 @@ namespace JCA {
       Tags.push_back (new TagArrayUInt8 ("Addr", "Sensoradresse", "Sensoradress HEX Codiert, ohne führende Fomatkennzeichnung", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &Addr[0], 8, std::bind (&DS18B20::addrChanged, this)));
       Tags.push_back (new TagUInt16 ("ReadInterval", "Leseintervall", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &ReadInterval, "s"));
 
-      Tags.push_back (new TagFloat ("Temp", "Temperatur", "", TagAccessType_T::Read, TagUsage_T::UseData, &Value, "°C"));
+      // Zwei-Punkt-Kalibrierung
+      Tags.push_back (new TagBool ("CalEnable", "Kalibrierung aktiv", "Aus: Rohwert wird ausgegeben. Ein: lineare 2-Punkt-Kalibrierung wird angewendet.", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &CalEnable, "EIN", "AUS"));
+      Tags.push_back (new TagFloat ("CalRawLow", "Kalibr. Rohwert unten", "Vom Sensor gemessener Rohwert beim unteren Referenzpunkt", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &CalRawLow, "°C"));
+      Tags.push_back (new TagFloat ("CalRefLow", "Kalibr. Sollwert unten", "Tatsächliche Temperatur am unteren Referenzpunkt", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &CalRefLow, "°C"));
+      Tags.push_back (new TagFloat ("CalRawHigh", "Kalibr. Rohwert oben", "Vom Sensor gemessener Rohwert beim oberen Referenzpunkt", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &CalRawHigh, "°C"));
+      Tags.push_back (new TagFloat ("CalRefHigh", "Kalibr. Sollwert oben", "Tatsächliche Temperatur am oberen Referenzpunkt", static_cast<TagAccessType_T> (TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &CalRefHigh, "°C"));
+
+      Tags.push_back (new TagFloat ("Temp", "Temperatur", "Kalibrierter Messwert (oder Rohwert wenn Kalibrierung aus)", TagAccessType_T::Read, TagUsage_T::UseData, &Value, "°C"));
+      Tags.push_back (new TagFloat ("RawTemp", "Roh-Temperatur", "Unkalibrierter Messwert direkt vom Sensor", TagAccessType_T::Read, TagUsage_T::UseData, &RawValue, "°C"));
       // Init Data
       Wire = _Wire;
       for (uint8_t i = 0; i < ONEWIRE_ADDRSIZE; i++) {
@@ -42,7 +50,13 @@ namespace JCA {
       AddrIsValid = false;
       ReadInterval = 1;
       Filter = 5.0;
+      CalEnable = false;
+      CalRawLow = 0.0f;
+      CalRefLow = 0.0f;
+      CalRawHigh = 100.0f;
+      CalRefHigh = 100.0f;
       Value = 0.0;
+      RawValue = 0.0;
       Resend = 0;
       ReadData = false;
       LastMillis = millis ();
@@ -135,10 +149,14 @@ namespace JCA {
                 raw = raw & ~1;
               }
             }
-            Value = (float)raw / 16.0;
+            RawValue = (float)raw / 16.0;
+            Value = applyCalibration (RawValue);
             if (Debug.print (FLAG_LOOP, false, Name, __func__, "Temp")) {
               Debug.print (FLAG_LOOP, false, Name, __func__, DebugSeparator);
-              Debug.println (FLAG_LOOP, false, Name, __func__, Value);
+              Debug.print (FLAG_LOOP, false, Name, __func__, Value);
+              Debug.print (FLAG_LOOP, false, Name, __func__, " (raw ");
+              Debug.print (FLAG_LOOP, false, Name, __func__, RawValue);
+              Debug.println (FLAG_LOOP, false, Name, __func__, ")");
             }
             this->ReadData = false;
           }
@@ -151,6 +169,26 @@ namespace JCA {
 
     void DS18B20::addrChanged () {
       AddrIsValid = validFamily (Addr) && validAddr (Addr);
+    }
+
+    /**
+     * @brief Apply linear two-point calibration to a raw temperature value.
+     *
+     * Falls back to the raw value if calibration is disabled or the two raw
+     * reference points are equal (which would yield a division by zero).
+     *
+     * @param _Raw uncalibrated temperature value (°C)
+     * @return calibrated temperature value (°C)
+     */
+    float DS18B20::applyCalibration (float _Raw) const {
+      if (!CalEnable) {
+        return _Raw;
+      }
+      const float Span = CalRawHigh - CalRawLow;
+      if (fabsf (Span) < 1e-6f) {
+        return _Raw;
+      }
+      return CalRefLow + (_Raw - CalRawLow) * (CalRefHigh - CalRefLow) / Span;
     }
 
     bool DS18B20::validFamily (uint8_t _Addr[ONEWIRE_ADDRSIZE]) {

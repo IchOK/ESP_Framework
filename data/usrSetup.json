@@ -1,28 +1,127 @@
 {
   "hardware": [
+    {
+      "type": "onewire",
+      "name": "oneWire",
+      "pin": 4
+    },
+    {
+      "type": "twowire",
+      "name": "twoWire",
+      "bus": 0,
+      "sda": 21,
+      "scl": 22,
+      "freq": "100000"
+    }
   ],
   "functions": [
     {
-      "type": "feeder",
-      "name": "Spindel",
-      "pinEnable": 5,
-      "pinStep": 4,
-      "pinDir": 0,
-      "invertEnable": true,
-      "invertStep": false,
-      "invertDir": false
+      "type": "ds18b20",
+      "name": "Innen Temperatur",
+      "refName": "oneWire"
     },
     {
-      "type": "level",
-      "name": "Futter",
-      "pinInput": 17
+      "type": "multiSwitchController",
+      "name": "Kühlung",
+      "inUnit": "°C",
+      "pinsOutput": [
+        16,
+        17,
+        18
+      ]
     },
     {
-      "type": "server",
-      "name": "Server",
-      "server": "IotServer"
+      "type": "oled128x64",
+      "name": "display",
+      "refName": "twoWire",
+      "addr": 60,
+      "lines": 3
+    },
+    {
+      "type": "buttonValue",
+      "name": "Soll Temp",
+      "pinUp": 27,
+      "pinDown": 25,
+      "pullup": "up",
+      "activeLow": "true",
+      "unit": "°C"
     }
   ],
   "links": [
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Innen Temperatur",
+          "tag": "Temp"
+        }
+      ],
+      "to": [
+        {
+          "func": "Kühlung",
+          "tag": "ProcessVar"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Innen Temperatur",
+          "tag": "Temp"
+        }
+      ],
+      "to": [
+        {
+          "func": "display",
+          "tag": "Value1"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Kühlung",
+          "tag": "Setpoint"
+        }
+      ],
+      "to": [
+        {
+          "func": "display",
+          "tag": "Value2"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Kühlung",
+          "tag": "ActiveOutput"
+        }
+      ],
+      "to": [
+        {
+          "func": "display",
+          "tag": "Value3"
+        }
+      ]
+    },
+    {
+      "type": "direct",
+      "from": [
+        {
+          "func": "Soll Temp",
+          "tag": "Value"
+        }
+      ],
+      "to": [
+        {
+          "func": "Kühlung",
+          "tag": "Setpoint"
+        }
+      ]
+    }
   ]
 }
