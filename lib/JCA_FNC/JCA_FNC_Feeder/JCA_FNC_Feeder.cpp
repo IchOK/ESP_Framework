@@ -10,7 +10,12 @@
  *
  */
 
-#include <JCA_FNC_Feeder.h>
+#include "JCA_FNC_Feeder.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
+#include "JCA_TAG_TagFloat.h"
+#include "JCA_TAG_TagInt16.h"
+#include "JCA_TAG_TagInt32.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

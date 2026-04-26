@@ -16,16 +16,20 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_FNC_Parent.h>
-#include <JCA_IOT_FuncHandler.h>
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_TAG_TagBool.h>
-#include <JCA_TAG_TagUInt16.h>
+#include "JCA_FNC_Parent.h"
+#include "JCA_IOT_FuncHandler.h"
 
 namespace JCA {
   namespace FNC {
     class DigitalOut : public FuncParent {
     private:
+      enum DelayAutoOffUnit_T : uint8_t {
+        DELAY_UNIT_H = 0,
+        DELAY_UNIT_M = 1,
+        DELAY_UNIT_S = 2,
+        DELAY_UNIT_MS = 3
+      };
+
       static const char *ClassName;
 
       // Function-Handler JSON-Tags
@@ -37,6 +41,7 @@ namespace JCA {
 
       // Konfig
       uint16_t DelayAutoOff;
+      uint8_t DelayAutoOffUnit;
 
       // Daten
       bool Value;
@@ -44,7 +49,8 @@ namespace JCA {
 
       // Intern
       unsigned long LastMillis;
-      uint16_t DelayMillis;
+      uint32_t DelayMillis;
+      uint32_t getDelayAutoOffUnitMillis () const;
 
     public:
       DigitalOut (uint8_t _Pin, String _Name);

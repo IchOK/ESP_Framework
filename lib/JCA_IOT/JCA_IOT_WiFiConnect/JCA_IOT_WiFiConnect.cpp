@@ -12,7 +12,8 @@
  * Apache License
  *
  */
-#include <JCA_IOT_WiFiConnect.h>
+#include "JCA_IOT_WiFiConnect.h"
+#include "JCA_SYS_DebugOut.h"
 using namespace JCA::SYS;
 
 namespace JCA {
@@ -29,7 +30,7 @@ namespace JCA {
     WiFiConnect::WiFiConnect (const char *_SsidPrefix, const char *_Password, const char *_ApIP, const char *_ApGateway, const char *_ApSubnet) {
 #ifdef ESP8266
       sprintf (ApSsid, "%s_%08X", _SsidPrefix, ESP.getChipId ());
-#elif ESP32
+#elif defined(ESP32)
       uint32_t ESP32ChipId = 0;
       for (int i = 0; i < 17; i = i + 8) {
         ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
@@ -412,7 +413,7 @@ namespace JCA {
         if (!Subnet.isSet ()) {
           return false;
         }
-#elif ESP32
+#elif defined(ESP32)
         if (IP == INADDR_NONE) {
           return false;
         }

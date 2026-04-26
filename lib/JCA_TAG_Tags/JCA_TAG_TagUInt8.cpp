@@ -10,7 +10,8 @@
  *
  */
 
-#include <JCA_TAG_TagUInt8.h>
+#include "JCA_TAG_TagUInt8.h"
+#include "JCA_SYS_DebugOut.h"
 using namespace JCA::SYS;
 
 namespace JCA {

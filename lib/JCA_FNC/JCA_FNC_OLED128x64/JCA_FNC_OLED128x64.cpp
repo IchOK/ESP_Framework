@@ -8,7 +8,11 @@
  * Apache License
  */
 
-#include <JCA_FNC_OLED128x64.h>
+#include "JCA_FNC_OLED128x64.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagFloat.h"
+#include "JCA_TAG_TagString.h"
+#include "JCA_TAG_TagUInt16.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

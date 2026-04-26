@@ -118,6 +118,10 @@ function createViewTag(ViewElement, DataTag) {
       createViewTagInputNumber(ViewTagValue, DataTag);
       break;
 
+    case 101:
+      createViewTagInputListUInt8(ViewTagValue, DataTag);
+      break;
+
     case 9:
       createViewTagInputString(ViewTagValue, DataTag);
       break;
@@ -205,6 +209,25 @@ function createViewTagInputNumber(ViewTagValue, DataTag) {
   }
 }
 
+function createViewTagInputListUInt8(ViewTagValue, DataTag) {
+  let ValueInput = document.createElement("select");
+  ValueInput.setAttribute("name", "value");
+  ValueInput.setAttribute("value-type", "number");
+  ValueInput.disabled = (DataTag.access & TagAccessType_T.Write) == 0;
+  if ((DataTag.access & TagAccessType_T.Write) == TagAccessType_T.Write) {
+    ValueInput.setAttribute("onchange", "onChange(this)");
+  }
+  if ("list" in DataTag) {
+    DataTag.list.forEach((ListItem) => {
+      let Option = document.createElement("option");
+      Option.value = ListItem.i;
+      Option.innerText = ListItem.v;
+      ValueInput.appendChild(Option);
+    });
+  }
+  ViewTagValue.appendChild(ValueInput);
+}
+
 function createViewTagInputString(ViewTagValue, DataTag) {
   // - create String-Input Field
   let ValueInput = document.createElement("input");
@@ -257,7 +280,7 @@ function timestampToDatetimeLocal(timestamp) {
 }
 
 function updateViewTag(ViewTag, DataTagValue) {
-  let ValueInput = ViewTag.querySelector("input[name='value']");
+  let ValueInput = ViewTag.querySelector("input[name='value'], select[name='value']");
   if (ValueInput.type === "button") {
     if (ValueInput.getAttribute("cmd") == "false") {
       if (DataTagValue) {
@@ -395,7 +418,11 @@ function getOnChangeObject (ValueInput) {
       Value = Math.floor(date.getTime() / 1000);
       break;
     default:
-      Value = ValueInput.value;
+      if (ValueInput.getAttribute("value-type") === "number") {
+        Value = parseInt(ValueInput.value, 10);
+      } else {
+        Value = ValueInput.value;
+      }
       break;
   }
   let ViewTag = ValueInput.parentElement.parentElement;

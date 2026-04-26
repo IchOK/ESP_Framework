@@ -14,13 +14,8 @@
 #include <time.h>
 #include <vector>
 
-#include <JCA_FNC_Parent.h>
-#include <JCA_IOT_FuncHandler.h>
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_TAG_TagUInt32.h>
-#include <JCA_TAG_TagFloat.h>
-#include <JCA_TAG_TagBool.h>
-#include <JCA_TAG_TagUInt8.h>
+#include "JCA_FNC_Parent.h"
+#include "JCA_IOT_FuncHandler.h"
 
 namespace JCA {
   namespace FNC {

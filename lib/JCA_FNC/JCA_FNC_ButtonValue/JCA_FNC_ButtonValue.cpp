@@ -8,7 +8,11 @@
  * Apache License
  */
 
-#include <JCA_FNC_ButtonValue.h>
+#include "JCA_FNC_ButtonValue.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
+#include "JCA_TAG_TagFloat.h"
+#include "JCA_TAG_TagUInt16.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 
@@ -21,6 +25,21 @@ namespace JCA {
     const char *ButtonValue::SetupTagPullup = "pullup";
     const char *ButtonValue::SetupTagActiveLow = "activeLow";
     const char *ButtonValue::SetupTagUnit = "unit";
+
+    static bool isUsableButtonPin (uint8_t _Pin) {
+#if defined(digitalPinIsValid)
+      if (!digitalPinIsValid (_Pin)) {
+        return false;
+      }
+#endif
+#if defined(CONFIG_IDF_TARGET_ESP32C6)
+      // Generic ESP32-C6 variants mark all SoC GPIOs valid, but GPIO24+
+      // are not exposed as regular pins on SuperMini-style boards.
+      return _Pin <= 23;
+#else
+      return true;
+#endif
+    }
 
     /**
      * @brief Construct a new ButtonValue object
@@ -199,6 +218,14 @@ namespace JCA {
         Done = false;
       }
 #endif
+      if (!isUsableButtonPin (PinUp)) {
+        Log["error"] = "Invalid pinUp GPIO " + String (PinUp);
+        Done = false;
+      }
+      if (!isUsableButtonPin (PinDown)) {
+        Log["error"] = "Invalid pinDown GPIO " + String (PinDown);
+        Done = false;
+      }
 
       if (Done) {
         _Functions.push_back (new ButtonValue (PinUp, PinDown, Pullup, ActiveLow, Unit, Name));

@@ -10,7 +10,9 @@
  *
  */
 
-#include <JCA_FNC_ValueAnalog.h>
+#include "JCA_FNC_ValueAnalog.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagFloat.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

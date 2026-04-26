@@ -598,7 +598,7 @@
 #elif defined(ARDUINO_SONOFF_DUALR3)
   #define BOARD_VARIANT "esp32"
   #define BOARD_MCU "esp32"
-#elif defined(ARDUINO_Lion:Bit_Dev_Board)
+#elif defined(ARDUINO_Lion_Bit_Dev_Board)
   #define BOARD_VARIANT "lionbit"
   #define BOARD_MCU "esp32"
 #elif defined(ARDUINO_WATCHY)

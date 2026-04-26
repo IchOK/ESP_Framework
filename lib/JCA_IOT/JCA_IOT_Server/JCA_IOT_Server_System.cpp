@@ -9,8 +9,9 @@
  * Apache License
  *
  */
-#include <JCA_IOT_Server.h>
-#include <JCA_FNC_Parent.h>
+#include "JCA_IOT_Server.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_FNC_Parent.h"
 using namespace JCA::SYS;
 using namespace JCA::FNC;
 
@@ -35,7 +36,7 @@ namespace JCA {
       String ChipID;
 #ifdef ESP8266
       ChipID = String (ESP.getChipId (), 16);
-#elif ESP32
+#elif defined(ESP32)
       uint32_t ESP32ChipId = 0;
       for (int i = 0; i < 17; i = i + 8) {
         ESP32ChipId |= ((ESP.getEfuseMac () >> (40 - i)) & 0xff) << i;
@@ -446,6 +447,64 @@ namespace JCA {
             }
             if (_Request->_tempObject != nullptr) {
               memcpy ((uint8_t *)(_Request->_tempObject) + _Index, _Data, _Len);
+            }
+          });
+
+      // RestAPI - sysConfig.json (GET/PUT), must be registered before /api
+      WebServerObject->on (JCA_IOT_SERVER_PATH_SYSCONFIG_API, HTTP_GET, [this] (AsyncWebServerRequest *_Request) {
+        if (!_Request->authenticate (ConfUser, ConfPassword)) {
+          return _Request->requestAuthentication ();
+        }
+        if (LittleFS.exists (JCA_IOT_FILE_SYSTEMCONFIG)) {
+          _Request->send (LittleFS, JCA_IOT_FILE_SYSTEMCONFIG, "application/json", false);
+        } else {
+          _Request->send (200, "application/json", "{}");
+        }
+      });
+      WebServerObject->on (
+          JCA_IOT_SERVER_PATH_SYSCONFIG_API, HTTP_PUT,
+          [this] (AsyncWebServerRequest *_Request) {
+            if (!_Request->authenticate (ConfUser, ConfPassword)) {
+              return _Request->requestAuthentication ();
+            }
+            Debug.println (FLAG_TRAFFIC, true, this->ObjectName, "RestAPI", "sysConfig PUT");
+            JsonDocument ResDoc;
+            JsonObject Res = ResDoc.to<JsonObject> ();
+            if (_Request->_tempObject == nullptr) {
+              Res["error"] = "empty body";
+            } else {
+              JsonDocument InDoc;
+              DeserializationError Error = deserializeJson (InDoc, (char *)(_Request->_tempObject));
+              if (Error) {
+                Res["error"] = "Invalid JSON";
+              } else if (!InDoc.is<JsonObject> ()) {
+                Res["error"] = "root must be object";
+              } else {
+                File ConfigFile = LittleFS.open (JCA_IOT_FILE_SYSTEMCONFIG, "w");
+                if (ConfigFile) {
+                  serializeJson (InDoc, ConfigFile);
+                  ConfigFile.close ();
+                  this->readConfig ();
+                  Res["status"] = "ok";
+                } else {
+                  Res["error"] = "write failed";
+                }
+              }
+            }
+            AsyncResponseStream *ResponseStream = _Request->beginResponseStream ("application/json");
+            serializeJsonPretty (ResDoc, *ResponseStream);
+            _Request->send (ResponseStream);
+          },
+          [this] (AsyncWebServerRequest *_Request, String _Filename, size_t _Index, uint8_t *_Data, size_t _Len, bool _Final) { (void)_Request; (void)_Filename; (void)_Index; (void)_Data; (void)_Len; (void)_Final; },
+          [this] (AsyncWebServerRequest *_Request, uint8_t *_Data, size_t _Len, size_t _Index, size_t _Total) {
+            if (_Total > 0 && _Request->_tempObject == nullptr) {
+              _Request->_tempObject = malloc (_Total + 10);
+            }
+            if (_Request->_tempObject != nullptr) {
+              memcpy ((uint8_t *)(_Request->_tempObject) + _Index, _Data, _Len);
+              if (_Index + _Len == _Total) {
+                ((char *)(_Request->_tempObject))[_Total] = '\0';
+              }
             }
           });
 

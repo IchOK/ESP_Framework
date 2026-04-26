@@ -10,7 +10,11 @@
  *
  */
 
-#include <JCA_FNC_DigitalOut.h>
+#include "JCA_FNC_DigitalOut.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
+#include "JCA_TAG_TagListUInt8.h"
+#include "JCA_TAG_TagUInt16.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 
@@ -29,12 +33,19 @@ namespace JCA {
         : FuncParent (_Name) {
       Debug.println (FLAG_SETUP, false, Name, __func__, "Create");
       // Create Tag-List
-      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &DelayAutoOff, "Min", nullptr));
+      Tags.push_back (new TagUInt16 ("DelayAutoOff", "Verzögerung Auto-OFF", "Wird der Wert auf 0 gesetzt ist die Finktion inaktiv", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, &DelayAutoOff, "", nullptr));
+      Tags.push_back (new TagListUInt8 ("DelayAutoOffUnit", "Einheit Auto-OFF", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseConfig, (uint8_t *)&DelayAutoOffUnit));
+      TagListUInt8 *DelayAutoOffUnitElement = static_cast<TagListUInt8 *> (Tags[Tags.size () - 1]);
+      DelayAutoOffUnitElement->List.insert ({ DelayAutoOffUnit_T::DELAY_UNIT_H, "h" });
+      DelayAutoOffUnitElement->List.insert ({ DelayAutoOffUnit_T::DELAY_UNIT_M, "m" });
+      DelayAutoOffUnitElement->List.insert ({ DelayAutoOffUnit_T::DELAY_UNIT_S, "s" });
+      DelayAutoOffUnitElement->List.insert ({ DelayAutoOffUnit_T::DELAY_UNIT_MS, "ms" });
 
       Tags.push_back (new TagBool ("Value", "Eingeschaltet", "", static_cast<TagAccessType_T>(TagAccessType_T::ReadWrite | TagAccessType_T::Save), TagUsage_T::UseData, &Value, "EIN", "AUS"));
-      Tags.push_back(new TagUInt16("DelayCounter", "Verzögerung Zähler", "", TagAccessType_T::Read, TagUsage_T::UseData, &DelayCounter, "Min"));
+      Tags.push_back(new TagUInt16("DelayCounter", "Verzögerung Zähler", "", TagAccessType_T::Read, TagUsage_T::UseData, &DelayCounter, ""));
       // Init Data
       DelayAutoOff = 0;
+      DelayAutoOffUnit = DelayAutoOffUnit_T::DELAY_UNIT_M;
       Pin = _Pin;
       pinMode(Pin, OUTPUT);
       Value = false;
@@ -57,11 +68,11 @@ namespace JCA {
         unsigned long DiffMillis = ActMillis - LastMillis;
         LastMillis = ActMillis;
         DelayMillis += DiffMillis;
-        if (DelayMillis >= 60000) {
+        if (DelayMillis >= getDelayAutoOffUnitMillis()) {
           DelayCounter++;
-          DelayMillis -= 60000;
+          DelayMillis -= getDelayAutoOffUnitMillis();
           if (DelayCounter >= DelayAutoOff) {
-            Value = 0;
+            Value = false;
           }
         }
       } else {
@@ -71,6 +82,20 @@ namespace JCA {
       }
 
       digitalWrite(Pin, Value);
+    }
+
+    uint32_t DigitalOut::getDelayAutoOffUnitMillis () const {
+      switch (DelayAutoOffUnit) {
+        case DelayAutoOffUnit_T::DELAY_UNIT_H:
+          return 3600000;
+        case DelayAutoOffUnit_T::DELAY_UNIT_S:
+          return 1000;
+        case DelayAutoOffUnit_T::DELAY_UNIT_MS:
+          return 1;
+        case DelayAutoOffUnit_T::DELAY_UNIT_M:
+        default:
+          return 60000;
+      }
     }
 
     /**

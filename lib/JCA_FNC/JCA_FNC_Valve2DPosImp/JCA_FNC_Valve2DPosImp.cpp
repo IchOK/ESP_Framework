@@ -9,7 +9,12 @@
  * Apache License
  *
  */
-#include <JCA_FNC_Valve2DPosImp.h>
+#include "JCA_FNC_Valve2DPosImp.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagFloat.h"
+#include "JCA_TAG_TagUInt16.h"
+#include "JCA_TAG_TagString.h"
+#include "JCA_TAG_TagInt32.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

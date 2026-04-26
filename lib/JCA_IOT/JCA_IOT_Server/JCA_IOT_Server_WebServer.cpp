@@ -9,7 +9,8 @@
  * Apache License
  *
  */
-#include <JCA_IOT_Server.h>
+#include "JCA_IOT_Server.h"
+#include "JCA_SYS_DebugOut.h"
 using namespace JCA::SYS;
 
 namespace JCA {
@@ -109,7 +110,7 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
+      _Request->send (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceConnectWildcards (_Var); });
     }
 
     /**
@@ -121,7 +122,7 @@ namespace JCA {
       if (!_Request->authenticate (ConfUser, ConfPassword)) {
         return _Request->requestAuthentication ();
       }
-      _Request->send_P (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceSystemWildcards (_Var); });
+      _Request->send (200, "text/html", PageFrame, [this] (const String &_Var) -> String { return this->replaceSystemWildcards (_Var); });
     }
 
     /**
@@ -192,7 +193,7 @@ namespace JCA {
         #ifdef ESP8266
         Update.runAsync (true);
         if (!Update.begin ((ESP.getFreeSketchSpace () - 0x1000) & 0xFFFFF000)) {
-        #elif ESP32
+        #elif defined(ESP32)
         if (!Update.begin ()) {
         #endif
           if (Debug.print (FLAG_ERROR, true, ObjectName, __func__, "")) {
@@ -301,6 +302,12 @@ namespace JCA {
       }
       if (var == "SVG_SYSTEM") {
         return String (FPSTR (SvgSystem));
+      }
+      if (var == "SVG_PLUS") {
+        return String (FPSTR (SvgPlus));
+      }
+      if (var == "SVG_TRASH") {
+        return String (FPSTR (SvgTrash));
       }
       return String ();
     }

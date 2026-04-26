@@ -12,7 +12,11 @@
  */
 
 #ifdef ESP32
-  #include <JCA_FNC_AcDimmers.h>
+  #include "JCA_FNC_AcDimmers.h"
+  #include "JCA_SYS_DebugOut.h"
+  #include "JCA_TAG_TagUInt16.h"
+  #include "JCA_TAG_TagUInt8.h"
+  #include "JCA_TAG_TagInt32.h"
   using namespace JCA::SYS;
   using namespace JCA::TAG;
 

@@ -20,7 +20,7 @@
 #ifdef ESP8266
   #define SPIFFS LittleFS
   #define SERIAL_BAUD 74880
-#elif ESP32
+#elif defined(ESP32)
   #define SERIAL_BAUD 115200
 #endif
 

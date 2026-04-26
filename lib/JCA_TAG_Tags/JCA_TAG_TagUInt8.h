@@ -16,7 +16,7 @@
 #ifndef _JCA_TAG_TAGUINT8_
 #define _JCA_TAG_TAGUINT8_
 
-#include <JCA_TAG_Parent.h>
+#include "JCA_TAG_Parent.h"
 
 namespace JCA {
   namespace TAG {

@@ -30,8 +30,7 @@
   #define FILE_WRITE "w"
 #endif
 
-#include <JCA_FNC_Parent.h>
-#include <JCA_SYS_DebugOut.h>
+#include "JCA_FNC_Parent.h"
 
 #define JCA_IOT_FUNCHANDLER_SETUP_NAME "name"
 // JSON Files used Functionhandler for Config and Data-Storage, only if not defines in main.cpp or somewhere else

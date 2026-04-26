@@ -16,7 +16,7 @@
 #ifndef _JCA_TAG_TAGBOOL_
 #define _JCA_TAG_TAGBOOL_
 
-#include <JCA_TAG_Parent.h>
+#include "JCA_TAG_Parent.h"
 
 namespace JCA {
   namespace TAG {

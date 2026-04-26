@@ -1,7 +1,12 @@
+# compile_commands.json is generated with: pio run -e WemosMini32 -t compiledb
 CompileFlags:
+  CompilationDatabase: .
   Remove:
     - -mlongcalls
-    - -fstrict-volatile-bitfields
-    - -fno-tree-switch-conversion
+    - -mtext-section-literals
     - -mfix-esp32-erratum-prologue
     - -mno-esp32-indirect-calls
+    - -fstrict-volatile-bitfields
+    - -fno-tree-switch-conversion
+    - -free
+    - -fipa-pta

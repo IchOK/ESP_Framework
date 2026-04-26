@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <meta charset="UTF-8">
   <title>%TITLE% - Setup Editor</title>
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
   <link rel="icon" type="image/png" href="/images/favicon.png">
@@ -15,6 +16,56 @@
       --ColorSetup: var(--contrast);
       --ColorWiFi: var(--secondary);
       --ColorSystem: var(--secondary)
+    }
+    .btn-square {
+      padding: 0;
+      margin: var(--border-width);
+      width: calc(1.5rem + var(--form-element-spacing-vertical) * 2) !important;
+      height: calc(1.5rem + var(--form-element-spacing-vertical) * 2) !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-square > svg {
+      width: 2rem !important;
+      min-width: 2rem;
+      max-width: 2rem;
+      height: 2rem !important;
+      min-height: 2rem;
+      max-height: 2rem;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 2rem;
+      pointer-events: none;
+    }
+    .btn-square-small {
+      padding: 0;
+      margin: var(--border-width) var(--border-width) calc(var(--form-element-spacing-vertical) * 2 + var(--border-width)) var(--border-width);
+      width: calc(1rem + var(--form-element-spacing-vertical) * 2) !important;
+      height: calc(1rem + var(--form-element-spacing-vertical) * 2) !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-square-small > svg {
+      width: 1.5rem !important;
+      min-width: 1.5rem;
+      max-width: 1.5rem;
+      height: 1.5rem !important;
+      min-height: 1.5rem;
+      max-height: 1.5rem;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 1.5rem;
+      pointer-events: none;
     }
     .setup-section {
       margin-bottom: 2rem;
@@ -44,9 +95,6 @@
     .btn-small {
       padding: 0.25rem 0.5rem;
       font-size: 0.875rem;
-    }
-    .add-button {
-      margin-top: 1rem;
     }
     .json-editor {
       font-family: monospace;
@@ -107,11 +155,41 @@
         if (loadedSetup.links) setupData.links = loadedSetup.links;
         console.log("Setup data loaded:", setupData);
 
+        populateAddSelectors();
         renderAll();
       } catch (error) {
         console.error("Error loading data:", error);
         alert("Fehler beim Laden der Daten: " + error.message);
       }
+    }
+
+    function fillTypeSelect(selectId, values) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      const currentValue = select.value;
+      select.innerHTML = '';
+      if (!values || values.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '-- Keine Typen verfügbar --';
+        select.appendChild(option);
+        return;
+      }
+      values.forEach(v => {
+        const option = document.createElement('option');
+        option.value = v;
+        option.textContent = v;
+        select.appendChild(option);
+      });
+      if (currentValue && values.includes(currentValue)) {
+        select.value = currentValue;
+      }
+    }
+
+    function populateAddSelectors() {
+      fillTypeSelect('add-hardware-type', metadata.hardwareTypes || []);
+      fillTypeSelect('add-function-type', metadata.functionTypes || []);
+      fillTypeSelect('add-link-type', metadata.linkTypes || ['direct']);
     }
 
     // Get tags for a specific function with optional access filter
@@ -231,7 +309,7 @@
         card.innerHTML = `
           <div class="item-header">
             <h4>${item.name || item.type || 'Unnamed'}</h4>
-            <button class="btn-small" onclick="removeHardware(${index})">Entfernen</button>
+            <button class="attention btn-square" onclick="removeHardware(${index})">%SVG_TRASH%</button>
           </div>
           <div class="item-properties">
             ${propertiesHtml}
@@ -321,7 +399,7 @@
         card.innerHTML = `
           <div class="item-header">
             <h4>${item.name || item.type || 'Unnamed'}</h4>
-            <button class="btn-small" onclick="removeFunction(${index})">Entfernen</button>
+            <button class="attention btn-square" onclick="removeFunction(${index})">%SVG_TRASH%</button>
           </div>
           <div class="item-properties">
             ${propertiesHtml}
@@ -342,7 +420,7 @@
         card.innerHTML = `
           <div class="item-header">
             <h4>Link ${index + 1} (${item.type || 'direct'})</h4>
-            <button class="btn-small" onclick="removeLink(${index})">Entfernen</button>
+            <button class="attention btn-square" onclick="removeLink(${index})">%SVG_TRASH%</button>
           </div>
           <div class="item-properties">
             <label>Type: 
@@ -384,7 +462,7 @@
                     }).join('')}
                   </select>
                 </label>
-                ${canRemove ? `<button class="btn-small" onclick="removeLinkFrom(${index}, ${fi})">Entfernen</button>` : ''}
+                ${canRemove ? `<button class="attention btn-square-small" onclick="removeLinkFrom(${index}, ${fi})">%SVG_TRASH%</button>` : ''}
               </div>
             `;
             }).join('') : ''}
@@ -425,7 +503,7 @@
                     }).join('')}
                   </select>
                 </label>
-                ${canRemove ? `<button class="btn-small" onclick="removeLinkTo(${index}, ${ti})">Entfernen</button>` : ''}
+                ${canRemove ? `<button class="attention btn-square-small" onclick="removeLinkTo(${index}, ${ti})">%SVG_TRASH%</button>` : ''}
               </div>
             `;
             }).join('') : ''}
@@ -448,12 +526,12 @@
     }
 
     // Hardware functions
-    function addHardware() {
+    function addHardware(selectedType) {
       if (!metadata.hardwareTypes || metadata.hardwareTypes.length === 0) {
         alert('Keine Hardware-Typen verfügbar');
         return;
       }
-      const type = prompt('Hardware-Typ auswählen:', metadata.hardwareTypes[0]);
+      const type = selectedType || (document.getElementById('add-hardware-type') ? document.getElementById('add-hardware-type').value : metadata.hardwareTypes[0]);
       if (type) {
         const newItem = { type: type, name: 'newHardware' };
         
@@ -508,12 +586,12 @@
     }
 
     // Function functions
-    function addFunction() {
+    function addFunction(selectedType) {
       if (!metadata.functionTypes || metadata.functionTypes.length === 0) {
         alert('Keine Funktions-Typen verfügbar');
         return;
       }
-      const type = prompt('Funktions-Typ auswählen:', metadata.functionTypes[0]);
+      const type = selectedType || (document.getElementById('add-function-type') ? document.getElementById('add-function-type').value : metadata.functionTypes[0]);
       if (type) {
         const newItem = { type: type, name: 'newFunction' };
         
@@ -592,8 +670,9 @@
     }
 
     // Link functions
-    function addLink() {
-      setupData.links.push({ type: 'direct', from: [], to: [] });
+    function addLink(selectedType) {
+      const type = selectedType || (document.getElementById('add-link-type') ? document.getElementById('add-link-type').value : 'direct');
+      setupData.links.push({ type: type || 'direct', from: [], to: [] });
       renderAll();
     }
 
@@ -816,7 +895,15 @@
           <h2>Hardware</h2>
         </header>
         <div id="hardware-list"></div>
-        <button class="add-button" onclick="addHardware()">Hardware hinzufügen</button>
+        <div class="item-card">
+          <div class="item-header">
+            <h3>Hardware hinzufügen</h3>
+          </div>
+          <div class="item-properties">
+            <select id="add-hardware-type" aria-label="Hardware-Typ"></select>
+            <button class="primary btn-square" onclick="addHardware(document.getElementById('add-hardware-type').value)">%SVG_PLUS%</button>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -826,7 +913,15 @@
           <h2>Funktionen</h2>
         </header>
         <div id="functions-list"></div>
-        <button class="add-button" onclick="addFunction()">Funktion hinzufügen</button>
+        <div class="item-card"></div>
+          <div class="item-header">
+            <h3>Funktion hinzufügen</h3>
+          </div>
+          <div class="item-properties">
+            <select id="add-function-type" aria-label="Funktions-Typ"></select>
+            <button class="primary btn-square" onclick="addFunction(document.getElementById('add-function-type').value)">%SVG_PLUS%</button>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -836,7 +931,15 @@
           <h2>Links</h2>
         </header>
         <div id="links-list"></div>
-        <button class="add-button" onclick="addLink()">Link hinzufügen</button>
+        <div class="item-card">
+          <div class="item-header">
+            <h3>Link hinzufügen</h3>
+          </div>
+          <div class="item-properties">
+            <select id="add-link-type" aria-label="Link-Typ"></select>
+            <button class="primary btn-square" onclick="addLink(document.getElementById('add-link-type').value)">%SVG_PLUS%</button>
+          </div>
+        </div>
       </section>
     </div>
 

@@ -16,7 +16,7 @@
 #ifdef ESP32
   #include <esp_err.h>
 #endif
-#include <JCA_SYS_DebugOut.h>
+#include "JCA_SYS_DebugOut.h"
 
 namespace JCA {
   namespace SYS {

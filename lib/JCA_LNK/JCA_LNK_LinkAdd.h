@@ -14,9 +14,9 @@
 #define _JCA_LNK_LINKADD_
 
 #include "ArduinoJson/Variant/JsonVariant.hpp"
-#include <JCA_IOT_FuncHandler.h>
+#include "JCA_IOT_FuncHandler.h"
 #include <ArduinoJson.h>
-#include <JCA_TAG_Parent.h>
+#include "JCA_TAG_Parent.h"
 
 // Forward declaration
 namespace JCA {

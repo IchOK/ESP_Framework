@@ -1,5 +1,6 @@
 
-#include <JCA_SYS_PwmOutput.h>
+#include "JCA_SYS_PwmOutput.h"
+#include "JCA_SYS_DebugOut.h"
 
 namespace JCA {
   namespace SYS {
@@ -14,7 +15,7 @@ namespace JCA {
     PwmOutput::PwmOutput () {
 #ifdef ESP8266
       ;
-#elif ESP32
+#elif defined(ESP32)
       for (uint8_t i = 0; i < ChannelCount; i++) {
         Channels[i].Pin = 0;
         Channels[i].Resolution = 0;
@@ -38,7 +39,7 @@ namespace JCA {
       analogWriteFreq (_Freq);
       analogWrite (_Pin, 0);
       return true;
-#elif ESP32
+#elif defined(ESP32)
       uint8_t ActChannel = 255;
       uint8_t NewChannel = 255;
       uint8_t PinChannel;
@@ -124,7 +125,7 @@ namespace JCA {
       analogWrite (_Pin, Duty);
       return true;
 
-#elif ESP32
+#elif defined(ESP32)
       uint8_t PinChannel = 255;
       uint32_t Duty;
 

@@ -10,7 +10,11 @@
  *
  */
 
-#include <JCA_FNC_LedStrip.h>
+#include "JCA_FNC_LedStrip.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
+#include "JCA_TAG_TagUInt16.h"
+#include "JCA_TAG_TagUInt32.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

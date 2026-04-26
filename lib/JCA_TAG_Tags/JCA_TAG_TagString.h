@@ -16,7 +16,7 @@
 #ifndef _JCA_TAG_TAGSTRING_
 #define _JCA_TAG_TAGSTRING_
 
-#include <JCA_TAG_Parent.h>
+#include "JCA_TAG_Parent.h"
 
 namespace JCA {
   namespace TAG {

@@ -71,12 +71,12 @@
 
 #include <ESP32Time.h>
 
-#include <JCA_IOT_Server_Boardinfo.h>
-#include <JCA_IOT_Server_WebSVGs.h>
-#include <JCA_IOT_Server_WebSites.h>
-#include <JCA_IOT_WiFiConnect.h>
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_SYS_Crypt.h>
+#include "JCA_IOT_Server_Boardinfo.h"
+#include "JCA_IOT_Server_WebSVGs.h"
+#include "JCA_IOT_Server_WebSites.h"
+#include "JCA_IOT_WiFiConnect.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_SYS_Crypt.h"
 
 // Manual setting Firmware withpout Git
 #ifndef AUTO_VERSION
@@ -117,6 +117,7 @@
 // Website Config
 #define JCA_IOT_SERVER_PATH_CONNECT "/connect"
 #define JCA_IOT_SERVER_PATH_SYS "/sys"
+#define JCA_IOT_SERVER_PATH_SYSCONFIG_API "/api/sysConfig"
 #define JCA_IOT_SERVER_PATH_SYS_UPLOAD "/upload"
 #define JCA_IOT_SERVER_PATH_SYS_UPDATE "/update"
 #define JCA_IOT_SERVER_PATH_SYS_RESET "/reset"

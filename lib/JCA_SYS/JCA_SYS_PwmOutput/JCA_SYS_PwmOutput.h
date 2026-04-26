@@ -2,9 +2,10 @@
 #ifndef _JCA_SYS_PWM_
 #define _JCA_SYS_PWM_
 
-#include <JCA_SYS_DebugOut.h>
+#include <Arduino.h>
+
 #ifdef ESP32
-#include <JCA_SYS_PWM_C.h>
+#include "JCA_SYS_PWM_C.h"
 #endif
 
 namespace JCA {
@@ -19,7 +20,7 @@ namespace JCA {
     private:
 #ifdef ESP8266
       uint8_t Resolution;
-#elif ESP32
+#elif defined(ESP32)
       static const uint8_t ChannelCount;
       PwmChannel_T Channels[JCA_SYS_PWM_CHANNELS];
 #endif

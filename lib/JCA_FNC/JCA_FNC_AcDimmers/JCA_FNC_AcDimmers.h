@@ -20,13 +20,9 @@
   #include <algorithm>
   #include <time.h>
 
-  #include <JCA_FNC_Parent.h>
-  #include <JCA_IOT_FuncHandler.h>
-  #include <JCA_SYS_DebugOut.h>
-  #include <JCA_SYS_TimerESP32.h>
-  #include <JCA_TAG_TagUInt16.h>
-  #include <JCA_TAG_TagUInt8.h>
-  #include <JCA_TAG_TagInt32.h>
+  #include "JCA_FNC_Parent.h"
+  #include "JCA_IOT_FuncHandler.h"
+  #include "JCA_SYS_TimerESP32.h"
 
   namespace JCA {
     namespace FNC {

@@ -5,11 +5,14 @@
   #ifdef ESP32
     #include <esp32-hal-timer.h>
     #include <driver/timer.h>
+    #include <soc/soc.h>
 
-    #include <JCA_SYS_DebugOut.h>
-    #include <JCA_SYS_EspError.h>
+    #include "JCA_SYS_EspError.h"
 
     #define JCA_SYS_TIMERESP32_MAX_TIMERS 2
+    #ifndef TIMER_BASE_CLK
+      #define TIMER_BASE_CLK APB_CLK_FREQ
+    #endif
     #define JCA_SYS_TIMERESP32_DIVIDER TIMER_BASE_CLK / 1000000 // -> 1MHz
 
     namespace JCA {

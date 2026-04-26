@@ -109,4 +109,26 @@ const char SvgLogo[] PROGMEM = R"rawliteral(
 </svg>
 )rawliteral";
 
+/**
+ * @brief Plus Icon
+ *
+ */
+const char SvgPlus[] PROGMEM = R"rawliteral(
+<svg viewBox="0 0 24 24" aria-hidden="true">
+ <path d="M12 5v14M5 12h14"/></svg>
+)rawliteral";
+
+/**
+ * @brief Trash Icon
+ *
+ */
+const char SvgTrash[] PROGMEM = R"rawliteral(
+<svg viewBox="0 0 24 24" aria-hidden="true">
+ <path d="M3 6h18"/>
+ <path d="M8 6V4h8v2"/>
+ <path d="M19 6l-1 14H6L5 6"/>
+ <path d="M10 10v7M14 10v7"/>
+</svg>
+)rawliteral";
+
 #endif

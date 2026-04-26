@@ -12,7 +12,7 @@
  *
  */
 
-#include <JCA_SYS_DebugOut.h>
+#include "JCA_SYS_DebugOut.h"
 
 namespace JCA {
   namespace SYS {
@@ -21,7 +21,7 @@ namespace JCA {
      *
      * @param _Serial The Serial-Interface to use for Debug output
      */
-    DebugOut::DebugOut (const SerialType &_Serial) : DebugSerial (_Serial) {
+    DebugOut::DebugOut (SerialType &_Serial) : DebugSerial (_Serial) {
       NewLine = true;
     }
 

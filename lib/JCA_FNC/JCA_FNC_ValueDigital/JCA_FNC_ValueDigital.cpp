@@ -10,7 +10,9 @@
  *
  */
 
-#include <JCA_FNC_ValueDigital.h>
+#include "JCA_FNC_ValueDigital.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

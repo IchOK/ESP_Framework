@@ -21,7 +21,9 @@
  */
 #define JCA_SYS_DebugOut_DEFAULT_BAUD 74880
 
-#ifdef ARDUINO_LOLIN_S2_MINI
+#if defined(CONFIG_IDF_TARGET_ESP32C6)
+  #define SerialType HWCDC
+#elif defined(ARDUINO_LOLIN_S2_MINI)
   #define SerialType USBCDC
 #else
   #define SerialType HardwareSerial
@@ -51,12 +53,12 @@ namespace JCA {
     private:
       const char *ObjectName = "DebugOut";
       uint16_t Flags;
-      SerialType DebugSerial;
+      SerialType &DebugSerial;
       bool NewLine;
       String getPrefix (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function);
 
     public:
-      DebugOut (const SerialType &_Serial);
+      DebugOut (SerialType &_Serial);
       ~DebugOut ();
 
       void init (uint16_t _Flags, unsigned long _Baud);

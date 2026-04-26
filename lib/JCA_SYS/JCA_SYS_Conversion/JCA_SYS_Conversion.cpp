@@ -10,7 +10,7 @@
  *
  */
 
-#include <JCA_SYS_Conversion.h>
+#include "JCA_SYS_Conversion.h"
 
 namespace JCA {
   namespace SYS {

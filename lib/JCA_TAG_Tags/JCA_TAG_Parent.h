@@ -17,8 +17,7 @@
 #include "FS.h"
 #include <ArduinoJson.h>
 
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_SYS_Conversion.h>
+#include "JCA_SYS_Conversion.h"
 
 #define JCA_TAG_TAGS_JsonName "name"
 #define JCA_TAG_TAGS_JsonText "text"

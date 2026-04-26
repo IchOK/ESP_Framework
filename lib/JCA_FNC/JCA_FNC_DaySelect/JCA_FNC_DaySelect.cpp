@@ -10,7 +10,10 @@
  *
  */
 
-#include <JCA_FNC_DaySelect.h>
+#include "JCA_FNC_DaySelect.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
+#include "JCA_TAG_TagUInt16.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 

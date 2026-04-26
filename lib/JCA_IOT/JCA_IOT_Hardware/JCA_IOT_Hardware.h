@@ -14,9 +14,8 @@
 #define _JCA_IOT_HARDWARE_
 
 #include <ArduinoJson.h>
-#include <JCA_IOT_FuncHandler.h>
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_SYS_PwmOutput.h>
+#include "JCA_IOT_FuncHandler.h"
+#include "JCA_SYS_PwmOutput.h"
 #include <map>
 #include <vector>
 

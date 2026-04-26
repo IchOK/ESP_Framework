@@ -3,11 +3,8 @@
         "*.tcc": "cpp",
         "variant": "cpp",
         "vector": "cpp"
-      },
+    },
     "cmake.configureOnOpen": false,
-    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "clangd.arguments": [
-        "--compile-commands-dir=${workspaceFolder}",
-        "--query-driver=**"
-    ]
+    "C_Cpp.default.configurationProvider": "platformio.platformio-ide",
+    "C_Cpp.intelliSenseEngine": "default"
 }

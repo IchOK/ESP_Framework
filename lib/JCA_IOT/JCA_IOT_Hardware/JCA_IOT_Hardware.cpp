@@ -10,7 +10,8 @@
  *
  */
 
-#include <JCA_IOT_Hardware.h>
+#include "JCA_IOT_Hardware.h"
+#include "JCA_SYS_DebugOut.h"
 
 using namespace JCA::SYS;
 

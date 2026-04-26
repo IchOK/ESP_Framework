@@ -13,9 +13,9 @@
 #ifndef _JCA_LNK_LINKDIRECT_
 #define _JCA_LNK_LINKDIRECT_
 
-#include <JCA_IOT_FuncHandler.h>
+#include "JCA_IOT_FuncHandler.h"
 #include <ArduinoJson.h>
-#include <JCA_TAG_Parent.h>
+#include "JCA_TAG_Parent.h"
 
 namespace JCA {
   namespace LNK {

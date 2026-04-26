@@ -20,13 +20,12 @@
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
   #include <ESP8266mDNS.h>
-#elif ESP32
+#elif defined(ESP32)
   #include <ESPmDNS.h>
   #include <FS.h>
   #include <SPIFFS.h>
   #include <WiFi.h>
 #endif
-#include <JCA_SYS_DebugOut.h>
 
 // Default Config if not passt other Data to Contructor
 #define JCA_IOT_WIFICONNECT_DEFAULT_SSID_PREFIX "JCA_IOT"

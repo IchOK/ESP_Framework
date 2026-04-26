@@ -22,6 +22,7 @@ const char PageFrame[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>%TITLE%</title>
 <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 <link rel="icon" type="image/png" href="/images/favicon.png">
@@ -87,6 +88,129 @@ Board MCU: %BOARD_MCU%<br/>
 <a href="/api/tags">Function-Tag Listing</a><br/>
 %VALUES_LINK%
 %LOG_LINK%
+</article>
+<article>
+<header>Systemkonfiguration</header>
+<div name="hostname" style="align-items:baseline ;" class="grid">
+    <p id="name">Hostname</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_hostname" name="value" style="padding-right:54px;text-align:right;" type="text">
+    </div>
+</div>
+<div name="port" style="align-items:baseline ;" class="grid">
+    <p id="name">Web-Port</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_port" name="value" style="padding-right:54px;text-align:right;" step="1" type="number" min="1" max="65535">
+    </div>
+</div>
+<div name="udtPort" style="align-items:baseline ;" class="grid">
+    <p id="name">UDP-Port</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_udtPort" name="value" style="padding-right:54px;text-align:right;" step="1" type="number" min="0" max="65535">
+    </div>
+</div>
+<div name="localTimeZone" style="align-items:baseline ;" class="grid">
+    <p id="name">Zeitzonen-Offset</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_localTimeZone" name="value" style="padding-right:54px;text-align:right;" step="1" type="number" min="0" max="86400">
+        <span name="unit" style="margin-left:-50px;text-align:left;">s</span>
+    </div>
+</div>
+<div name="wsUpdate" style="align-items:baseline ;" class="grid">
+    <p id="name">WebSocket-Update-Intervall</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_wsUpdate" name="value" style="padding-right:54px;text-align:right;" step="1" type="number" min="0">
+        <span name="unit" style="margin-left:-50px;text-align:left;">ms</span>
+    </div>
+</div>
+<div name="dayLightSaving" style="align-items:baseline ;" class="grid">
+    <p id="name">Sommerzeit</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_dayLightSaving" name="value" type="button" class="primary outline" data-dls="0" value="AUS" title="Klick: umschalten" />
+    </div>
+</div>
+<div name="rebootCounter" style="align-items:baseline ;" class="grid">
+    <p id="name">Reboot-Zähler</p>
+    <div style="display:flex;align-items:baseline;">
+        <input id="sysCfg_rebootCounter" name="value" style="padding-right:54px;text-align:right;" step="any" type="number" readonly>
+    </div>
+</div>
+<button type="button" id="sysConfigSave" class="primary">Speichern</button>
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  function showMsg(t, isErr) {
+    var m = el("sysConfigMsg");
+    m.style.display = "block";
+    m.textContent = t;
+    m.style.color = isErr ? "crimson" : "";
+  }
+  function setDayLS(on) {
+    var b = el("sysCfg_dayLightSaving");
+    if (!b) { return; }
+    b.setAttribute("data-dls", on ? "1" : "0");
+    b.value = on ? "EIN" : "AUS";
+    b.className = on ? "primary" : "primary outline";
+  }
+  function applyJson(j) {
+    if (!el("sysCfg_hostname")) { return; }
+    el("sysCfg_hostname").value = (j && j.hostname != null) ? j.hostname : "";
+    el("sysCfg_port").value = (j && j.port != null) ? j.port : 80;
+    el("sysCfg_udtPort").value = (j && j.udtPort != null) ? j.udtPort : 0;
+    el("sysCfg_localTimeZone").value = (j && j.localTimeZone != null) ? j.localTimeZone : 0;
+    el("sysCfg_wsUpdate").value = (j && j.wsUpdate != null) ? j.wsUpdate : 0;
+    setDayLS(!!(j && j.dayLightSaving));
+    el("sysCfg_rebootCounter").value = (j && j.rebootCounter != null) ? j.rebootCounter : 0;
+  }
+  function loadCfg() {
+    fetch("/api/sysConfig", { credentials: "same-origin", cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(applyJson)
+      .catch(function (e) { showMsg("Laden: " + e, true); });
+  }
+  function saveCfg() {
+    var body = {
+      hostname: el("sysCfg_hostname").value,
+      port: parseInt(el("sysCfg_port").value, 10) || 0,
+      udtPort: parseInt(el("sysCfg_udtPort").value, 10) || 0,
+      localTimeZone: parseInt(el("sysCfg_localTimeZone").value, 10) || 0,
+      wsUpdate: parseInt(el("sysCfg_wsUpdate").value, 10) || 0,
+      dayLightSaving: el("sysCfg_dayLightSaving").getAttribute("data-dls") === "1",
+      rebootCounter: parseInt(el("sysCfg_rebootCounter").value, 10) || 0
+    };
+    fetch("/api/sysConfig", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      credentials: "same-origin"
+    })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (x.j && x.j.error) { showMsg(x.j.error, true); return; }
+        showMsg("Gespeichert.", false);
+        loadCfg();
+      })
+      .catch(function (e) { showMsg("Speichern: " + e, true); });
+  }
+  function boot() {
+    if (el("sysConfigSave")) { el("sysConfigSave").addEventListener("click", saveCfg); }
+    var dls = el("sysCfg_dayLightSaving");
+    if (dls && dls.getAttribute("data-dls") !== null) {
+      dls.addEventListener("click", function () {
+        var on = dls.getAttribute("data-dls") !== "1";
+        setDayLS(on);
+      });
+    }
+    loadCfg();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else { boot(); }
+})();
+</script>
 </article>
 <article>
 <header>Upload Files</header>

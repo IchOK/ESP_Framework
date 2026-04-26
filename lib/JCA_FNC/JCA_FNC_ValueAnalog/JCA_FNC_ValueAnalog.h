@@ -16,10 +16,8 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_FNC_Parent.h>
-#include <JCA_IOT_FuncHandler.h>
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_TAG_TagFloat.h>
+#include "JCA_FNC_Parent.h"
+#include "JCA_IOT_FuncHandler.h"
 
 namespace JCA {
   namespace FNC {

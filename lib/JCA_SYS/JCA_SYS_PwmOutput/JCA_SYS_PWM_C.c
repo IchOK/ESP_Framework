@@ -1,6 +1,6 @@
 
 #ifdef ESP32
-#include <JCA_SYS_PWM_C.h>
+#include "JCA_SYS_PWM_C.h"
 #include "driver/ledc.h"
 #include "esp32-hal.h"
 #include "soc/soc_caps.h"

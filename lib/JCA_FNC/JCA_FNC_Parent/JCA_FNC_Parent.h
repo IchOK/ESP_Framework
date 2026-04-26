@@ -18,8 +18,8 @@
 #include <map>
 #include <vector>
 
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_TAG_Parent.h>
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_Parent.h"
 
 using namespace JCA::TAG;
 

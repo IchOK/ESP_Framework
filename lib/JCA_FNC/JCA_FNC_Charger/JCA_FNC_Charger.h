@@ -16,15 +16,10 @@
 #include <ArduinoJson.h>
 #include <time.h>
 
-#include <JCA_FNC_INA219.h>
-#include <JCA_FNC_Parent.h>
-#include <JCA_IOT_FuncHandler.h>
-#include <JCA_SYS_DebugOut.h>
-#include <JCA_SYS_PwmOutput.h>
-#include <JCA_TAG_TagBool.h>
-#include <JCA_TAG_TagFloat.h>
-#include <JCA_TAG_TagListUInt8.h>
-#include <JCA_TAG_TagUInt16.h>
+#include "JCA_FNC_INA219.h"
+#include "JCA_FNC_Parent.h"
+#include "JCA_IOT_FuncHandler.h"
+#include "JCA_SYS_PwmOutput.h"
 
 #define CURRENT_AH_STEPS 0.001
 #define POWER_AH_STEPS 0.001

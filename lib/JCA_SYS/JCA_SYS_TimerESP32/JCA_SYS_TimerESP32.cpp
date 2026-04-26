@@ -1,5 +1,6 @@
 #ifdef ESP32
-  #include <JCA_SYS_TimerESP32.h>
+  #include "JCA_SYS_TimerESP32.h"
+    #include "JCA_SYS_DebugOut.h"
 
   namespace JCA {
     namespace SYS {

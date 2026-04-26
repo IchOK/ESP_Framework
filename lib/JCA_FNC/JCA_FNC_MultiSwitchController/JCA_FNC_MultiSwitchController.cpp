@@ -8,7 +8,12 @@
  * Apache License
  */
 
-#include <JCA_FNC_MultiSwitchController.h>
+#include "JCA_FNC_MultiSwitchController.h"
+#include "JCA_SYS_DebugOut.h"
+#include "JCA_TAG_TagBool.h"
+#include "JCA_TAG_TagFloat.h"
+#include "JCA_TAG_TagInt16.h"
+#include "JCA_TAG_TagUInt16.h"
 using namespace JCA::SYS;
 using namespace JCA::TAG;
 
