@@ -66,17 +66,21 @@ namespace JCA {
         } else {
           Debug.print (FLAG_ERROR, true, Name, __func__, "Tag to link not found : ");
           Debug.println (FLAG_ERROR, true, Name, __func__, _TagName);
+#if !defined(JCA_NO_SETUP_LOG)
           JsonObject Log = _LogArray.add<JsonObject>();
           Log["func"] = _FuncName;
           Log["tag"] = _TagName;
+#endif
           return false;
         }
       } else {
         _Tag = -1;
         Debug.print (FLAG_ERROR, true, Name, __func__, "Function to link not found : ");
         Debug.println (FLAG_ERROR, true, Name, __func__, _FuncName);
+#if !defined(JCA_NO_SETUP_LOG)
         JsonObject Log = _LogArray.add<JsonObject>();
         Log["func"] = _FuncName;
+#endif
         return false;
       }
     }
@@ -112,12 +116,18 @@ namespace JCA {
       Debug.println (FLAG_SETUP, true, Name, __func__, "Run");
       FuncPatchRet_T RetValue = FuncPatchRet_T::done;
       JsonDocument SetupDoc;
+#if !defined(JCA_NO_SETUP_LOG)
       JsonDocument LogDoc;
+#else
+      JsonDocument LogDiscard;
+#endif
 
       if (!LittleFS.exists(JCA_IOT_FILE_SETUP)) {
+#if !defined(JCA_NO_SETUP_LOG)
         JsonObject LogObj = LogDoc["File"].to<JsonObject>();
         LogObj["Name"] = JCA_IOT_FILE_SETUP;
         LogObj["Error"] = "not found";
+#endif
         RetValue = FuncPatchRet_T::fileMissing;
       } else {
         // Open Setup File
@@ -127,9 +137,11 @@ namespace JCA {
         if (Error) {
           Debug.print (FLAG_ERROR, true, Name, __func__, "DeserializeJson failed: ");
           Debug.println (FLAG_ERROR, true, Name, __func__, Error.c_str());
+#if !defined(JCA_NO_SETUP_LOG)
           JsonObject LogObj = LogDoc["File"].to<JsonObject>();
           LogObj["Name"] = JCA_IOT_FILE_SETUP;
           LogObj["Error"] = Error.c_str ();
+#endif
           RetValue = FuncPatchRet_T::jsonSyntax;
         } else {
           JsonObject SetupObj = SetupDoc.as<JsonObject>();
@@ -142,11 +154,18 @@ namespace JCA {
           //-------------------------------------------------------
           if (SetupObj[JsonTagHardware].is<JsonArray>()) {
             Debug.println (FLAG_SETUP, true, Name, __func__, "Found Hardware");
+#if !defined(JCA_NO_SETUP_LOG)
             JsonArray LogArray = LogDoc["Hardware"].to<JsonArray>();
+#endif
             JsonArray SetupHwArr = SetupObj[JsonTagHardware].as<JsonArray>();
             for (JsonObject SetupHwObj : SetupHwArr) {
-              Debug.println (FLAG_SETUP, true, Name, __func__, SetupHwObj["type"].as<String>());
+              Debug.println (FLAG_SETUP, true, Name, __func__, SetupHwObj["type"].as<const char *>());
+#if !defined(JCA_NO_SETUP_LOG)
               JsonObject Log = LogArray.add<JsonObject>();
+#else
+              LogDiscard.clear();
+              JsonObject Log = LogDiscard.to<JsonObject>();
+#endif
               if (HardwareList.count(SetupHwObj["type"]) == 1) {
                 // Hardware found in creator List -> Call Creator and add to HardwareMapping
                 if (HardwareMapping.count (SetupHwObj["type"]) == 0) {
@@ -156,8 +175,10 @@ namespace JCA {
               } else {
                 // Hardware not found, log error
                 Debug.print (FLAG_ERROR, true, Name, __func__, "Hardware not found in Hardware List : ");
-                Debug.println (FLAG_ERROR, true, Name, __func__, SetupHwObj["type"].as<String> ());
+                Debug.println (FLAG_ERROR, true, Name, __func__, SetupHwObj["type"].as<const char *>());
+#if !defined(JCA_NO_SETUP_LOG)
                 Log["Fault"] = "Type not found" + SetupHwObj["type"].as<String> ();
+#endif
                 if (RetValue > FuncPatchRet_T::hardwareMissing) {
                   RetValue = FuncPatchRet_T::hardwareMissing;
                 }
@@ -174,19 +195,28 @@ namespace JCA {
           //-------------------------------------------------------
           if (SetupObj[JsonTagFunctions].is<JsonArray>()) {
             Debug.println (FLAG_SETUP, true, Name, __func__, "Found Functions");
+#if !defined(JCA_NO_SETUP_LOG)
             JsonArray LogArray = LogDoc["Functions"].to<JsonArray>();
+#endif
             JsonArray SetupFuncArr = SetupObj[JsonTagFunctions].as<JsonArray> ();
             for (JsonObject SetupFuncObj : SetupFuncArr) {
-              Debug.println (FLAG_SETUP, true, Name, __func__, SetupFuncObj["type"].as<String> ());
+              Debug.println (FLAG_SETUP, true, Name, __func__, SetupFuncObj["type"].as<const char *>());
+#if !defined(JCA_NO_SETUP_LOG)
               JsonObject Log = LogArray.add<JsonObject>();
+#else
+              LogDiscard.clear();
+              JsonObject Log = LogDiscard.to<JsonObject>();
+#endif
               if (FunctionList.count (SetupFuncObj["type"]) == 1) {
                 // Function found in creator List -> Call Creator and add to Function Vector
                 FunctionList[SetupFuncObj["type"].as<String> ()](SetupFuncObj, Log, Functions, HardwareMapping);
               } else {
                 // Function not found, log error
                 Debug.print (FLAG_ERROR, true, Name, __func__, "Function not found in Function List : ");
-                Debug.println (FLAG_ERROR, true, Name, __func__, SetupFuncObj["type"].as<String> ());
+                Debug.println (FLAG_ERROR, true, Name, __func__, SetupFuncObj["type"].as<const char *>());
+#if !defined(JCA_NO_SETUP_LOG)
                 Log["Fault"] = "Type not found" + SetupFuncObj["type"].as<String> ();
+#endif
                 if (RetValue > FuncPatchRet_T::functionMissing) {
                   RetValue = FuncPatchRet_T::functionMissing;
                 }
@@ -203,15 +233,26 @@ namespace JCA {
           //-------------------------------------------------------
           if (SetupObj[JsonTagLinks].is<JsonArray>()) {
             Debug.println (FLAG_SETUP, true, Name, __func__, "Found Links");
+#if !defined(JCA_NO_SETUP_LOG)
             JsonArray LogArray = LogDoc["Links"].to<JsonArray>();
+#else
+            JsonArray LogArray = LogDiscard.to<JsonArray>();
+#endif
             JsonArray SetupLinkArr = SetupObj[JsonTagLinks].as<JsonArray> ();
             for (JsonObject SetupLinkObj : SetupLinkArr) {
-              Debug.println (FLAG_SETUP, true, Name, __func__, SetupLinkObj["type"].as<String> ());
+              Debug.println (FLAG_SETUP, true, Name, __func__, SetupLinkObj["type"].as<const char *>());
+#if !defined(JCA_NO_SETUP_LOG)
               JsonObject Log = LogArray.add<JsonObject>();
+#else
+              LogDiscard.clear();
+              JsonObject Log = LogDiscard.to<JsonObject>();
+#endif
               if (LinkMapping.count (SetupLinkObj["type"]) == 1) {
                 // Create Link
                 Links.push_back (new FuncLink (LinkMapping[SetupLinkObj["type"].as<String> ()]));
+#if !defined(JCA_NO_SETUP_LOG)
                 Log["Type"] = SetupLinkObj["type"].as<String> ();
+#endif
                 size_t Link = Links.size() - 1;
                 int16_t FuncIndex;
                 int16_t TagIndex;
@@ -219,13 +260,19 @@ namespace JCA {
 
                 // Add all From Pointer
                 JsonArray FromArr = SetupLinkObj["from"].as<JsonArray> ();
+#if !defined(JCA_NO_SETUP_LOG)
                 JsonArray LogFrom = Log["IN"].to<JsonArray>();
+#endif
                 for (JsonObject FromObj : FromArr) {
                   if (checkLink (FromObj["func"].as<String> (), FuncIndex, FromObj["tag"].as<String> (), TagIndex, LogArray)) {
                     Links[Link]->addInput ({ FuncIndex, TagIndex });
+#if !defined(JCA_NO_SETUP_LOG)
                     LogFrom.add ("OK: FuncIndex=" + String(FuncIndex) + " TagIndex=" + String(TagIndex));
+#endif
                   } else {
+#if !defined(JCA_NO_SETUP_LOG)
                     LogFrom.add ("FAIL: " + FromObj["func"].as<String> () + "_" + FromObj["tag"].as<String> ());
+#endif
                     if (RetValue > FuncPatchRet_T::linkObjMissing) {
                       RetValue = FuncPatchRet_T::linkObjMissing;
                     }
@@ -234,13 +281,19 @@ namespace JCA {
 
                 // Add all To Pointer
                 JsonArray ToArr = SetupLinkObj["to"].as<JsonArray> ();
+#if !defined(JCA_NO_SETUP_LOG)
                 JsonArray LogTo = Log["OUT"].to<JsonArray>();
+#endif
                 for (JsonObject ToObj : ToArr) {
                   if (checkLink (ToObj["func"].as<String> (), FuncIndex, ToObj["tag"].as<String> (), TagIndex, LogArray)) {
                     Links[Link]->addOutput ({ FuncIndex, TagIndex });
+#if !defined(JCA_NO_SETUP_LOG)
                     LogTo.add ("OK: FuncIndex=" + String (FuncIndex) + " TagIndex=" + String (TagIndex));
+#endif
                   } else {
+#if !defined(JCA_NO_SETUP_LOG)
                     LogTo.add ("FAIL: " + ToObj["func"].as<String> () + "_" + ToObj["tag"].as<String> ());
+#endif
                     if (RetValue > FuncPatchRet_T::linkObjMissing) {
                       RetValue = FuncPatchRet_T::linkObjMissing;
                     }
@@ -249,8 +302,10 @@ namespace JCA {
               } else {
                 // Function not found, log error
                 Debug.print (FLAG_ERROR, true, Name, __func__, "Link-Type not defined : ");
-                Debug.println (FLAG_ERROR, true, Name, __func__, SetupLinkObj["type"].as<String> ());
+                Debug.println (FLAG_ERROR, true, Name, __func__, SetupLinkObj["type"].as<const char *>());
+#if !defined(JCA_NO_SETUP_LOG)
                 Log["Fault"] = "Type not found" + SetupLinkObj["type"].as<String> ();
+#endif
                 if (RetValue > FuncPatchRet_T::linkTypMissing) {
                   RetValue = FuncPatchRet_T::linkTypMissing;
                 }
@@ -265,10 +320,12 @@ namespace JCA {
         SetupFile.close ();
       }
 
+#if !defined(JCA_NO_SETUP_LOG)
       // Write Logfile
       File LogFile = LittleFS.open (JCA_IOT_FILE_LOG, FILE_WRITE);
       serializeJson (LogDoc, LogFile);
       LogFile.close ();
+#endif
 
       Debug.println (FLAG_SETUP, true, Name, __func__, "Done");
       return RetValue;

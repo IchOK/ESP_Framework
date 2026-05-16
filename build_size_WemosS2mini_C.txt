@@ -1,0 +1,14 @@
+Environment: WemosS2mini_C
+ELF: /home/jochen/Coding/ESP_Framework/.pio/build/WemosS2mini_C/FW_ESP_Framework_alpha-84-g3662078.elf
+
+Memory (pio size):
+  Flash used: 1495120 bytes
+  RAM used:   n/a bytes
+
+OTA slot limit: 1572864 bytes (1536 KiB)
+Target max:     1425408 bytes (1392 KiB)
+  OTA headroom:   77744 bytes
+  Target OK:      NO
+
+nm symbol groups (text section, bytes):
+  TOTAL (approx)          0

@@ -16,6 +16,98 @@
 
 namespace JCA {
   namespace SYS {
+
+#if defined(JCA_DEBUG_DISABLED)
+
+    DebugOut::DebugOut (SerialType &_Serial) : DebugSerial (_Serial) {
+      NewLine = true;
+      Flags = FLAG_NONE;
+    }
+    DebugOut::~DebugOut () {}
+    void DebugOut::init (uint16_t _Flags, unsigned long _Baud) { (void)_Flags; (void)_Baud; Flags = FLAG_NONE; }
+    void DebugOut::init (uint16_t _Flags) { (void)_Flags; Flags = FLAG_NONE; }
+    bool DebugOut::isFlagSet (DEBUGOUT_FLAGS _Flag) { (void)_Flag; return false; }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const Printable &_Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const String &_Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const char *_Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, const char *_Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, double _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, double _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, long _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned int _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned int _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, int _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, int _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, unsigned char _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, char _Message) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; return false;
+    }
+    bool DebugOut::print (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, uint8_t _Message[], unsigned int _Length, unsigned char _Base) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; (void)_Length; (void)_Base; return false;
+    }
+    bool DebugOut::println (DEBUGOUT_FLAGS _Flag, bool _Framework, String _ElementName, const char *_Function, uint8_t _Message[], unsigned int _Length, unsigned char _Base) {
+      (void)_Flag; (void)_Framework; (void)_ElementName; (void)_Function; (void)_Message; (void)_Length; (void)_Base; return false;
+    }
+
+#else
+
     /**
      * @brief Construct a new DebugOut::DebugOut object
      *
@@ -686,6 +778,8 @@ namespace JCA {
         return false;
       }
     }
+
+#endif
 
     DebugOut Debug (Serial);
   }

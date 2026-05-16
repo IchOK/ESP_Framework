@@ -1,0 +1,14 @@
+Environment: ESP32c3_SuperMini
+ELF: /home/jochen/Coding/ESP_Framework/.pio/build/ESP32c3_SuperMini/FW_ESP_Framework_alpha-84-g3662078.elf
+
+Memory (pio size):
+  Flash used: 1507024 bytes
+  RAM used:   n/a bytes
+
+OTA slot limit: 1572864 bytes (1536 KiB)
+Target max:     1425408 bytes (1392 KiB)
+  OTA headroom:   65840 bytes
+  Target OK:      NO
+
+nm symbol groups (text section, bytes):
+  TOTAL (approx)          0

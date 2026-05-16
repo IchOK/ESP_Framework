@@ -190,12 +190,19 @@ namespace JCA {
       if (!_Index) {
         Debug.print (FLAG_TRAFFIC, true, ObjectName, __func__, "Update Start: ");
         Debug.println (FLAG_TRAFFIC, true, ObjectName, __func__, _Filename.c_str ());
+        bool BeginOk = false;
         #ifdef ESP8266
         Update.runAsync (true);
-        if (!Update.begin ((ESP.getFreeSketchSpace () - 0x1000) & 0xFFFFF000)) {
+        BeginOk = Update.begin ((ESP.getFreeSketchSpace () - 0x1000) & 0xFFFFF000);
         #elif defined(ESP32)
-        if (!Update.begin ()) {
+        const esp_partition_t *UpdatePartition = esp_ota_get_next_update_partition (nullptr);
+        if (UpdatePartition == nullptr) {
+          Debug.println (FLAG_ERROR, true, ObjectName, __func__, "No OTA partition (check partition table)");
+        } else {
+          BeginOk = Update.begin (UPDATE_SIZE_UNKNOWN, U_FLASH, -1, LOW, UpdatePartition->label);
+        }
         #endif
+        if (!BeginOk) {
           if (Debug.print (FLAG_ERROR, true, ObjectName, __func__, "")) {
             Update.printError (Serial);
           }

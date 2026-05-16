@@ -48,6 +48,7 @@
   #include <SPIFFS.h>
   #include <Update.h>
   #include <WiFi.h>
+  #include <esp_ota_ops.h>
 #elif defined(ESP8266)
   #define SPIFFS LittleFS
   #include "ESPAsyncUDP.h"

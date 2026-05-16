@@ -10,6 +10,8 @@
  *
  */
 
+#ifndef JCA_IGNORE_LINK_ADD
+
 #include "JCA_LNK_LinkAdd.h"
 
 using namespace JCA::TAG;
@@ -61,3 +63,5 @@ namespace JCA {
     }
   }
 }
+
+#endif

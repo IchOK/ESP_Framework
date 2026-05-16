@@ -10,6 +10,8 @@
  *
  */
 
+#ifndef JCA_IGNORE_LINK_DIRECT
+
 #include "JCA_LNK_LinkDirect.h"
 #include "ArduinoJson/Array/JsonArray.hpp"
 
@@ -49,3 +51,5 @@ namespace JCA {
     
   }
 }
+
+#endif

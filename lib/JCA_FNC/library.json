@@ -1,0 +1,6 @@
+{
+  "name": "JCA_FNC",
+  "version": "1.0.0",
+  "description": "JCA function modules (subfolders excluded via lib_ignore / jca_lib_filter.py)",
+  "platforms": ["espressif32", "espressif8266"]
+}

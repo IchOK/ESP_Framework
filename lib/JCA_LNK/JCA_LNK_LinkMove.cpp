@@ -10,6 +10,8 @@
  *
  */
 
+#ifndef JCA_IGNORE_LINK_MOVE
+
 #include "JCA_LNK_LinkMove.h"
 
 using namespace JCA::TAG;
@@ -52,3 +54,5 @@ namespace JCA {
     }
   }
 }
+
+#endif

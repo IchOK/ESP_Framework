@@ -10,6 +10,8 @@
  *
  */
 
+#ifndef JCA_IGNORE_LINK_OR
+
 #include "JCA_LNK_LinkOr.h"
 
 using namespace JCA::TAG;
@@ -48,3 +50,5 @@ namespace JCA {
     }
   }
 }
+
+#endif

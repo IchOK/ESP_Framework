@@ -1,0 +1,6 @@
+{
+  "name": "JCA_LNK",
+  "version": "1.0.0",
+  "description": "JCA link types; optional sources excluded via JCA_IGNORE_LINK_* in .cpp",
+  "platforms": ["espressif32", "espressif8266"]
+}

@@ -35,16 +35,29 @@
 #include <JCA_IOT_Hardware.h>
 
 // Project Links
-#include <JCA_LNK_LinkAnd.h>
-#include <JCA_LNK_LinkDirect.h>
-#include <JCA_LNK_LinkMove.h>
-#include <JCA_LNK_LinkNot.h>
-#include <JCA_LNK_LinkOr.h>
+#ifndef JCA_IGNORE_LINK_AND
+  #include <JCA_LNK_LinkAnd.h>
+#endif
+#ifndef JCA_IGNORE_LINK_DIRECT
+  #include <JCA_LNK_LinkDirect.h>
+#endif
+#ifndef JCA_IGNORE_LINK_MOVE
+  #include <JCA_LNK_LinkMove.h>
+#endif
+#ifndef JCA_IGNORE_LINK_NOT
+  #include <JCA_LNK_LinkNot.h>
+#endif
+#ifndef JCA_IGNORE_LINK_OR
+  #include <JCA_LNK_LinkOr.h>
+#endif
+#ifndef JCA_IGNORE_LINK_ADD
+  #include <JCA_LNK_LinkAdd.h>
+#endif
 
 // Project function - conditional compilation for memory-constrained targets
 // Define JCA_IGNORE_xxx build flags in platformio.ini to exclude specific modules.
 // By default all modules are included. Use -DJCA_IGNORE_xxx to exclude heavy modules on ESP8266.
-#ifdef ESP32
+#if defined(ESP32) && !defined(JCA_IGNORE_ACDIMMERS)
   #include <JCA_FNC_AcDimmers.h>
 #endif
 #ifndef JCA_IGNORE_CHARGER
@@ -142,18 +155,31 @@ void addHardwareToHandler() {
 // Links
 //-------------------------------------------------------
 void addLinksToHandler() {
-  JCA::LNK::LinkAnd::AddToHandler(Handler);
-  JCA::LNK::LinkDirect::AddToHandler(Handler);
-  JCA::LNK::LinkMove::AddToHandler(Handler);
-  JCA::LNK::LinkNot::AddToHandler(Handler);
-  JCA::LNK::LinkOr::AddToHandler(Handler);
+  #ifndef JCA_IGNORE_LINK_AND
+    JCA::LNK::LinkAnd::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LINK_DIRECT
+    JCA::LNK::LinkDirect::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LINK_MOVE
+    JCA::LNK::LinkMove::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LINK_NOT
+    JCA::LNK::LinkNot::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LINK_OR
+    JCA::LNK::LinkOr::AddToHandler(Handler);
+  #endif
+  #ifndef JCA_IGNORE_LINK_ADD
+    JCA::LNK::LinkAdd::AddToHandler(Handler);
+  #endif
 }
 
 //-------------------------------------------------------
 // Functions
 //-------------------------------------------------------
 void addFunctionsToHandler () {
-  #ifdef ESP32
+  #if defined(ESP32) && !defined(JCA_IGNORE_ACDIMMERS)
     AcDimmers::AddToHandler (Handler);
   #endif
   #ifndef JCA_IGNORE_CHARGER
