@@ -239,6 +239,7 @@ namespace JCA {
         Debug.println (FLAG_ERROR, true, ObjectName, __func__, "System - Config File NOT found");
         RetValue = false;
       }
+      Connector.setApSsid (JCA_IOT_WIFICONNECT_DEFAULT_SSID_PREFIX, Hostname.c_str ());
       return RetValue;
     }
 

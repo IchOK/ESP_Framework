@@ -35,8 +35,11 @@
 #include <JCA_IOT_Hardware.h>
 
 // Project Links
+#include <JCA_LNK_LinkAnd.h>
 #include <JCA_LNK_LinkDirect.h>
 #include <JCA_LNK_LinkMove.h>
+#include <JCA_LNK_LinkNot.h>
+#include <JCA_LNK_LinkOr.h>
 
 // Project function - conditional compilation for memory-constrained targets
 // Define JCA_IGNORE_xxx build flags in platformio.ini to exclude specific modules.
@@ -139,8 +142,11 @@ void addHardwareToHandler() {
 // Links
 //-------------------------------------------------------
 void addLinksToHandler() {
+  JCA::LNK::LinkAnd::AddToHandler(Handler);
   JCA::LNK::LinkDirect::AddToHandler(Handler);
   JCA::LNK::LinkMove::AddToHandler(Handler);
+  JCA::LNK::LinkNot::AddToHandler(Handler);
+  JCA::LNK::LinkOr::AddToHandler(Handler);
 }
 
 //-------------------------------------------------------

@@ -87,6 +87,7 @@ namespace JCA {
       bool setGateway (const char *_Gateway);
       bool setSubnet (const char *_Subnet);
       bool setDHCP (bool _DHCP);
+      bool setApSsid (const char *_SsidPrefix, const char *_ApSsid);
       bool init (const char *_Ssid, const char *_Password, const char *_IP, const char *_Gateway, const char *_Subnet, bool _DHCP);
       bool init ();
 

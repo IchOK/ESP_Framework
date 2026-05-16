@@ -134,9 +134,11 @@ namespace JCA {
       int16_t Desired = 0;
 
       if (PvEff > SpEff + OffHyst) {
+        // Off Hysteresis reached
         LatchedStage = 0;
         Desired = 0;
       } else {
+        // Search for Statge with biggest OnHysteresis
         int16_t Best = -1;
         float BestHyst = -1.0f;
         for (uint8_t i = 0; i < OutputCount; i++) {
@@ -152,14 +154,14 @@ namespace JCA {
         }
 
         if (LatchedStage > 0) {
+          // If we are latched, check if the current latched stage is still valid
           const uint8_t idx = static_cast<uint8_t> (LatchedStage - 1);
           if (idx >= OutputCount || !stageEnabled (idx)) {
-            LatchedStage = (Best >= 0) ? static_cast<int16_t> (Best + 1) : 0;
-            Desired = LatchedStage;
-          } else if (PvEff > SpEff - OnHyst[idx] + OffHyst) {
+            // Current latched stage is no longer valid, switch to best stage
             LatchedStage = (Best >= 0) ? static_cast<int16_t> (Best + 1) : 0;
             Desired = LatchedStage;
           } else {
+            // Current latched stage is still valid, check if the new best stage is stronger
             if (Best >= 0 && OnHyst[static_cast<uint8_t> (Best)] > OnHyst[idx]) {
               LatchedStage = static_cast<int16_t> (Best + 1);
             }

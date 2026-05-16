@@ -184,6 +184,21 @@ namespace JCA {
     }
 
     /**
+     * @brief Set the SSID for AP mode (e.g. device hostname)
+     *
+     * @param _ApSsid SSID of the soft AP (max. 32 characters per 802.11)
+     * @return true SSID is valid
+     * @return false SSID is invalid
+     */
+    bool WiFiConnect::setApSsid (const char *_SsidPrefix, const char *_ApSsid) {
+      if (_SsidPrefix == nullptr || strlen (_SsidPrefix) == 0 || _ApSsid == nullptr || strlen (_ApSsid) == 0) {
+        return false;
+      }
+      sprintf (ApSsid, "%s_%s", _SsidPrefix, _ApSsid);
+      return true;
+    }
+
+    /**
      * @brief initialize the WiFi Connection and pass the data for Station mode
      *
      * @param _Ssid SSID of remote AP
